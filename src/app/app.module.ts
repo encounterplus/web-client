@@ -4,10 +4,14 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { MapComponent } from './core/map/map.component';
+import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    MapComponent,
+    InitiativeListComponent
   ],
   imports: [
     BrowserModule,
