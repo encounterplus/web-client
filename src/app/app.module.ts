@@ -6,12 +6,14 @@ import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MapComponent } from './core/map/map.component';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
+import { CanvasContainerDirective } from './core/map/canvas-container.directive';
 
 @NgModule({
   declarations: [
     AppComponent,
     MapComponent,
-    InitiativeListComponent
+    InitiativeListComponent,
+    CanvasContainerDirective
   ],
   imports: [
     BrowserModule,
