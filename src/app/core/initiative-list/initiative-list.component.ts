@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
   selector: 'app-initiative-list',
@@ -6,6 +6,9 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./initiative-list.component.scss']
 })
 export class InitiativeListComponent implements OnInit {
+
+  @Input() 
+  public data: {};
 
   constructor() { }
 

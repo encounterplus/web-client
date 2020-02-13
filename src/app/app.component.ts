@@ -1,6 +1,10 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { MapComponent } from './core/map/map.component';
+import { DataService } from './data.service';
+import {  takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 
 @Component({
     selector: 'app-root',
@@ -10,13 +14,23 @@ import { MapComponent } from './core/map/map.component';
 export class AppComponent implements OnInit, AfterViewInit {
     title = 'external-screen';
 
+    data = {}
+
+    destroy$: Subject<boolean> = new Subject<boolean>();
+
     public ws: WebSocket;
 
-    @ViewChild("map", {
+    @ViewChild("appMap", {
         static: false
     })
-
     public map: MapComponent;
+
+    @ViewChild("appInitiativeList", {
+        static: false
+    })
+    public initiativeList: InitiativeListComponent;
+
+    constructor(private dataService: DataService) { }
 
     connect(url: string) {
         this.openWebSocketConnection(url);
@@ -52,6 +66,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
+
+        this.dataService.sendGetRequest().pipe(takeUntil(this.destroy$)).subscribe((data: any[]) => {
+            console.log(data);
+            this.data = data;
+        })
+
         let lastSuccessfullWSConnection = localStorage.getItem("lastSuccessfullWSConnection");
         var autoReconnect = JSON.parse(localStorage.getItem("autoReconnect"));
         if (autoReconnect == null) {
@@ -72,4 +92,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit() {
     }
+
+    ngOnDestroy() {
+        this.destroy$.next(true);
+        // Unsubscribe from the subject
+        this.destroy$.unsubscribe();
+      }
 }
