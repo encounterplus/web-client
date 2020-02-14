@@ -8,7 +8,7 @@ export class CanvasContainerDirective implements AfterViewInit {
   
   // static PIXI options
   static OPTIONS: Object = {
-    backgroundColor: 0x1099bb, 
+    backgroundColor: 0x333333, 
     resolution: window.devicePixelRatio || 1,
     antialias: true,
     forceFXAA: true,

@@ -1,0 +1,10 @@
+:host {
+    position: absolute;
+    width: 150px;
+    height: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba($color: #ffffff, $alpha: 0.2);
+    overflow: scroll;
+}

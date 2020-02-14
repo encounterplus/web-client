@@ -5,6 +5,7 @@ import { DataService } from './data.service';
 import {  takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
+import { ApiData } from './shared/models/api-data';
 
 @Component({
     selector: 'app-root',
@@ -14,7 +15,7 @@ import { InitiativeListComponent } from './core/initiative-list/initiative-list.
 export class AppComponent implements OnInit, AfterViewInit {
     title = 'external-screen';
 
-    data = {}
+    data: ApiData
 
     destroy$: Subject<boolean> = new Subject<boolean>();
 
@@ -30,7 +31,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     })
     public initiativeList: InitiativeListComponent;
 
-    constructor(private dataService: DataService) { }
+    constructor(private dataService: DataService) { 
+        this.data = new ApiData()
+    }
 
     connect(url: string) {
         this.openWebSocketConnection(url);
@@ -67,7 +70,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
 
-        this.dataService.sendGetRequest().pipe(takeUntil(this.destroy$)).subscribe((data: any[]) => {
+        this.dataService.getData().pipe(takeUntil(this.destroy$)).subscribe((data: ApiData) => {
             console.log(data);
             this.data = data;
         })

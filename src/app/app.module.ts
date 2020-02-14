@@ -8,13 +8,16 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MapComponent } from './core/map/map.component';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 import { CanvasContainerDirective } from './core/map/canvas-container.directive';
+import { CreatureComponent } from './core/creature/creature.component';
+import { DataService } from './data.service';
 
 @NgModule({
   declarations: [
     AppComponent,
     MapComponent,
     InitiativeListComponent,
-    CanvasContainerDirective
+    CanvasContainerDirective,
+    CreatureComponent
   ],
   imports: [
     BrowserModule,
@@ -22,7 +25,7 @@ import { CanvasContainerDirective } from './core/map/canvas-container.directive'
     HttpClientModule,
     NgbModule
   ],
-  providers: [],
+  providers: [DataService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

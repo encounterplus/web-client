@@ -3,16 +3,25 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { throwError } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
+import { ApiData } from './shared/models/api-data';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
 
-  private REST_API_URL: string;
+  public remoteHost: string
+  
+  get remoteBaseURL(): string {
+    return `http://${this.remoteHost}`
+  }
+
+  get remoteBaseApiURL(): string {
+    return `${this.remoteBaseURL}/api/v1`
+  }
 
   constructor(private httpClient: HttpClient) { 
-    this.REST_API_URL = `http://${environment.config.defaults.HOST}/api/v1`
+    this.remoteHost = 'localhost:8080'
   }
 
   handleError(error: HttpErrorResponse) {
@@ -28,7 +37,7 @@ export class DataService {
     return throwError(errorMessage);
   }
 
-  public sendGetRequest(){
-    return this.httpClient.get(this.REST_API_URL).pipe(retry(3), catchError(this.handleError));
+  public getData(){
+    return this.httpClient.get<ApiData>(this.remoteBaseApiURL).pipe(retry(3), catchError(this.handleError));
   }
 }
