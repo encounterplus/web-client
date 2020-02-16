@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, ElementRef } from '@angular/core';
 import { ApiData } from 'src/app/shared/models/api-data';
 import { Game } from 'src/app/shared/models/game';
 import { Creature } from 'src/app/shared/models/creature';
@@ -25,9 +25,25 @@ export class InitiativeListComponent implements OnInit {
       return this.turned != null && this.turned.id != null ? this.turned.id : "";
   }
 
-  constructor() { }
+  constructor(private element: ElementRef) { }
 
   ngOnInit(): void {
   }
 
+  ngAfterViewChecked(): void {
+    console.debug("view checked");
+  }
+
+  ngAfterViewInit(): void {
+    console.debug("TEST");
+    this.scrollToTurned();
+  }
+
+  scrollToTurned() {
+    // scroll to turned element
+    console.debug(this.turnedId);
+    let selector = `[data-id="${this.turnedId}"]`;
+    let el = this.element.nativeElement.querySelector(selector);
+    el.scrollIntoView()
+  }
 }

@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
-import { throwError } from 'rxjs';
+import { throwError, Observable } from 'rxjs';
+import { ApiData } from '../models/api-data';
 import { retry, catchError } from 'rxjs/operators';
-import { ApiData } from './shared/models/api-data';
 
 @Injectable({
   providedIn: 'root'
 })
-export class DataService {
+export class ApiService {
 
   public remoteHost: string
   
@@ -37,7 +36,7 @@ export class DataService {
     return throwError(errorMessage);
   }
 
-  public getData(){
+  public getData(): Observable<ApiData> {
     return this.httpClient.get<ApiData>(this.remoteBaseApiURL).pipe(retry(3), catchError(this.handleError));
   }
 }

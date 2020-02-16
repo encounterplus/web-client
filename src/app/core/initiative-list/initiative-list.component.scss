@@ -8,3 +8,6 @@
     background-color: rgba($color: #ffffff, $alpha: 0.2);
     overflow: scroll;
 }
+:host(::-webkit-scrollbar) {
+    width: 0 !important
+}

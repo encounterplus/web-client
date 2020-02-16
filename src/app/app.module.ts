@@ -9,7 +9,9 @@ import { MapComponent } from './core/map/map.component';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 import { CanvasContainerDirective } from './core/map/canvas-container.directive';
 import { CreatureComponent } from './core/creature/creature.component';
-import { DataService } from './data.service';
+import { ApiService } from './shared/services/api.service';
+import { WebsocketService } from './shared/services/websocket.service';
+import { DataService } from './shared/services/data.service';
 
 @NgModule({
   declarations: [
@@ -25,7 +27,7 @@ import { DataService } from './data.service';
     HttpClientModule,
     NgbModule
   ],
-  providers: [DataService],
+  providers: [ApiService, WebsocketService, DataService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

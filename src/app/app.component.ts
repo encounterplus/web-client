@@ -1,11 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
-import { environment } from 'src/environments/environment';
 import { MapComponent } from './core/map/map.component';
-import { DataService } from './data.service';
-import {  takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 import { ApiData } from './shared/models/api-data';
+import { DataService } from './shared/services/data.service';
 
 @Component({
     selector: 'app-root',
@@ -19,78 +17,34 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     destroy$: Subject<boolean> = new Subject<boolean>();
 
-    public ws: WebSocket;
+    @ViewChild(MapComponent)
+    public mapComponent: MapComponent;
 
-    @ViewChild("appMap", {
-        static: false
-    })
-    public map: MapComponent;
-
-    @ViewChild("appInitiativeList", {
-        static: false
-    })
-    public initiativeList: InitiativeListComponent;
+    @ViewChild(InitiativeListComponent)
+    public initiativeListComponent: InitiativeListComponent;
 
     constructor(private dataService: DataService) { 
         this.data = new ApiData()
     }
-
-    connect(url: string) {
-        this.openWebSocketConnection(url);
-    }
-
-    private openWebSocketConnection(url: string) {
-        console.debug(`Starting a WebSocket connection ${url}`);
-        this.ws = new WebSocket(url);
-
-        this.ws.onopen = () => {
-            console.debug(`WebSocket connection opened...`);
-            localStorage.setItem("lastSuccessfullWSConnection", url);
-        }
-
-        this.ws.onmessage = message => {
-            console.debug(`ws message received:`, message);
-        }
-
-        this.ws.onerror = error => {
-            console.error(`WS Error message: `, error);
-            this.ws = null;
-        }
-
-        this.ws.onclose = () => {
-            this.ws = null;
-        }
-    }
-
-    disconnect() {
-        console.debug(`Disconnecting from WebSockets server`);
-        this.ws.close();
-        this.ws = null;
-    }
-
+    
     ngOnInit() {
 
-        this.dataService.getData().pipe(takeUntil(this.destroy$)).subscribe((data: ApiData) => {
+        this.dataService.getData().subscribe((data: ApiData) => {
             console.log(data);
             this.data = data;
         })
 
-        let lastSuccessfullWSConnection = localStorage.getItem("lastSuccessfullWSConnection");
-        var autoReconnect = JSON.parse(localStorage.getItem("autoReconnect"));
-        if (autoReconnect == null) {
-            autoReconnect = environment.config.defaults.AUTO_RECONNECT
-        }
-        console.debug(`autoReconnect in app component ngOnInit(): ${autoReconnect}`)
+        this.dataService.events.subscribe(event => {
+            console.log("Event received: " + JSON.stringify(event));
+            console.log(`Event name: ${event.name}`)
 
-        if (!lastSuccessfullWSConnection) {
-            console.debug(`No past successfull WebSocket connections found`)
-        } else {
-            console.debug(`Last successfull connection string: "${lastSuccessfullWSConnection}"`)
-            if (autoReconnect) {
-                console.debug(`Set to auto-reconnect. Reconnecting...`)
-                this.openWebSocketConnection(lastSuccessfullWSConnection)
+            if (event.name == "gameUpdate" ) {
+                this.data.game.turn = event.data.turn;
+                this.initiativeListComponent.scrollToTurned();
             }
-        }
+
+            // this.gethData();
+        });
     }
 
     ngAfterViewInit() {

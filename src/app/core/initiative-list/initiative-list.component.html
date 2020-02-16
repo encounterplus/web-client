@@ -1,1 +1,1 @@
-<app-creature *ngFor="let creature of activeCreatures" [creature]="creature" [ngClass]="{'creature-turned': creature.id == turnedId }" class="creature creature-{{creature.type}} d-flex align-items-stretch"></app-creature>
+<app-creature *ngFor="let creature of activeCreatures" [creature]="creature" [attr.data-id]="creature.id" [ngClass]="{'creature-turned': creature.id == turnedId }" class="creature creature-{{creature.type}} d-flex align-items-stretch"></app-creature>

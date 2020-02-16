@@ -30,7 +30,7 @@ export class MapComponent implements OnInit {
       this.app  = this.canvas.app;
       this.width  = this.canvas.width;
       this.height = this.canvas.height;
-
+      
       this.__setup();
     }
   }
