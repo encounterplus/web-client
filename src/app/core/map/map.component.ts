@@ -1,7 +1,12 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
 import * as PIXI from 'pixi.js';
 import { Viewport } from 'pixi-viewport'
+import { Game } from 'src/app/shared/models/game';
+import { Map } from 'src/app/shared/models/map';
+import { ScreenConfig } from 'src/app/shared/models/screen-config';
+import { MapContainer } from './map-container';
+import { AppState } from 'src/app/shared/models/app-state';
 
 @Component({
   selector: 'app-map',
@@ -13,8 +18,13 @@ export class MapComponent implements OnInit {
   @ViewChild(CanvasContainerDirective, {static: true})
   canvas: CanvasContainerDirective;
 
+  @Input() 
+  public state: AppState = new AppState();
+
   width: number = 0;
   height: number = 0;
+
+  isReady: false;
 
   // PixiJS
   app: PIXI.Application;
@@ -22,7 +32,12 @@ export class MapComponent implements OnInit {
 
   viewport: Viewport;
 
+  // layers
+
+  mapContainer: MapContainer;
+
   constructor() { 
+    this.mapContainer = new MapContainer();
   }
 
   ngOnInit(): void {
@@ -30,79 +45,89 @@ export class MapComponent implements OnInit {
       this.app  = this.canvas.app;
       this.width  = this.canvas.width;
       this.height = this.canvas.height;
-      
-      this.__setup();
-    }
-  }
 
-  protected __setup(): void {
-    // Create a new texture
-    let tokenTexture = PIXI.Texture.from('/assets/img/token.png');
-    let mapTexture = PIXI.Texture.from('/assets/img/map.jpg');
+      // create viewport
+      this.viewport = new Viewport({
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+        worldWidth: 100,
+        worldHeight: 100,
 
-    this.viewport = new Viewport({
-      screenWidth: this.width,
-      screenHeight: this.height,
-      worldWidth: this.width,
-      worldHeight: this.height,
-      interaction: this.app.renderer.plugins.interaction
-    });
+        interaction: this.app.renderer.plugins.interaction // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+      })
 
-    // add the viewport to the stage
-    this.app.stage.addChild(this.viewport);
+      // add the viewport to the stage
+      this.app.stage.addChild(this.viewport)
 
-    // activate plugins
-    this.viewport
+      // activate plugins
+      this.viewport
         .drag()
-        .wheel()
+        .pinch()
+        .wheel({
+          percent: 0.001
+        })
+        .snapZoom({
+          height: 20,
+          removeOnComplete: true,
+          removeOnInterrupt: true,
+          time: 2000,
+        });
 
-    this.container = new PIXI.Container();
-    this.viewport.addChild(this.container);
+      this.viewport.addChild(this.mapContainer);
 
-    let map = new PIXI.Sprite(mapTexture);
-    map.x = 0;
-    map.y = 0;
+      // this.app.stage.addChild(this.mapContainer)
+       
+      console.debug("map component initialized");
 
-    this.container.addChild(map);
-
-    const canvas = document.createElement('canvas');
-    canvas.width  = 50;
-    canvas.height = 50;
-
-    let context = canvas.getContext('2d');
-    context.beginPath();
-    context.moveTo(50, 0);
-    context.lineTo(0, 0);
-    context.lineTo(0, 50);
-    context.lineWidth = 1;
-    context.strokeStyle = '#ffffff';
-    context.stroke();
-
-    const tileTexture = PIXI.Texture.from(canvas);
-    const background = new PIXI.TilingSprite(tileTexture, map.width, map.height);
-
-    this.container.addChild(background)
-    
-
-    // Create a 5x5 grid of bunnies
-    for (let i = 1; i < 25; i++) {
-        const token = new PIXI.Sprite(tokenTexture);
-        token.anchor.set(0.5);
-        token.x = (i % 5) * 100;
-        token.y = Math.floor(i / 5) * 100;
-        // token.interactive = true;
-        token.width = 50;
-        token.height = 50;
-
-
-        // token
-        //     .on('pointerdown', onDragStart)
-        //     .on('pointerup', onDragEnd)
-        //     .on('pointerupoutside', onDragEnd)
-        //     .on('pointermove', onDragMove);
-        this.container.addChild(token);
+      this.update()
+      this.draw();
     }
-
   }
 
+  update() {
+    this.mapContainer.update(this.state.map);
+    this.mapContainer.updateCreatures(this.state.game.creatures);
+  }
+
+  async draw() {
+    await this.mapContainer.draw();
+
+    this.viewport.setZoom(0.95);
+
+    // this.viewport.worldWidth = c;
+    // this.viewport.worldHeight = this.mapContainer.h;
+
+    // this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
+
+    // console.debug(this.viewport.worldWidth);
+    // console.debug(this.viewport.worldHeight);
+
+    this.viewport.forceHitArea = new PIXI.Rectangle(0,0, this.mapContainer.w, this.mapContainer.h);
+
+    // // manual render without render loop
+    // this.app.render();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+
+
+    console.debug("data changed");
+
+    if (!this.isReady) {
+      return;
+    }
+
+    this.update();
+    this.mapContainer.draw();
+  }
+
+  // protected _draw(): void {
+  //   console.debug("drawing map component");
+  //   this.app.stage.removeChildren();
+  //   this.app.stage.addChild(this.mapLayer);
+  // }
+
+  protected _destroy(): void {
+    // this.mapLayer.destroy();
+  }
 }

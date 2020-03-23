@@ -31,11 +31,11 @@ export class InitiativeListComponent implements OnInit {
   }
 
   ngAfterViewChecked(): void {
-    console.debug("view checked");
+    // console.debug("view checked");
   }
 
   ngAfterViewInit(): void {
-    console.debug("TEST");
+    // console.debug("TEST");
     this.scrollToTurned();
   }
 

@@ -1,5 +1,6 @@
 import { Directive, AfterViewInit, ElementRef, HostListener, NgZone, Input } from '@angular/core';
 import * as PIXI from 'pixi.js';
+import { delayWhen } from 'rxjs/operators';
 
 @Directive({
   selector: '[appCanvasContainer]'
@@ -14,15 +15,20 @@ export class CanvasContainerDirective implements AfterViewInit {
   height: number;
 
   @Input()
-  public devicePixelRatio = window.devicePixelRatio || 1;
+  // public devicePixelRatio = window.devicePixelRatio || 1;
+  public devicePixelRatio = 1;
 
   @Input()
   public applicationOptions: Object = {
     backgroundColor: 0x333333, 
-    resolution: window.devicePixelRatio || 1,
+    // resolution:  window.devicePixelRatio || 1,
+    resolution:  1,
     antialias: true,
-    forceFXAA: true,
-    autoResize: true
+    transparent: false,
+    // forceFXAA: true,
+    autoResize: true,
+    // sharedTicker: true,
+    // autoStart: false
   };
 
   constructor(private el: ElementRef, private zone: NgZone) { 
@@ -37,13 +43,20 @@ export class CanvasContainerDirective implements AfterViewInit {
 
     this.element.appendChild(this.app.view);
 
-    this.width  = this.app.view.width;
-    this.height = this.app.view.height;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
 
     const viewportScale = 1 / this.devicePixelRatio;
     this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
-    this.app.view.style.transform = `scale(${viewportScale})`;
-    this.app.view.style.transformOrigin = `top left`;
+    // this.app.view.style.transform = `scale(${viewportScale})`;
+    // this.app.view.style.transformOrigin = `top left`;
+
+    // this.app.ticker.minFPS = 30;
+
+    // Confirm that WebGL is available
+    if ( this.app.renderer.type !== PIXI.RENDERER_TYPE.WEBGL ) {
+      throw new Error("No WebGL Support!");
+    }
 
     let ticker = PIXI.Ticker.shared;
     ticker.autoStart = false;
@@ -53,6 +66,8 @@ export class CanvasContainerDirective implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // debuging tools
+    window.PIXI = PIXI;
   }
 
   // @HostListener('window:resize', ['$event'])
@@ -65,12 +80,14 @@ export class CanvasContainerDirective implements AfterViewInit {
 
   @HostListener('window:resize', ['$event'])
   onResize(event) {
-    this.width = event.target.innerWidth;
-    this.height = event.target.innerHeight;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
     const viewportScale = 1 / this.devicePixelRatio;
     this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
-    this.app.view.style.transform = `scale(${viewportScale})`;
-    this.app.view.style.transformOrigin = `top left`;
+    // this.app.view.style.transform = `scale(${viewportScale})`;
+    // this.app.view.style.transformOrigin = `top left`;
+
+    this.app.stage
   }
 
   destroy() {

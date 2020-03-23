@@ -4,6 +4,8 @@ import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 import { ApiData } from './shared/models/api-data';
 import { DataService } from './shared/services/data.service';
+import { environment } from 'src/environments/environment';
+import { AppState } from './shared/models/app-state';
 
 @Component({
     selector: 'app-root',
@@ -13,7 +15,9 @@ import { DataService } from './shared/services/data.service';
 export class AppComponent implements OnInit, AfterViewInit {
     title = 'external-screen';
 
-    data: ApiData
+    env = environment;
+
+    state: AppState;
 
     destroy$: Subject<boolean> = new Subject<boolean>();
 
@@ -24,14 +28,19 @@ export class AppComponent implements OnInit, AfterViewInit {
     public initiativeListComponent: InitiativeListComponent;
 
     constructor(private dataService: DataService) { 
-        this.data = new ApiData()
+        this.state = new AppState();
     }
-    
+
     ngOnInit() {
 
         this.dataService.getData().subscribe((data: ApiData) => {
-            console.log(data);
-            this.data = data;
+            // console.log(data);
+
+            this.state.game = data.game;
+            this.state.map = data.map;
+            this.state.config = data.config;
+
+            console.debug(this.state);
         })
 
         this.dataService.events.subscribe(event => {
@@ -39,11 +48,9 @@ export class AppComponent implements OnInit, AfterViewInit {
             console.log(`Event name: ${event.name}`)
 
             if (event.name == "gameUpdate" ) {
-                this.data.game.turn = event.data.turn;
+                this.state.game.turn = event.data.turn;
                 this.initiativeListComponent.scrollToTurned();
             }
-
-            // this.gethData();
         });
     }
 

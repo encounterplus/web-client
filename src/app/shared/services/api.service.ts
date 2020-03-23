@@ -20,7 +20,7 @@ export class ApiService {
   }
 
   constructor(private httpClient: HttpClient) { 
-    this.remoteHost = 'localhost:8080'
+    this.remoteHost = '192.168.1.168:8080'
   }
 
   handleError(error: HttpErrorResponse) {

@@ -15,4 +15,5 @@ export class Creature {
     scale: number;
     x: number;
     y: number;
+    cachedToken: string;
 }

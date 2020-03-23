@@ -1,4 +1,4 @@
 <div id="app" class="h-100 d-flex flex-column">
-  <app-map class="h-100"></app-map>
-  <app-initiative-list *ngIf="data.game.creatures.length > 0" [game]="data.game" id="initiative-list"></app-initiative-list>
+  <app-map *ngIf="state.map" [state]="state" class="h-100"></app-map>
+  <app-initiative-list *ngIf="state.game.creatures.length > 0" [game]="state.game" id="initiative-list"></app-initiative-list>
 </div>
