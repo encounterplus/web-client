@@ -21,8 +21,8 @@ export class CanvasContainerDirective implements AfterViewInit {
   @Input()
   public applicationOptions: Object = {
     backgroundColor: 0x333333, 
-    // resolution:  window.devicePixelRatio || 1,
-    resolution:  1,
+    resolution:  window.devicePixelRatio || 1,
+    // resolution:  1,
     antialias: true,
     transparent: false,
     // forceFXAA: true,

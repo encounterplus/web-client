@@ -58,14 +58,6 @@ export class MapContainer extends Layer {
         this.tokensLayer.grid = this.grid
     }
 
-    updateCreatures(creatures: Array<Creature>) {
-        console.debug("updating creatures");
-        this.creatures = creatures.filter( creature => {
-            return creature.mapId == this.map.id
-        });
-        this.tokensLayer.update(this.creatures);
-    }
-
     async draw() {
         await this.backgroundLayer.draw();
         await this.gridLayer.draw();

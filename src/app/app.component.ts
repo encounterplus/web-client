@@ -6,6 +6,7 @@ import { ApiData } from './shared/models/api-data';
 import { DataService } from './shared/services/data.service';
 import { environment } from 'src/environments/environment';
 import { AppState } from './shared/models/app-state';
+import { Creature } from './shared/models/creature';
 
 @Component({
     selector: 'app-root',
@@ -50,6 +51,27 @@ export class AppComponent implements OnInit, AfterViewInit {
             if (event.name == "gameUpdate" ) {
                 this.state.game.turn = event.data.turn;
                 this.initiativeListComponent.scrollToTurned();
+                this.mapComponent.mapContainer.tokensLayer.updateTurned(this.state.turned);
+            } else if (event.name == "creatureUpdate") {
+                let creature = Object.assign(new Creature, event.data) as Creature;
+                console.debug(creature);
+                // this.state.game.creatures.push(creature);
+
+                let token = this.mapComponent.mapContainer.tokensLayer.tokenByCreatureId(creature.id)
+                token.creature = creature;
+                token.update();
+
+                // this.mapComponent.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
+                // this.mapComponent.mapContainer.tokensLayer.draw()
+            } else if (event.name == "creatureMove") {
+
+                let token = this.mapComponent.mapContainer.tokensLayer.tokenByCreatureId(event.data.id);
+                token.creature.x = event.data.x;
+                token.creature.y = event.data.y;
+                token.update();
+
+                // this.mapComponent.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
+                // this.mapComponent.mapContainer.tokensLayer.draw()
             }
         });
     }

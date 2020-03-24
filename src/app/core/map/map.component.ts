@@ -7,6 +7,7 @@ import { Map } from 'src/app/shared/models/map';
 import { ScreenConfig } from 'src/app/shared/models/screen-config';
 import { MapContainer } from './map-container';
 import { AppState } from 'src/app/shared/models/app-state';
+import { Creature } from 'src/app/shared/models/creature';
 
 @Component({
   selector: 'app-map',
@@ -86,11 +87,13 @@ export class MapComponent implements OnInit {
 
   update() {
     this.mapContainer.update(this.state.map);
-    this.mapContainer.updateCreatures(this.state.game.creatures);
+    this.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
   }
 
   async draw() {
     await this.mapContainer.draw();
+
+    this.mapContainer.tokensLayer.updateTurned(this.state.turned);
 
     this.viewport.setZoom(0.95);
 
@@ -119,6 +122,7 @@ export class MapComponent implements OnInit {
 
     this.update();
     this.mapContainer.draw();
+
   }
 
   // protected _draw(): void {

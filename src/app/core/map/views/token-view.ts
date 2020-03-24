@@ -24,7 +24,21 @@ export class TokenView extends View {
     data: PIXI.interaction.InteractionData;
     dragging: boolean = false;
 
-    color: number;
+    
+    selected: boolean = false;
+    turned: boolean = false;
+
+    get color(): number {
+        if (this.turned) {
+            return 0xff9500;
+        } else if (this.creature.type == "monster") {
+            return 0x631515;
+        } else if (this.creature.type == "player") {
+            return 0x3F51B5;
+        } else {
+            return 0xFFCCFFCC;
+        }
+    }
 
     constructor(creature: Creature, grid: Grid) {
         super();
@@ -95,9 +109,6 @@ export class TokenView extends View {
         this.h = this.grid.size * this.creature.scale;
 
         this.position.set(this.creature.x - (this.w / 2), this.creature.y - (this.h / 2));
-
-        this.color = this.creature.type == "player" ? 0x3F51B5 : 0x631515;
-
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
     }
 
@@ -127,6 +138,7 @@ export class TokenView extends View {
             x = clamp(x, 0, (this.w) - (badgeSize / 2));
             y = clamp(y, 0, (this.h) - (badgeSize / 2));
 
+            this.uidGraphics.clear();
             this.uidGraphics.beginFill(this.color).drawCircle(x, y, badgeSize / 2).endFill();
             // this.uidGraphics.cacheAsBitmap = true;
 
@@ -134,6 +146,7 @@ export class TokenView extends View {
             this.uidText.style.fontSize = badgeSize / 2.5;
             
         } else {
+            this.uidGraphics.clear();
             this.uidGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, this.w / 2).endFill();
             // this.uidGraphics.cacheAsBitmap = true;
             this.uidText.position.set(this.w / 2, this.h / 2);
