@@ -12,7 +12,7 @@ export class AppState {
     isDirty: boolean = false;
 
     get activeCreatures(): Array<Creature> {
-        return this.game.creatures.sort((a, b) => (a.rank > b.rank) ? 1 : -1)
+        return this.game.creatures.filter( creature => { return creature.initiative != -10 } ).sort((a, b) => (a.rank > b.rank) ? 1 : -1)
     }
 
     get mapCreatures(): Array<Creature> {

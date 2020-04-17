@@ -5,9 +5,9 @@ import { environment } from 'src/environments/environment';
 import { Layer } from './layers/layer';
 import { GridLayer } from './layers/grid-layer';
 import { BackgroundLayer } from './layers/background-layer';
-import { TokenView } from './views/token-view';
 import { TokensLayer } from './layers/tokens-layer';
 import { Grid } from './models/grid';
+import { VisionLayer } from './layers/vision-layer';
 
 export class MapContainer extends Layer {
 
@@ -22,13 +22,12 @@ export class MapContainer extends Layer {
     middleLayer: Layer;
     bottomLayer: Layer;
 
-    visionLayer: Layer;
+    visionLayer: VisionLayer;
     lightLayer: Layer;
 
     // data
     
     map: Map;
-    creatures: Array<Creature>;
 
     grid: Grid = new Grid();
 
@@ -40,6 +39,7 @@ export class MapContainer extends Layer {
 
         this.backgroundLayer = this.addChild(new BackgroundLayer());
         this.gridLayer = this.addChild(new GridLayer());
+        this.visionLayer = this.addChild(new VisionLayer());
         this.tokensLayer = this.addChild(new TokensLayer());
     }
 
@@ -62,6 +62,7 @@ export class MapContainer extends Layer {
         await this.backgroundLayer.draw();
         await this.gridLayer.draw();
         await this.tokensLayer.draw();
+        await this.visionLayer.draw();
 
         this.w = this.backgroundLayer.w;
         this.h = this.backgroundLayer.h;

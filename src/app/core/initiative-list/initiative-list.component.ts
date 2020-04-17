@@ -2,6 +2,7 @@ import { Component, OnInit, Input, SimpleChanges, ElementRef } from '@angular/co
 import { ApiData } from 'src/app/shared/models/api-data';
 import { Game } from 'src/app/shared/models/game';
 import { Creature } from 'src/app/shared/models/creature';
+import { AppState } from 'src/app/shared/models/app-state';
 
 @Component({
   selector: 'app-initiative-list',
@@ -11,19 +12,7 @@ import { Creature } from 'src/app/shared/models/creature';
 export class InitiativeListComponent implements OnInit {
 
   @Input() 
-  public game: Game;
-
-  get activeCreatures(): Array<Creature> {
-    return this.game.creatures.sort((a, b) => (a.rank > b.rank) ? 1 : -1)
-  }
-
-  get turned(): Creature {
-      return (this.game.creatures.length > 0 && this.game.creatures.length >= this.game.turn ) ? this.activeCreatures[this.game.turn - 1] : null
-  }
-
-  get turnedId(): string {
-      return this.turned != null && this.turned.id != null ? this.turned.id : "";
-  }
+  public state: AppState;
 
   constructor(private element: ElementRef) { }
 
@@ -41,8 +30,8 @@ export class InitiativeListComponent implements OnInit {
 
   scrollToTurned() {
     // scroll to turned element
-    console.debug(this.turnedId);
-    let selector = `[data-id="${this.turnedId}"]`;
+    console.debug(this.state.turnedId);
+    let selector = `[data-id="${this.state.turnedId}"]`;
     let el = this.element.nativeElement.querySelector(selector);
     el.scrollIntoView()
   }

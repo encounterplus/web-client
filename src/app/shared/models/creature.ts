@@ -1,3 +1,5 @@
+import { Vision } from './vision';
+
 export class Creature {
     id: string;
     uid: string;
@@ -16,4 +18,5 @@ export class Creature {
     x: number;
     y: number;
     cachedToken: string;
+    vision: Vision;
 }

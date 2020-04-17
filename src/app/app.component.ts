@@ -45,7 +45,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         })
 
         this.dataService.events.subscribe(event => {
-            console.log("Event received: " + JSON.stringify(event));
+            // console.log("Event received: " + JSON.stringify(event));
             console.log(`Event name: ${event.name}`)
 
             if (event.name == "gameUpdate" ) {
@@ -57,19 +57,45 @@ export class AppComponent implements OnInit, AfterViewInit {
                 console.debug(creature);
                 // this.state.game.creatures.push(creature);
 
+                // udpdate state
+                let index =  this.state.game.creatures.findIndex((obj => obj.id == creature.id));
+                // this.state.game.creatures[index] = creature;
+                this.state.game.creatures[index].vision = creature.vision;
+
+                // update token
                 let token = this.mapComponent.mapContainer.tokensLayer.tokenByCreatureId(creature.id)
-                token.creature = creature;
-                token.update();
+                if (token != null) {
+                    token.creature = creature;
+                    token.creature.x = event.data.x;
+                    token.creature.y = event.data.y;
+                    token.update();
+                }
+
+                this.mapComponent.mapContainer.visionLayer.draw();
 
                 // this.mapComponent.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
                 // this.mapComponent.mapContainer.tokensLayer.draw()
             } else if (event.name == "creatureMove") {
 
                 let token = this.mapComponent.mapContainer.tokensLayer.tokenByCreatureId(event.data.id);
-                token.creature.x = event.data.x;
-                token.creature.y = event.data.y;
-                token.update();
+                if (token != null) {
+                    token.creature.x = event.data.x;
+                    token.creature.y = event.data.y;
+                    token.update();
+                }
 
+                // this.state.game.creatures[index] = creature;
+                if (event.data.los != null) {
+                    let index =  this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
+                    this.state.game.creatures[index].x = event.data.x;
+                    this.state.game.creatures[index].y = event.data.y;
+                    this.state.game.creatures[index].vision.x = event.data.x;
+                    this.state.game.creatures[index].vision.y = event.data.y;
+                    this.state.game.creatures[index].vision.polygon = event.data.los;
+                }
+                
+                
+                this.mapComponent.mapContainer.visionLayer.draw();
                 // this.mapComponent.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
                 // this.mapComponent.mapContainer.tokensLayer.draw()
             }

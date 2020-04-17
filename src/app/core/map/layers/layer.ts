@@ -62,5 +62,36 @@ export class Layer extends PIXI.Container {
             resolve(null);
           });
         });
-      }
+    }
+
+    getResource(src: string): PIXI.LoaderResource {
+
+        const loader = PIXI.Loader.shared;
+        let cached = loader.resources[src];
+        if ( !cached ) return null;
+
+        return cached;
+    }
+
+    async loadResource(src: string): Promise<PIXI.LoaderResource> {
+
+        // First try to load the resource from the cache
+        let res = this.getResource(src);
+        if ( res ) return res;
+
+        // Return the ready texture as a Promise
+        return new Promise((resolve, reject) => {
+            const loader = PIXI.Loader.shared;
+            loader.add(src, src).load( function(loader, resources) {
+                let res = resources[src];
+                if (res) {
+                    resolve(res);
+                } else {
+                    let err = new Error(`Failed to load resource ${src}`);
+                    delete PIXI.Loader.shared.resources[src];
+                    resolve(null);
+                }
+            })
+        });
+    }
 }

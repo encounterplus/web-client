@@ -77,6 +77,11 @@ export class MapComponent implements OnInit {
       this.viewport.addChild(this.mapContainer);
 
       // this.app.stage.addChild(this.mapContainer)
+
+      // void gl.blendEquationSeparate(modeRGB, modeAlpha);
+      // void gl.blendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+      let gl = WebGLRenderingContext;
+      (this.app.renderer.state as any).blendModes[21] = [gl.ONE,  gl.ONE, gl.ZERO, gl.DST_ALPHA, gl.FUNC_ADD, gl.FUNC_ADD]
        
       console.debug("map component initialized");
 
@@ -86,7 +91,9 @@ export class MapComponent implements OnInit {
   }
 
   update() {
+    this.mapContainer.visionLayer.app = this.app;
     this.mapContainer.update(this.state.map);
+    this.mapContainer.visionLayer.updateCreatures(this.state.mapCreatures);
     this.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
   }
 

@@ -24,7 +24,7 @@ export class CanvasContainerDirective implements AfterViewInit {
     resolution:  window.devicePixelRatio || 1,
     // resolution:  1,
     antialias: true,
-    transparent: false,
+    transparent: true,
     // forceFXAA: true,
     autoResize: true,
     // sharedTicker: true,
