@@ -31,6 +31,8 @@ export class GridLayer extends Layer {
 
     async draw() {
 
+        return;
+
         // canvas drawing
 
         // const canvas = document.createElement('canvas');

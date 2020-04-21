@@ -12,7 +12,7 @@ export const environment = {
     }
   },
   remoteHost: '192.168.1.168:8080',
-  remoteURL: 'http://192.168.1.168:8080',
+  remoteURL: 'http://192.168.1.166:8080',
   version: version
 };
 

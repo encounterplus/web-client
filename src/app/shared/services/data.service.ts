@@ -5,8 +5,6 @@ import { Observable, Subject } from 'rxjs';
 import { WebsocketService, WSEvent } from './websocket.service';
 import { map } from 'rxjs/operators';
 
-const CHAT_URL = "ws://192.168.1.168:8080/ws";
-
 @Injectable({
   providedIn: 'root'
 })
@@ -17,7 +15,7 @@ export class DataService {
   constructor(private api: ApiService, private ws: WebsocketService) { 
     
     this.events = <Subject<WSEvent>>ws
-			.connect(CHAT_URL)
+			.connect(this.wsURL)
 			.pipe(map((response: WSEvent): any => {
 				return JSON.parse(response.data);
       }));
@@ -27,6 +25,10 @@ export class DataService {
 
   get baseURL(): string {
     return this.api.remoteBaseURL
+  }
+
+  get wsURL(): string {
+    return 'ws://' + this.api.remoteHost + '/ws'
   }
 
   // Simulate GET /todos

@@ -1,13 +1,18 @@
 import { Component, OnInit, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
-import * as PIXI from 'pixi.js';
-import { Viewport } from 'pixi-viewport'
+// import * as PIXI from 'pixi.js';
+import { Viewport } from 'pixi-viewport';
 import { Game } from 'src/app/shared/models/game';
 import { Map } from 'src/app/shared/models/map';
 import { ScreenConfig } from 'src/app/shared/models/screen-config';
 import { MapContainer } from './map-container';
 import { AppState } from 'src/app/shared/models/app-state';
 import { Creature } from 'src/app/shared/models/creature';
+
+window.PIXI = PIXI;
+
+import 'pixi.js';
+import 'pixi-layers';
 
 @Component({
   selector: 'app-map',
@@ -57,6 +62,8 @@ export class MapComponent implements OnInit {
         interaction: this.app.renderer.plugins.interaction // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
       })
 
+      // this.app.stage = new PIXI.display.Stage();
+
       // add the viewport to the stage
       this.app.stage.addChild(this.viewport)
 
@@ -93,7 +100,10 @@ export class MapComponent implements OnInit {
   update() {
     this.mapContainer.visionLayer.app = this.app;
     this.mapContainer.update(this.state.map);
+    this.mapContainer.lightsLayer.updateCreatures(this.state.mapCreatures);
+    this.mapContainer.lightsLayer.updateTiles(this.state.map.tiles);
     this.mapContainer.visionLayer.updateCreatures(this.state.mapCreatures);
+    this.mapContainer.visionLayer.updateTiles(this.state.map.tiles);
     this.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
   }
 
@@ -102,7 +112,12 @@ export class MapComponent implements OnInit {
 
     this.mapContainer.tokensLayer.updateTurned(this.state.turned);
 
-    this.viewport.setZoom(0.95);
+    this.viewport.setZoom(this.state.map.zoom);
+    this.viewport.position.x = (this.width / 2.0) - this.state.map.x;
+    this.viewport.position.y = (this.height / 2.0) - this.state.map.y;
+
+
+    // this.viewport.setTransform(-this.state.map.x, -this.state.map.y);
 
     // this.viewport.worldWidth = c;
     // this.viewport.worldHeight = this.mapContainer.h;

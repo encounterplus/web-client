@@ -4,6 +4,7 @@ import { Layer } from './layer';
 import { Map } from 'src/app/shared/models/map';
 import { environment } from 'src/environments/environment';
 import { map } from 'rxjs/operators';
+import { Loader } from '../models/loader';
 
 export class BackgroundLayer extends Layer {
 
@@ -27,7 +28,7 @@ export class BackgroundLayer extends Layer {
             return;
         }
 
-        this.imageTexture = await this.loadTexture(environment.remoteURL + this.image);
+        this.imageTexture = await Loader.shared.loadTexture(environment.remoteURL + this.image);
 
         if(this.imageTexture == null) {
             return this;

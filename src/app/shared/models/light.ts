@@ -1,10 +1,9 @@
-export class Vision {
+export class Light {
     id: string;
-    x: number;
-    y: number;
+    enabled: boolean;
     radiusMin: number;
     radiusMax: number;
     color: string;
+    opacity: number;
     alwaysVisible: boolean;
-    polygon: Array<number>;
 }

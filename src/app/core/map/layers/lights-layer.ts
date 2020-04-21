@@ -10,7 +10,7 @@ import { CreatureComponent } from '../../creature/creature.component';
 import { Tile } from 'src/app/shared/models/tile';
 import { Loader } from '../models/loader';
 
-export class VisionLayer extends Layer {
+export class LightsLayer extends Layer {
 
     app: PIXI.Application;
     creatures: Array<Creature> = [];
@@ -23,98 +23,60 @@ export class VisionLayer extends Layer {
     updateTiles(tiles: Array<Tile>) {
         this.tiles = tiles;
     }
-
+    
     vert: PIXI.LoaderResource;
     frag: PIXI.LoaderResource;
 
     lighting: PIXI.display.Layer
     lightingSprite: PIXI.Sprite
 
+    lights: Array<PIXI.Mesh> = [];
+
     constructor() {
         super();
 
-        this.bg = new PIXI.Sprite(PIXI.Texture.WHITE);
-        this.bg.tint = 0x000000;
-
-        let filter = new PIXI.filters.AlphaFilter(1.0)
-        filter.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-        this.filters = [filter];
+        // let filter = new PIXI.filters.AlphaFilter(1.0)
+        // filter.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+        // this.filters = [filter];
     }
 
-    // msk = new PIXI.Graphics();
-    bg = new PIXI.Sprite(PIXI.Texture.WHITE);
-
-    // _render(renderer: PIXI.Renderer) {
-
-    //     let g1 = new PIXI.Graphics().beginFill(0xfffffff).drawCircle(200,200, 400).drawCircle(400,400,300).endFill();
-
-    //     // let g2 = new PIXI.Graphics().beginFill(0xfffffff).drawCircle(400,400, 300).endFill();
-    //     renderer.mask.push(this, g1);
-    //     // renderer.mask.push(this, g2);
-
-    //     super._render(renderer);
-
-    //     // renderer.mask.pop(this);
-    // }
-
-    visions: Array<PIXI.Mesh> = [];
+    isDirty: boolean = true;
 
     async draw() {
-        // this.cacheAsBitmap = false;
-        this.clear();
-
+        this.clear();   
+        
         // return this;
-
-        const startTime = performance.now();
-
-       
-        this.bg.width = this.w;
-        this.bg.height = this.h;
-        this.addChild(this.bg);
 
         // load filters
         if (this.vert == null || this.frag == null) {
             this.vert = await Loader.shared.loadResource("/assets/shaders/vision.vert");
-            this.frag = await Loader.shared.loadResource("/assets/shaders/vision.frag");
+            this.frag = await Loader.shared.loadResource("/assets/shaders/light.frag");
         }
 
-        let msk = new PIXI.Graphics();
-        msk.beginFill(0xffffff);
+        // var msk = new PIXI.Graphics().beginFill(0xffffff);
 
         for(let creature of this.creatures) {
             // console.log(creature);
             if(creature.vision != null && creature.vision.polygon != null) {
 
-                // console.log(creature.vision.polygon);
-
-                let polygon = this.getGeometry(creature.vision.x, creature.vision.y, creature.vision.polygon)
-                // console.log(polygon);
-
-                // let polygon = PIXI.utils.earcut (creature.vision.polygon, null, 2);
-
+                let polygon = this.getGeometry2(creature.vision.x, creature.vision.y, creature.vision.polygon);
+                // let polygon = this.getGeometry2(creature.vision.x, creature.vision.y, creature.vision.radiusMax);
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
 
                 let geometry = new PIXI.Geometry()
-                    .addAttribute('aVertexPosition', polygon);
+                    .addAttribute('aVertexPosition', polygon)
+                    // .addIndex([3,2,1,3,1,0]);
 
                 let mesh = new PIXI.Mesh(geometry, shader);
                
                 mesh.shader.uniforms.position = [creature.vision.x, creature.vision.y]
-                mesh.shader.uniforms.radiusMin = [creature.vision.radiusMin];
-                mesh.shader.uniforms.radiusMax = [creature.vision.radiusMax];
-                mesh.shader.uniforms.intensity = 1.0;
+                mesh.shader.uniforms.radiusMin = creature.vision.radiusMin;
+                mesh.shader.uniforms.radiusMax = creature.vision.radiusMax;
+                mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(creature.vision.color));
+                mesh.shader.uniforms.falloff = [1.0, 0.1, 50];
+                mesh.shader.uniforms.intensity = creature.light.opacity;
                 mesh.blendMode = PIXI.BLEND_MODES.ADD;
-                
-                // mesh.parentLayer = this.lighting;
-                // mesh.blendMode = 21;
-                // mesh.texture.baseTexture.alphaMode = PIXI.ALPHA_MODES.PREMULTIPLIED_ALPHA;
-
-                this.addChild(mesh);
-                this.visions.push(mesh);
-
-                msk.drawPolygon(creature.vision.polygon);
                 // mesh.cacheAsBitmap = true;
-
 
                 // var graphics = new PIXI.Graphics();
                 // graphics.beginFill(0xffffff);
@@ -122,55 +84,68 @@ export class VisionLayer extends Layer {
                 // graphics.endFill();
                 // this.addChild(graphics);
 
-                // this.filter.uniforms.position = [creature.vision.x, creature.vision.y];
-                // this.filter.uniforms.radiusMin = [creature.vision.radiusMin];
-                // this.filter.uniforms.radiusMax = [creature.vision.radiusMax];
+                // mesh.mask = graphics;
 
-                // graphics.filters = [this.filter];
+                this.addChild(mesh);
+                this.lights.push(mesh);
             }
         }
-
-        msk.endFill();
 
         // tiles
         for(let tile of this.tiles) {
             // console.log(creature);
             if(tile.vision != null && tile.vision.polygon != null) {
-                let polygon = this.getGeometry(tile.vision.x, tile.vision.y, tile.vision.polygon)
+                // let polygon = this.getGeometry(tile.vision.x, tile.vision.y, tile.vision.radiusMax);
+                let polygon = this.getGeometry2(tile.vision.x, tile.vision.y, tile.vision.polygon);
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
 
                 let geometry = new PIXI.Geometry()
-                    .addAttribute('aVertexPosition', polygon);
+                    .addAttribute('aVertexPosition', polygon)
+                    // .addIndex([3,2,1,3,1,0]);
 
                 let mesh = new PIXI.Mesh(geometry, shader);
                
                 mesh.shader.uniforms.position = [tile.vision.x, tile.vision.y]
-                mesh.shader.uniforms.radiusMin = [tile.vision.radiusMin];
-                mesh.shader.uniforms.radiusMax = [tile.vision.radiusMax];
-                mesh.shader.uniforms.intensity = 1.0;
+                mesh.shader.uniforms.radiusMin = tile.vision.radiusMin;
+                mesh.shader.uniforms.radiusMax = tile.vision.radiusMax;
+                mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(tile.vision.color));
+                mesh.shader.uniforms.falloff = [1.0, 0.01, 10];
+                mesh.shader.uniforms.intensity = tile.light.opacity;
+                // mesh.blendMode = PIXI.BLEND_MODES.MULTIPLY;
                 mesh.blendMode = PIXI.BLEND_MODES.ADD;
+                // mesh.cacheAsBitmap = true;
+
+                // var graphics = new PIXI.Graphics();
+                // graphics.beginFill(0xffffff);
+                // // graphics.drawStar(tile.vision.x, tile.vision.y, 100, 500);
+                // graphics.drawPolygon(tile.vision.polygon);
+                // graphics.endFill();
+                // graphics.alpha = 0.5
+
+                // this.addChild(graphics);
+
+                // mesh.mask = graphics;
 
                 this.addChild(mesh);
-                this.visions.push(mesh);
+                this.lights.push(mesh);
 
-                mesh.mask = msk;
-                // mesh.cacheAsBitmap = true;
-                // mesh.filterArea = new PIXI.Rectangle(0, 0, this.w, this.h);
             }
         }
-
-        this.addChild(msk)
-
-        const endTime = performance.now();
-        const elaspedTimeInMilliseconds = endTime - startTime;
-        // console.log(elaspedTimeInMilliseconds);
-
-        // this.cacheAsBitmap = true;
-
+        this.isDirty = true
         return this;
     }
 
-    getGeometry(x: number, y: number, polygon: Array<number>) {
+    getGeometry(x: number, y: number, size: number) {
+        var vertices = [
+            x - size, y - size,
+            x - size, y + size,
+            x + size, y + size,
+            x + size, y - size
+        ];
+        return vertices;
+    }
+
+    getGeometry2(x: number, y: number, polygon: Array<number>) {
         let origin = [x, y]
         var buffer = [];
         for (let i = 0; i < polygon.length - 2; i = i + 2) {
@@ -201,10 +176,10 @@ export class VisionLayer extends Layer {
     }
 
     clear() {
-        for(let mesh of this.visions) {
+        for(let mesh of this.lights) {
             mesh.destroy();
         }
-        this.visions = [];
+        this.lights = [];
         this.removeChildren();
     }
 }

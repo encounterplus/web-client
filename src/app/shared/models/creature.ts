@@ -1,4 +1,5 @@
 import { Vision } from './vision';
+import { Light } from './light';
 
 export class Creature {
     id: string;
@@ -19,4 +20,5 @@ export class Creature {
     y: number;
     cachedToken: string;
     vision: Vision;
+    light: Light;
 }

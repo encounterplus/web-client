@@ -46,7 +46,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         this.dataService.events.subscribe(event => {
             // console.log("Event received: " + JSON.stringify(event));
-            console.log(`Event name: ${event.name}`)
+            // console.log(`Event name: ${event.name}`)
 
             if (event.name == "gameUpdate" ) {
                 this.state.game.turn = event.data.turn;
@@ -95,6 +95,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 }
                 
                 
+                this.mapComponent.mapContainer.lightsLayer.draw();
                 this.mapComponent.mapContainer.visionLayer.draw();
                 // this.mapComponent.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
                 // this.mapComponent.mapContainer.tokensLayer.draw()

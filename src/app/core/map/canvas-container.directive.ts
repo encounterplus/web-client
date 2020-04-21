@@ -1,6 +1,6 @@
 import { Directive, AfterViewInit, ElementRef, HostListener, NgZone, Input } from '@angular/core';
 import * as PIXI from 'pixi.js';
-import { delayWhen } from 'rxjs/operators';
+window.PIXI = PIXI;
 
 @Directive({
   selector: '[appCanvasContainer]'
@@ -24,7 +24,7 @@ export class CanvasContainerDirective implements AfterViewInit {
     resolution:  window.devicePixelRatio || 1,
     // resolution:  1,
     antialias: true,
-    transparent: true,
+    transparent: false,
     // forceFXAA: true,
     autoResize: true,
     // sharedTicker: true,
@@ -52,6 +52,7 @@ export class CanvasContainerDirective implements AfterViewInit {
     // this.app.view.style.transformOrigin = `top left`;
 
     // this.app.ticker.minFPS = 30;
+    // this.app.ticker.maxFPS = 60;
 
     // Confirm that WebGL is available
     if ( this.app.renderer.type !== PIXI.RENDERER_TYPE.WEBGL ) {

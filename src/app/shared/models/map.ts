@@ -1,4 +1,5 @@
 import { NumberValueAccessor } from '@angular/forms';
+import { Tile } from './tile';
 
 export class Map {
     id: string;
@@ -15,4 +16,5 @@ export class Map {
     y: number;
     zoom: number;
 
+    tiles: Array<Tile> = [];
 }

@@ -8,6 +8,7 @@ import { BackgroundLayer } from './layers/background-layer';
 import { TokensLayer } from './layers/tokens-layer';
 import { Grid } from './models/grid';
 import { VisionLayer } from './layers/vision-layer';
+import { LightsLayer } from './layers/lights-layer';
 
 export class MapContainer extends Layer {
 
@@ -23,7 +24,9 @@ export class MapContainer extends Layer {
     bottomLayer: Layer;
 
     visionLayer: VisionLayer;
-    lightLayer: Layer;
+    lightsLayer: LightsLayer;
+
+    visionSprite: PIXI.Sprite;
 
     // data
     
@@ -39,6 +42,7 @@ export class MapContainer extends Layer {
 
         this.backgroundLayer = this.addChild(new BackgroundLayer());
         this.gridLayer = this.addChild(new GridLayer());
+        this.lightsLayer = this.addChild(new LightsLayer());
         this.visionLayer = this.addChild(new VisionLayer());
         this.tokensLayer = this.addChild(new TokensLayer());
     }
@@ -60,12 +64,17 @@ export class MapContainer extends Layer {
 
     async draw() {
         await this.backgroundLayer.draw();
-        await this.gridLayer.draw();
-        await this.tokensLayer.draw();
-        await this.visionLayer.draw();
 
         this.w = this.backgroundLayer.w;
         this.h = this.backgroundLayer.h;
+
+        this.visionLayer.w = this.w;
+        this.visionLayer.h = this.h;
+
+        await this.gridLayer.draw();
+        await this.lightsLayer.draw();
+        await this.tokensLayer.draw();
+        await this.visionLayer.draw();
 
         // this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
         // this.interactive = true;
