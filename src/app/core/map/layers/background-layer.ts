@@ -28,7 +28,7 @@ export class BackgroundLayer extends Layer {
             return;
         }
 
-        this.imageTexture = await Loader.shared.loadTexture(environment.remoteURL + this.image);
+        this.imageTexture = await Loader.shared.loadTexture(this.image);
 
         if(this.imageTexture == null) {
             return this;

@@ -19,6 +19,8 @@ export class Loader {
         crossorigin: "anonymous"
     };
 
+    remoteBaseURL: string = "";
+
     getTexture(src: string): PIXI.Texture {
 
         const loader = PIXI.Loader.shared;
@@ -35,7 +37,11 @@ export class Loader {
         }
     }
 
-    async loadTexture(src: string): Promise<PIXI.Texture> {
+    async loadTexture(src: string, local: boolean = false): Promise<PIXI.Texture> {
+
+        if (local == false) {
+            src = this.remoteBaseURL + src;
+        }
 
         // First try to load the resource from the cache
         let tex = this.getTexture(src);

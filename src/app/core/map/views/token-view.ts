@@ -4,6 +4,7 @@ import { View } from './view';
 import { Sprite, interaction } from 'pixi.js';
 import { environment } from 'src/environments/environment';
 import { Grid } from '../models/grid';
+import { Loader } from '../models/loader';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num;
@@ -69,9 +70,9 @@ export class TokenView extends View {
         // this.tokenTexture = await this.loadTexture('/assets/img/token.png');
         
         if (this.creature.cachedToken != null) {
-            this.tokenTexture = await this.loadTexture(environment.remoteURL + this.creature.cachedToken);
+            this.tokenTexture = await Loader.shared.loadTexture(this.creature.cachedToken);
         } else if (this.creature.token != null) {
-            this.tokenTexture = await this.loadTexture(environment.remoteURL + this.creature.token);
+            this.tokenTexture = await Loader.shared.loadTexture(this.creature.token);
         } else {
             this.tokenTexture = null;
         }
