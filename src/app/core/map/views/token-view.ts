@@ -5,9 +5,18 @@ import { Sprite, interaction } from 'pixi.js';
 import { environment } from 'src/environments/environment';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
+import { DataService } from 'src/app/shared/services/data.service';
+import { WSEvent, WSEventName } from 'src/app/shared/models/wsevent';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num;
+}
+
+export enum ControlState {
+    start = 0,
+    control = 1,
+    end = 2,
+    block = 3
 }
 
 export class TokenView extends View {
@@ -28,6 +37,8 @@ export class TokenView extends View {
     
     selected: boolean = false;
     turned: boolean = false;
+    controlled: boolean = false;
+    blocked: boolean = false;
 
     get color(): number {
         if (this.turned) {
@@ -41,7 +52,7 @@ export class TokenView extends View {
         }
     }
 
-    constructor(creature: Creature, grid: Grid) {
+    constructor(creature: Creature, grid: Grid, private dataService: DataService) {
         super();
         this.creature = creature;
         this.grid = grid;
@@ -100,6 +111,7 @@ export class TokenView extends View {
 
         this.updateToken();
         this.updateUID();
+        this.updateTint();
     }
 
     update() {
@@ -111,6 +123,8 @@ export class TokenView extends View {
 
         this.position.set(this.creature.x - (this.w / 2), this.creature.y - (this.h / 2));
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
+
+        // it (this.creature.)
     }
 
     updateToken() {
@@ -155,6 +169,10 @@ export class TokenView extends View {
         }
     }
 
+    updateTint() {
+        this.tokenSprite.tint = this.controlled ? 0xFFCCCC : 0xFFFFFF;
+    }
+
     clear() {
         this.removeChildren();
     }
@@ -163,25 +181,48 @@ export class TokenView extends View {
 
         event.stopPropagation();
 
+        if (this.controlled) {
+            return;
+        }
+
         // store a reference to the data
         // the reason for this is because of multitouch
         // we want to track the movement of this particular touch
         this.data = event.data;
         this.dragging = true;
+
+        this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}});
     }
     
     onDragEnd() {
+        event.stopPropagation();
+
+        if (this.controlled) {
+            return;
+        }
+
         this.dragging = false;
         // set the interaction data to null
         this.data = null;
+
+        this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end}});
     }
     
     onDragMove() {
+        event.stopPropagation();
+
+        if (this.controlled) {
+            return;
+        }
+
         if (this.dragging) {
             const newPosition = this.data.getLocalPosition(this.parent);
 
-            this.position.set(newPosition.x - (this.w / 2), newPosition.y - (this.h / 2));
+            if (!this.blocked) {
+                this.center = newPosition;
+            }
+        
+            this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: newPosition.x | 0, y: newPosition.y | 0, state: ControlState.control}});
         }
     }
-
 }

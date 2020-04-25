@@ -7,6 +7,8 @@ import { DataService } from './shared/services/data.service';
 import { environment } from 'src/environments/environment';
 import { AppState } from './shared/models/app-state';
 import { Creature } from './shared/models/creature';
+import { WSEventName } from './shared/models/wsevent';
+import { ControlState } from './core/map/views/token-view';
 
 @Component({
     selector: 'app-root',
@@ -46,9 +48,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         this.dataService.events.subscribe(event => {
             // console.log("Event received: " + JSON.stringify(event));
-            // console.log(`Event name: ${event.name}`)
+            console.log(`Event received: ${event.name}`)
 
-            if (event.name == "gameUpdate" ) {
+            if (event.name == WSEventName.gameUpdate ) {
                 this.state.game.turn = event.data.turn;
                 this.initiativeListComponent.scrollToTurned();
                 this.mapComponent.mapContainer.tokensLayer.updateTurned(this.state.turned);
@@ -69,19 +71,27 @@ export class AppComponent implements OnInit, AfterViewInit {
                     token.creature.x = event.data.x;
                     token.creature.y = event.data.y;
                     token.update();
+                    token.updateTint();
                 }
 
                 this.mapComponent.mapContainer.visionLayer.draw();
 
                 // this.mapComponent.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
                 // this.mapComponent.mapContainer.tokensLayer.draw()
-            } else if (event.name == "creatureMove") {
+            } else if (event.name == WSEventName.creatureMove) {
 
                 let token = this.mapComponent.mapContainer.tokensLayer.tokenByCreatureId(event.data.id);
                 if (token != null) {
-                    token.creature.x = event.data.x;
-                    token.creature.y = event.data.y;
-                    token.update();
+                    token.blocked = event.data.state == ControlState.block;
+
+                    if (!token.dragging) {
+                        token.creature.x = event.data.x;
+                        token.creature.y = event.data.y;
+
+                        token.controlled = event.data.state != ControlState.end && !token.dragging ? true : false
+                        token.update();
+                        token.updateTint();
+                    }
                 }
 
                 // this.state.game.creatures[index] = creature;

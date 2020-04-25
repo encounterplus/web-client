@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { TokenView } from '../views/token-view';
 import { Grid } from '../models/grid';
 import { CreatureComponent } from '../../creature/creature.component';
+import { DataService } from 'src/app/shared/services/data.service';
 
 export class TokensLayer extends Layer {
 
@@ -16,6 +17,10 @@ export class TokensLayer extends Layer {
     turned: TokenView;
 
     grid: Grid;
+
+    constructor(private dataService: DataService) {
+        super();
+    }
 
     updateCreatures(creatures: Array<Creature>) {
         this.creatures = creatures;
@@ -38,7 +43,7 @@ export class TokensLayer extends Layer {
         this.clear();
 
         for (let creature of this.creatures) {
-            let tokenView = new TokenView(creature, this.grid);
+            let tokenView = new TokenView(creature, this.grid, this.dataService);
             this.addChild(tokenView);
             await tokenView.draw();
 

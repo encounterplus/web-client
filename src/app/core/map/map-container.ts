@@ -9,6 +9,7 @@ import { TokensLayer } from './layers/tokens-layer';
 import { Grid } from './models/grid';
 import { VisionLayer } from './layers/vision-layer';
 import { LightsLayer } from './layers/lights-layer';
+import { DataService } from 'src/app/shared/services/data.service';
 
 export class MapContainer extends Layer {
 
@@ -37,14 +38,14 @@ export class MapContainer extends Layer {
     data: PIXI.interaction.InteractionData;
     dragging: boolean;
 
-    constructor() {
+    constructor(private dataService: DataService) {
         super();
 
         this.backgroundLayer = this.addChild(new BackgroundLayer());
         this.gridLayer = this.addChild(new GridLayer());
         this.lightsLayer = this.addChild(new LightsLayer());
         this.visionLayer = this.addChild(new VisionLayer());
-        this.tokensLayer = this.addChild(new TokensLayer());
+        this.tokensLayer = this.addChild(new TokensLayer(this.dataService));
     }
 
     update(map: Map) {

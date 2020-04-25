@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, Observable, Observer } from 'rxjs';
-
-export interface WSEvent {
-  name: string;
-  data: any;
-}
+import { WSEvent } from '../models/wsevent';
 
 @Injectable({
   providedIn: 'root'

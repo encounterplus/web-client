@@ -21,7 +21,7 @@ export class ApiService {
   }
 
   constructor(private httpClient: HttpClient) { 
-    this.remoteHost = '192.168.1.168:8080'
+    this.remoteHost = '192.168.1.166:8080'
     Loader.shared.remoteBaseURL = this.remoteBaseURL;
   }
 

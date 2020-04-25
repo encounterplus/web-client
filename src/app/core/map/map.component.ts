@@ -13,6 +13,7 @@ window.PIXI = PIXI;
 
 import 'pixi.js';
 import 'pixi-layers';
+import { DataService } from 'src/app/shared/services/data.service';
 
 @Component({
   selector: 'app-map',
@@ -42,8 +43,8 @@ export class MapComponent implements OnInit {
 
   mapContainer: MapContainer;
 
-  constructor() { 
-    this.mapContainer = new MapContainer();
+  constructor(private dataService: DataService) { 
+    this.mapContainer = new MapContainer(this.dataService);
   }
 
   ngOnInit(): void {

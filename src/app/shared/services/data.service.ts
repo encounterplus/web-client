@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { ApiData } from '../models/api-data';
 import { Observable, Subject } from 'rxjs';
-import { WebsocketService, WSEvent } from './websocket.service';
+import { WebsocketService} from './websocket.service';
 import { map } from 'rxjs/operators';
+import { WSEvent } from '../models/wsevent';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +20,6 @@ export class DataService {
 			.pipe(map((response: WSEvent): any => {
 				return JSON.parse(response.data);
       }));
-      
-
 	}
 
   get baseURL(): string {
