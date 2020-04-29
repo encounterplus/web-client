@@ -99,19 +99,13 @@ export class MapComponent implements OnInit {
   }
 
   update() {
-    this.mapContainer.visionLayer.app = this.app;
-    this.mapContainer.update(this.state.map);
-    this.mapContainer.lightsLayer.updateCreatures(this.state.mapCreatures);
-    this.mapContainer.lightsLayer.updateTiles(this.state.map.tiles);
-    this.mapContainer.visionLayer.updateCreatures(this.state.mapCreatures);
-    this.mapContainer.visionLayer.updateTiles(this.state.map.tiles);
-    this.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
+    this.mapContainer.update(this.state);
   }
 
   async draw() {
     await this.mapContainer.draw();
 
-    this.mapContainer.tokensLayer.updateTurned(this.state.turned);
+    // this.mapContainer.tokensLayer.updateTurned(this.state.turned);
 
     this.viewport.setZoom(this.state.map.zoom);
     this.viewport.position.x = (this.width / 2.0) - this.state.map.x;

@@ -1,12 +1,13 @@
 
-import { Creature } from 'src/app/shared/models/creature';
+import { Creature, Role } from 'src/app/shared/models/creature';
 import { View } from './view';
-import { Sprite, interaction } from 'pixi.js';
+import { Sprite, interaction, Container } from 'pixi.js';
 import { environment } from 'src/environments/environment';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
 import { WSEvent, WSEventName } from 'src/app/shared/models/wsevent';
+import { AuraView } from './aura-view';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num;
@@ -34,11 +35,12 @@ export class TokenView extends View {
     data: PIXI.interaction.InteractionData;
     dragging: boolean = false;
 
-    
     selected: boolean = false;
     turned: boolean = false;
     controlled: boolean = false;
     blocked: boolean = false;
+
+    auraContainer: Container = new PIXI.Container();
 
     get color(): number {
         if (this.turned) {
@@ -73,7 +75,25 @@ export class TokenView extends View {
         this.update();
 
         await this.drawToken()
+        await this.drawAuras();
+
         return this;
+    }
+
+    async drawAuras() {
+        this.auraContainer.removeChildren();
+
+        for (let aura of this.creature.auras) {
+            if (!aura.enabled) {
+                continue;
+            }
+            let view = new AuraView(aura, this.grid);
+            view.w = ((aura.radius / 5) * this.grid.size * 2) + this.w;
+            view.h = ((aura.radius / 5) * this.grid.size * 2) + this.h;
+            await view.draw();
+            view.position.set(view.w / 2, view.h / 2);
+            this.auraContainer.addChild(view);
+        }
     }
 
     async drawToken() {
@@ -121,7 +141,14 @@ export class TokenView extends View {
         this.w = this.grid.size * this.creature.scale;
         this.h = this.grid.size * this.creature.scale;
 
+        
+        // this.auraContainer.width = this.w;
+        // this.auraContainer.height = this.h;
+
+        this.zIndex = this.creature.role == Role.friendly ? 50 : 30;
+
         this.position.set(this.creature.x - (this.w / 2), this.creature.y - (this.h / 2));
+        this.auraContainer.position.set(this.creature.x, this.creature.y);
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
         // it (this.creature.)
@@ -220,6 +247,7 @@ export class TokenView extends View {
 
             if (!this.blocked) {
                 this.center = newPosition;
+                this.auraContainer.position.set(newPosition.x, newPosition.y);
             }
         
             this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: newPosition.x | 0, y: newPosition.y | 0, state: ControlState.control}});

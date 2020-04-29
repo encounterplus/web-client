@@ -9,6 +9,7 @@ export class GridLayer extends Layer {
     offsetX: number = 0;
     offsetY: number = 0;
     color: string = '#ffffff';
+    // visible: boolean = true;
 
     tileTexture: PIXI.Texture;
     tilingSprite: PIXI.TilingSprite;
@@ -30,8 +31,13 @@ export class GridLayer extends Layer {
       }
 
     async draw() {
+        this.removeChildren()
 
-        return;
+        if (!this.visible) {
+            return;
+        }
+
+        // return;
 
         // canvas drawing
 

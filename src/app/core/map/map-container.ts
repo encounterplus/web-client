@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Creature } from 'src/app/shared/models/creature';
+import { Creature, CreatureType } from 'src/app/shared/models/creature';
 import { Map } from 'src/app/shared/models/map';
 import { environment } from 'src/environments/environment';
 import { Layer } from './layers/layer';
@@ -10,20 +10,29 @@ import { Grid } from './models/grid';
 import { VisionLayer } from './layers/vision-layer';
 import { LightsLayer } from './layers/lights-layer';
 import { DataService } from 'src/app/shared/services/data.service';
+import { AppState } from 'src/app/shared/models/app-state';
+import { TokenView } from './views/token-view';
+import { Tile } from 'src/app/shared/models/tile';
+import { TilesLayer } from './layers/tiles-layer';
+import { AreaEffectsLayer } from './layers/area-effects-layer';
+import { AreaEffectView } from './views/area-effect-view';
+import { TileView } from './views/tile-view';
+import { AurasLayer } from './layers/auras-layer';
 
 export class MapContainer extends Layer {
 
     backgroundLayer: BackgroundLayer;
     gridLayer: GridLayer;
     canvasLayer: Layer;
-    areaEffectsLayer: Layer;
-    tokensLayer: TokensLayer;
+    areaEffectsLayer: AreaEffectsLayer;
+    monstersLayer: TokensLayer;
+    playersLayer: TokensLayer;
 
-    dmLayer: Layer;
-    topLayer: Layer;
-    middleLayer: Layer;
-    bottomLayer: Layer;
+    topLayer: TilesLayer;
+    middleLayer: TilesLayer;
+    bottomLayer: TilesLayer;
 
+    aurasLayer: AurasLayer;
     visionLayer: VisionLayer;
     lightsLayer: LightsLayer;
 
@@ -33,34 +42,99 @@ export class MapContainer extends Layer {
     
     map: Map;
 
+    state: AppState;
+
     grid: Grid = new Grid();
 
     data: PIXI.interaction.InteractionData;
     dragging: boolean;
 
+    turned: TokenView;
+
+    tiles: Array<Tile> = [];
+
     constructor(private dataService: DataService) {
         super();
 
         this.backgroundLayer = this.addChild(new BackgroundLayer());
+        this.bottomLayer = this.addChild(new TilesLayer(this.dataService));
         this.gridLayer = this.addChild(new GridLayer());
+        this.middleLayer = this.addChild(new TilesLayer(this.dataService));
         this.lightsLayer = this.addChild(new LightsLayer());
+        this.aurasLayer = this.addChild(new AurasLayer(this.dataService));
+        this.topLayer = this.addChild(new TilesLayer(this.dataService));
+        this.areaEffectsLayer = this.addChild(new AreaEffectsLayer(this.dataService));
+        this.monstersLayer = this.addChild(new TokensLayer(this.dataService));
         this.visionLayer = this.addChild(new VisionLayer());
-        this.tokensLayer = this.addChild(new TokensLayer(this.dataService));
+        this.playersLayer = this.addChild(new TokensLayer(this.dataService));
     }
 
-    update(map: Map) {
-        console.debug("updating map");
-        this.map = map;
+    update(state: AppState) {
+        this.state = state;
 
-        this.grid.size = map.gridSize;
-        this.grid.offsetX = map.gridOffsetX;
-        this.grid.offsetY = map.gridOffsetY;
-        this.grid.color = map.gridColor;
+        console.debug("updating map");
+        this.map = this.state.map;
+
+        if (this.map == null) {
+            return;
+        }
+
+        this.grid.size = this.state.map.gridSize;
+        this.grid.offsetX = this.state.map.gridOffsetX;
+        this.grid.offsetY = this.state.map.gridOffsetY;
+        this.grid.color = this.state.map.gridColor;
 
         // update grid
-        this.backgroundLayer.update(map);
-        this.gridLayer.update(map);
-        this.tokensLayer.grid = this.grid
+        this.backgroundLayer.update(this.state.map);
+        this.gridLayer.update(this.state.map);
+        // this.tokensLayer.grid = this.grid
+
+        this.lightsLayer.updateCreatures(this.state.mapCreatures);
+        this.lightsLayer.updateTiles(this.state.map.tiles);
+        this.visionLayer.updateCreatures(this.state.mapCreatures);
+        this.visionLayer.updateTiles(this.state.map.tiles);
+        this.monstersLayer.creatures = this.state.mapCreatures.filter(creature => creature.type != CreatureType.player);
+        this.monstersLayer.grid = this.grid;
+        this.playersLayer.creatures = this.state.mapCreatures.filter(creature => creature.type == CreatureType.player);
+        this.playersLayer.grid = this.grid;
+
+        this.areaEffectsLayer.areaEffects = this.state.map.areaEffects;
+        this.areaEffectsLayer.grid = this.grid;
+        // this.tokensLayer.updateCreatures(this.state.mapCreatures);
+        // this.tokensLayer.updateTiles(this.state.map.tiles);
+
+        this.tiles = state.map.tiles;
+    }
+
+    updateTiles(tiles: Array<Tile>) {
+        this.tiles = tiles;
+    }
+
+    updateTurned(creature: Creature) {
+        if (this.turned != null) {
+            this.turned.turned = false;
+            this.turned.updateUID();
+        }
+
+        this.turned = this.tokenByCreature(creature);
+        if (this.turned != null) {
+            this.turned.turned = true
+            this.turned.updateUID();
+        }
+    }
+
+    async drawTiles() {
+        // this.bottomLayer.clear();
+        // this.middleLayer.clear();
+        // this.topLayer.clear();
+
+        this.bottomLayer.tiles = this.tiles.filter(tile => tile.layer == "map");
+        this.middleLayer.tiles = this.tiles.filter(tile => tile.layer == "object");
+        this.topLayer.tiles = this.tiles.filter(tile => tile.layer == "token");
+
+        await this.bottomLayer.draw();
+        await this.middleLayer.draw();
+        await this.topLayer.draw();
     }
 
     async draw() {
@@ -74,8 +148,22 @@ export class MapContainer extends Layer {
 
         await this.gridLayer.draw();
         await this.lightsLayer.draw();
-        await this.tokensLayer.draw();
-        await this.visionLayer.draw();
+
+        await this.monstersLayer.draw();
+
+        // vision
+        if (this.state.map.lineOfSight) {
+            await this.visionLayer.draw();
+        } else {
+            this.visionLayer.clear();
+        }
+        
+        await this.playersLayer.draw();
+        this.aurasLayer.tokens = this.playersLayer.views;
+        this.aurasLayer.draw();
+        await this.drawTiles();
+
+        await this.areaEffectsLayer.draw();
 
         // this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
         // this.interactive = true;
@@ -88,6 +176,56 @@ export class MapContainer extends Layer {
         //     .on('pointermove', this.onDragMove);
 
         return this;
+    }
+
+    tokenByCreature(creature: Creature): TokenView {
+        return this.tokenByCreatureId(creature.id)
+    }
+
+    tokenByCreatureId(creatureId: String): TokenView {
+
+        for (let token of this.playersLayer.views) {
+            if (token.creature.id == creatureId) {
+                return token;
+            }
+        }
+
+        for (let token of this.monstersLayer.views) {
+            if (token.creature.id == creatureId) {
+                return token;
+            }
+        }
+
+        return null;
+    }
+
+    areaEffectViewById(id: String): AreaEffectView {
+        for (let model of this.areaEffectsLayer.views) {
+            if (model.areaEffect.id == id) {
+                return model;
+            }
+        }
+        return null;
+    }
+
+    tileViewById(id: String): TileView {
+        for (let model of this.topLayer.views) {
+            if (model.tile.id == id) {
+                return model;
+            }
+        }
+        for (let model of this.middleLayer.views) {
+            if (model.tile.id == id) {
+                return model;
+            }
+        }
+
+        for (let model of this.bottomLayer.views) {
+            if (model.tile.id == id) {
+                return model;
+            }
+        }
+        return null;
     }
 
     onDragStart(event: PIXI.interaction.InteractionEvent) {

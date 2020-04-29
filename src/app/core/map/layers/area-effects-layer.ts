@@ -9,11 +9,13 @@ import { CreatureComponent } from '../../creature/creature.component';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Tile } from 'src/app/shared/models/tile';
 import { TileView } from '../views/tile-view';
+import { AreaEffect } from 'src/app/shared/models/area-effect';
+import { AreaEffectView } from '../views/area-effect-view';
 
-export class TokensLayer extends Layer {
+export class AreaEffectsLayer extends Layer {
 
-    creatures: Array<Creature> = [];
-    views: Array<TokenView> = [];
+    areaEffects: Array<AreaEffect> = [];
+    views: Array<AreaEffectView> = [];
     grid: Grid;
 
     constructor(private dataService: DataService) {
@@ -24,12 +26,12 @@ export class TokensLayer extends Layer {
         this.clear();
 
         // creaetures
-        for (let creature of this.creatures) {
-            let tokenView = new TokenView(creature, this.grid, this.dataService);
-            this.addChild(tokenView);
-            await tokenView.draw();
+        for (let areaEffect of this.areaEffects) {
+            let view = new AreaEffectView(areaEffect, this.grid, this.dataService);
+            this.addChild(view);
+            await view.draw();
 
-            this.views.push(tokenView);
+            this.views.push(view);
         }
 
         return this;

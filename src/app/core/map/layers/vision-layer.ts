@@ -12,7 +12,6 @@ import { Loader } from '../models/loader';
 
 export class VisionLayer extends Layer {
 
-    app: PIXI.Application;
     creatures: Array<Creature> = [];
     tiles: Array<Tile> = [];
 

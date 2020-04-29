@@ -9,6 +9,8 @@ import { AppState } from './shared/models/app-state';
 import { Creature } from './shared/models/creature';
 import { WSEventName } from './shared/models/wsevent';
 import { ControlState } from './core/map/views/token-view';
+import { AreaEffect } from './shared/models/area-effect';
+import { Tile } from './shared/models/tile';
 
 @Component({
     selector: 'app-root',
@@ -53,7 +55,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             if (event.name == WSEventName.gameUpdate ) {
                 this.state.game.turn = event.data.turn;
                 this.initiativeListComponent.scrollToTurned();
-                this.mapComponent.mapContainer.tokensLayer.updateTurned(this.state.turned);
+                this.mapComponent.mapContainer.updateTurned(this.state.turned);
             } else if (event.name == "creatureUpdate") {
                 let creature = Object.assign(new Creature, event.data) as Creature;
                 console.debug(creature);
@@ -65,7 +67,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.state.game.creatures[index].vision = creature.vision;
 
                 // update token
-                let token = this.mapComponent.mapContainer.tokensLayer.tokenByCreatureId(creature.id)
+                let token = this.mapComponent.mapContainer.tokenByCreatureId(creature.id)
                 if (token != null) {
                     token.creature = creature;
                     token.creature.x = event.data.x;
@@ -80,7 +82,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 // this.mapComponent.mapContainer.tokensLayer.draw()
             } else if (event.name == WSEventName.creatureMove) {
 
-                let token = this.mapComponent.mapContainer.tokensLayer.tokenByCreatureId(event.data.id);
+                let token = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id);
                 if (token != null) {
                     token.blocked = event.data.state == ControlState.block;
 
@@ -104,11 +106,37 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.state.game.creatures[index].vision.polygon = event.data.los;
                 }
                 
-                
                 this.mapComponent.mapContainer.lightsLayer.draw();
                 this.mapComponent.mapContainer.visionLayer.draw();
                 // this.mapComponent.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
                 // this.mapComponent.mapContainer.tokensLayer.draw()
+            } else if (event.name == WSEventName.areaEffectUpdate) {
+                let model = Object.assign(new AreaEffect, event.data) as AreaEffect;
+                console.debug(model);
+
+
+                // udpdate state
+                let index =  this.state.map.areaEffects.findIndex((obj => obj.id == model.id));
+                this.state.map.areaEffects[index] = model;
+
+                let view = this.mapComponent.mapContainer.areaEffectViewById(model.id)
+                if (view != null) {
+                    view.areaEffect = model;
+                    view.draw();
+                }
+            } else if (event.name == WSEventName.tileUpdate) {
+                let model = Object.assign(new Tile, event.data) as Tile;
+                console.debug(model);
+
+                // udpdate state
+                let index =  this.state.map.tiles.findIndex((obj => obj.id == model.id));
+                this.state.map.tiles[index] = model;
+
+                let view = this.mapComponent.mapContainer.tileViewById(model.id)
+                if (view != null) {
+                    view.tile = model;
+                    view.draw();
+                }
             }
         });
     }
