@@ -89,10 +89,22 @@ export class AppComponent implements OnInit, AfterViewInit {
                     if (!token.dragging) {
                         token.creature.x = event.data.x;
                         token.creature.y = event.data.y;
-
                         token.controlled = event.data.state != ControlState.end && !token.dragging ? true : false
                         token.update();
                         token.updateTint();
+                    }
+
+                    token.distance = event.data.distance;
+                    token.updateDistance();
+
+                    if (event.data.path != null) {
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, token.creature.scale, token.color);
+                        this.mapComponent.mapContainer.gridLayer.drawHighlight();
+                    }
+
+                    if (event.data.state == ControlState.end) {
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight([], token.creature.scale, token.color);
+                        this.mapComponent.mapContainer.gridLayer.drawHighlight();
                     }
                 }
 

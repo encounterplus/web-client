@@ -32,6 +32,8 @@ export class TokenView extends View {
     uidGraphics: PIXI.Graphics;
     uidText: PIXI.Text;
 
+    distanceText: PIXI.Text;
+
     data: PIXI.interaction.InteractionData;
     dragging: boolean = false;
 
@@ -39,6 +41,8 @@ export class TokenView extends View {
     turned: boolean = false;
     controlled: boolean = false;
     blocked: boolean = false;
+
+    distance: string;
 
     auraContainer: Container = new PIXI.Container();
 
@@ -129,9 +133,17 @@ export class TokenView extends View {
         this.uidText.resolution = 2;
         this.addChild(this.uidText);
 
+        // distance
+        this.distanceText = new PIXI.Text(this.distance, {fontFamily : 'Arial', fontSize: 30, fill : 0xffffff, align : 'center', dropShadow: true,
+        dropShadowColor: '#000000', dropShadowBlur: 6, dropShadowDistance: 0});
+        this.distanceText.anchor.set(0.5, 0.5);
+        this.distanceText.resolution = 2;
+        this.addChild(this.distanceText);
+
         this.updateToken();
         this.updateUID();
         this.updateTint();
+        this.updateDistance();
     }
 
     update() {
@@ -193,6 +205,17 @@ export class TokenView extends View {
             // this.uidGraphics.cacheAsBitmap = true;
             this.uidText.position.set(this.w / 2, this.h / 2);
             this.uidText.style.fontSize = this.height / 2.5;
+        }
+    }
+
+    updateDistance() {
+        if (this.distance == null && this.distance != "") {
+            this.distanceText.visible = false;
+        } else {
+            this.distanceText.visible = true;
+            this.distanceText.text = this.distance;
+            this.distanceText.position.set(this.w / 2, -this.grid.size / 2);
+            this.distanceText.style.fontSize = (this.grid.size / 4);
         }
     }
 

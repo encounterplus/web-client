@@ -79,15 +79,11 @@ export class MapContainer extends Layer {
             return;
         }
 
-        this.grid.size = this.state.map.gridSize;
-        this.grid.offsetX = this.state.map.gridOffsetX;
-        this.grid.offsetY = this.state.map.gridOffsetY;
-        this.grid.color = this.state.map.gridColor;
+        this.backgroundLayer.update(this.state.map);
 
         // update grid
-        this.backgroundLayer.update(this.state.map);
-        this.gridLayer.update(this.state.map);
-        // this.tokensLayer.grid = this.grid
+        this.grid.update(this.state.map);
+        this.gridLayer.update(this.grid);
 
         this.lightsLayer.updateCreatures(this.state.mapCreatures);
         this.lightsLayer.updateTiles(this.state.map.tiles);
