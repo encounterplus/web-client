@@ -241,7 +241,7 @@ export class TokenView extends View {
         this.data = event.data;
         this.dragging = true;
 
-        this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}});
+        // this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}});
     }
     
     onDragEnd() {
@@ -255,7 +255,7 @@ export class TokenView extends View {
         // set the interaction data to null
         this.data = null;
 
-        this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end}});
+        // this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end}});
     }
     
     onDragMove() {
@@ -273,7 +273,7 @@ export class TokenView extends View {
                 this.auraContainer.position.set(newPosition.x, newPosition.y);
             }
         
-            this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: newPosition.x | 0, y: newPosition.y | 0, state: ControlState.control}});
+            // this.dataService.send({name: WSEventName.creatureMove, data: {id: this.creature.id, x: newPosition.x | 0, y: newPosition.y | 0, state: ControlState.control}});
         }
     }
 }

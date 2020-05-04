@@ -22,6 +22,7 @@
     "@angular/router": "~9.1.2",
     "@ng-bootstrap/ng-bootstrap": "^6.0.2",
     "bootstrap": "^4.4.1",
+    "font-awesome": "^4.7.0",
     "gl-matrix": "^3.3.0",
     "pixi-layers": "^0.2.3",
     "pixi-viewport": "^4.10.0",

@@ -4,25 +4,19 @@ import { throwError, Observable } from 'rxjs';
 import { ApiData } from '../models/api-data';
 import { retry, catchError } from 'rxjs/operators';
 import { Loader } from 'src/app/core/map/models/loader';
+import { ToastService } from '../toast.service';
+import { DataService } from './data.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-
-  public remoteHost: string
   
-  get remoteBaseURL(): string {
-    return `http://${this.remoteHost}`
+  get baseURL(): string {
+    return `http://${this.ds.remoteHost}/api`
   }
 
-  get remoteBaseApiURL(): string {
-    return `${this.remoteBaseURL}/api/v1`
-  }
-
-  constructor(private httpClient: HttpClient) { 
-    this.remoteHost = '192.168.1.168:8080'
-    Loader.shared.remoteBaseURL = this.remoteBaseURL;
+  constructor(private httpClient: HttpClient, private ds: DataService, private ts: ToastService) { 
   }
 
   handleError(error: HttpErrorResponse) {
@@ -34,11 +28,14 @@ export class ApiService {
       // Server-side errors
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
-    window.alert(errorMessage);
+    // window.alert(errorMessage);
+    // this.ts.showError(errorMessage);
+    // this.ts.showError("test");
     return throwError(errorMessage);
+    // return this;
   }
 
   public getData(): Observable<ApiData> {
-    return this.httpClient.get<ApiData>(this.remoteBaseApiURL).pipe(retry(3), catchError(this.handleError));
+    return this.httpClient.get<ApiData>(this.baseURL).pipe(retry(1), catchError(this.handleError));
   }
 }

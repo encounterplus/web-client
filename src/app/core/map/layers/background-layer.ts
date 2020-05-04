@@ -37,8 +37,6 @@ export class BackgroundLayer extends Layer {
         this.w = this.imageTexture.width;
         this.h = this.imageTexture.height;
 
-        console.debug(this.imageTexture);
-
         let sprite = new PIXI.Sprite(this.imageTexture);
         sprite.width = this.imageTexture.width;
         sprite.height = this.imageTexture.height;
@@ -48,8 +46,8 @@ export class BackgroundLayer extends Layer {
         // this.width = this.imageTexture.width;
         // this.height = this.imageTexture.height;
 
-        console.debug(this.width);
-        console.debug(this.height);
+        // console.debug(this.width);
+        // console.debug(this.height);
     }
 
     clear() {

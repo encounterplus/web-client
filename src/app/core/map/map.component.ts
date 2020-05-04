@@ -31,7 +31,7 @@ export class MapComponent implements OnInit {
   width: number = 0;
   height: number = 0;
 
-  isReady: false;
+  isReady: boolean = false;
 
   // PixiJS
   app: PIXI.Application;

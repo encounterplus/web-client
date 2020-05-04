@@ -1,0 +1,15 @@
+<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+    
+    <div class="btn-group" ngbDropdown role="group">
+      <button id="dropdownBasic1" type="button" class="btn btn-dark" ngbDropdownToggle>
+        EncounterPlus
+      </button>
+      <div aria-labelledby="dropdownBasic1" ngbDropdownMenu>
+        <button ngbDropdownItem (click)="showSettings()">Settings</button>
+        <button ngbDropdownItem (click)="showAbout()">About</button>
+      </div>
+    </div>
+
+    <!-- <button type="button" class="btn btn-dark"><i class="fa fa-cog"></i></button> -->
+    <button type="button" class="btn btn-dark"><i class="fa fa-pencil"></i></button>
+</div>

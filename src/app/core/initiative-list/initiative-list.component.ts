@@ -1,7 +1,4 @@
-import { Component, OnInit, Input, SimpleChanges, ElementRef } from '@angular/core';
-import { ApiData } from 'src/app/shared/models/api-data';
-import { Game } from 'src/app/shared/models/game';
-import { Creature } from 'src/app/shared/models/creature';
+import { Component, OnInit, Input, ElementRef } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
 
 @Component({

@@ -13,7 +13,7 @@ export class CreatureComponent implements OnInit {
   public creature: Creature;
 
   get image(): string {
-    return this.creature.image ? `${this.dataService.baseURL}${this.creature.image}` : "/assets/img/creature.png"
+    return this.creature.image ? `http://${this.dataService.remoteHost}${this.creature.image}` : "/assets/img/creature.png"
   }
 
   constructor(public dataService: DataService) { }

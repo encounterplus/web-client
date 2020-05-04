@@ -1,44 +1,70 @@
 import { Injectable } from '@angular/core';
-import { Subject, Observable, Observer } from 'rxjs';
+import { Subject, Observable, Observer, throwError, BehaviorSubject, timer } from 'rxjs';
 import { WSEvent } from '../models/wsevent';
+import { ToastService } from '../toast.service';
+import { retryWhen, tap, delay, map, catchError, distinctUntilChanged, switchMap, repeat, skip, filter } from 'rxjs/operators';
+import { webSocket } from "rxjs/webSocket";
+import { DataService } from './data.service';
+
+const reconnectionDelay = 5000;
 
 @Injectable({
   providedIn: 'root'
 })
 export class WebsocketService {
 
-  constructor() { }
+  get baseURL(): string {
+    return 'ws://' + this.ds.remoteHost + '/ws'
+  }
 
-  private subject: Subject<WSEvent>;
+  constructor(private ds: DataService, private ts: ToastService) { 
+    this.create();
+    this.connectionStatus$.pipe(
+      skip(1),
+      filter(status => !status),
+      tap(() => this.create()),
+    ).subscribe();
+  }
 
-  public connect(url): Subject<WSEvent> {
-    if (!this.subject) {
-      this.subject = this.create(url);
-      console.log("Successfully connected: " + url);
+  private status$: Subject<boolean> = new BehaviorSubject<boolean>(false);
+  private attemptNr: number = 0;
+  private ws: any;
+  public events$: Subject<WSEvent> = new Subject<WSEvent>();
+
+  public get connectionStatus$(): Observable<boolean> {
+    return this.status$.pipe(distinctUntilChanged());
+  }
+
+  private create() {
+    if (this.ws) {
+      this.ws.unsubscribe();
     }
-    return this.subject;
+    const retryConnection = switchMap(() => {
+      this.status$.next(false);
+      this.attemptNr = this.attemptNr + 1;
+
+      // this.ts.showError(`Websocket connection error (${this.baseURL}) will attempt ${this.attemptNr} reconnection in ${reconnectionDelay}ms`);
+      console.log(`Connection down (${this.baseURL}), will attempt ${this.attemptNr} reconnection in ${reconnectionDelay}ms`);
+
+      return timer(reconnectionDelay);
+    });
+
+    const openObserver = new Subject<Event>();
+    openObserver.pipe(map((_) => true)).subscribe(this.status$);
+    const closeObserver = new Subject<CloseEvent>();
+    closeObserver.pipe(map((_) => false)).subscribe(this.status$);
+    this.ws = webSocket<any>({
+      url: this.baseURL,
+      openObserver,
+      closeObserver,
+    });
+
+    this.ws.pipe(retryWhen((errs) =>
+      errs.pipe(retryConnection,
+        repeat()))).subscribe(this.events$);
   }
 
   public send(event: WSEvent) {
-    this.subject.next(event);
-  }
-
-  private create(url): Subject<WSEvent> {
-    let ws = new WebSocket(url);
-
-    let observable = Observable.create((obs: Observer<WSEvent>) => {
-      ws.onmessage = obs.next.bind(obs);
-      ws.onerror = obs.error.bind(obs);
-      ws.onclose = obs.complete.bind(obs);
-      return ws.close.bind(ws);
-    });
-    let observer = {
-      next: (data: Object) => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify(data));
-        }
-      }
-    };
-    return Subject.create(observer, observable);
+    this.events$.next(event);
   }
 }
