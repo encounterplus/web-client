@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from './api.service';
 import { ApiData } from '../models/api-data';
-import { Observable, Subject } from 'rxjs';
-import { WebsocketService} from './websocket.service';
-import { map, catchError } from 'rxjs/operators';
+import { Observable, Subject, BehaviorSubject, timer, throwError } from 'rxjs';
+import { map, catchError, skip, filter, tap, distinctUntilChanged, switchMap, retryWhen, repeat, retry } from 'rxjs/operators';
 import { WSEvent } from '../models/wsevent';
-import { Loader } from 'src/app/core/map/models/loader';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { ToastService } from '../toast.service';
+import { webSocket } from 'rxjs/webSocket';
 
 @Injectable({
   providedIn: 'root'
@@ -14,27 +14,85 @@ export class DataService {
 
   // public events: Subject<WSEvent>;
 
+  private reconnectionDelay = 1000;
+
   public remoteHost: string
 
-  constructor() { 
-
-    this.remoteHost = "192.168.1.168:8080";
-    Loader.shared.remoteBaseURL = `http://${this.remoteHost}`;
-
-  //   // return;
-    
-  //   this.events = <Subject<WSEvent>>ws
-	// 		.connect(this.wsURL);
-	// }
-
+  constructor(private httpClient: HttpClient) { 
   }
 
-  // // Simulate GET /todos
-  // getData(): Observable<ApiData> {
-  //   return this.api.getData()
-  // }
+  get baseURL(): string {
+    return `http://${this.remoteHost}`
+  }
 
-  // public send(event: WSEvent) {
-  //   this.events.next(event);
-  // }
+  get apiBaseURL(): string {
+    return `http://${this.remoteHost}/api`
+  }
+
+  get wsBaseURL(): string {
+    return `ws://${this.remoteHost}/ws`
+  }
+
+  handleError(error: HttpErrorResponse) {
+    let errorMessage = 'Unknown error!';
+    if (error.error instanceof ErrorEvent) {
+      // Client-side errors
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side errors
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+    return throwError(errorMessage);
+  }
+
+  public getData(): Observable<ApiData> {
+    return this.httpClient.get<ApiData>(this.apiBaseURL).pipe(retry(1), catchError(this.handleError));
+  }
+
+  private status$: Subject<boolean> = new BehaviorSubject<boolean>(false);
+  private attemptNr: number = 0;
+  private ws: any;
+  public events$: Subject<WSEvent> = new Subject<WSEvent>();
+
+  public get connectionStatus$(): Observable<boolean> {
+    return this.status$.pipe(distinctUntilChanged());
+  }
+
+  public connect() {
+    this.create();
+    this.connectionStatus$.pipe(
+      skip(1),
+      filter(status => !status),
+      tap(() => this.create()),
+    ).subscribe();
+  }
+
+  private create() {
+    if (this.ws) {
+      this.ws.unsubscribe();
+    }
+    const retryConnection = switchMap(() => {
+      this.status$.next(false);
+      this.attemptNr = this.attemptNr + 1;
+
+      console.log(`Connection down (${this.wsBaseURL}), will attempt ${this.attemptNr} reconnection in ${this.reconnectionDelay}ms`);
+      return timer(this.reconnectionDelay);
+    });
+
+    const openObserver = new Subject<Event>();
+    openObserver.pipe(map((_) => true)).subscribe(this.status$);
+    const closeObserver = new Subject<CloseEvent>();
+    closeObserver.pipe(map((_) => false)).subscribe(this.status$);
+    this.ws = webSocket<any>({
+      url: this.wsBaseURL,
+      openObserver,
+      closeObserver,
+    });
+
+    this.ws.pipe(retryWhen((errs) => errs.pipe(retryConnection, repeat()))).subscribe(this.events$);
+  }
+
+  public send(event: WSEvent) {
+    this.ws.next(event);
+  }
 }

@@ -14,11 +14,12 @@ import { Tile } from './shared/models/tile';
 import { ToolbarComponent } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/toast.service';
-import { WebsocketService } from './shared/services/websocket.service';
-import { ApiService } from './shared/services/api.service';
 import { retry } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
+import { ActivatedRoute } from '@angular/router';
+import { Loader } from './core/map/models/loader';
+import { AboutModalComponent } from './core/about-modal/about-modal.component';
 
 @Component({
     selector: 'app-root',
@@ -46,7 +47,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     @ViewChild(ToastListComponent)
     public toastListComponent: ToastListComponent;
 
-    constructor(private dataService: DataService, private websocketService: WebsocketService, private apiService: ApiService, private ts: ToastService, private modalService: NgbModal) { 
+    constructor(private dataService: DataService, private toastService: ToastService, private modalService: NgbModal) { 
         this.state = new AppState();
     }
 
@@ -56,14 +57,25 @@ export class AppComponent implements OnInit, AfterViewInit {
             case "showSettings":
                 this.modalService.open(SettingsModalComponent).result.then(result => {
                     console.debug(`Settings component closed with: ${result}`);
+                    this.dataService.connect();
                 }, reason => {
                     console.debug(`Setting component dismissed ${reason}`)
+                });
+                break;
+            case "showAbout":
+                this.modalService.open(AboutModalComponent).result.then(result => {
+                    console.debug(`About component closed with: ${result}`);
+                }, reason => {
+                    console.debug(`About component dismissed ${reason}`)
                 });
                 break;
         }
     }
 
     handleEvent(event: WSEvent) {
+        console.log(`Event received: ${event.name}`)
+        console.log(JSON.stringify(event));
+
         if (event.name == WSEventName.gameUpdate ) {
             this.state.game.turn = event.data.turn;
             this.initiativeListComponent.scrollToTurned();
@@ -165,7 +177,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     getData() {
-        this.apiService.getData().subscribe((data: ApiData) => {
+        this.dataService.getData().subscribe((data: ApiData) => {
             // console.log(data);
 
             this.state.game = data.game;
@@ -179,31 +191,45 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             console.debug(this.state);
-        }, err => this.ts.showError("API error: " + err));
+        }, err => this.toastService.showError("API error: " + err));
     }
 
     wsConnect() {
-        this.websocketService.events$.subscribe(event => {
-            // console.log("Event received: " + JSON.stringify(event));
-            console.log(`Event received: ${event.name}`)
+        this.dataService.connect();
+        this.dataService.events$.subscribe(event => {
             this.handleEvent(event);
-        }, err => this.ts.showError("Websocket error: " + err), () => this.ts.showSuccess("Websocket connected"));
+        }, err => this.toastService.showError("Websocket error: " + err), () => this.toastService.showSuccess("Websocket connected"));
+    }
 
-        this.websocketService.connectionStatus$.subscribe(status => {
-            if (status) {
-                this.ts.clear();
-                this.ts.showSuccess("Websocket connected");
-                this.getData();
-            } else {
-                this.ts.showError("Websocket disconnected", false);
-            }
-        });
+    configureRemoteHost() {
+        let urlParams = new URLSearchParams(window.location.search);
+        let remoteHost = urlParams.get('remoteHost') || window.location.host;
+        if (remoteHost.includes("localhost:") || remoteHost.includes("encounter.plus")) {
+            remoteHost = localStorage.getItem("lastSuccessfullHost");
+        }
+
+        this.dataService.remoteHost = remoteHost;
+        Loader.shared.remoteBaseURL = this.dataService.baseURL;
     }
 
     ngOnInit() {
-
-        // this.getData();
+        this.configureRemoteHost();
         this.wsConnect();
+
+        this.dataService.connectionStatus$.subscribe(status => {
+            if (status) {
+                console.log("Websocket connected");
+
+                localStorage.setItem("lastSuccessfullHost", this.dataService.remoteHost);
+
+                this.toastService.clear();
+                this.toastService.showSuccess("Websocket connected");
+                this.getData();
+            } else {
+                console.log("Websocket disconnected");
+                this.toastService.showError("Websocket disconnected", false);
+            }
+        });
     }
 
     ngAfterViewInit() {
