@@ -57,12 +57,33 @@ export class Loader {
           base.once("loaded", f => resolve(tex));
           base.once("error", base => {
             // let message = `Failed to load texture ${base.resource.url}`;
-            let err = new Error(`Failed to load texture ${base.resource.url}`);
+            console.error(`Failed to load resource ${src}`);
             delete PIXI.Loader.shared.resources[base.resource.url];
             base.destroy();
             // reject(err);
             resolve(null);
           });
+        });
+    }
+
+    async loadTextureBase64(name: string, base64string: string): Promise<PIXI.Texture> {
+        // First try to load the resource from the cache
+        let tex = this.getTexture(name);
+        if ( tex ) return tex;
+
+        // Return the ready texture as a Promise
+        return new Promise((resolve, reject) => {
+            const loader = PIXI.Loader.shared;
+            loader.add(name, base64string).load( function(loader, resources) {
+                let res = resources[name];
+                if (res) {
+                    resolve(res.texture);
+                } else {
+                    console.error(`Failed to load resource ${name}`);
+                    delete PIXI.Loader.shared.resources[name];
+                    resolve(null);
+                }
+            })
         });
     }
 
@@ -94,5 +115,13 @@ export class Loader {
                 }
             })
         });
+    }
+
+    destroy(src: string) {
+        const loader = PIXI.Loader.shared;
+        if (loader.resources[src]) {
+            loader.resources[src].texture.destroy(true);
+            delete loader.resources[src];
+        }
     }
 }

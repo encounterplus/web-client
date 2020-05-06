@@ -5,7 +5,8 @@ export enum WSEventName {
     areaEffectUpdate = "areaEffectUpdate",
     creatureMove = "creatureMove",
     tileMove = "tileMove",
-    areaEffectMove = "areaEffectMove"
+    areaEffectMove = "areaEffectMove",
+    fogUpdate = "fogUpdate"
 }
 
 export interface WSEvent {

@@ -20,6 +20,7 @@ import { SettingsModalComponent } from './core/settings-modal/settings-modal.com
 import { ActivatedRoute } from '@angular/router';
 import { Loader } from './core/map/models/loader';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
+import { BaseTexture } from 'pixi.js';
 
 @Component({
     selector: 'app-root',
@@ -78,129 +79,145 @@ export class AppComponent implements OnInit, AfterViewInit {
         console.log(`Event received: ${event.name}`)
         // console.log(JSON.stringify(event));
 
-        if (event.name == WSEventName.gameUpdate ) {
-            this.state.game.turn = event.data.turn;
-            this.state.game.round = event.data.round;
-            this.state.game.started = event.data.started;
+        switch (event.name) {
 
-            if (event.data.creatures) {
-                this.state.game.creatures = event.data.creatures;
-                this.mapComponent.update();
-                this.mapComponent.draw();
-
-            }
-            if (this.initiativeListComponent) {
-                this.initiativeListComponent.scrollToTurned();
-            }
-            
-            this.mapComponent.mapContainer.updateTurned(this.state.turned);
-        } else if (event.name == "creatureUpdate") {
-            let creature = Object.assign(new Creature, event.data) as Creature;
-            console.debug(creature);
-            // this.state.game.creatures.push(creature);
-
-            // udpdate state
-            let index =  this.state.game.creatures.findIndex((obj => obj.id == creature.id));
-            // this.state.game.creatures[index] = creature;
-            this.state.game.creatures[index].vision = creature.vision;
-            this.state.game.creatures[index].initiative = creature.initiative;
-            this.state.game.creatures[index].rank = creature.rank;
-
-            // update token
-            let token = this.mapComponent.mapContainer.tokenByCreatureId(creature.id)
-            if (token != null) {
-                token.creature = creature;
-                token.creature.x = event.data.x;
-                token.creature.y = event.data.y;
-                token.update();
-                token.updateTint();
+            case WSEventName.gameUpdate: {
+                this.state.game.turn = event.data.turn;
+                this.state.game.round = event.data.round;
+                this.state.game.started = event.data.started;
+    
+                if (event.data.creatures) {
+                    this.state.game.creatures = event.data.creatures;
+                    this.mapComponent.update();
+                    this.mapComponent.draw();
+    
+                }
+                if (this.initiativeListComponent) {
+                    this.initiativeListComponent.scrollToTurned();
+                }
+                
+                this.mapComponent.mapContainer.updateTurned(this.state.turned);
+                break;
             }
 
-            this.mapComponent.mapContainer.visionLayer.draw();
+            case WSEventName.creatureUpdate: {
+                let creature = Object.assign(new Creature, event.data) as Creature;
+                console.debug(creature);
+                // this.state.game.creatures.push(creature);
 
-            // this.mapComponent.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
-            // this.mapComponent.mapContainer.tokensLayer.draw()
-        } else if (event.name == WSEventName.creatureMove) {
+                // udpdate state
+                let index =  this.state.game.creatures.findIndex((obj => obj.id == creature.id));
+                // this.state.game.creatures[index] = creature;
+                this.state.game.creatures[index].vision = creature.vision;
+                this.state.game.creatures[index].initiative = creature.initiative;
+                this.state.game.creatures[index].rank = creature.rank;
 
-            let token = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id);
-            if (token != null) {
-                token.blocked = event.data.state == ControlState.block;
-
-                if (!token.dragging) {
+                // update token
+                let token = this.mapComponent.mapContainer.tokenByCreatureId(creature.id)
+                if (token != null) {
+                    token.creature = creature;
                     token.creature.x = event.data.x;
                     token.creature.y = event.data.y;
-                    token.controlled = event.data.state != ControlState.end && !token.dragging ? true : false
                     token.update();
                     token.updateTint();
                 }
 
-                token.distance = event.data.distance;
-                token.updateDistance();
+                this.mapComponent.mapContainer.visionLayer.draw();
+                break
+            }
 
-                if (event.data.path != null) {
-                    this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, token.creature.scale, token.color);
-                    this.mapComponent.mapContainer.gridLayer.drawHighlight();
+            case WSEventName.creatureMove: {
+                let token = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id);
+                if (token != null) {
+                    token.blocked = event.data.state == ControlState.block;
+
+                    if (!token.dragging) {
+                        token.creature.x = event.data.x;
+                        token.creature.y = event.data.y;
+                        token.controlled = event.data.state != ControlState.end && !token.dragging ? true : false
+                        token.update();
+                        token.updateTint();
+                    }
+
+                    token.distance = event.data.distance;
+                    token.updateDistance();
+
+                    if (event.data.path != null) {
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, token.creature.scale, token.color);
+                        this.mapComponent.mapContainer.gridLayer.drawHighlight();
+                    }
+
+                    if (event.data.state == ControlState.end) {
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight([], token.creature.scale, token.color);
+                        this.mapComponent.mapContainer.gridLayer.drawHighlight();
+                    }
                 }
 
-                if (event.data.state == ControlState.end) {
-                    this.mapComponent.mapContainer.gridLayer.updateHighlight([], token.creature.scale, token.color);
-                    this.mapComponent.mapContainer.gridLayer.drawHighlight();
+                // this.state.game.creatures[index] = creature;
+                if (event.data.los != null) {
+                    let index =  this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
+                    this.state.game.creatures[index].x = event.data.x;
+                    this.state.game.creatures[index].y = event.data.y;
+                    this.state.game.creatures[index].vision.x = event.data.x;
+                    this.state.game.creatures[index].vision.y = event.data.y;
+                    this.state.game.creatures[index].vision.polygon = event.data.los;
                 }
+                
+                this.mapComponent.mapContainer.lightsLayer.draw();
+                this.mapComponent.mapContainer.visionLayer.draw();
+                break;
             }
 
-            // this.state.game.creatures[index] = creature;
-            if (event.data.los != null) {
-                let index =  this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
-                this.state.game.creatures[index].x = event.data.x;
-                this.state.game.creatures[index].y = event.data.y;
-                this.state.game.creatures[index].vision.x = event.data.x;
-                this.state.game.creatures[index].vision.y = event.data.y;
-                this.state.game.creatures[index].vision.polygon = event.data.los;
-            }
-            
-            this.mapComponent.mapContainer.lightsLayer.draw();
-            this.mapComponent.mapContainer.visionLayer.draw();
-            // this.mapComponent.mapContainer.tokensLayer.updateCreatures(this.state.mapCreatures);
-            // this.mapComponent.mapContainer.tokensLayer.draw()
-        } else if (event.name == WSEventName.areaEffectUpdate) {
-            let model = Object.assign(new AreaEffect, event.data) as AreaEffect;
-            console.debug(model);
-
-
-            // udpdate state
-            let index =  this.state.map.areaEffects.findIndex((obj => obj.id == model.id));
-            this.state.map.areaEffects[index] = model;
-
-            let view = this.mapComponent.mapContainer.areaEffectViewById(model.id)
-            if (view != null) {
-                view.areaEffect = model;
-                view.draw();
-            }
-        } else if (event.name == WSEventName.tileUpdate) {
-            let model = Object.assign(new Tile, event.data) as Tile;
-            console.debug(model);
-
-            // udpdate state
-            let index =  this.state.map.tiles.findIndex((obj => obj.id == model.id));
-            this.state.map.tiles[index] = model;
-
-            let view = this.mapComponent.mapContainer.tileViewById(model.id)
-            if (view != null) {
-                view.tile = model;
-                view.draw();
+            case WSEventName.areaEffectUpdate: {
+                let model = Object.assign(new AreaEffect, event.data) as AreaEffect;
+                console.debug(model);
+    
+                // udpdate state
+                let index =  this.state.map.areaEffects.findIndex((obj => obj.id == model.id));
+                this.state.map.areaEffects[index] = model;
+    
+                let view = this.mapComponent.mapContainer.areaEffectViewById(model.id)
+                if (view != null) {
+                    view.areaEffect = model;
+                    view.draw();
+                }
+                break;
             }
 
-            if (event.data.los != null) {
-                let index =  this.state.map.tiles.findIndex((obj => obj.id == event.data.id));
-                this.state.map.tiles[index].x = event.data.x;
-                this.state.map.tiles[index].y = event.data.y;
-                this.state.map.tiles[index].vision.x = event.data.x;
-                this.state.map.tiles[index].vision.y = event.data.y;
-                this.state.map.tiles[index].vision.polygon = event.data.los;
+            case WSEventName.tileUpdate: {
+                let model = Object.assign(new Tile, event.data) as Tile;
+                console.debug(model);
+
+                // udpdate state
+                let index =  this.state.map.tiles.findIndex((obj => obj.id == model.id));
+                this.state.map.tiles[index] = model;
+
+                let view = this.mapComponent.mapContainer.tileViewById(model.id)
+                if (view != null) {
+                    view.tile = model;
+                    view.draw();
+                }
+
+                if (event.data.los != null) {
+                    let index =  this.state.map.tiles.findIndex((obj => obj.id == event.data.id));
+                    this.state.map.tiles[index].x = event.data.x;
+                    this.state.map.tiles[index].y = event.data.y;
+                    this.state.map.tiles[index].vision.x = event.data.x;
+                    this.state.map.tiles[index].vision.y = event.data.y;
+                    this.state.map.tiles[index].vision.polygon = event.data.los;
+                }
+                
+                this.mapComponent.mapContainer.lightsLayer.draw();
+                this.mapComponent.mapContainer.visionLayer.draw();
+                break;
             }
-            
-            this.mapComponent.mapContainer.lightsLayer.draw();
-            this.mapComponent.mapContainer.visionLayer.draw();
+
+            case WSEventName.fogUpdate: {
+                let base64image = event.data.image;
+
+                this.mapComponent.mapContainer.fogLayer.fogBase64 = base64image;
+                this.mapComponent.mapContainer.fogLayer.drawPartialFog();
+            }
         }
     }
 

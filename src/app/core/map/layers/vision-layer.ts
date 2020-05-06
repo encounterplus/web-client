@@ -12,6 +12,8 @@ import { Loader } from '../models/loader';
 
 export class VisionLayer extends Layer {
 
+    
+
     creatures: Array<Creature> = [];
     tiles: Array<Tile> = [];
 
@@ -27,7 +29,11 @@ export class VisionLayer extends Layer {
     frag: PIXI.LoaderResource;
 
     lighting: PIXI.display.Layer
-    lightingSprite: PIXI.Sprite
+    lightingSprite: PIXI.Sprite;
+
+    bg: PIXI.Sprite;
+
+    visions: Array<PIXI.Mesh> = [];
 
     constructor() {
         super();
@@ -40,29 +46,9 @@ export class VisionLayer extends Layer {
         this.filters = [filter];
     }
 
-    // msk = new PIXI.Graphics();
-    bg = new PIXI.Sprite(PIXI.Texture.WHITE);
-
-    // _render(renderer: PIXI.Renderer) {
-
-    //     let g1 = new PIXI.Graphics().beginFill(0xfffffff).drawCircle(200,200, 400).drawCircle(400,400,300).endFill();
-
-    //     // let g2 = new PIXI.Graphics().beginFill(0xfffffff).drawCircle(400,400, 300).endFill();
-    //     renderer.mask.push(this, g1);
-    //     // renderer.mask.push(this, g2);
-
-    //     super._render(renderer);
-
-    //     // renderer.mask.pop(this);
-    // }
-
-    visions: Array<PIXI.Mesh> = [];
-
     async draw() {
         // this.cacheAsBitmap = false;
         this.clear();
-
-        // return this;
 
         if (!this.visible) {
             return;

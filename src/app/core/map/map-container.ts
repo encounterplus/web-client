@@ -18,6 +18,7 @@ import { AreaEffectsLayer } from './layers/area-effects-layer';
 import { AreaEffectView } from './views/area-effect-view';
 import { TileView } from './views/tile-view';
 import { AurasLayer } from './layers/auras-layer';
+import { FogLayer } from './layers/fog-layer';
 
 export class MapContainer extends Layer {
 
@@ -34,9 +35,8 @@ export class MapContainer extends Layer {
 
     aurasLayer: AurasLayer;
     visionLayer: VisionLayer;
+    fogLayer: FogLayer;
     lightsLayer: LightsLayer;
-
-    visionSprite: PIXI.Sprite;
 
     // data
     
@@ -66,6 +66,7 @@ export class MapContainer extends Layer {
         this.areaEffectsLayer = this.addChild(new AreaEffectsLayer(this.dataService));
         this.monstersLayer = this.addChild(new TokensLayer(this.dataService));
         this.visionLayer = this.addChild(new VisionLayer());
+        this.fogLayer = this.addChild(new FogLayer());
         this.playersLayer = this.addChild(new TokensLayer(this.dataService));
     }
 
@@ -91,6 +92,7 @@ export class MapContainer extends Layer {
         this.visionLayer.updateCreatures(this.state.mapCreatures);
         this.visionLayer.updateTiles(this.state.map.tiles);
         this.visionLayer.visible = this.state.map.lineOfSight;
+        this.fogLayer.update(this.state.map);
         this.monstersLayer.creatures = this.state.mapCreatures.filter(creature => creature.type != CreatureType.player);
         this.monstersLayer.grid = this.grid;
         this.playersLayer.creatures = this.state.mapCreatures.filter(creature => creature.type == CreatureType.player);
@@ -146,6 +148,7 @@ export class MapContainer extends Layer {
 
         // vision
         await this.visionLayer.draw();
+        await this.fogLayer.draw();
 
         await this.gridLayer.draw();
         await this.lightsLayer.draw();
