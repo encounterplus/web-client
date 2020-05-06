@@ -1,5 +1,6 @@
-import { Component, OnInit, Input, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, IterableDiffers } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
+import { Creature } from 'src/app/shared/models/creature';
 
 @Component({
   selector: 'app-initiative-list',
@@ -11,7 +12,12 @@ export class InitiativeListComponent implements OnInit {
   @Input() 
   public state: AppState;
 
-  constructor(private element: ElementRef) { }
+  constructor(private element: ElementRef) { 
+  }
+
+  get activeCreatures(): Array<Creature> {
+    return this.state.game.creatures.filter( creature => { return creature.initiative != -10 } ).sort((a, b) => (a.rank > b.rank) ? 1 : -1)
+}
 
   ngOnInit(): void {
   }
@@ -21,7 +27,6 @@ export class InitiativeListComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    // console.debug("TEST");
     this.scrollToTurned();
   }
 
@@ -30,6 +35,8 @@ export class InitiativeListComponent implements OnInit {
     console.debug(this.state.turnedId);
     let selector = `[data-id="${this.state.turnedId}"]`;
     let el = this.element.nativeElement.querySelector(selector);
-    el.scrollIntoView()
+    if (el) {
+      el.scrollIntoView();
+    }
   }
 }

@@ -87,8 +87,10 @@ export class MapContainer extends Layer {
 
         this.lightsLayer.updateCreatures(this.state.mapCreatures);
         this.lightsLayer.updateTiles(this.state.map.tiles);
+        this.lightsLayer.visible = this.state.map.lineOfSight;
         this.visionLayer.updateCreatures(this.state.mapCreatures);
         this.visionLayer.updateTiles(this.state.map.tiles);
+        this.visionLayer.visible = this.state.map.lineOfSight;
         this.monstersLayer.creatures = this.state.mapCreatures.filter(creature => creature.type != CreatureType.player);
         this.monstersLayer.grid = this.grid;
         this.playersLayer.creatures = this.state.mapCreatures.filter(creature => creature.type == CreatureType.player);
@@ -142,17 +144,13 @@ export class MapContainer extends Layer {
         this.visionLayer.w = this.w;
         this.visionLayer.h = this.h;
 
+        // vision
+        await this.visionLayer.draw();
+
         await this.gridLayer.draw();
         await this.lightsLayer.draw();
 
         await this.monstersLayer.draw();
-
-        // vision
-        if (this.state.map.lineOfSight) {
-            await this.visionLayer.draw();
-        } else {
-            this.visionLayer.clear();
-        }
         
         await this.playersLayer.draw();
         this.aurasLayer.tokens = this.playersLayer.views;
@@ -175,7 +173,11 @@ export class MapContainer extends Layer {
     }
 
     tokenByCreature(creature: Creature): TokenView {
-        return this.tokenByCreatureId(creature.id)
+        if (creature) {
+            return this.tokenByCreatureId(creature.id)
+        } else {
+            return null;
+        }
     }
 
     tokenByCreatureId(creatureId: String): TokenView {

@@ -105,11 +105,26 @@ export class MapComponent implements OnInit {
   async draw() {
     await this.mapContainer.draw();
 
+    this.viewport.worldWidth = this.mapContainer.backgroundLayer.w;
+    this.viewport.worldHeight = this.mapContainer.backgroundLayer.h;
+
     // this.mapContainer.tokensLayer.updateTurned(this.state.turned);
 
-    this.viewport.setZoom(this.state.map.zoom);
-    this.viewport.position.x = (this.width / 2.0) - this.state.map.x;
-    this.viewport.position.y = (this.height / 2.0) - this.state.map.y;
+    
+    // this.viewport.position.x = (this.mapContainer.backgroundLayer.w / 2) + this.state.map.x;
+    // this.viewport.position.y = (this.mapContainer.backgroundLayer.h / 2) + this.state.map.y;
+    
+    
+    // this.viewport.position.x = - (((this.mapContainer.backgroundLayer.w / 2) - this.state.map.x) * this.state.map.zoom);
+    // this.viewport.position.y = - (((this.mapContainer.backgroundLayer.h / 2) - this.state.map.y) * this.state.map.zoom);
+
+    // console.warn(this.viewport.screenWidth);
+    // console.warn(this.viewport.screenHeight);
+    // this.viewport.position.x =  -((this.mapContainer.backgroundLayer.w / 2));
+    // this.viewport.position.y =  -((this.mapContainer.backgroundLayer.h / 2));
+    // this.viewport.setZoom(this.state.map.zoom);
+
+    this.viewport.fitWorld(false);
 
 
     // this.viewport.setTransform(-this.state.map.x, -this.state.map.y);

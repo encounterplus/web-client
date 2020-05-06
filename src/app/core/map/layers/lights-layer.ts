@@ -45,7 +45,9 @@ export class LightsLayer extends Layer {
     async draw() {
         this.clear();   
         
-        // return this;
+        if (!this.visible) {
+            return;
+        }
 
         // load filters
         if (this.vert == null || this.frag == null) {

@@ -29,7 +29,7 @@ export class AreaEffectsLayer extends Layer {
         for (let areaEffect of this.areaEffects) {
             let view = new AreaEffectView(areaEffect, this.grid, this.dataService);
             this.addChild(view);
-            await view.draw();
+            view.draw();
 
             this.views.push(view);
         }

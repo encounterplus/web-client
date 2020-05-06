@@ -23,7 +23,7 @@ export class TilesLayer extends Layer {
         for (let tile of this.tiles) {
             let tileView = new TileView(tile, this.grid, this.dataService);
             this.addChild(tileView);
-            await tileView.draw();
+            tileView.draw();
 
             this.views.push(tileView);
         }

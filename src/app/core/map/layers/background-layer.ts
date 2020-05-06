@@ -12,6 +12,8 @@ export class BackgroundLayer extends Layer {
     imageSprite: PIXI.Sprite;
     videoSprite: PIXI.Sprite;
 
+    loadingText = new PIXI.Text("Loading map image...", {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'});
+
     image: string;
     video: string;
 
@@ -23,12 +25,21 @@ export class BackgroundLayer extends Layer {
 
     async draw() {
         this.clear();
-        
+
         if (this.image == null) {
-            return;
+            return this;
         }
 
+        // add loading text
+        this.addChild(this.loadingText);
+        this.loadingText.anchor.set(0.5, 0.5)
+        this.loadingText.position.set(window.innerWidth / 2.0, window.innerHeight / 2);
+
+        // start loading map image
         this.imageTexture = await Loader.shared.loadTexture(this.image);
+
+        // clean loading
+        this.removeChildren();
 
         if(this.imageTexture == null) {
             return this;

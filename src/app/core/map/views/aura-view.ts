@@ -35,7 +35,7 @@ export class AuraView extends View {
 
     async drawShape() {
         let graphics = new PIXI.Graphics().lineStyle(1, PIXI.utils.string2hex(this.aura.color));
-        graphics.beginFill(PIXI.utils.string2hex(this.aura.color), 0.3);
+        graphics.beginFill(PIXI.utils.string2hex(this.aura.color), 0.15);
         graphics.drawCircle(-this.w / 2, -this.h / 2, this.w / 2);
         graphics.endFill();
         this.addChild(graphics);

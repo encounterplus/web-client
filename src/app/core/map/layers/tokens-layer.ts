@@ -27,7 +27,7 @@ export class TokensLayer extends Layer {
         for (let creature of this.creatures) {
             let tokenView = new TokenView(creature, this.grid, this.dataService);
             this.addChild(tokenView);
-            await tokenView.draw();
+            tokenView.draw();
 
             this.views.push(tokenView);
         }

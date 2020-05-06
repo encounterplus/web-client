@@ -17,6 +17,9 @@ export class SettingsModalComponent implements OnInit {
     console.log(this.remoteHost);
     this.dataService.remoteHost = this.remoteHost;
     this.modalInstance.close("Close");
+
+    // temporary hack
+    document.location.search = `?remoteHost=${this.remoteHost}`;
   }
 
   ngOnInit() {

@@ -49,6 +49,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     constructor(private dataService: DataService, private toastService: ToastService, private modalService: NgbModal) { 
         this.state = new AppState();
+
+        window['state'] = this.state;
     }
 
     toolbarAction(type: string) {
@@ -74,11 +76,23 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     handleEvent(event: WSEvent) {
         console.log(`Event received: ${event.name}`)
-        console.log(JSON.stringify(event));
+        // console.log(JSON.stringify(event));
 
         if (event.name == WSEventName.gameUpdate ) {
             this.state.game.turn = event.data.turn;
-            this.initiativeListComponent.scrollToTurned();
+            this.state.game.round = event.data.round;
+            this.state.game.started = event.data.started;
+
+            if (event.data.creatures) {
+                this.state.game.creatures = event.data.creatures;
+                this.mapComponent.update();
+                this.mapComponent.draw();
+
+            }
+            if (this.initiativeListComponent) {
+                this.initiativeListComponent.scrollToTurned();
+            }
+            
             this.mapComponent.mapContainer.updateTurned(this.state.turned);
         } else if (event.name == "creatureUpdate") {
             let creature = Object.assign(new Creature, event.data) as Creature;
@@ -89,6 +103,8 @@ export class AppComponent implements OnInit, AfterViewInit {
             let index =  this.state.game.creatures.findIndex((obj => obj.id == creature.id));
             // this.state.game.creatures[index] = creature;
             this.state.game.creatures[index].vision = creature.vision;
+            this.state.game.creatures[index].initiative = creature.initiative;
+            this.state.game.creatures[index].rank = creature.rank;
 
             // update token
             let token = this.mapComponent.mapContainer.tokenByCreatureId(creature.id)
@@ -173,6 +189,18 @@ export class AppComponent implements OnInit, AfterViewInit {
                 view.tile = model;
                 view.draw();
             }
+
+            if (event.data.los != null) {
+                let index =  this.state.map.tiles.findIndex((obj => obj.id == event.data.id));
+                this.state.map.tiles[index].x = event.data.x;
+                this.state.map.tiles[index].y = event.data.y;
+                this.state.map.tiles[index].vision.x = event.data.x;
+                this.state.map.tiles[index].vision.y = event.data.y;
+                this.state.map.tiles[index].vision.polygon = event.data.los;
+            }
+            
+            this.mapComponent.mapContainer.lightsLayer.draw();
+            this.mapComponent.mapContainer.visionLayer.draw();
         }
     }
 
@@ -203,11 +231,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     configureRemoteHost() {
         let urlParams = new URLSearchParams(window.location.search);
-        let remoteHost = urlParams.get('remoteHost') || window.location.host;
-        if (remoteHost.includes("localhost:") || remoteHost.includes("encounter.plus")) {
-            remoteHost = localStorage.getItem("lastSuccessfullHost");
-        }
-
+        let remoteHost = urlParams.get('remoteHost') || localStorage.getItem("lastSuccessfullHost") || window.location.host;
         this.dataService.remoteHost = remoteHost;
         Loader.shared.remoteBaseURL = this.dataService.baseURL;
     }
