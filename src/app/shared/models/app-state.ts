@@ -1,4 +1,4 @@
-import { ScreenConfig } from './screen-config';
+import { Screen } from './screen';
 import { Grid } from 'src/app/core/map/models/grid';
 import { Game } from './game';
 import { Map} from './map';
@@ -7,7 +7,7 @@ import { Creature } from './creature';
 export class AppState {
     map: Map;
     game: Game = new Game();
-    config: ScreenConfig = new ScreenConfig();
+    screen: Screen= new Screen();
     grid: Grid = new Grid();
     isDirty: boolean = false;
 

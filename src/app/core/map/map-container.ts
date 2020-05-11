@@ -19,6 +19,8 @@ import { AreaEffectView } from './views/area-effect-view';
 import { TileView } from './views/tile-view';
 import { AurasLayer } from './layers/auras-layer';
 import { FogLayer } from './layers/fog-layer';
+import { ParticlesLayer } from './layers/particles-layer';
+import { DrawingsLayer } from './layers/drawings-layer';
 
 export class MapContainer extends Layer {
 
@@ -37,6 +39,8 @@ export class MapContainer extends Layer {
     visionLayer: VisionLayer;
     fogLayer: FogLayer;
     lightsLayer: LightsLayer;
+    particlesLayer: ParticlesLayer;
+    drawingsLayer: DrawingsLayer;
 
     // data
     
@@ -63,11 +67,23 @@ export class MapContainer extends Layer {
         this.lightsLayer = this.addChild(new LightsLayer());
         this.aurasLayer = this.addChild(new AurasLayer(this.dataService));
         this.topLayer = this.addChild(new TilesLayer(this.dataService));
+        this.drawingsLayer = this.addChild(new DrawingsLayer(this.dataService));
         this.areaEffectsLayer = this.addChild(new AreaEffectsLayer(this.dataService));
         this.monstersLayer = this.addChild(new TokensLayer(this.dataService));
         this.visionLayer = this.addChild(new VisionLayer());
         this.fogLayer = this.addChild(new FogLayer());
+        this.particlesLayer = this.addChild(new ParticlesLayer(this.dataService));
         this.playersLayer = this.addChild(new TokensLayer(this.dataService));
+
+        // this.interactive = true;
+        // // this.buttonMode = true;
+
+        // this
+        //     .on('pointerdown', this.onDragStart)
+        //     .on('pointerup', this.onDragEnd)
+        //     .on('pointerupoutside', this.onDragEnd)
+        //     .on('pointermove', this.onDragMove);
+
     }
 
     update(state: AppState) {
@@ -102,6 +118,7 @@ export class MapContainer extends Layer {
         this.areaEffectsLayer.grid = this.grid;
         // this.tokensLayer.updateCreatures(this.state.mapCreatures);
         // this.tokensLayer.updateTiles(this.state.map.tiles);
+        this.drawingsLayer.drawings = this.state.map.drawings;
 
         this.tiles = state.map.tiles;
     }
@@ -143,8 +160,13 @@ export class MapContainer extends Layer {
         this.w = this.backgroundLayer.w;
         this.h = this.backgroundLayer.h;
 
-        this.visionLayer.w = this.w;
-        this.visionLayer.h = this.h;
+        // update size for all layers
+        for(let layer of this.children) {
+            if (layer instanceof Layer) {
+                layer.w = this.w;
+                layer.h = this.h;
+            }
+        }
 
         // vision
         await this.visionLayer.draw();
@@ -162,15 +184,14 @@ export class MapContainer extends Layer {
 
         await this.areaEffectsLayer.draw();
 
-        // this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
-        // this.interactive = true;
-        // this.buttonMode = true;
+        await this.drawingsLayer.draw();
 
-        // this
-        //     .on('pointerdown', this.onDragStart)
-        //     .on('pointerup', this.onDragEnd)
-        //     .on('pointerupoutside', this.onDragEnd)
-        //     .on('pointermove', this.onDragMove);
+        await this.particlesLayer.draw();
+
+        // console.log(this.width);
+        // console.log(this.height);
+
+        this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
         return this;
     }
@@ -233,11 +254,13 @@ export class MapContainer extends Layer {
         // store a reference to the data
         // the reason for this is because of multitouch
         // we want to track the movement of this particular touch
+        console.log('drag started');
         this.data = event.data;
         this.dragging = true;
     }
     
     onDragEnd() {
+        console.log('drag ended');
         this.dragging = false;
         // set the interaction data to null
         this.data = null;
@@ -245,9 +268,10 @@ export class MapContainer extends Layer {
     
     onDragMove() {
         if (this.dragging) {
-            const newPosition = this.data.getLocalPosition(this.parent);
-            this.x += this.data.global.x - this.x;
-            this.y += this.data.global.y - this.y;
+            console.log('dragging');
+            // const newPosition = this.data.getLocalPosition(this.parent);
+            // this.x += this.data.global.x - this.x;
+            // this.y += this.data.global.y - this.y;
         }
     }
 }

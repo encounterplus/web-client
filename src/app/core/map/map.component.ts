@@ -4,7 +4,7 @@ import { CanvasContainerDirective } from './canvas-container.directive';
 import { Viewport } from 'pixi-viewport';
 import { Game } from 'src/app/shared/models/game';
 import { Map } from 'src/app/shared/models/map';
-import { ScreenConfig } from 'src/app/shared/models/screen-config';
+import { Screen } from 'src/app/shared/models/screen';
 import { MapContainer } from './map-container';
 import { AppState } from 'src/app/shared/models/app-state';
 import { Creature } from 'src/app/shared/models/creature';
@@ -57,8 +57,8 @@ export class MapComponent implements OnInit {
       this.viewport = new Viewport({
         screenWidth: window.innerWidth,
         screenHeight: window.innerHeight,
-        worldWidth: 100,
-        worldHeight: 100,
+        worldWidth: 1000,
+        worldHeight: 1000,
 
         interaction: this.app.renderer.plugins.interaction // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
       })
@@ -75,12 +75,12 @@ export class MapComponent implements OnInit {
         .wheel({
           percent: 0.001
         })
-        .snapZoom({
-          height: 20,
-          removeOnComplete: true,
-          removeOnInterrupt: true,
-          time: 2000,
-        });
+        // .snapZoom({
+        //   height: 20,
+        //   removeOnComplete: true,
+        //   removeOnInterrupt: true,
+        //   time: 2000,
+        // });
 
       this.viewport.addChild(this.mapContainer);
 
@@ -105,8 +105,8 @@ export class MapComponent implements OnInit {
   async draw() {
     await this.mapContainer.draw();
 
-    this.viewport.worldWidth = this.mapContainer.backgroundLayer.w;
-    this.viewport.worldHeight = this.mapContainer.backgroundLayer.h;
+    this.viewport.worldWidth = this.mapContainer.w;
+    this.viewport.worldHeight = this.mapContainer.h;
 
     // this.mapContainer.tokensLayer.updateTurned(this.state.turned);
 
@@ -124,7 +124,7 @@ export class MapComponent implements OnInit {
     // this.viewport.position.y =  -((this.mapContainer.backgroundLayer.h / 2));
     // this.viewport.setZoom(this.state.map.zoom);
 
-    this.viewport.fitWorld(false);
+    this.viewport.fitWorld(true);
 
 
     // this.viewport.setTransform(-this.state.map.x, -this.state.map.y);
@@ -137,7 +137,7 @@ export class MapComponent implements OnInit {
     // console.debug(this.viewport.worldWidth);
     // console.debug(this.viewport.worldHeight);
 
-    this.viewport.forceHitArea = new PIXI.Rectangle(0,0, this.mapContainer.w, this.mapContainer.h);
+    // this.viewport.forceHitArea = new PIXI.Rectangle(0,0, this.mapContainer.w, this.mapContainer.h);
 
     // // manual render without render loop
     // this.app.render();

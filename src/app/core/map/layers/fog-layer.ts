@@ -37,10 +37,7 @@ export class FogLayer extends Layer {
         if (!this.visible) {
             return;
         }
-
-        this.w = this.parent.width;
-        this.h = this.parent.height;
-
+        
         this.bg.width = this.w;
         this.bg.height = this.h;
         this.addChild(this.bg);

@@ -63,8 +63,9 @@ export class GridLayer extends Layer {
     }
 
     async drawGrid() {
-        let width = this.parent.width;
-        let height = this.parent.height;
+        
+        let width = this.w;
+        let height = this.h;
 
         // columns
         let cols = Math.floor(width / this.grid.size);

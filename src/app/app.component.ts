@@ -60,7 +60,6 @@ export class AppComponent implements OnInit, AfterViewInit {
             case "showSettings":
                 this.modalService.open(SettingsModalComponent).result.then(result => {
                     console.debug(`Settings component closed with: ${result}`);
-                    this.dataService.connect();
                 }, reason => {
                     console.debug(`Setting component dismissed ${reason}`)
                 });
@@ -218,6 +217,11 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.mapComponent.mapContainer.fogLayer.fogBase64 = base64image;
                 this.mapComponent.mapContainer.fogLayer.drawPartialFog();
             }
+
+            case WSEventName.mapLoad: {
+                // window.location = window.location;
+                this.getData();
+            }
         }
     }
 
@@ -227,7 +231,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             this.state.game = data.game;
             this.state.map = data.map;
-            this.state.config = data.config;
+            this.state.screen = data.screen;
 
             if (this.mapComponent != undefined) {
                 this.mapComponent.isReady = true;
@@ -254,6 +258,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
+        // init user color
+        let color = localStorage.getItem("userColor");
+        if (!color) {
+            localStorage.setItem("userColor", '#'+(Math.random()*0xFFFFFF<<0).toString(16));
+        }
+
         this.configureRemoteHost();
         this.wsConnect();
 

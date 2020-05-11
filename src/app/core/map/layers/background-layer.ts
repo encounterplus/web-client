@@ -57,8 +57,8 @@ export class BackgroundLayer extends Layer {
         // this.width = this.imageTexture.width;
         // this.height = this.imageTexture.height;
 
-        // console.debug(this.width);
-        // console.debug(this.height);
+        console.debug(this.width);
+        console.debug(this.height);
     }
 
     clear() {

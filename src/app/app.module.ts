@@ -17,6 +17,7 @@ import { ToastService } from './shared/toast.service';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import { AboutModalComponent } from './core/about-modal/about-modal.component';
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
+    ColorPickerModule,
     NgbModule
   ],
   providers: [ToastService, DataService],

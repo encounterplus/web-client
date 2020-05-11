@@ -59,9 +59,9 @@ export class CanvasContainerDirective implements AfterViewInit {
       throw new Error("No WebGL Support!");
     }
 
-    let ticker = PIXI.Ticker.shared;
-    ticker.autoStart = false;
-    ticker.stop();
+    // let ticker = PIXI.Ticker.shared;
+    // ticker.autoStart = false;
+    // ticker.stop();
 
     console.debug(`canvas container initialized`);
   }
