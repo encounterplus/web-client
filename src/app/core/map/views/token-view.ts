@@ -8,6 +8,7 @@ import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
 import { WSEvent, WSEventName } from 'src/app/shared/models/wsevent';
 import { AuraView } from './aura-view';
+import { ScreenInteraction } from 'src/app/shared/models/screen';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num;
@@ -49,9 +50,9 @@ export class TokenView extends View {
     get color(): number {
         if (this.turned) {
             return 0xff9500;
-        } else if (this.creature.type == "monster") {
+        } else if (this.creature.role == Role.hostile) {
             return 0x631515;
-        } else if (this.creature.type == "player") {
+        } else if (this.creature.role == Role.friendly) {
             return 0x3F51B5;
         } else {
             return 0xFFCCFFCC;
@@ -144,6 +145,7 @@ export class TokenView extends View {
         this.updateUID();
         this.updateTint();
         this.updateDistance();
+        this.updateInteraction();
     }
 
     update() {
@@ -221,6 +223,25 @@ export class TokenView extends View {
 
     updateTint() {
         this.tokenSprite.tint = this.controlled ? 0xFFCCCC : 0xFFFFFF;
+    }
+
+    updateInteraction() {
+        
+        switch (this.dataService.state.screen.interaction) {
+            case ScreenInteraction.all: 
+                this.interactive = this.creature.role == Role.friendly;
+                break;
+
+            case ScreenInteraction.turn: 
+                this.interactive = this.creature.role == Role.friendly && (this.turned || !this.dataService.state.game.started);
+                break;
+
+            case ScreenInteraction.none: 
+                this.interactive = false;
+                break;
+            default:
+                this.interactive = false;
+        }
     }
 
     clear() {

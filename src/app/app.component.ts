@@ -88,12 +88,13 @@ export class AppComponent implements OnInit, AfterViewInit {
                 if (event.data.creatures) {
                     this.state.game.creatures = event.data.creatures;
                     this.mapComponent.update();
-                    this.mapComponent.draw();
-    
+                    this.mapComponent.draw();    
                 }
                 if (this.initiativeListComponent) {
                     this.initiativeListComponent.scrollToTurned();
                 }
+
+                this.mapComponent.mapContainer.updateInteraction();
                 
                 this.mapComponent.mapContainer.updateTurned(this.state.turned);
                 break;
@@ -222,6 +223,12 @@ export class AppComponent implements OnInit, AfterViewInit {
                 // window.location = window.location;
                 this.getData();
             }
+
+            case WSEventName.interactionUpdate: {
+                // window.location = window.location;
+                this.state.screen.interaction = event.data;
+                this.mapComponent.mapContainer.updateInteraction();
+            }
         }
     }
 
@@ -233,6 +240,8 @@ export class AppComponent implements OnInit, AfterViewInit {
             this.state.map = data.map;
             this.state.screen = data.screen;
 
+            this.dataService.state = this.state;
+        
             if (this.mapComponent != undefined) {
                 this.mapComponent.isReady = true;
                 this.mapComponent.update();

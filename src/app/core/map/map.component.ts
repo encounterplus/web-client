@@ -105,38 +105,20 @@ export class MapComponent implements OnInit {
   async draw() {
     await this.mapContainer.draw();
 
-    this.viewport.worldWidth = this.mapContainer.w;
-    this.viewport.worldHeight = this.mapContainer.h;
+    // console.log(this.mapContainer.w);
+    // console.log(this.mapContainer.h);
 
-    // this.mapContainer.tokensLayer.updateTurned(this.state.turned);
+    // update viewport
+    this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
 
-    
-    // this.viewport.position.x = (this.mapContainer.backgroundLayer.w / 2) + this.state.map.x;
-    // this.viewport.position.y = (this.mapContainer.backgroundLayer.h / 2) + this.state.map.y;
-    
-    
-    // this.viewport.position.x = - (((this.mapContainer.backgroundLayer.w / 2) - this.state.map.x) * this.state.map.zoom);
-    // this.viewport.position.y = - (((this.mapContainer.backgroundLayer.h / 2) - this.state.map.y) * this.state.map.zoom);
-
-    // console.warn(this.viewport.screenWidth);
-    // console.warn(this.viewport.screenHeight);
-    // this.viewport.position.x =  -((this.mapContainer.backgroundLayer.w / 2));
-    // this.viewport.position.y =  -((this.mapContainer.backgroundLayer.h / 2));
-    // this.viewport.setZoom(this.state.map.zoom);
-
+    // fit scale
     this.viewport.fitWorld(true);
 
+    // move center
+    this.viewport.moveCenter(this.mapContainer.w / 2,this.mapContainer.h / 2);
 
-    // this.viewport.setTransform(-this.state.map.x, -this.state.map.y);
-
-    // this.viewport.worldWidth = c;
-    // this.viewport.worldHeight = this.mapContainer.h;
-
-    // this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
-
-    // console.debug(this.viewport.worldWidth);
-    // console.debug(this.viewport.worldHeight);
-
+    // upadate turned creature
+    this.mapContainer.updateTurned(this.state.turned);
     // this.viewport.forceHitArea = new PIXI.Rectangle(0,0, this.mapContainer.w, this.mapContainer.h);
 
     // // manual render without render loop
@@ -144,7 +126,6 @@ export class MapComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-
 
     console.debug("data changed");
 

@@ -6,6 +6,7 @@ import { WSEvent } from '../models/wsevent';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ToastService } from '../toast.service';
 import { webSocket } from 'rxjs/webSocket';
+import { AppState } from '../models/app-state';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,9 @@ import { webSocket } from 'rxjs/webSocket';
 export class DataService {
 
   // public events: Subject<WSEvent>;
+
+  // hmm, is this right?
+  state: AppState;
 
   private reconnectionDelay = 1000;
 

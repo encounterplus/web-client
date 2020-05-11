@@ -21,6 +21,7 @@ import { AurasLayer } from './layers/auras-layer';
 import { FogLayer } from './layers/fog-layer';
 import { ParticlesLayer } from './layers/particles-layer';
 import { DrawingsLayer } from './layers/drawings-layer';
+import { ScreenInteraction } from 'src/app/shared/models/screen';
 
 export class MapContainer extends Layer {
 
@@ -131,12 +132,26 @@ export class MapContainer extends Layer {
         if (this.turned != null) {
             this.turned.turned = false;
             this.turned.updateUID();
+            this.turned.updateInteraction();
         }
 
         this.turned = this.tokenByCreature(creature);
         if (this.turned != null) {
             this.turned.turned = true
             this.turned.updateUID();
+            this.turned.updateInteraction();
+        }
+    }
+
+    updateInteraction() {
+        console.log(`updating interaction`);
+
+        for (let view of this.playersLayer.views) {
+            view.updateInteraction();
+        }
+
+        for (let view of this.monstersLayer.views) {
+            view.updateInteraction();
         }
     }
 
@@ -195,6 +210,8 @@ export class MapContainer extends Layer {
 
         return this;
     }
+
+
 
     tokenByCreature(creature: Creature): TokenView {
         if (creature) {
