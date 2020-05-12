@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, SimpleChanges, HostListener } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
 // import * as PIXI from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
@@ -123,6 +123,12 @@ export class MapComponent implements OnInit {
 
     // // manual render without render loop
     // this.app.render();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event) {
+    // update viewport
+    this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
   }
 
   ngOnChanges(changes: SimpleChanges) {

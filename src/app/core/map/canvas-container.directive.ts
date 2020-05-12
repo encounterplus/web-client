@@ -20,7 +20,7 @@ export class CanvasContainerDirective implements AfterViewInit {
 
   @Input()
   public applicationOptions: Object = {
-    backgroundColor: 0x333333, 
+    backgroundColor: 0x00000, 
     resolution:  window.devicePixelRatio || 1,
     // resolution:  1,
     antialias: true,
@@ -71,24 +71,11 @@ export class CanvasContainerDirective implements AfterViewInit {
     window.PIXI = PIXI;
   }
 
-  // @HostListener('window:resize', ['$event'])
-  // onResize(event) {
-  //   this.width = event.target.innerWidth;
-  //   this.height = event.target.innerHeight;
-
-  //   this.app.renderer.resize(this.width, this.height);
-  // }
-
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
-    const viewportScale = 1 / this.devicePixelRatio;
     this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
-    // this.app.view.style.transform = `scale(${viewportScale})`;
-    // this.app.view.style.transformOrigin = `top left`;
-
-    this.app.stage
   }
 
   destroy() {
