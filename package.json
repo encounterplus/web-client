@@ -25,6 +25,7 @@
     "font-awesome": "^4.7.0",
     "gl-matrix": "^3.3.0",
     "ngx-color-picker": "^9.1.0",
+    "ngx-lightbox": "^2.1.2",
     "pixi-layers": "^0.2.3",
     "pixi-particles": "^4.2.1",
     "pixi-viewport": "^4.11.1",

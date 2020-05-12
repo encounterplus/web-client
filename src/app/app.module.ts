@@ -18,6 +18,8 @@ import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { ColorPickerModule } from 'ngx-color-picker';
+import { ImageHandoutComponent } from './core/image-handout/image-handout.component';
+import { LightboxModule } from 'ngx-lightbox';
 
 @NgModule({
   declarations: [
@@ -30,7 +32,8 @@ import { ColorPickerModule } from 'ngx-color-picker';
     CanvasContainerDirective,
     DisableRightClickDirective,
     CreatureComponent,
-    AboutModalComponent
+    AboutModalComponent,
+    ImageHandoutComponent
   ],
   imports: [
     BrowserModule,
@@ -38,6 +41,7 @@ import { ColorPickerModule } from 'ngx-color-picker';
     HttpClientModule,
     FormsModule,
     ColorPickerModule,
+    LightboxModule,
     NgbModule
   ],
   providers: [ToastService, DataService],

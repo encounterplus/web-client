@@ -3,6 +3,12 @@
     width: 140px;
     height: 140px;
     margin: 5px;
+    cursor: pointer;
+
+    @media (max-width: 420px) {
+        width: 90px;
+        height: 90px;
+    }
     
     .main-image {
         background-color: lightgray;

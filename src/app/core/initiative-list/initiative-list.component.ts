@@ -1,6 +1,8 @@
 import { Component, OnInit, Input, ElementRef, IterableDiffers } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
 import { Creature } from 'src/app/shared/models/creature';
+import { Lightbox, IAlbum } from 'ngx-lightbox';
+import { DataService } from 'src/app/shared/services/data.service';
 
 @Component({
   selector: 'app-initiative-list',
@@ -12,12 +14,20 @@ export class InitiativeListComponent implements OnInit {
   @Input() 
   public state: AppState;
 
-  constructor(private element: ElementRef) { 
+  constructor(private element: ElementRef, private lightbox: Lightbox, private dataService: DataService) { 
   }
 
   get activeCreatures(): Array<Creature> {
     return this.state.game.creatures.filter( creature => { return creature.initiative != -10 } ).sort((a, b) => (a.rank > b.rank) ? 1 : -1)
-}
+  }
+
+  get images(): Array<IAlbum> {
+    let images: Array<IAlbum>  = [];
+    for (let creature of this.activeCreatures) {
+      images.push({src:  `http://${this.dataService.remoteHost}${creature.image}`, caption: null, thumb: null});
+    }
+    return images;
+  }
 
   ngOnInit(): void {
   }
@@ -38,5 +48,15 @@ export class InitiativeListComponent implements OnInit {
     if (el) {
       el.scrollIntoView();
     }
+  }
+
+  open(index: number): void {
+    // open lightbox
+    this.lightbox.open(this.images, index);
+  }
+
+  close(): void {
+    // close lightbox programmatically
+    this.lightbox.close();
   }
 }

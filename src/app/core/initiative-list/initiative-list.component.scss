@@ -7,6 +7,10 @@
     bottom: 0;
     background-color: rgba($color: #ffffff, $alpha: 0.2);
     overflow: scroll;
+
+    @media (max-width: 420px) {
+        width: 100px;
+    }
 }
 :host(::-webkit-scrollbar) {
     width: 0 !important
