@@ -7,7 +7,10 @@ export enum WSEventName {
     tileMove = "tileMove",
     areaEffectMove = "areaEffectMove",
     fogUpdate = "fogUpdate",
+    pointerUpdate = "pointerUpdate",
+    pointerMove = "pointerMove",
     interactionUpdate = "interactionUpdate",
+    userUpdate = "userUpdate",
     mapLoad = "mapLoad",
     reload = "reload"
 }

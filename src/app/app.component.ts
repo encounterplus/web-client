@@ -225,9 +225,12 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.interactionUpdate: {
-                // window.location = window.location;
                 this.state.screen.interaction = event.data;
                 this.mapComponent.mapContainer.updateInteraction();
+            }
+
+            case WSEventName.pointerUpdate: {
+                this.mapComponent.mapContainer.particlesLayer.drawPointer(event.data.x, event.data.y, PIXI.utils.string2hex(event.data.color));
             }
         }
     }
@@ -285,6 +288,12 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.toastService.clear();
                 this.toastService.showSuccess("Websocket connected");
                 this.getData();
+
+                // update color
+                let name = localStorage.getItem("userName") || "Unknown";
+                let color = localStorage.getItem("userColor");
+                this.dataService.send({name: WSEventName.userUpdate, data: {name: name, color: color}});
+
             } else {
                 console.log("Websocket disconnected");
                 this.toastService.showError("Websocket disconnected", false);

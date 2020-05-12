@@ -28,7 +28,7 @@ export class ParticlesLayer extends Layer {
         return this;
     }
 
-    async drawPointer(point: PIXI.Point) {
+    async drawPointer(x: number, y: number, color: number) {
         if (!this.ringTexture) {
             this.ringTexture = await Loader.shared.loadTexture('/assets/img/ring.png', true);
         }
@@ -79,11 +79,11 @@ export class ParticlesLayer extends Layer {
                 color: {
                     list: [
                         {
-                            value: "fb1010",
+                            value: PIXI.utils.hex2string(color),
                             time: 0
                         },
                         {
-                            value: "f5b830",
+                            value: PIXI.utils.hex2string(color),
                             time: 1
                         }
                     ],
@@ -133,7 +133,7 @@ export class ParticlesLayer extends Layer {
             }
         );
 
-        emitter.updateOwnerPos(point.x, point.y);
+        emitter.updateOwnerPos(x, y);
         
         emitter.emit = true;
         emitter.autoUpdate = true;

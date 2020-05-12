@@ -22,6 +22,8 @@ export class DataService {
 
   public remoteHost: string
 
+  public localEvents: Subject<any>;
+
   constructor(private httpClient: HttpClient) { 
   }
 

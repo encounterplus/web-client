@@ -5,6 +5,10 @@ import { Map } from 'src/app/shared/models/map';
 import { environment } from 'src/environments/environment';
 import { map } from 'rxjs/operators';
 import { Loader } from '../models/loader';
+import { DataService } from 'src/app/shared/services/data.service';
+import { WSEventName } from 'src/app/shared/models/wsevent';
+import { WSEvent } from 'src/app/shared/models/wsevent';
+import { ControlState } from '../views/token-view';
 
 export class BackgroundLayer extends Layer {
 
@@ -21,7 +25,9 @@ export class BackgroundLayer extends Layer {
     dragging: boolean = false;
     clicked: boolean = false;
 
-    constructor() {
+    map: Map;
+
+    constructor(private dataService: DataService) {
         super();
 
         this.interactive = true;
@@ -33,6 +39,7 @@ export class BackgroundLayer extends Layer {
     }
 
     update(map: Map) {
+        this.map = map;
         this.image = map.image;
         this.scale.set(map.scale, map.scale);
         // this.video = map.video;
@@ -92,10 +99,15 @@ export class BackgroundLayer extends Layer {
         if (this.clicked) {
             console.log('double click');
             const newPosition = event.data.getLocalPosition(this.parent);
-            console.log(newPosition);
+
+            // get userr's color
+            let color = localStorage.getItem("userColor");
+
+            // send event
+            this.dataService.send({name: WSEventName.pointerUpdate, data: {id: this.map.id, x: newPosition.x | 0, y: newPosition.y | 0, color: color, state: ControlState.end}})
             return
         }
-        
+
         this.clicked = false;
         clearTimeout(this.double)
 

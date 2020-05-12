@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataService } from 'src/app/shared/services/data.service';
+import { WSEventName } from 'src/app/shared/models/wsevent';
 
 @Component({
   selector: 'ngbd-modal-basic',
@@ -20,6 +21,8 @@ export class SettingsModalComponent implements OnInit {
   save() {
     localStorage.setItem("userName", this.name);
     localStorage.setItem("userColor", this.color);
+
+    this.dataService.send({name: WSEventName.userUpdate, data: {name: this.name, color: this.color}});
 
     this.modalInstance.close("Close");
 

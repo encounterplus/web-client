@@ -61,7 +61,7 @@ export class MapContainer extends Layer {
     constructor(private dataService: DataService) {
         super();
 
-        this.backgroundLayer = this.addChild(new BackgroundLayer());
+        this.backgroundLayer = this.addChild(new BackgroundLayer(this.dataService));
         this.bottomLayer = this.addChild(new TilesLayer(this.dataService));
         this.gridLayer = this.addChild(new GridLayer());
         this.middleLayer = this.addChild(new TilesLayer(this.dataService));
