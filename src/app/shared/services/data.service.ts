@@ -56,7 +56,7 @@ export class DataService {
   }
 
   private status$: Subject<boolean> = new BehaviorSubject<boolean>(false);
-  private attemptNr: number = 0;
+  public attemptNr: number = 0;
   private ws: any;
   public events$: Subject<WSEvent> = new Subject<WSEvent>();
 
@@ -81,8 +81,10 @@ export class DataService {
       this.status$.next(false);
       this.attemptNr = this.attemptNr + 1;
 
-      console.log(`Connection down (${this.wsBaseURL}), will attempt ${this.attemptNr} reconnection in ${this.reconnectionDelay}ms`);
-      return timer(this.reconnectionDelay);
+      let delay = this.reconnectionDelay * Math.min(this.attemptNr * 2, 30);
+
+      console.log(`Connection down (${this.wsBaseURL}), will attempt ${this.attemptNr} reconnection in ${delay}ms`);
+      return timer(delay);
     });
 
     const openObserver = new Subject<Event>();

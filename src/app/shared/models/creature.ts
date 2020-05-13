@@ -26,6 +26,7 @@ export class Creature {
     hitpoints: number;
     bloodied: boolean;
     dead: boolean;
+    hidden: boolean;
     image: string;
     token: string;
     mapId: string;

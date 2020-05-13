@@ -2,7 +2,7 @@ import { Screen } from './screen';
 import { Grid } from 'src/app/core/map/models/grid';
 import { Game } from './game';
 import { Map} from './map';
-import { Creature } from './creature';
+import { Creature, CreatureType } from './creature';
 
 export class AppState {
     map: Map;
@@ -19,6 +19,14 @@ export class AppState {
         return this.game.creatures.filter( creature => {
             return creature.mapId == this.map.id
         });
+    }
+
+    get mapMonsters(): Array<Creature> {
+        return this.mapCreatures.filter(creature => creature.type != CreatureType.player);
+    }
+
+    get mapPlayers(): Array<Creature> {
+        return this.mapCreatures.filter(creature => creature.type == CreatureType.player);
     }
     
     get turned(): Creature {

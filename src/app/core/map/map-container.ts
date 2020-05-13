@@ -65,26 +65,16 @@ export class MapContainer extends Layer {
         this.bottomLayer = this.addChild(new TilesLayer(this.dataService));
         this.gridLayer = this.addChild(new GridLayer());
         this.middleLayer = this.addChild(new TilesLayer(this.dataService));
-        this.lightsLayer = this.addChild(new LightsLayer());
+        this.lightsLayer = this.addChild(new LightsLayer(this.dataService));
         this.aurasLayer = this.addChild(new AurasLayer(this.dataService));
         this.topLayer = this.addChild(new TilesLayer(this.dataService));
         this.drawingsLayer = this.addChild(new DrawingsLayer(this.dataService));
         this.areaEffectsLayer = this.addChild(new AreaEffectsLayer(this.dataService));
         this.monstersLayer = this.addChild(new TokensLayer(this.dataService));
-        this.visionLayer = this.addChild(new VisionLayer());
+        this.visionLayer = this.addChild(new VisionLayer(this.dataService));
         this.fogLayer = this.addChild(new FogLayer());
         this.particlesLayer = this.addChild(new ParticlesLayer(this.dataService));
         this.playersLayer = this.addChild(new TokensLayer(this.dataService));
-
-        // this.interactive = true;
-        // // this.buttonMode = true;
-
-        // this
-        //     .on('pointerdown', this.onDragStart)
-        //     .on('pointerup', this.onDragEnd)
-        //     .on('pointerupoutside', this.onDragEnd)
-        //     .on('pointermove', this.onDragMove);
-
     }
 
     update(state: AppState) {
@@ -103,18 +93,22 @@ export class MapContainer extends Layer {
         this.grid.update(this.state.map);
         this.gridLayer.update(this.grid);
 
-        this.lightsLayer.updateCreatures(this.state.mapCreatures);
-        this.lightsLayer.updateTiles(this.state.map.tiles);
-        this.lightsLayer.visible = this.state.map.lineOfSight;
-        this.visionLayer.updateCreatures(this.state.mapCreatures);
-        this.visionLayer.updateTiles(this.state.map.tiles);
-        this.visionLayer.visible = this.state.map.lineOfSight;
+        // this.lightsLayer.updateCreatures(this.state.mapCreatures);
+        // this.lightsLayer.updateTiles(this.state.map.tiles);
+        // this.lightsLayer.visible = this.state.map.lineOfSight;
+        this.lightsLayer.update();
+        // this.visionLayer.updateCreatures(this.state.mapCreatures);
+        // this.visionLayer.updateTiles(this.state.map.tiles);
+        this.visionLayer.update();
+        // this.visionLayer.visible = this.state.map.lineOfSight;
         this.fogLayer.update(this.state.map);
-        this.monstersLayer.creatures = this.state.mapCreatures.filter(creature => creature.type != CreatureType.player);
+        
         this.monstersLayer.grid = this.grid;
-        this.playersLayer.creatures = this.state.mapCreatures.filter(creature => creature.type == CreatureType.player);
         this.playersLayer.grid = this.grid;
 
+        this.monstersLayer.creatures = this.state.mapMonsters;
+        this.playersLayer.creatures = this.state.mapPlayers;
+        
         this.areaEffectsLayer.areaEffects = this.state.map.areaEffects;
         this.areaEffectsLayer.grid = this.grid;
         // this.tokensLayer.updateCreatures(this.state.mapCreatures);
@@ -265,30 +259,5 @@ export class MapContainer extends Layer {
             }
         }
         return null;
-    }
-
-    onDragStart(event: PIXI.interaction.InteractionEvent) {
-        // store a reference to the data
-        // the reason for this is because of multitouch
-        // we want to track the movement of this particular touch
-        console.log('drag started');
-        this.data = event.data;
-        this.dragging = true;
-    }
-    
-    onDragEnd() {
-        console.log('drag ended');
-        this.dragging = false;
-        // set the interaction data to null
-        this.data = null;
-    }
-    
-    onDragMove() {
-        if (this.dragging) {
-            console.log('dragging');
-            // const newPosition = this.data.getLocalPosition(this.parent);
-            // this.x += this.data.global.x - this.x;
-            // this.y += this.data.global.y - this.y;
-        }
     }
 }

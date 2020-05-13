@@ -38,7 +38,14 @@ export class CanvasContainerDirective implements AfterViewInit {
                     this.applicationOptions);
 
     this.zone.runOutsideAngular(() => {
+      // prevents pixi ticker to clash with zone
       this.app = new PIXI.Application(options);
+      
+      // prevents mouse zoom
+      window.addEventListener('wheel', e => {
+        e.preventDefault();
+      }, {passive: false});
+
     });
 
     this.element.appendChild(this.app.view);
@@ -77,6 +84,13 @@ export class CanvasContainerDirective implements AfterViewInit {
     this.height = window.innerHeight;
     this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
   }
+
+  // @HostListener('document:touchstart', ['$event'])
+  // onTouchStart(event) {
+  //   // do something meaningful with it
+  //   event.preventDefault();
+  //   console.log(`The touch started ${event}!`);
+  // }
 
   destroy() {
     this.app.destroy();

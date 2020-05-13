@@ -9,6 +9,7 @@ import { Grid } from '../models/grid';
 import { CreatureComponent } from '../../creature/creature.component';
 import { Tile } from 'src/app/shared/models/tile';
 import { Loader } from '../models/loader';
+import { DataService } from 'src/app/shared/services/data.service';
 
 export class LightsLayer extends Layer {
 
@@ -16,13 +17,13 @@ export class LightsLayer extends Layer {
     creatures: Array<Creature> = [];
     tiles: Array<Tile> = [];
 
-    updateCreatures(creatures: Array<Creature>) {
-        this.creatures = creatures;
-    }
+    // updateCreatures(creatures: Array<Creature>) {
+    //     this.creatures = creatures;
+    // }
 
-    updateTiles(tiles: Array<Tile>) {
-        this.tiles = tiles;
-    }
+    // updateTiles(tiles: Array<Tile>) {
+    //     this.tiles = tiles;
+    // }
     
     vert: PIXI.LoaderResource;
     frag: PIXI.LoaderResource;
@@ -32,7 +33,7 @@ export class LightsLayer extends Layer {
 
     lights: Array<PIXI.Mesh> = [];
 
-    constructor() {
+    constructor(private dataService: DataService) {
         super();
 
         // let filter = new PIXI.filters.AlphaFilter(1.0)
@@ -41,6 +42,12 @@ export class LightsLayer extends Layer {
     }
 
     isDirty: boolean = true;
+
+    update() {
+        this.creatures = this.dataService.state.mapCreatures;
+        this.tiles = this.dataService.state.map.tiles;
+        this.visible = this.dataService.state.map.lineOfSight;
+    }
 
     async draw() {
         this.clear();   

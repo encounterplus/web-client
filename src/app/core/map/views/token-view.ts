@@ -149,15 +149,8 @@ export class TokenView extends View {
     }
 
     update() {
-        
-        // this.x = this.creature.x;
-        // this.y = this.creature.y;
         this.w = this.grid.size * this.creature.scale;
         this.h = this.grid.size * this.creature.scale;
-
-        
-        // this.auraContainer.width = this.w;
-        // this.auraContainer.height = this.h;
 
         this.zIndex = this.creature.role == Role.friendly ? 50 : 30;
 
@@ -165,7 +158,11 @@ export class TokenView extends View {
         this.auraContainer.position.set(this.creature.x, this.creature.y);
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
-        // it (this.creature.)
+        if (this.creature.role == Role.friendly) {
+            this.visible = true;
+        } else {
+            this.visible = !this.creature.hidden;
+        }
     }
 
     updateToken() {
@@ -185,6 +182,10 @@ export class TokenView extends View {
         // this.uidGraphics.position.set(this.w / 2, this.h / 2);
 
         // console.debug("updating UID");
+
+        if (!this.uidGraphics || !this.uidText) {
+            return;
+        }
 
         if (this.tokenTexture != null ) {
             let badgeSize = this.grid.size * 0.4;

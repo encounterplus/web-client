@@ -9,6 +9,7 @@ import { Grid } from '../models/grid';
 import { CreatureComponent } from '../../creature/creature.component';
 import { Tile } from 'src/app/shared/models/tile';
 import { Loader } from '../models/loader';
+import { DataService } from 'src/app/shared/services/data.service';
 
 export class VisionLayer extends Layer {
 
@@ -17,12 +18,18 @@ export class VisionLayer extends Layer {
     creatures: Array<Creature> = [];
     tiles: Array<Tile> = [];
 
-    updateCreatures(creatures: Array<Creature>) {
-        this.creatures = creatures;
-    }
+    // updateCreatures(creatures: Array<Creature>) {
+    //     this.creatures = creatures;
+    // }
 
-    updateTiles(tiles: Array<Tile>) {
-        this.tiles = tiles;
+    // updateTiles(tiles: Array<Tile>) {
+    //     this.tiles = tiles;
+    // }
+
+    update() {
+        this.creatures = this.dataService.state.mapCreatures;
+        this.tiles = this.dataService.state.map.tiles;
+        this.visible = this.dataService.state.map.lineOfSight;
     }
 
     vert: PIXI.LoaderResource;
@@ -35,7 +42,7 @@ export class VisionLayer extends Layer {
 
     visions: Array<PIXI.Mesh> = [];
 
-    constructor() {
+    constructor(private dataService: DataService) {
         super();
 
         this.bg = new PIXI.Sprite(PIXI.Texture.WHITE);

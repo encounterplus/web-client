@@ -87,8 +87,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     
                 if (event.data.creatures) {
                     this.state.game.creatures = event.data.creatures;
-                    this.mapComponent.update();
-                    this.mapComponent.draw();    
+                    this.mapComponent.mapContainer.update(this.state);
+                    this.mapComponent.mapContainer.draw();
                 }
                 if (this.initiativeListComponent) {
                     this.initiativeListComponent.scrollToTurned();
@@ -101,28 +101,42 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.creatureUpdate: {
-                let creature = Object.assign(new Creature, event.data) as Creature;
-                console.debug(creature);
+                // let creature = Object.assign(new Creature, event.data) as Creature;
+                
                 // this.state.game.creatures.push(creature);
 
                 // udpdate state
-                let index =  this.state.game.creatures.findIndex((obj => obj.id == creature.id));
+                let index =  this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
+                let creature = this.state.game.creatures[index];
                 // this.state.game.creatures[index] = creature;
-                this.state.game.creatures[index].vision = creature.vision;
-                this.state.game.creatures[index].initiative = creature.initiative;
-                this.state.game.creatures[index].rank = creature.rank;
 
-                // update token
-                let token = this.mapComponent.mapContainer.tokenByCreatureId(creature.id)
-                if (token != null) {
-                    token.creature = creature;
-                    token.creature.x = event.data.x;
-                    token.creature.y = event.data.y;
-                    token.update();
-                    token.updateTint();
+                if (creature) {
+                    Object.assign(creature, event.data);
                 }
 
+                // changes
+                console.debug(creature);
+
+                // update token
+                let token = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id)
+                if (token != null) {
+                    // TODO: more efecient draw
+                    token.draw();
+                } else {
+                    this.mapComponent.mapContainer.monstersLayer.creatures = this.state.mapMonsters;
+                    this.mapComponent.mapContainer.playersLayer.creatures = this.state.mapPlayers;
+                    
+                    this.mapComponent.mapContainer.monstersLayer.draw();
+                    this.mapComponent.mapContainer.playersLayer.draw();
+                }
+
+                this.mapComponent.mapContainer.lightsLayer.update();
+                this.mapComponent.mapContainer.visionLayer.update()
                 this.mapComponent.mapContainer.visionLayer.draw();
+                this.mapComponent.mapContainer.lightsLayer.draw();
+
+                this.mapComponent.mapContainer.aurasLayer.tokens = this.mapComponent.mapContainer.playersLayer.views;
+                this.mapComponent.mapContainer.aurasLayer.draw();
                 break
             }
 
@@ -282,6 +296,9 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.dataService.connectionStatus$.subscribe(status => {
             if (status) {
                 console.log("Websocket connected");
+
+                // this should be in data service, not here
+                this.dataService.attemptNr = 0;
 
                 localStorage.setItem("lastSuccessfullHost", this.dataService.remoteHost);
 
