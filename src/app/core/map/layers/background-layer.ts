@@ -9,6 +9,8 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { WSEvent } from 'src/app/shared/models/wsevent';
 import { ControlState } from '../views/token-view';
+import { Pointer } from 'src/app/shared/models/pointer';
+import { v4 as uuidv4 } from 'uuid';
 
 export class BackgroundLayer extends Layer {
 
@@ -27,15 +29,17 @@ export class BackgroundLayer extends Layer {
 
     map: Map;
 
+    activePointer: Pointer;
+
     constructor(private dataService: DataService) {
         super();
 
         this.interactive = true;
 
         this
-            .on('pointerdown', this.onPointerUp)
-            .on('pointerup', this.onPointerDown);
-            // .on('pointermove', this.onDragMove);
+            .on('pointerup', this.onPointerUp)
+            .on('pointerdown', this.onPointerDown)
+            .on('pointermove', this.onPointerMove);
     }
 
     update(map: Map) {
@@ -89,49 +93,64 @@ export class BackgroundLayer extends Layer {
         this.removeChildren();
     }
 
-    double: any;
 
     onPointerUp(event: PIXI.interaction.InteractionEvent) {
         // store a reference to the data
         // the reason for this is because of multitouch
         // we want to track the movement of this particular touch
         
-        if (this.clicked) {
-            console.log('double click');
+        
+        this.dragging = false;
+
+        if (this.activePointer) {
+            event.stopPropagation();
             const newPosition = event.data.getLocalPosition(this.parent);
 
-            // get userr's color
-            let color = localStorage.getItem("userColor");
+            this.activePointer.x = newPosition.x | 0;
+            this.activePointer.y = newPosition.y | 0;
+            this.activePointer.state = ControlState.end;
 
             // send event
-            this.dataService.send({name: WSEventName.pointerUpdate, data: {id: this.map.id, x: newPosition.x | 0, y: newPosition.y | 0, color: color, state: ControlState.end}})
+            this.dataService.send({name: WSEventName.pointerUpdate, data: this.activePointer});
+
+            // remove pointer
+            this.activePointer = null;
+        }
+    }
+    
+    onPointerDown(event: PIXI.interaction.InteractionEvent) {
+        if (event.data.originalEvent.shiftKey) {
+            event.stopPropagation();
+            this.dragging = true;
+
+            const newPosition = event.data.getLocalPosition(this.parent);
+
+            this.activePointer = new Pointer();
+            this.activePointer.id = uuidv4();
+            this.activePointer.color = localStorage.getItem("userColor");
+            this.activePointer.source = localStorage.getItem("userName");
+            this.activePointer.x = newPosition.x | 0;
+            this.activePointer.y = newPosition.y | 0;
+            this.activePointer.state = ControlState.start;
+
+            // send event
+            this.dataService.send({name: WSEventName.pointerUpdate, data: this.activePointer});
             return
         }
-
-        this.clicked = false;
-        clearTimeout(this.double)
-
-        this.data = event.data;
-        this.dragging = true;
     }
     
-    onPointerDown() {
-        // console.log('pointer up');
-        this.dragging = false;
-        // set the interaction data to null
-        this.data = null;
+    onPointerMove(event: PIXI.interaction.InteractionEvent) {
+        if (this.dragging && this.activePointer) {
+            event.stopPropagation();
 
-        this.clicked = true;
-        this.double = setTimeout(() => { this.clicked = false; }, 400); 
-    }
-    
-    onDragMove() {
-        if (this.dragging) {
-            // console.log('dragging');
-            // const newPosition = this.data.getLocalPosition(this.parent);
-            // this.x += this.data.global.x - this.x;
-            // this.y += this.data.global.y - this.y;
+            const newPosition = event.data.getLocalPosition(this.parent);
+
+            this.activePointer.x = newPosition.x | 0;
+            this.activePointer.y = newPosition.y | 0;
+            this.activePointer.state = ControlState.control;
+
+            // send event
+            this.dataService.send({name: WSEventName.pointerUpdate, data: this.activePointer});
         }
     }
-
 }

@@ -16,6 +16,10 @@ export class DrawingsLayer extends Layer {
         super();
     }
 
+    update() {
+        this.drawings = this.dataService.state.map.drawings;
+    }
+
     async draw() {
         this.clear();
 

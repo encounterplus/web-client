@@ -1,5 +1,6 @@
 export enum WSEventName {
     gameUpdate = "gameUpdate",
+    mapUpdate = "mapUpdate",
     creatureUpdate = "creatureUpdate",
     tileUpdate = "tileUpdate",
     areaEffectUpdate = "areaEffectUpdate",
@@ -10,6 +11,7 @@ export enum WSEventName {
     pointerUpdate = "pointerUpdate",
     pointerMove = "pointerMove",
     interactionUpdate = "interactionUpdate",
+    drawingsUpdate = "drawingsUpdate",
     userUpdate = "userUpdate",
     mapLoad = "mapLoad",
     reload = "reload"

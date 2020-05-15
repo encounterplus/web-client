@@ -100,6 +100,19 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break;
             }
 
+            case WSEventName.mapUpdate: {
+                
+                let map = this.state.map;
+
+                if (map) {
+                    Object.assign(map, event.data);
+                }
+
+                this.mapComponent.mapContainer.update(this.state);
+                this.mapComponent.mapContainer.draw();
+                break;
+            }
+
             case WSEventName.creatureUpdate: {
                 // let creature = Object.assign(new Creature, event.data) as Creature;
                 
@@ -231,20 +244,31 @@ export class AppComponent implements OnInit, AfterViewInit {
 
                 this.mapComponent.mapContainer.fogLayer.fogBase64 = base64image;
                 this.mapComponent.mapContainer.fogLayer.drawPartialFog();
+                break;
             }
 
             case WSEventName.mapLoad: {
                 // window.location = window.location;
                 this.getData();
+                break;
             }
 
             case WSEventName.interactionUpdate: {
                 this.state.screen.interaction = event.data;
                 this.mapComponent.mapContainer.updateInteraction();
+                break;
             }
 
             case WSEventName.pointerUpdate: {
-                this.mapComponent.mapContainer.particlesLayer.drawPointer(event.data.x, event.data.y, PIXI.utils.string2hex(event.data.color));
+                this.mapComponent.mapContainer.particlesLayer.drawPointer(event.data);
+                break;
+            }
+
+            case WSEventName.drawingsUpdate: {
+                this.state.map.drawings = event.data;
+                this.mapComponent.mapContainer.drawingsLayer.update();
+                this.mapComponent.mapContainer.drawingsLayer.draw()
+                break;
             }
         }
     }

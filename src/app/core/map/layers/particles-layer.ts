@@ -1,6 +1,6 @@
 import { Creature, CreatureType } from 'src/app/shared/models/creature';
 import { Layer } from './layer';
-import { TokenView } from '../views/token-view';
+import { TokenView, ControlState } from '../views/token-view';
 import { Grid } from '../models/grid';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Tile } from 'src/app/shared/models/tile';
@@ -9,8 +9,12 @@ import { TileView } from '../views/tile-view';
 import * as pixi from 'pixi.js';
 import * as particles from "pixi-particles";
 import { Loader } from '../models/loader';
+import { Pointer } from 'src/app/shared/models/pointer';
+import { PointerView } from '../views/pointer-view';
 
 export class ParticlesLayer extends Layer {
+
+    grid: Grid;
 
     constructor(private dataService: DataService) {
         super();
@@ -18,126 +22,52 @@ export class ParticlesLayer extends Layer {
 
     ringTexture: PIXI.Texture; 
 
+    views = {};
+
     async draw() {
         // this.clear();
 
         this.w = this.parent.width;
         this.h = this.parent.height;
 
+        if (!this.ringTexture) {
+            this.ringTexture = await Loader.shared.loadTexture('/assets/img/particle.png', true);
+        }
+
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
         return this;
     }
 
-    async drawPointer(x: number, y: number, color: number) {
-        if (!this.ringTexture) {
-            this.ringTexture = await Loader.shared.loadTexture('/assets/img/ring.png', true);
+    pointerViewById(id: string): PointerView {
+        return this.views[id];
+    }
+
+    async drawPointer(pointer: Pointer) {
+        var pointerView = this.pointerViewById(pointer.id);
+        if (pointerView) {
+            pointerView.updateOwnerPos(pointer.x, pointer.y);
+        } else {
+            console.log("creating new pointer");
+            pointerView = new PointerView(pointer, this.grid, this, this.ringTexture);
+            pointerView.updateOwnerPos(pointer.x, pointer.y);
+            pointerView.emit = true;
+            pointerView.playOnceAndDestroy( () => {
+                console.log('destroying pointer');
+            });
+            this.views[pointer.id] = pointerView;
         }
 
-        var emitter = new particles.Emitter(
-
-            // The PIXI.Container to put the emitter in
-            // if using blend modes, it's important to put this
-            // on top of a bitmap, and not use the root stage Container
-            this,
-        
-            // The collection of particle images to use
-            [this.ringTexture],
-        
-            // Emitter configuration, edit this to change the look
-            // of the emitter
-            {
-                alpha: {
-                    list: [
-                        {
-                            value: 0.0,
-                            time: 0
-                        },
-                        {
-                            value: 1,
-                            time: 0.5
-                        },
-                        {
-                            value: 0.0,
-                            time: 1
-                        }
-                    ],
-                    isStepped: false
-                },
-                scale: {
-                    list: [
-                        {
-                            value: 0.3,
-                            time: 0
-                        },
-                        {
-                            value: 0.4,
-                            time: 1
-                        }
-                    ],
-                    isStepped: false
-                },
-                color: {
-                    list: [
-                        {
-                            value: PIXI.utils.hex2string(color),
-                            time: 0
-                        },
-                        {
-                            value: PIXI.utils.hex2string(color),
-                            time: 1
-                        }
-                    ],
-                    isStepped: false
-                },
-                speed: {
-                    list: [
-                        {
-                            value: 200,
-                            time: 0
-                        },
-                        {
-                            value: 100,
-                            time: 1
-                        }
-                    ],
-                    isStepped: false
-                },
-                startRotation: {
-                    min: 0,
-                    max: 360
-                },
-                rotationSpeed: {
-                    min: 0,
-                    max: 0
-                },
-                lifetime: {
-                    min: 0.5,
-                    max: 0.5
-                },
-                frequency: 0.008,
-                spawnChance: 1,
-                particlesPerWave: 1,
-                emitterLifetime: 0.5,
-                maxParticles: 500,
-                pos: {
-                    x: 0,
-                    y: 0
-                },
-                addAtBack: false,
-                spawnType: "circle",
-                spawnCircle: {
-                    x: 0,
-                    y: 0,
-                    r: 10
-                }
+        switch(pointer.state) {
+            case ControlState.control: {
+                break;
             }
-        );
 
-        emitter.updateOwnerPos(x, y);
-        
-        emitter.emit = true;
-        emitter.autoUpdate = true;
-        emitter.playOnceAndDestroy()
+            case ControlState.end:
+            case ControlState.cancel:
+                pointerView.emit = false;
+                delete this.views[pointer.id];
+                break;
+        }
     }
 
     clear() {

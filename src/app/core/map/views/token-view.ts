@@ -18,7 +18,8 @@ export enum ControlState {
     start = 0,
     control = 1,
     end = 2,
-    block = 3
+    block = 3,
+    cancel = 4
 }
 
 export class TokenView extends View {
@@ -50,6 +51,8 @@ export class TokenView extends View {
     get color(): number {
         if (this.turned) {
             return 0xff9500;
+        } else if (this.creature.dead) {
+            return 0x333333;
         } else if (this.creature.role == Role.hostile) {
             return 0x631515;
         } else if (this.creature.role == Role.friendly) {
@@ -131,7 +134,7 @@ export class TokenView extends View {
 
         this.uidText = new PIXI.Text(this.creature.uid, {fontFamily : 'Arial', fontSize: 24, fill : 0xffffff, align : 'center'});
         this.uidText.anchor.set(0.5, 0.5);
-        this.uidText.resolution = 2;
+        this.uidText.resolution = 4;
         this.addChild(this.uidText);
 
         // distance
@@ -162,6 +165,10 @@ export class TokenView extends View {
             this.visible = true;
         } else {
             this.visible = !this.creature.hidden;
+        }
+
+        if (this.creature.dead) {
+            this.zIndex = 29;
         }
     }
 

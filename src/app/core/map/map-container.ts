@@ -113,7 +113,7 @@ export class MapContainer extends Layer {
         this.areaEffectsLayer.grid = this.grid;
         // this.tokensLayer.updateCreatures(this.state.mapCreatures);
         // this.tokensLayer.updateTiles(this.state.map.tiles);
-        this.drawingsLayer.drawings = this.state.map.drawings;
+        this.drawingsLayer.update();
 
         this.tiles = state.map.tiles;
     }
@@ -215,7 +215,7 @@ export class MapContainer extends Layer {
         }
     }
 
-    tokenByCreatureId(creatureId: String): TokenView {
+    tokenByCreatureId(creatureId: string): TokenView {
 
         for (let token of this.playersLayer.views) {
             if (token.creature.id == creatureId) {
@@ -232,7 +232,7 @@ export class MapContainer extends Layer {
         return null;
     }
 
-    areaEffectViewById(id: String): AreaEffectView {
+    areaEffectViewById(id: string): AreaEffectView {
         for (let model of this.areaEffectsLayer.views) {
             if (model.areaEffect.id == id) {
                 return model;
@@ -241,7 +241,7 @@ export class MapContainer extends Layer {
         return null;
     }
 
-    tileViewById(id: String): TileView {
+    tileViewById(id: string): TileView {
         for (let model of this.topLayer.views) {
             if (model.tile.id == id) {
                 return model;
