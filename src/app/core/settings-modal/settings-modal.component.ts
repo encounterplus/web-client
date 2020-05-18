@@ -22,7 +22,7 @@ export class SettingsModalComponent implements OnInit {
     localStorage.setItem("userName", this.name);
     localStorage.setItem("userColor", this.color);
 
-    this.dataService.send({name: WSEventName.userUpdate, data: {name: this.name, color: this.color}});
+    this.dataService.send({name: WSEventName.clientUpdated, data: {name: this.name, color: this.color}});
 
     this.modalInstance.close("Close");
 

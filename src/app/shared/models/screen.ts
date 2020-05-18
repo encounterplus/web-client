@@ -7,6 +7,6 @@ export enum ScreenInteraction {
 
 export class Screen {
     interaction: ScreenInteraction;
-    overlayImage: String;
-    overlayType: String;
+    overlayImage: string;
+    overlayType: string;
 }

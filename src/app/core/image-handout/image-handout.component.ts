@@ -14,7 +14,11 @@ export class ImageHandoutComponent implements OnInit {
   public screen: Screen;
 
   get image(): string {
-    return `http://${this.dataService.remoteHost}${this.screen.overlayImage}`;
+    if (this.screen.overlayImage && this.screen.overlayImage.startsWith("http")) {
+      return this.screen.overlayImage;
+    } else {
+      return `http://${this.dataService.remoteHost}${this.screen.overlayImage}`;
+    }
   }
 
   constructor(public dataService: DataService, private lightbox: Lightbox) { }

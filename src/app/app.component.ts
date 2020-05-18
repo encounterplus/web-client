@@ -80,7 +80,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         switch (event.name) {
 
-            case WSEventName.gameUpdate: {
+            case WSEventName.gameUpdated: {
                 this.state.game.turn = event.data.turn;
                 this.state.game.round = event.data.round;
                 this.state.game.started = event.data.started;
@@ -94,13 +94,15 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.initiativeListComponent.scrollToTurned();
                 }
 
-                this.mapComponent.mapContainer.updateInteraction();
+                if (this.mapComponent) {
+                    this.mapComponent.mapContainer.updateInteraction();
+                    this.mapComponent.mapContainer.updateTurned(this.state.turned);
+                }
                 
-                this.mapComponent.mapContainer.updateTurned(this.state.turned);
                 break;
             }
 
-            case WSEventName.mapUpdate: {
+            case WSEventName.mapUpdated: {
                 
                 let map = this.state.map;
 
@@ -113,7 +115,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break;
             }
 
-            case WSEventName.creatureUpdate: {
+            case WSEventName.creatureUpdated: {
                 // let creature = Object.assign(new Creature, event.data) as Creature;
                 
                 // this.state.game.creatures.push(creature);
@@ -129,6 +131,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
                 // changes
                 console.debug(creature);
+
+                // check for empty map
+                if (!this.mapComponent) {
+                    return;
+                }
 
                 // update token
                 let token = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id)
@@ -153,7 +160,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break
             }
 
-            case WSEventName.creatureMove: {
+            case WSEventName.creatureMoved: {
                 let token = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id);
                 if (token != null) {
                     token.blocked = event.data.state == ControlState.block;
@@ -195,7 +202,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break;
             }
 
-            case WSEventName.areaEffectUpdate: {
+            case WSEventName.areaEffectUpdated: {
                 let model = Object.assign(new AreaEffect, event.data) as AreaEffect;
                 console.debug(model);
     
@@ -211,7 +218,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break;
             }
 
-            case WSEventName.tileUpdate: {
+            case WSEventName.tileUpdated: {
                 let model = Object.assign(new Tile, event.data) as Tile;
                 console.debug(model);
 
@@ -239,7 +246,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break;
             }
 
-            case WSEventName.fogUpdate: {
+            case WSEventName.fogUpdated: {
                 let base64image = event.data.image;
 
                 this.mapComponent.mapContainer.fogLayer.fogBase64 = base64image;
@@ -247,27 +254,32 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break;
             }
 
-            case WSEventName.mapLoad: {
+            case WSEventName.mapLoaded: {
                 // window.location = window.location;
                 this.getData();
                 break;
             }
 
-            case WSEventName.interactionUpdate: {
+            case WSEventName.interactionUpdated: {
                 this.state.screen.interaction = event.data;
                 this.mapComponent.mapContainer.updateInteraction();
                 break;
             }
 
-            case WSEventName.pointerUpdate: {
+            case WSEventName.pointerUpdated: {
                 this.mapComponent.mapContainer.particlesLayer.drawPointer(event.data);
                 break;
             }
 
-            case WSEventName.drawingsUpdate: {
+            case WSEventName.drawingsUpdated: {
                 this.state.map.drawings = event.data;
                 this.mapComponent.mapContainer.drawingsLayer.update();
                 this.mapComponent.mapContainer.drawingsLayer.draw()
+                break;
+            }
+
+            case WSEventName.screenUpdated: {
+                this.state.screen = event.data;
                 break;
             }
         }
@@ -333,7 +345,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 // update color
                 let name = localStorage.getItem("userName") || "Unknown";
                 let color = localStorage.getItem("userColor");
-                this.dataService.send({name: WSEventName.userUpdate, data: {name: name, color: color}});
+                this.dataService.send({name: WSEventName.clientUpdated, data: {name: name, color: color}});
 
             } else {
                 console.log("Websocket disconnected");

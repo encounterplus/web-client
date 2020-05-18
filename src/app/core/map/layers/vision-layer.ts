@@ -13,18 +13,8 @@ import { DataService } from 'src/app/shared/services/data.service';
 
 export class VisionLayer extends Layer {
 
-    
-
     creatures: Array<Creature> = [];
     tiles: Array<Tile> = [];
-
-    // updateCreatures(creatures: Array<Creature>) {
-    //     this.creatures = creatures;
-    // }
-
-    // updateTiles(tiles: Array<Tile>) {
-    //     this.tiles = tiles;
-    // }
 
     update() {
         this.creatures = this.dataService.state.mapCreatures;
@@ -41,6 +31,8 @@ export class VisionLayer extends Layer {
     bg: PIXI.Sprite;
 
     visions: Array<PIXI.Mesh> = [];
+
+    msk: PIXI.Graphics;
 
     constructor(private dataService: DataService) {
         super();
@@ -61,8 +53,6 @@ export class VisionLayer extends Layer {
             return;
         }
 
-        const startTime = performance.now();
-
         this.bg.width = this.w + 10;
         this.bg.height = this.h + 10;
         this.bg.position.set(-5, -5);
@@ -74,8 +64,16 @@ export class VisionLayer extends Layer {
             this.frag = await Loader.shared.loadResource("/assets/shaders/vision.frag");
         }
 
-        let msk = new PIXI.Graphics();
-        msk.beginFill(0xffffff);
+        // cleanup otherwise msk will leak memory
+        if(this.msk) {
+            this.msk.destroy();
+            this.msk = null;
+        }
+
+        // create new mask
+        // TODO: create custom renderer using stencil buffer
+        this.msk = new PIXI.Graphics();
+        this.msk.beginFill(0xffffff);
 
         for(let creature of this.creatures) {
             // console.log(creature);
@@ -100,37 +98,18 @@ export class VisionLayer extends Layer {
                 mesh.shader.uniforms.radiusMax = [creature.vision.radiusMax];
                 mesh.shader.uniforms.intensity = 1.0;
                 mesh.blendMode = PIXI.BLEND_MODES.ADD;
-                
-                // mesh.parentLayer = this.lighting;
-                // mesh.blendMode = 21;
-                // mesh.texture.baseTexture.alphaMode = PIXI.ALPHA_MODES.PREMULTIPLIED_ALPHA;
 
                 this.addChild(mesh);
                 this.visions.push(mesh);
 
-                msk.drawPolygon(creature.vision.polygon);
-                // mesh.cacheAsBitmap = true;
-
-
-                // var graphics = new PIXI.Graphics();
-                // graphics.beginFill(0xffffff);
-                // graphics.drawPolygon(creature.vision.polygon);
-                // graphics.endFill();
-                // this.addChild(graphics);
-
-                // this.filter.uniforms.position = [creature.vision.x, creature.vision.y];
-                // this.filter.uniforms.radiusMin = [creature.vision.radiusMin];
-                // this.filter.uniforms.radiusMax = [creature.vision.radiusMax];
-
-                // graphics.filters = [this.filter];
+                this.msk.drawPolygon(creature.vision.polygon);
             }
         }
 
-        msk.endFill();
+        this.msk.endFill();
 
         // tiles
         for(let tile of this.tiles) {
-            // console.log(creature);
             if(tile.vision != null && tile.vision.polygon != null) {
                 let polygon = this.getGeometry(tile.vision.x, tile.vision.y, tile.vision.polygon)
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
@@ -149,19 +128,11 @@ export class VisionLayer extends Layer {
                 this.addChild(mesh);
                 this.visions.push(mesh);
 
-                mesh.mask = msk;
-                // mesh.cacheAsBitmap = true;
-                // mesh.filterArea = new PIXI.Rectangle(0, 0, this.w, this.h);
+                mesh.mask = this.msk;
             }
         }
 
-        this.addChild(msk)
-
-        const endTime = performance.now();
-        const elaspedTimeInMilliseconds = endTime - startTime;
-        // console.log(elaspedTimeInMilliseconds);
-
-        // this.cacheAsBitmap = true;
+        this.addChild(this.msk);
 
         return this;
     }

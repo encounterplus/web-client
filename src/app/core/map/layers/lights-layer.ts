@@ -85,15 +85,6 @@ export class LightsLayer extends Layer {
                 mesh.shader.uniforms.falloff = [1.0, 0.1, 50];
                 mesh.shader.uniforms.intensity = creature.light.opacity;
                 mesh.blendMode = PIXI.BLEND_MODES.ADD;
-                // mesh.cacheAsBitmap = true;
-
-                // var graphics = new PIXI.Graphics();
-                // graphics.beginFill(0xffffff);
-                // graphics.drawPolygon(creature.vision.polygon);
-                // graphics.endFill();
-                // this.addChild(graphics);
-
-                // mesh.mask = graphics;
 
                 this.addChild(mesh);
                 this.lights.push(mesh);
@@ -122,18 +113,6 @@ export class LightsLayer extends Layer {
                 mesh.shader.uniforms.intensity = tile.light.opacity;
                 // mesh.blendMode = PIXI.BLEND_MODES.MULTIPLY;
                 mesh.blendMode = PIXI.BLEND_MODES.ADD;
-                // mesh.cacheAsBitmap = true;
-
-                // var graphics = new PIXI.Graphics();
-                // graphics.beginFill(0xffffff);
-                // // graphics.drawStar(tile.vision.x, tile.vision.y, 100, 500);
-                // graphics.drawPolygon(tile.vision.polygon);
-                // graphics.endFill();
-                // graphics.alpha = 0.5
-
-                // this.addChild(graphics);
-
-                // mesh.mask = graphics;
 
                 this.addChild(mesh);
                 this.lights.push(mesh);

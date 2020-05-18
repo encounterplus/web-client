@@ -111,7 +111,7 @@ export class BackgroundLayer extends Layer {
             this.activePointer.state = ControlState.end;
 
             // send event
-            this.dataService.send({name: WSEventName.pointerUpdate, data: this.activePointer});
+            this.dataService.send({name: WSEventName.pointerUpdated, data: this.activePointer});
 
             // remove pointer
             this.activePointer = null;
@@ -134,7 +134,7 @@ export class BackgroundLayer extends Layer {
             this.activePointer.state = ControlState.start;
 
             // send event
-            this.dataService.send({name: WSEventName.pointerUpdate, data: this.activePointer});
+            this.dataService.send({name: WSEventName.pointerUpdated, data: this.activePointer});
             return
         }
     }
@@ -150,7 +150,7 @@ export class BackgroundLayer extends Layer {
             this.activePointer.state = ControlState.control;
 
             // send event
-            this.dataService.send({name: WSEventName.pointerUpdate, data: this.activePointer});
+            this.dataService.send({name: WSEventName.pointerUpdated, data: this.activePointer});
         }
     }
 }
