@@ -37,7 +37,7 @@ export class AreaEffectView extends View {
 
         
         this.interactiveChildren = false
-        this.interactive = true;
+        this.interactive = false;
         this.buttonMode = true;
 
         this
@@ -227,6 +227,8 @@ export class AreaEffectView extends View {
         this.zIndex = this.areaEffect.zIndex;
         this.alpha = this.areaEffect.opacity;
         this.hitArea = this.calculateHitArea();
+
+        this.visible = !this.areaEffect.hidden;
     }
 
     clear() {

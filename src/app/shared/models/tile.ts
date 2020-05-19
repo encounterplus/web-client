@@ -16,4 +16,5 @@ export class Tile {
     light: Light;
     vision: Vision;
     components: Array<Component> = [];
+    hidden: boolean = false;
 }

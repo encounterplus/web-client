@@ -14,14 +14,16 @@ export class PointerView extends particles.Emitter {
 
     constructor(pointer: Pointer, grid: Grid, parent: PIXI.Container, texture: PIXI.Texture) {
 
+        let particleScale = grid.size / 64.0;
+
         let config = {
             alpha: {
                 start: 1,
-                end: 0
+                end: 0,
             },
             scale: {
-                start: 1,
-                end: 0.8
+                start: 0.8 * particleScale,
+                end: 0.6 * particleScale
             },
             color: {
                 start: pointer.color,

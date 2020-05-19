@@ -1,7 +1,7 @@
 
 import { Creature, Role } from 'src/app/shared/models/creature';
 import { View } from './view';
-import { Sprite, interaction, Container } from 'pixi.js';
+import { Sprite, interaction, Container, BLEND_MODES } from 'pixi.js';
 import { environment } from 'src/environments/environment';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
@@ -26,6 +26,9 @@ export class TokenView extends View {
 
     creature: Creature;
     grid: Grid;
+
+    overlayTexture: PIXI.Texture;
+    overlaySprite: PIXI.Sprite;
 
     tokenTexture: PIXI.Texture;
     tokenSprite: PIXI.Sprite;
@@ -116,6 +119,9 @@ export class TokenView extends View {
             this.tokenTexture = null;
         }
 
+        this.w = this.grid.size * this.creature.scale;
+        this.h = this.grid.size * this.creature.scale;
+
         // // stroke
         // let graphics = new PIXI.Graphics();
         // graphics.lineStyle(1, 0xcccccc, 0.8).drawRoundedRect(-1, -1, this.w+1, this.h+1, 4);
@@ -127,6 +133,23 @@ export class TokenView extends View {
             sprite.anchor.set(0.5, 0.5);
             this.tokenSprite = this.addChild(sprite);
         }
+
+        this.updateToken();
+
+        // overlay
+        if (this.creature.dead) {
+            this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-dead.png', true);
+            let sprite = new PIXI.Sprite(this.overlayTexture);
+            sprite.anchor.set(0.5, 0.5);
+            this.overlaySprite = this.addChild(sprite);
+        } else if (this.creature.bloodied) {
+            this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-bloodied.png', true);
+            let sprite = new PIXI.Sprite(this.overlayTexture);
+            sprite.anchor.set(0.5, 0.5);
+            this.overlaySprite = this.addChild(sprite);
+        }
+
+        this.updateOverlay();
 
         // uid
         this.uidGraphics = new PIXI.Graphics();
@@ -144,7 +167,6 @@ export class TokenView extends View {
         this.distanceText.resolution = 2;
         this.addChild(this.distanceText);
 
-        this.updateToken();
         this.updateUID();
         this.updateTint();
         this.updateDistance();
@@ -179,6 +201,14 @@ export class TokenView extends View {
             this.tokenSprite.width = this.tokenTexture.width * scale;
             this.tokenSprite.height = this.tokenTexture.height * scale;
             this.tokenSprite.position.set(this.w / 2, this.h / 2);
+        }
+    }
+
+    updateOverlay() {
+        if (this.overlayTexture != null) {
+            this.overlaySprite.width = this.w;
+            this.overlaySprite.height = this.h;
+            this.overlaySprite.position.set(this.w / 2, this.h / 2);
         }
     }
 

@@ -21,6 +21,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Loader } from './core/map/models/loader';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { BaseTexture } from 'pixi.js';
+import { Marker } from './shared/models/marker';
 
 @Component({
     selector: 'app-root',
@@ -148,6 +149,9 @@ export class AppComponent implements OnInit, AfterViewInit {
                     
                     this.mapComponent.mapContainer.monstersLayer.draw();
                     this.mapComponent.mapContainer.playersLayer.draw();
+
+                    this.mapComponent.mapContainer.aurasLayer.tokens = this.mapComponent.mapContainer.playersLayer.views;
+                    this.mapComponent.mapContainer.aurasLayer.draw();
                 }
 
                 this.mapComponent.mapContainer.lightsLayer.update();
@@ -155,8 +159,6 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.mapComponent.mapContainer.visionLayer.draw();
                 this.mapComponent.mapContainer.lightsLayer.draw();
 
-                this.mapComponent.mapContainer.aurasLayer.tokens = this.mapComponent.mapContainer.playersLayer.views;
-                this.mapComponent.mapContainer.aurasLayer.draw();
                 break
             }
 
@@ -189,12 +191,16 @@ export class AppComponent implements OnInit, AfterViewInit {
 
                 // this.state.game.creatures[index] = creature;
                 if (event.data.los != null) {
-                    let index =  this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
-                    this.state.game.creatures[index].x = event.data.x;
-                    this.state.game.creatures[index].y = event.data.y;
-                    this.state.game.creatures[index].vision.x = event.data.x;
-                    this.state.game.creatures[index].vision.y = event.data.y;
-                    this.state.game.creatures[index].vision.polygon = event.data.los;
+                    let index = this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
+                    if (index) {
+                        this.state.game.creatures[index].x = event.data.x;
+                        this.state.game.creatures[index].y = event.data.y;
+                        if (this.state.game.creatures[index].vision) {
+                            this.state.game.creatures[index].vision.x = event.data.x;
+                            this.state.game.creatures[index].vision.y = event.data.y;
+                            this.state.game.creatures[index].vision.polygon = event.data.los;
+                        }
+                    }
                 }
                 
                 this.mapComponent.mapContainer.lightsLayer.draw();
@@ -275,6 +281,54 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.state.map.drawings = event.data;
                 this.mapComponent.mapContainer.drawingsLayer.update();
                 this.mapComponent.mapContainer.drawingsLayer.draw()
+                break;
+            }
+
+            case WSEventName.markerMoved: {
+                let view = this.mapComponent.mapContainer.markerViewById(event.data.id);
+                if (view != null) {
+                    view.marker.x = event.data.x;
+                    view.marker.y = event.data.y;
+                    view.update();
+                }
+                break;
+            }
+
+            case WSEventName.markerUpdated: {
+                let model = Object.assign(new Marker, event.data) as Marker;
+                console.debug(model);
+
+                // udpdate state
+                let index =  this.state.map.markers.findIndex((obj => obj.id == model.id));
+                this.state.map.markers[index] = model;
+
+                let view = this.mapComponent.mapContainer.markerViewById(model.id)
+                if (view != null) {
+                    view.marker = model;
+                    view.draw();
+                }
+
+                break;
+            }
+
+            case WSEventName.markersUpdated: {
+                this.state.map.markers = event.data;
+                this.mapComponent.mapContainer.markersLayer.update();
+                this.mapComponent.mapContainer.markersLayer.draw()
+                break;
+            }
+
+            case WSEventName.areaEffectsUpdated: {
+                this.state.map.areaEffects = event.data;
+                this.mapComponent.mapContainer.areaEffectsLayer.update();
+                this.mapComponent.mapContainer.areaEffectsLayer.draw()
+                break;
+            }
+
+            case WSEventName.tilesUpdated: {
+                this.state.map.tiles = event.data;
+                this.mapComponent.mapContainer.updateTiles(event.data);
+                this.mapComponent.mapContainer.drawTiles();
                 break;
             }
 

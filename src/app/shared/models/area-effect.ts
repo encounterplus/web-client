@@ -24,4 +24,5 @@ export class AreaEffect {
     width: number;
     asset: Asset;
     components: Array<Component> = [];
+    hidden: boolean = false;
 }

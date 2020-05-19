@@ -22,6 +22,10 @@ export class AreaEffectsLayer extends Layer {
         super();
     }
 
+    update() {
+        this.areaEffects = this.dataService.state.map?.areaEffects || [];
+    }
+
     async draw() {
         this.clear();
 

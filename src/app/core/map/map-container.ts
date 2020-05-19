@@ -22,6 +22,8 @@ import { FogLayer } from './layers/fog-layer';
 import { ParticlesLayer } from './layers/particles-layer';
 import { DrawingsLayer } from './layers/drawings-layer';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
+import { MarkersLayer } from './layers/markers-layer';
+import { MarkerView } from './views/marker-view';
 
 export class MapContainer extends Layer {
 
@@ -42,6 +44,7 @@ export class MapContainer extends Layer {
     lightsLayer: LightsLayer;
     particlesLayer: ParticlesLayer;
     drawingsLayer: DrawingsLayer;
+    markersLayer: MarkersLayer;
 
     // data
     
@@ -70,6 +73,7 @@ export class MapContainer extends Layer {
         this.topLayer = this.addChild(new TilesLayer(this.dataService));
         this.drawingsLayer = this.addChild(new DrawingsLayer(this.dataService));
         this.areaEffectsLayer = this.addChild(new AreaEffectsLayer(this.dataService));
+        this.markersLayer = this.addChild(new MarkersLayer(this.dataService));
         this.monstersLayer = this.addChild(new TokensLayer(this.dataService));
         this.visionLayer = this.addChild(new VisionLayer(this.dataService));
         this.fogLayer = this.addChild(new FogLayer());
@@ -93,14 +97,8 @@ export class MapContainer extends Layer {
         this.grid.update(this.state.map);
         this.gridLayer.update(this.grid);
 
-        // this.lightsLayer.updateCreatures(this.state.mapCreatures);
-        // this.lightsLayer.updateTiles(this.state.map.tiles);
-        // this.lightsLayer.visible = this.state.map.lineOfSight;
         this.lightsLayer.update();
-        // this.visionLayer.updateCreatures(this.state.mapCreatures);
-        // this.visionLayer.updateTiles(this.state.map.tiles);
         this.visionLayer.update();
-        // this.visionLayer.visible = this.state.map.lineOfSight;
         this.fogLayer.update(this.state.map);
         
         this.monstersLayer.grid = this.grid;
@@ -109,11 +107,15 @@ export class MapContainer extends Layer {
         this.monstersLayer.creatures = this.state.mapMonsters;
         this.playersLayer.creatures = this.state.mapPlayers;
         
-        this.areaEffectsLayer.areaEffects = this.state.map.areaEffects;
+        this.areaEffectsLayer.update();
         this.areaEffectsLayer.grid = this.grid;
-        // this.tokensLayer.updateCreatures(this.state.mapCreatures);
-        // this.tokensLayer.updateTiles(this.state.map.tiles);
+
         this.drawingsLayer.update();
+
+        this.particlesLayer.grid = this.grid;
+
+        this.markersLayer.grid = this.grid;
+        this.markersLayer.update();
 
         this.tiles = state.map.tiles;
     }
@@ -193,6 +195,8 @@ export class MapContainer extends Layer {
 
         await this.areaEffectsLayer.draw();
 
+        await this.markersLayer.draw();
+
         await this.drawingsLayer.draw();
 
         await this.particlesLayer.draw();
@@ -217,15 +221,15 @@ export class MapContainer extends Layer {
 
     tokenByCreatureId(creatureId: string): TokenView {
 
-        for (let token of this.playersLayer.views) {
-            if (token.creature.id == creatureId) {
-                return token;
+        for (let view of this.playersLayer.views) {
+            if (view.creature.id == creatureId) {
+                return view;
             }
         }
 
-        for (let token of this.monstersLayer.views) {
-            if (token.creature.id == creatureId) {
-                return token;
+        for (let view of this.monstersLayer.views) {
+            if (view.creature.id == creatureId) {
+                return view;
             }
         }
 
@@ -233,29 +237,38 @@ export class MapContainer extends Layer {
     }
 
     areaEffectViewById(id: string): AreaEffectView {
-        for (let model of this.areaEffectsLayer.views) {
-            if (model.areaEffect.id == id) {
-                return model;
+        for (let view of this.areaEffectsLayer.views) {
+            if (view.areaEffect.id == id) {
+                return view;
             }
         }
         return null;
     }
 
     tileViewById(id: string): TileView {
-        for (let model of this.topLayer.views) {
-            if (model.tile.id == id) {
-                return model;
+        for (let view of this.topLayer.views) {
+            if (view.tile.id == id) {
+                return view;
             }
         }
-        for (let model of this.middleLayer.views) {
-            if (model.tile.id == id) {
-                return model;
+        for (let view of this.middleLayer.views) {
+            if (view.tile.id == id) {
+                return view;
             }
         }
 
-        for (let model of this.bottomLayer.views) {
-            if (model.tile.id == id) {
-                return model;
+        for (let view of this.bottomLayer.views) {
+            if (view.tile.id == id) {
+                return view;
+            }
+        }
+        return null;
+    }
+
+    markerViewById(id: string): MarkerView {
+        for (let view of this.markersLayer.views) {
+            if (view.marker.id == id) {
+                return view;
             }
         }
         return null;

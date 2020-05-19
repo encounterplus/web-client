@@ -2,6 +2,7 @@ import { Tile } from './tile';
 import { AreaEffect } from './area-effect';
 import { Drawing } from './drawing';
 import { Wall } from './wall';
+import { Marker } from './marker';
 
 export class Map {
     id: string;
@@ -21,6 +22,7 @@ export class Map {
     zoom: number;
     tiles: Array<Tile> = [];
     areaEffects: Array<AreaEffect> = [];
+    markers: Array<Marker> = [];
     drawings: Array<Drawing> = [];
     walls: Array<Wall> = [];
 }
