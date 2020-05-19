@@ -108,6 +108,8 @@ export class VisionLayer extends Layer {
 
         this.msk.endFill();
 
+        let tilesWithVision = false;
+
         // tiles
         for(let tile of this.tiles) {
             if(tile.vision != null && tile.vision.polygon != null) {
@@ -129,10 +131,14 @@ export class VisionLayer extends Layer {
                 this.visions.push(mesh);
 
                 mesh.mask = this.msk;
+                tilesWithVision = true
             }
         }
 
-        this.addChild(this.msk);
+        // add mask only when tiles with vision are present
+        if (tilesWithVision) {
+            this.addChild(this.msk);
+        }
 
         return this;
     }
