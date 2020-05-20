@@ -266,7 +266,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.pointerUpdated: {
-                this.mapComponent.mapContainer.particlesLayer.drawPointer(event.data);
+                this.mapComponent.mapContainer.effectsLayer.drawPointer(event.data);
                 break;
             }
 

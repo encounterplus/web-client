@@ -18,7 +18,7 @@ import { AreaEffectView } from './views/area-effect-view';
 import { TileView } from './views/tile-view';
 import { AurasLayer } from './layers/auras-layer';
 import { FogLayer } from './layers/fog-layer';
-import { ParticlesLayer } from './layers/particles-layer';
+import { EffectsLayer } from './layers/effects-layer';
 import { DrawingsLayer } from './layers/drawings-layer';
 import { MarkersLayer } from './layers/markers-layer';
 import { MarkerView } from './views/marker-view';
@@ -40,7 +40,7 @@ export class MapContainer extends Layer {
     visionLayer: VisionLayer;
     fogLayer: FogLayer;
     lightsLayer: LightsLayer;
-    particlesLayer: ParticlesLayer;
+    effectsLayer: EffectsLayer;
     drawingsLayer: DrawingsLayer;
     markersLayer: MarkersLayer;
 
@@ -71,7 +71,7 @@ export class MapContainer extends Layer {
         this.monstersLayer = this.addChild(new TokensLayer(this.dataService));
         this.visionLayer = this.addChild(new VisionLayer(this.dataService));
         this.fogLayer = this.addChild(new FogLayer());
-        this.particlesLayer = this.addChild(new ParticlesLayer(this.dataService));
+        this.effectsLayer = this.addChild(new EffectsLayer(this.dataService));
         this.playersLayer = this.addChild(new TokensLayer(this.dataService));
     }
 
@@ -106,7 +106,7 @@ export class MapContainer extends Layer {
 
         this.drawingsLayer.update();
 
-        this.particlesLayer.grid = this.grid;
+        this.effectsLayer.grid = this.grid;
 
         this.markersLayer.grid = this.grid;
         this.markersLayer.update();
@@ -189,7 +189,7 @@ export class MapContainer extends Layer {
 
         await this.drawingsLayer.draw();
 
-        await this.particlesLayer.draw();
+        await this.effectsLayer.draw();
 
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 

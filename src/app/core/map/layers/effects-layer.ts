@@ -7,7 +7,7 @@ import { Loader } from '../models/loader';
 import { Pointer } from 'src/app/shared/models/pointer';
 import { PointerView } from '../views/pointer-view';
 
-export class ParticlesLayer extends Layer {
+export class EffectsLayer extends Layer {
     grid: Grid;
 
     constructor(private dataService:DataService) {
