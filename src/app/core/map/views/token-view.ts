@@ -260,7 +260,9 @@ export class TokenView extends View {
     }
 
     updateTint() {
-        this.tokenSprite.tint = this.controlled ? 0xFFCCCC : 0xFFFFFF;
+        if (this.tokenSprite) {
+            this.tokenSprite.tint = this.controlled ? 0xFFCCCC : 0xFFFFFF;
+        }
     }
 
     updateInteraction() {
