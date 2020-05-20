@@ -74,8 +74,7 @@ export class PointerView extends View {
         this.pointer = pointer;
         this.grid = grid;
 
-
-
+        // create source label
         this.sourceText = new PIXI.Text(this.pointer.source || "Unknown", {fontFamily : 'Arial', fontSize: 30, fill : 0xffffff, align : 'center', dropShadow: true,
         dropShadowColor: '#000000', dropShadowBlur: 6, dropShadowDistance: 0});
         this.sourceText.style.fontSize = (this.grid.size / 4);
@@ -93,5 +92,4 @@ export class PointerView extends View {
         this.emitter.updateOwnerPos(x, y);
         this.sourceText.position.set(x, y - this.grid.size / 1.5);
     }
-    
 }
