@@ -14,19 +14,24 @@ export class SettingsModalComponent implements OnInit {
   name: string;
   color: string;
 
+  maxFPSOptions: Array<number> = [5, 15, 30, 60];
+  maxFPS: number = 60;
+
   constructor(public modalInstance: NgbActiveModal, private dataService: DataService) { 
-    
   }
 
   save() {
     localStorage.setItem("userName", this.name);
     localStorage.setItem("userColor", this.color);
+    localStorage.setItem("maxFPS", `${this.maxFPS}`);
 
+    // update server
     this.dataService.send({name: WSEventName.clientUpdated, data: {name: this.name, color: this.color}});
 
-    this.modalInstance.close("Close");
+    // close modal
+    this.modalInstance.close("save");
 
-    // temporary hack
+    // temporary hack to reload when host changed
     if (this.remoteHost != this.dataService.remoteHost) {
       document.location.search = `?remoteHost=${this.remoteHost}`;
     }
@@ -36,5 +41,6 @@ export class SettingsModalComponent implements OnInit {
     this.remoteHost = this.dataService.remoteHost;
     this.name = localStorage.getItem("userName") || "Unknown";
     this.color = this.color = localStorage.getItem("userColor") || '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+    this.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60;
   }
 }

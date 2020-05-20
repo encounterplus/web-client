@@ -18,6 +18,13 @@
             <input class="form-control" [(colorPicker)]="color" [style.background]="color" [value]="color" [cpPosition]="'bottom'" />
         </div>
     </div>
+
+    <div class="form-group">
+        <label for="maxFPS">Max FPS</label>
+        <select [(ngModel)]="maxFPS" class="form-control" id="maxFPS">
+            <option *ngFor="let fps of maxFPSOptions; let i = index" [value]="maxFPSOptions[i]">{{fps}}</option>
+        </select>
+      </div>
 </div>
 
 <div class="modal-footer">

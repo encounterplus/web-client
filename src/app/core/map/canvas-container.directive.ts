@@ -58,7 +58,7 @@ export class CanvasContainerDirective implements AfterViewInit {
     this.app.renderer.resize(this.width, this.height);
 
     // this.app.ticker.minFPS = 30;
-    this.app.ticker.maxFPS = 60;
+    this.app.ticker.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60;
 
     // Confirm that WebGL is available
     if ( this.app.renderer.type !== PIXI.RENDERER_TYPE.WEBGL ) {

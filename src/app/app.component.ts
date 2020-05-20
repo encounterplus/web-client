@@ -57,6 +57,8 @@ export class AppComponent implements OnInit, AfterViewInit {
             case "showSettings":
                 this.modalService.open(SettingsModalComponent).result.then(result => {
                     console.debug(`Settings component closed with: ${result}`);
+                    // update maxFPS
+                    this.mapComponent.app.ticker.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60;
                 }, reason => {
                     console.debug(`Setting component dismissed ${reason}`)
                 });
