@@ -45,15 +45,16 @@ export class ParticlesLayer extends Layer {
     async drawPointer(pointer: Pointer) {
         var pointerView = this.pointerViewById(pointer.id);
         if (pointerView) {
-            pointerView.updateOwnerPos(pointer.x, pointer.y);
+            pointerView.updatePosition(pointer.x, pointer.y);
         } else {
             console.log("creating new pointer");
             pointerView = new PointerView(pointer, this.grid, this, this.ringTexture);
-            pointerView.updateOwnerPos(pointer.x, pointer.y);
-            pointerView.emit = true;
-            pointerView.playOnceAndDestroy( () => {
+            pointerView.updatePosition(pointer.x, pointer.y);
+            pointerView.emitter.emit = true;
+            pointerView.emitter.playOnceAndDestroy( () => {
                 console.log('destroying pointer');
             });
+            this.addChild(pointerView);
             this.views[pointer.id] = pointerView;
         }
 
@@ -64,8 +65,9 @@ export class ParticlesLayer extends Layer {
 
             case ControlState.end:
             case ControlState.cancel:
-                pointerView.emit = false;
+                pointerView.emitter.emit = false;
                 delete this.views[pointer.id];
+                pointerView.destroy();
                 break;
         }
     }
