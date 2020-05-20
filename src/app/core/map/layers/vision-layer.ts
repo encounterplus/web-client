@@ -1,12 +1,5 @@
-// import * as PIXI from 'pixi.js';
 import { Creature } from 'src/app/shared/models/creature';
 import { Layer } from './layer';
-// import * as PIXIDISPLAY from 'pixi-layers';
-import { Map } from 'src/app/shared/models/map';
-import { environment } from 'src/environments/environment';
-import { TokenView } from '../views/token-view';
-import { Grid } from '../models/grid';
-import { CreatureComponent } from '../../creature/creature.component';
 import { Tile } from 'src/app/shared/models/tile';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
@@ -46,7 +39,6 @@ export class VisionLayer extends Layer {
     }
 
     async draw() {
-        // this.cacheAsBitmap = false;
         this.clear();
 
         if (!this.visible) {
@@ -58,7 +50,7 @@ export class VisionLayer extends Layer {
         this.bg.position.set(-5, -5);
         this.addChild(this.bg);
 
-        // load filters
+        // load shaders
         if (this.vert == null || this.frag == null) {
             this.vert = await Loader.shared.loadResource("/assets/shaders/vision.vert");
             this.frag = await Loader.shared.loadResource("/assets/shaders/vision.frag");
@@ -76,18 +68,14 @@ export class VisionLayer extends Layer {
         this.msk.beginFill(0xffffff);
 
         for(let creature of this.creatures) {
-            // console.log(creature);
             if(creature.vision != null && creature.vision.polygon != null) {
-
-                // console.log(creature.vision.polygon);
-
                 let polygon = this.getGeometry(creature.vision.x, creature.vision.y, creature.vision.polygon)
-                // console.log(polygon);
-
+                // this might be better triangle filling function
                 // let polygon = PIXI.utils.earcut (creature.vision.polygon, null, 2);
 
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
 
+                // TODO: add indicies
                 let geometry = new PIXI.Geometry()
                     .addAttribute('aVertexPosition', polygon);
 

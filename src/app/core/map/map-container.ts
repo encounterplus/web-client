@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js';
-import { Creature, CreatureType } from 'src/app/shared/models/creature';
+import { Creature } from 'src/app/shared/models/creature';
 import { Map } from 'src/app/shared/models/map';
-import { environment } from 'src/environments/environment';
 import { Layer } from './layers/layer';
 import { GridLayer } from './layers/grid-layer';
 import { BackgroundLayer } from './layers/background-layer';
@@ -21,7 +20,6 @@ import { AurasLayer } from './layers/auras-layer';
 import { FogLayer } from './layers/fog-layer';
 import { ParticlesLayer } from './layers/particles-layer';
 import { DrawingsLayer } from './layers/drawings-layer';
-import { ScreenInteraction } from 'src/app/shared/models/screen';
 import { MarkersLayer } from './layers/markers-layer';
 import { MarkerView } from './views/marker-view';
 
@@ -47,18 +45,14 @@ export class MapContainer extends Layer {
     markersLayer: MarkersLayer;
 
     // data
-    
     map: Map;
-
     state: AppState;
-
     grid: Grid = new Grid();
 
     data: PIXI.interaction.InteractionData;
     dragging: boolean;
 
     turned: TokenView;
-
     tiles: Array<Tile> = [];
 
     constructor(private dataService: DataService) {
@@ -152,10 +146,6 @@ export class MapContainer extends Layer {
     }
 
     async drawTiles() {
-        // this.bottomLayer.clear();
-        // this.middleLayer.clear();
-        // this.topLayer.clear();
-
         this.bottomLayer.tiles = this.tiles.filter(tile => tile.layer == "map");
         this.middleLayer.tiles = this.tiles.filter(tile => tile.layer == "object");
         this.topLayer.tiles = this.tiles.filter(tile => tile.layer == "token");
@@ -201,15 +191,10 @@ export class MapContainer extends Layer {
 
         await this.particlesLayer.draw();
 
-        // console.log(this.width);
-        // console.log(this.height);
-
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
         return this;
     }
-
-
 
     tokenByCreature(creature: Creature): TokenView {
         if (creature) {

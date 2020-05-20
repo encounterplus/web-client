@@ -1,8 +1,5 @@
 import { View } from './view';
 import { Grid } from '../models/grid';
-import { Loader } from '../models/loader';
-import { DataService } from 'src/app/shared/services/data.service';
-import { Aura } from 'src/app/shared/models/aura';
 import * as particles from "pixi-particles";
 import { Pointer } from 'src/app/shared/models/pointer';
 

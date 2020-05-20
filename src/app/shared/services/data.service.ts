@@ -4,7 +4,6 @@ import { Observable, Subject, BehaviorSubject, timer, throwError } from 'rxjs';
 import { map, catchError, skip, filter, tap, distinctUntilChanged, switchMap, retryWhen, repeat, retry } from 'rxjs/operators';
 import { WSEvent } from '../models/wsevent';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ToastService } from '../toast.service';
 import { webSocket } from 'rxjs/webSocket';
 import { AppState } from '../models/app-state';
 
@@ -13,16 +12,11 @@ import { AppState } from '../models/app-state';
 })
 export class DataService {
 
-  // public events: Subject<WSEvent>;
-
-  // hmm, is this right?
+  // hmm, global state?
   state: AppState;
 
   private reconnectionDelay = 1000;
-
   public remoteHost: string
-
-  public localEvents: Subject<any>;
 
   constructor(private httpClient: HttpClient) { 
   }

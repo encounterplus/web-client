@@ -1,12 +1,5 @@
-// import * as PIXI from 'pixi.js';
 import { Creature } from 'src/app/shared/models/creature';
 import { Layer } from './layer';
-// import * as PIXIDISPLAY from 'pixi-layers';
-import { Map } from 'src/app/shared/models/map';
-import { environment } from 'src/environments/environment';
-import { TokenView } from '../views/token-view';
-import { Grid } from '../models/grid';
-import { CreatureComponent } from '../../creature/creature.component';
 import { Tile } from 'src/app/shared/models/tile';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
@@ -16,14 +9,6 @@ export class LightsLayer extends Layer {
     app: PIXI.Application;
     creatures: Array<Creature> = [];
     tiles: Array<Tile> = [];
-
-    // updateCreatures(creatures: Array<Creature>) {
-    //     this.creatures = creatures;
-    // }
-
-    // updateTiles(tiles: Array<Tile>) {
-    //     this.tiles = tiles;
-    // }
     
     vert: PIXI.LoaderResource;
     frag: PIXI.LoaderResource;
@@ -62,14 +47,9 @@ export class LightsLayer extends Layer {
             this.frag = await Loader.shared.loadResource("/assets/shaders/light.frag");
         }
 
-        // var msk = new PIXI.Graphics().beginFill(0xffffff);
-
         for(let creature of this.creatures) {
-            // console.log(creature);
             if(creature.vision != null && creature.vision.polygon != null) {
-
-                let polygon = this.getGeometry2(creature.vision.x, creature.vision.y, creature.vision.polygon);
-                // let polygon = this.getGeometry2(creature.vision.x, creature.vision.y, creature.vision.radiusMax);
+                let polygon = this.getGeometry2(creature.vision.x, creature.vision.y, creature.vision.polygon);;
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
 
                 let geometry = new PIXI.Geometry()
@@ -93,9 +73,7 @@ export class LightsLayer extends Layer {
 
         // tiles
         for(let tile of this.tiles) {
-            // console.log(creature);
             if(tile.vision != null && tile.vision.polygon != null) {
-                // let polygon = this.getGeometry(tile.vision.x, tile.vision.y, tile.vision.radiusMax);
                 let polygon = this.getGeometry2(tile.vision.x, tile.vision.y, tile.vision.polygon);
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
 

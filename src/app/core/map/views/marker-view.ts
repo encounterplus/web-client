@@ -1,8 +1,5 @@
 import { View } from './view';
 import { Grid } from '../models/grid';
-import { Loader } from '../models/loader';
-import { DataService } from 'src/app/shared/services/data.service';
-import { Aura } from 'src/app/shared/models/aura';
 import { Marker } from 'src/app/shared/models/marker';
 
 export class MarkerView extends View {
@@ -72,7 +69,6 @@ export class MarkerView extends View {
         this.h = this.grid.size;
 
         this.position.set(this.marker.x - (this.w / 2), this.marker.y - (this.w));
-        // this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
         this.visible = !this.marker.hidden;
     }
 

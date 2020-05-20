@@ -1,13 +1,9 @@
 import * as PIXI from 'pixi.js';
-import { Creature } from 'src/app/shared/models/creature';
 import { Layer } from './layer';
 import { Map } from 'src/app/shared/models/map';
-import { environment } from 'src/environments/environment';
-import { map } from 'rxjs/operators';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
-import { WSEvent } from 'src/app/shared/models/wsevent';
 import { ControlState } from '../views/token-view';
 import { Pointer } from 'src/app/shared/models/pointer';
 import { v4 as uuidv4 } from 'uuid';
@@ -78,13 +74,8 @@ export class BackgroundLayer extends Layer {
         sprite.width = this.imageTexture.width;
         sprite.height = this.imageTexture.height;
         this.imageSprite = this.addChild(sprite);
-        // this.imageSprite.scale = this.scale
 
-        // this.width = this.imageTexture.width;
-        // this.height = this.imageTexture.height;
-
-        console.debug(this.width);
-        console.debug(this.height);
+        console.log(`map size: ${this.width}x${this.height}`)
     }
 
     clear() {
@@ -93,13 +84,7 @@ export class BackgroundLayer extends Layer {
         this.removeChildren();
     }
 
-
     onPointerUp(event: PIXI.interaction.InteractionEvent) {
-        // store a reference to the data
-        // the reason for this is because of multitouch
-        // we want to track the movement of this particular touch
-        
-        
         this.dragging = false;
 
         if (this.activePointer) {

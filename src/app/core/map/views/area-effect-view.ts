@@ -1,12 +1,6 @@
-import { Creature } from 'src/app/shared/models/creature';
 import { View } from './view';
-import { Sprite, interaction } from 'pixi.js';
-import { environment } from 'src/environments/environment';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
-import { DataService } from 'src/app/shared/services/data.service';
-import { WSEvent, WSEventName } from 'src/app/shared/models/wsevent';
-import { Tile } from 'src/app/shared/models/tile';
 import { AreaEffect, AreaEffectShape } from 'src/app/shared/models/area-effect';
 
 export function toRadians(degrees: number) {
@@ -30,7 +24,7 @@ export class AreaEffectView extends View {
 
     selected: boolean = false;
 
-    constructor(areaEffect: AreaEffect, grid: Grid, private dataService: DataService) {
+    constructor(areaEffect: AreaEffect, grid: Grid) {
         super();
         this.areaEffect = areaEffect;
         this.grid = grid;
@@ -235,7 +229,7 @@ export class AreaEffectView extends View {
         this.removeChildren();
     }
 
-    onClick(event: interaction.InteractionEvent) {
+    onClick() {
         this.selected = !this.selected;
         this.handlesGraphics.visible = this.selected;
 
@@ -244,6 +238,5 @@ export class AreaEffectView extends View {
         } else {
             this.shapeGraphics.visible = true;
         }
-        
     }
 }

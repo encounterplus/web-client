@@ -42,21 +42,16 @@ export class Loader {
         if (local == false) {
             src = this.remoteBaseURL + src;
         }
-
-        // First try to load the resource from the cache
         let tex = this.getTexture(src);
         if ( tex ) return tex;
 
-        // Otherwise load it and wait for loading to resolve
         tex = PIXI.Texture.from(src, {resourceOptions: this.RESOURCE_LOADER_OPTIONS});
 
-        // Return the ready texture as a Promise
         return new Promise((resolve, reject) => {
           let base = tex.baseTexture;
           if ( base.valid ) resolve(tex);
           base.once("loaded", f => resolve(tex));
           base.once("error", base => {
-            // let message = `Failed to load texture ${base.resource.url}`;
             console.error(`Failed to load resource ${src}`);
             delete PIXI.Loader.shared.resources[base.resource.url];
             base.destroy();
@@ -67,11 +62,9 @@ export class Loader {
     }
 
     async loadTextureBase64(name: string, base64string: string): Promise<PIXI.Texture> {
-        // First try to load the resource from the cache
         let tex = this.getTexture(name);
         if ( tex ) return tex;
 
-        // Return the ready texture as a Promise
         return new Promise((resolve, reject) => {
             const loader = PIXI.Loader.shared;
             loader.add(name, base64string).load( function(loader, resources) {
@@ -91,17 +84,13 @@ export class Loader {
         const loader = PIXI.Loader.shared;
         let cached = loader.resources[src];
         if ( !cached ) return null;
-
         return cached;
     }
 
     async loadResource(src: string): Promise<PIXI.LoaderResource> {
-
-        // First try to load the resource from the cache
         let res = this.getResource(src);
         if ( res ) return res;
 
-        // Return the ready texture as a Promise
         return new Promise((resolve, reject) => {
             const loader = PIXI.Loader.shared;
             loader.add(src, src).load( function(loader, resources) {

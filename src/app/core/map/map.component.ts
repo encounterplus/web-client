@@ -1,13 +1,8 @@
 import { Component, OnInit, ViewChild, Input, SimpleChanges, HostListener } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
-// import * as PIXI from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
-import { Game } from 'src/app/shared/models/game';
-import { Map } from 'src/app/shared/models/map';
-import { Screen } from 'src/app/shared/models/screen';
 import { MapContainer } from './map-container';
 import { AppState } from 'src/app/shared/models/app-state';
-import { Creature } from 'src/app/shared/models/creature';
 
 window.PIXI = PIXI;
 
@@ -40,7 +35,6 @@ export class MapComponent implements OnInit {
   viewport: Viewport;
 
   // layers
-
   mapContainer: MapContainer;
 
   constructor(private dataService: DataService) { 
@@ -63,8 +57,6 @@ export class MapComponent implements OnInit {
         interaction: this.app.renderer.plugins.interaction // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
       })
 
-      // this.app.stage = new PIXI.display.Stage();
-
       // add the viewport to the stage
       this.app.stage.addChild(this.viewport)
 
@@ -84,12 +76,9 @@ export class MapComponent implements OnInit {
 
       this.viewport.addChild(this.mapContainer);
 
-      // this.app.stage.addChild(this.mapContainer)
-
-      // void gl.blendEquationSeparate(modeRGB, modeAlpha);
-      // void gl.blendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
-      let gl = WebGLRenderingContext;
-      (this.app.renderer.state as any).blendModes[21] = [gl.ONE,  gl.ONE, gl.ZERO, gl.DST_ALPHA, gl.FUNC_ADD, gl.FUNC_ADD]
+      // this is not needed now
+      // let gl = WebGLRenderingContext;
+      // (this.app.renderer.state as any).blendModes[21] = [gl.ONE,  gl.ONE, gl.ZERO, gl.DST_ALPHA, gl.FUNC_ADD, gl.FUNC_ADD]
        
       console.debug("map component initialized");
 
@@ -105,9 +94,6 @@ export class MapComponent implements OnInit {
   async draw() {
     await this.mapContainer.draw();
 
-    // console.log(this.mapContainer.w);
-    // console.log(this.mapContainer.h);
-
     // update viewport
     this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
 
@@ -119,19 +105,18 @@ export class MapComponent implements OnInit {
 
     // upadate turned creature
     this.mapContainer.updateTurned(this.state.turned);
-    // this.viewport.forceHitArea = new PIXI.Rectangle(0,0, this.mapContainer.w, this.mapContainer.h);
 
     // // manual render without render loop
     // this.app.render();
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize(event) {
+  onResize() {
     // update viewport
     this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges() {
 
     console.debug("data changed");
 
@@ -141,14 +126,7 @@ export class MapComponent implements OnInit {
 
     this.update();
     this.mapContainer.draw();
-
   }
-
-  // protected _draw(): void {
-  //   console.debug("drawing map component");
-  //   this.app.stage.removeChildren();
-  //   this.app.stage.addChild(this.mapLayer);
-  // }
 
   protected _destroy(): void {
     // this.mapLayer.destroy();

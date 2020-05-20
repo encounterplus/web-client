@@ -41,7 +41,7 @@ export class CanvasContainerDirective implements AfterViewInit {
       // prevents pixi ticker to clash with zone
       this.app = new PIXI.Application(options);
       
-      // prevents mouse zoom
+      // prevents mouse zoom on document
       window.addEventListener('wheel', e => {
         e.preventDefault();
       }, {passive: false});
@@ -53,13 +53,12 @@ export class CanvasContainerDirective implements AfterViewInit {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
 
-    const viewportScale = 1 / this.devicePixelRatio;
-    this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
-    // this.app.view.style.transform = `scale(${viewportScale})`;
-    // this.app.view.style.transformOrigin = `top left`;
+    // const viewportScale = 1 / this.devicePixelRatio;
+    // this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
+    this.app.renderer.resize(this.width, this.height);
 
     // this.app.ticker.minFPS = 30;
-    // this.app.ticker.maxFPS = 60;
+    this.app.ticker.maxFPS = 60;
 
     // Confirm that WebGL is available
     if ( this.app.renderer.type !== PIXI.RENDERER_TYPE.WEBGL ) {

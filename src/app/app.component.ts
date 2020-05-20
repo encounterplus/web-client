@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { MapComponent } from './core/map/map.component';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
@@ -6,7 +6,6 @@ import { ApiData } from './shared/models/api-data';
 import { DataService } from './shared/services/data.service';
 import { environment } from 'src/environments/environment';
 import { AppState } from './shared/models/app-state';
-import { Creature } from './shared/models/creature';
 import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState } from './core/map/views/token-view';
 import { AreaEffect } from './shared/models/area-effect';
@@ -14,13 +13,10 @@ import { Tile } from './shared/models/tile';
 import { ToolbarComponent } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/toast.service';
-import { retry } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
-import { ActivatedRoute } from '@angular/router';
 import { Loader } from './core/map/models/loader';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
-import { BaseTexture } from 'pixi.js';
 import { Marker } from './shared/models/marker';
 
 @Component({
@@ -75,6 +71,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
     }
 
+    // main websocket event handler
     handleEvent(event: WSEvent) {
         console.log(`Event received: ${event.name}`)
         // console.log(JSON.stringify(event));
@@ -117,14 +114,10 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.creatureUpdated: {
-                // let creature = Object.assign(new Creature, event.data) as Creature;
-                
-                // this.state.game.creatures.push(creature);
 
                 // udpdate state
                 let index =  this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
                 let creature = this.state.game.creatures[index];
-                // this.state.game.creatures[index] = creature;
 
                 if (creature) {
                     Object.assign(creature, event.data);
@@ -154,6 +147,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.mapComponent.mapContainer.aurasLayer.draw();
                 }
 
+                // update los & ligts
                 this.mapComponent.mapContainer.lightsLayer.update();
                 this.mapComponent.mapContainer.visionLayer.update()
                 this.mapComponent.mapContainer.visionLayer.draw();
@@ -163,36 +157,35 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.creatureMoved: {
-                let token = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id);
-                if (token != null) {
-                    token.blocked = event.data.state == ControlState.block;
+                let view = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id);
+                if (view != null) {
+                    view.blocked = event.data.state == ControlState.block;
 
-                    if (!token.dragging) {
-                        token.creature.x = event.data.x;
-                        token.creature.y = event.data.y;
-                        token.controlled = event.data.state != ControlState.end && !token.dragging ? true : false
-                        token.update();
-                        token.updateTint();
+                    if (!view.dragging) {
+                        view.creature.x = event.data.x;
+                        view.creature.y = event.data.y;
+                        view.controlled = event.data.state != ControlState.end && !view.dragging ? true : false
+                        view.update();
+                        view.updateTint();
                     }
 
-                    token.distance = event.data.distance;
-                    token.updateDistance();
+                    view.distance = event.data.distance;
+                    view.updateDistance();
 
                     if (event.data.path != null) {
-                        this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, token.creature.scale, token.color);
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, view.creature.scale, view.color);
                         this.mapComponent.mapContainer.gridLayer.drawHighlight();
                     }
 
                     if (event.data.state == ControlState.end) {
-                        this.mapComponent.mapContainer.gridLayer.updateHighlight([], token.creature.scale, token.color);
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight([], view.creature.scale, view.color);
                         this.mapComponent.mapContainer.gridLayer.drawHighlight();
                     }
                 }
 
-                // this.state.game.creatures[index] = creature;
                 if (event.data.los != null) {
                     let index = this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
-                    if (index) {
+                    if (index !== undefined && index !== null) {
                         this.state.game.creatures[index].x = event.data.x;
                         this.state.game.creatures[index].y = event.data.y;
                         if (this.state.game.creatures[index].vision) {
@@ -261,7 +254,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.mapLoaded: {
-                // window.location = window.location;
+                // get new data from API and redraw everything
                 this.getData();
                 break;
             }
@@ -339,10 +332,9 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
     }
 
+    // get data from JSON API
     getData() {
         this.dataService.getData().subscribe((data: ApiData) => {
-            // console.log(data);
-
             this.state.game = data.game;
             this.state.map = data.map;
             this.state.screen = data.screen;
@@ -354,7 +346,6 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.mapComponent.update();
                 this.mapComponent.draw();
             }
-
             console.debug(this.state);
         }, err => this.toastService.showError("API error: " + err));
     }

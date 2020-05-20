@@ -1,22 +1,16 @@
-import { Creature, CreatureType } from 'src/app/shared/models/creature';
 import { Layer } from './layer';
-import { TokenView, ControlState } from '../views/token-view';
+import { ControlState } from '../views/token-view';
 import { Grid } from '../models/grid';
 import { DataService } from 'src/app/shared/services/data.service';
-import { Tile } from 'src/app/shared/models/tile';
-import { TileView } from '../views/tile-view';
 
-import * as pixi from 'pixi.js';
-import * as particles from "pixi-particles";
 import { Loader } from '../models/loader';
 import { Pointer } from 'src/app/shared/models/pointer';
 import { PointerView } from '../views/pointer-view';
 
 export class ParticlesLayer extends Layer {
-
     grid: Grid;
 
-    constructor(private dataService: DataService) {
+    constructor(private dataService:DataService) {
         super();
     }
 
@@ -26,7 +20,6 @@ export class ParticlesLayer extends Layer {
 
     async draw() {
         // this.clear();
-
         this.w = this.parent.width;
         this.h = this.parent.height;
 

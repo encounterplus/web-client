@@ -7,8 +7,6 @@ export class Layer extends PIXI.Container {
     h: number;
     
     async draw(): Promise<this> {
-        // Clear existing layer contents
-        // this.removeChildren().forEach(c => c.destroy());
         this.removeChildren();
     
         // Set basic dimensions

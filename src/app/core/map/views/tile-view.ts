@@ -1,11 +1,7 @@
-import { Creature } from 'src/app/shared/models/creature';
 import { View } from './view';
-import { Sprite, interaction } from 'pixi.js';
-import { environment } from 'src/environments/environment';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
-import { WSEvent, WSEventName } from 'src/app/shared/models/wsevent';
 import { Tile } from 'src/app/shared/models/tile';
 
 export class TileView extends View {
@@ -16,7 +12,7 @@ export class TileView extends View {
     assetTexture: PIXI.Texture;
     assetSprite: PIXI.Sprite;
 
-    constructor(tile: Tile, grid: Grid, private dataService: DataService) {
+    constructor(tile: Tile, grid: Grid) {
         super();
         this.tile = tile;
         this.grid = grid;
@@ -32,8 +28,6 @@ export class TileView extends View {
 
     async drawAsset() {
         // texture
-        // this.tokenTexture = await this.loadTexture('/assets/img/token.png');
-        
         if (this.tile.asset.resource != null) {
             this.assetTexture = await Loader.shared.loadTexture(this.tile.asset.resource);
         } else {

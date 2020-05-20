@@ -1,12 +1,11 @@
 
 import { Creature, Role } from 'src/app/shared/models/creature';
 import { View } from './view';
-import { Sprite, interaction, Container, BLEND_MODES } from 'pixi.js';
-import { environment } from 'src/environments/environment';
+import { interaction, Container } from 'pixi.js';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
-import { WSEvent, WSEventName } from 'src/app/shared/models/wsevent';
+import { WSEventName } from 'src/app/shared/models/wsevent';
 import { AuraView } from './aura-view';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
 
@@ -108,9 +107,6 @@ export class TokenView extends View {
     }
 
     async drawToken() {
-        // texture
-        // this.tokenTexture = await this.loadTexture('/assets/img/token.png');
-        
         if (this.creature.cachedToken != null) {
             this.tokenTexture = await Loader.shared.loadTexture(this.creature.cachedToken);
         } else if (this.creature.token != null) {
@@ -121,11 +117,6 @@ export class TokenView extends View {
 
         this.w = this.grid.size * this.creature.scale;
         this.h = this.grid.size * this.creature.scale;
-
-        // // stroke
-        // let graphics = new PIXI.Graphics();
-        // graphics.lineStyle(1, 0xcccccc, 0.8).drawRoundedRect(-1, -1, this.w+1, this.h+1, 4);
-        // this.addChild(graphics);
 
         // sprite
         if (this.tokenTexture != null) {
@@ -213,13 +204,6 @@ export class TokenView extends View {
     }
 
     updateUID() {
-        // this.uidText.width = this.w;
-        // this.uidText.height = this.h;
-
-        // this.uidGraphics.position.set(this.w / 2, this.h / 2);
-
-        // console.debug("updating UID");
-
         if (!this.uidGraphics || !this.uidText) {
             return;
         }
@@ -234,7 +218,6 @@ export class TokenView extends View {
 
             this.uidGraphics.clear();
             this.uidGraphics.beginFill(this.color).drawCircle(x, y, badgeSize / 2).endFill();
-            // this.uidGraphics.cacheAsBitmap = true;
 
             this.uidText.position.set(x, y);
             this.uidText.style.fontSize = badgeSize / 2.5;
@@ -242,7 +225,6 @@ export class TokenView extends View {
         } else {
             this.uidGraphics.clear();
             this.uidGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, this.w / 2).endFill();
-            // this.uidGraphics.cacheAsBitmap = true;
             this.uidText.position.set(this.w / 2, this.h / 2);
             this.uidText.style.fontSize = this.height / 2.5;
         }
@@ -296,9 +278,6 @@ export class TokenView extends View {
             return;
         }
 
-        // store a reference to the data
-        // the reason for this is because of multitouch
-        // we want to track the movement of this particular touch
         this.data = event.data;
         this.dragging = true;
 
@@ -313,7 +292,6 @@ export class TokenView extends View {
         }
 
         this.dragging = false;
-        // set the interaction data to null
         this.data = null;
 
         this.dataService.send({name: WSEventName.creatureMoved, data: {id: this.creature.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end}});

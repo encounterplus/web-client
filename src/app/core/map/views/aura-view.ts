@@ -1,7 +1,6 @@
 import { View } from './view';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
-import { DataService } from 'src/app/shared/services/data.service';
 import { Aura } from 'src/app/shared/models/aura';
 
 export class AuraView extends View {
@@ -73,12 +72,6 @@ export class AuraView extends View {
     }
 
     update() {
-
-        // this.w = (this.aura.radius / 5) * this.grid.size * 2;
-        // this.h = (this.aura.radius / 5) * this.grid.size * 2;
-
-        // this.position.set(this.tile.x, this.tile.y)
-        // this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
         this.alpha = this.aura.opacity;
     }
 

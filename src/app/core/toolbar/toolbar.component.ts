@@ -20,11 +20,6 @@ export class ToolbarComponent implements OnInit {
 
   showSettings() {
     this.action.emit("showSettings");
-    // this.modalService.open(SettingsModalComponent).result.then(result => {
-    //     console.debug(`Settings component closed with: ${result}`);
-    // }, reason => {
-    //     console.debug(`Setting component dismissed ${reason}`)
-    // });
   }
 
   showAbout() {

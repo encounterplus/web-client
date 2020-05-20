@@ -15,11 +15,7 @@ export class GridLayer extends Layer {
 
     constructor() {
         super();
-
-        // const colorMatrix = new PIXI.filters.AlphaFilter();
         this.alphaFilter.alpha = 0.5;
-        // this.highlightGraphics.filters = [colorMatrix];
-
     }
 
     update(grid: Grid) {
@@ -82,60 +78,6 @@ export class GridLayer extends Layer {
         }
 
         return this;
-
-        // canvas drawing
-
-        // const canvas = document.createElement('canvas');
-        // canvas.width  = this.size;
-        // canvas.height = this.size;
-
-        // let context = canvas.getContext('2d');
-        // context.beginPath();
-        // context.moveTo(this.size, 0);
-        // context.lineTo(0, 0);
-        // context.lineTo(0, this.size);
-        // context.lineWidth = 1; //  1 / (window.devicePixelRatio || 1);
-        // context.strokeStyle = this.color;
-        // context.stroke();
-
-        // let width = this.parent.width;
-        // let height = this.parent.height;
-
-        // this.tileTexture = PIXI.Texture.from(canvas);
-        // this.tilingSprite = this.addChild(new PIXI.TilingSprite(this.tileTexture, width + this.size, height + this.size));
-        // this.tilingSprite.x = this.offsetX - this.size;
-        // this.tilingSprite.y = this.offsetY - this.size;
-
-        // this.cacheAsBitmap = true;
-        
-
-        // this.scale.set(0.5);
-
-        // console.debug(this.width);
-        // console.debug(this.tilingSprite);
-
-        // const graphics = new PIXI.Graphics();
-
-        // // Rectangle
-        // graphics.beginFill(0xDE3249);
-        // graphics.drawRect(50, 50, 100, 100);
-        // graphics.endFill();
-
-        // // Rectangle + line style 1
-        // graphics.lineStyle(2, 0xFEEB77, 1);
-        // graphics.beginFill(0x650A5A);
-        // graphics.drawRect(200, 50, 100, 100);
-        // graphics.endFill();
-
-        // // draw polygon
-        // const path = [600, 370, 700, 460, 780, 420, 730, 570, 590, 520];
-
-        // graphics.lineStyle(0);
-        // graphics.beginFill(0x3500FA, 1);
-        // graphics.drawPolygon(path);
-        // graphics.endFill();
-
-        // this.addChild(graphics);
     }
 
     async draw() {

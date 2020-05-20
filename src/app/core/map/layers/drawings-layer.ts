@@ -1,12 +1,7 @@
-import { Creature, CreatureType } from 'src/app/shared/models/creature';
 import { Layer } from './layer';
-import { TokenView } from '../views/token-view';
-import { Grid } from '../models/grid';
 import { DataService } from 'src/app/shared/services/data.service';
-import { Tile } from 'src/app/shared/models/tile';
-import { TileView } from '../views/tile-view';
 import { Drawing, DrawingShape } from 'src/app/shared/models/drawing';
-import { Graphics, BLEND_MODES } from 'pixi.js';
+import { Graphics } from 'pixi.js';
 
 export class DrawingsLayer extends Layer {
     drawings: Array<Drawing> = [];
@@ -58,7 +53,7 @@ export class DrawingsLayer extends Layer {
         return this;
     }
 
-    async drawDrawing(drawing: Drawing) {
+    async drawDrawing() {
 
     }
 

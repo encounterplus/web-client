@@ -34,7 +34,7 @@ export class SettingsModalComponent implements OnInit {
 
   ngOnInit() {
     this.remoteHost = this.dataService.remoteHost;
-    this.name = localStorage.getItem("userName");
+    this.name = localStorage.getItem("userName") || "Unknown";
     this.color = this.color = localStorage.getItem("userColor") || '#'+(Math.random()*0xFFFFFF<<0).toString(16);
   }
 }
