@@ -24,6 +24,7 @@
     "bootstrap": "^4.5.0",
     "font-awesome": "^4.7.0",
     "gl-matrix": "^3.3.0",
+    "ionicons": "^5.0.1",
     "ngx-color-picker": "^9.1.0",
     "ngx-lightbox": "^2.1.2",
     "pixi-layers": "^0.2.3",

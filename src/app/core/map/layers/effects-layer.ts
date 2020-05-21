@@ -40,12 +40,12 @@ export class EffectsLayer extends Layer {
         if (pointerView) {
             pointerView.updatePosition(pointer.x, pointer.y);
         } else {
-            console.log("creating new pointer");
+            // console.log("creating new pointer");
             pointerView = new PointerView(pointer, this.grid, this, this.ringTexture);
             pointerView.updatePosition(pointer.x, pointer.y);
             pointerView.emitter.emit = true;
             pointerView.emitter.playOnceAndDestroy( () => {
-                console.log('destroying pointer');
+                // console.log('destroying pointer');
             });
             this.addChild(pointerView);
             this.views[pointer.id] = pointerView;

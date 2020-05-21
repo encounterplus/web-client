@@ -10,7 +10,7 @@ import { VisionLayer } from './layers/vision-layer';
 import { LightsLayer } from './layers/lights-layer';
 import { DataService } from 'src/app/shared/services/data.service';
 import { AppState } from 'src/app/shared/models/app-state';
-import { TokenView } from './views/token-view';
+import { TokenView, ControlState } from './views/token-view';
 import { Tile } from 'src/app/shared/models/tile';
 import { TilesLayer } from './layers/tiles-layer';
 import { AreaEffectsLayer } from './layers/area-effects-layer';
@@ -22,6 +22,11 @@ import { EffectsLayer } from './layers/effects-layer';
 import { DrawingsLayer } from './layers/drawings-layer';
 import { MarkersLayer } from './layers/markers-layer';
 import { MarkerView } from './views/marker-view';
+import { Tool } from '../toolbar/toolbar.component';
+import { Pointer } from 'src/app/shared/models/pointer';
+import { WSEventName } from 'src/app/shared/models/wsevent';
+import { v4 as uuidv4 } from 'uuid';
+import { ReturnStatement } from '@angular/compiler';
 
 export class MapContainer extends Layer {
 
@@ -50,7 +55,11 @@ export class MapContainer extends Layer {
     grid: Grid = new Grid();
 
     data: PIXI.interaction.InteractionData;
-    dragging: boolean;
+    dragging: boolean = false;
+    clicked: boolean = false;
+
+    activePointer: Pointer;
+    activeTool: Tool;
 
     turned: TokenView;
     tiles: Array<Tile> = [];
@@ -73,6 +82,13 @@ export class MapContainer extends Layer {
         this.fogLayer = this.addChild(new FogLayer());
         this.effectsLayer = this.addChild(new EffectsLayer(this.dataService));
         this.playersLayer = this.addChild(new TokensLayer(this.dataService));
+
+        this.interactive = true;
+
+        this
+            .on('pointerup', this.onPointerUp)
+            .on('pointerdown', this.onPointerDown)
+            .on('pointermove', this.onPointerMove);
     }
 
     update(state: AppState) {
@@ -257,5 +273,76 @@ export class MapContainer extends Layer {
             }
         }
         return null;
+    }
+
+    onPointerUp(event: PIXI.interaction.InteractionEvent) {
+        this.dragging = false;
+
+        if (this.activePointer) {
+            event.stopPropagation();
+            const newPosition = event.data.getLocalPosition(this.parent);
+
+            this.activePointer.x = newPosition.x | 0;
+            this.activePointer.y = newPosition.y | 0;
+            this.activePointer.state = ControlState.end;
+
+            // send event
+            this.dataService.send({name: WSEventName.pointerUpdated, data: this.activePointer});
+
+            // remove pointer
+            this.activePointer = null;
+        }
+    }
+    
+    onPointerDown(event: PIXI.interaction.InteractionEvent) {
+        if (event.data.originalEvent.shiftKey || this.activeTool == Tool.pointer) {
+            event.stopPropagation();
+            this.dragging = true;
+
+            const newPosition = event.data.getLocalPosition(this.parent);
+
+            // check if active pointer is present
+            if (this.activePointer) {
+                // send event
+                this.activePointer.state = ControlState.end;
+                this.dataService.send({name: WSEventName.pointerUpdated, data: this.activePointer});
+            }
+
+            this.activePointer = new Pointer();
+            this.activePointer.id = uuidv4();
+            this.activePointer.color = localStorage.getItem("userColor");
+            this.activePointer.source = localStorage.getItem("userName");
+            this.activePointer.x = newPosition.x | 0;
+            this.activePointer.y = newPosition.y | 0;
+            this.activePointer.state = ControlState.start;
+
+            // send event
+            this.dataService.send({name: WSEventName.pointerUpdated, data: this.activePointer});
+            return
+        }
+    }
+    
+    onPointerMove(event: PIXI.interaction.InteractionEvent) {
+        if (this.dragging && this.activePointer) {
+            event.stopPropagation();
+
+            const newPosition = event.data.getLocalPosition(this.parent);
+
+            // out of bounds
+            if (newPosition.x < 0 || newPosition.x > this.w || newPosition.y < 0 || newPosition.y > this.h) {
+                this.activePointer.state = ControlState.end;
+                // send event
+                this.dataService.send({name: WSEventName.pointerUpdated, data: this.activePointer});
+                this.activePointer = null;
+                return;
+            }
+
+            this.activePointer.x = newPosition.x | 0;
+            this.activePointer.y = newPosition.y | 0;
+            this.activePointer.state = ControlState.control;
+
+            // send event
+            this.dataService.send({name: WSEventName.pointerUpdated, data: this.activePointer});
+        }
     }
 }

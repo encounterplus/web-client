@@ -1,5 +1,5 @@
-<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-    
+<div class="btn-toolbar" role="toolbar">
+  <div class="btn-group mr-2" role="group" aria-label="Button group with nested dropdown">
     <div class="btn-group" ngbDropdown role="group">
       <button id="dropdownBasic1" type="button" class="btn btn-dark" ngbDropdownToggle>
         EncounterPlus
@@ -8,8 +8,16 @@
         <button ngbDropdownItem (click)="showSettings()">Settings</button>
         <button ngbDropdownItem (click)="showAbout()">About</button>
       </div>
-    </div>
+    </div>    
+  </div>
 
-    <!-- <button type="button" class="btn btn-dark"><i class="fa fa-cog"></i></button> -->
-    <!-- <button type="button" class="btn btn-dark"><i class="fa fa-pencil"></i></button> -->
+  <div class="btn-group mr-2 btn-group-toggle" ngbRadioGroup name="radioBasic" role="group" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)" aria-label="Second group">
+    <label ngbButtonLabel class="btn btn-dark">
+      <input ngbButton type="radio" value="move"> <i class="fa fa-arrows"></i>
+    </label>
+    <label ngbButtonLabel class="btn btn-dark">
+      <input ngbButton type="radio" value="pointer"> <i class="fa fa-magic"></i>
+    </label>
+  </div>
 </div>
+

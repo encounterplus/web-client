@@ -10,7 +10,7 @@ import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState } from './core/map/views/token-view';
 import { AreaEffect } from './shared/models/area-effect';
 import { Tile } from './shared/models/tile';
-import { ToolbarComponent } from './core/toolbar/toolbar.component';
+import { ToolbarComponent, Tool } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/toast.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -70,6 +70,12 @@ export class AppComponent implements OnInit, AfterViewInit {
                     console.debug(`About component dismissed ${reason}`)
                 });
                 break;
+        }
+    }
+
+    activeToolAction(tool: Tool) {
+        if (this.mapComponent) {
+            this.mapComponent.mapContainer.activeTool = tool;
         }
     }
 
