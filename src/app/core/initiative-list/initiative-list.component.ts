@@ -13,20 +13,20 @@ export class InitiativeListComponent implements OnInit {
   // Used to store how much space it's current taking up.
   static WIDTH = 0;
 
-  @Input() 
+  @Input()
   public state: AppState;
 
-  constructor(private element: ElementRef, private lightbox: Lightbox, private dataService: DataService) { 
+  constructor(private element: ElementRef, private lightbox: Lightbox, private dataService: DataService) {
   }
 
   get activeCreatures(): Array<Creature> {
-    return this.state.game.creatures.filter( creature => { return creature.initiative != -10 } ).sort((a, b) => (a.rank > b.rank) ? 1 : -1)
+    return this.state.game.creatures.filter(creature => { return creature.initiative != -10 }).sort((a, b) => (a.rank > b.rank) ? 1 : -1)
   }
 
   get images(): Array<IAlbum> {
-    let images: Array<IAlbum>  = [];
+    let images: Array<IAlbum> = [];
     for (let creature of this.activeCreatures) {
-      images.push({src:  `http://${this.dataService.remoteHost}${creature.image}`, caption: null, thumb: null});
+      images.push({ src: `http://${this.dataService.remoteHost}${creature.image}`, caption: null, thumb: null });
     }
     return images;
   }
@@ -45,10 +45,14 @@ export class InitiativeListComponent implements OnInit {
   scrollToTurned() {
     // scroll to turned element
     console.debug(this.state.turnedId);
-    let selector = `[data-id="${this.state.turnedId}"]`;
-    let el = this.element.nativeElement.querySelector(selector);
+    const selector = `[data-id="${this.state.turnedId}"]`;
+    const el = (this.element.nativeElement as HTMLElement).querySelector(selector);
     if (el) {
-      el.scrollIntoView();
+      const box = el.getBoundingClientRect();
+
+      if (box.top < 0 || box.bottom > window.innerHeight) {
+        el.scrollIntoView(box.top < 0);
+      }
     }
   }
 
