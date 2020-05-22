@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, Input, SimpleChanges, HostListener } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
+import { InitiativeListComponent } from '../initiative-list/initiative-list.component';
 import { Viewport } from 'pixi-viewport';
 import { MapContainer } from './map-container';
 import { AppState } from 'src/app/shared/models/app-state';
@@ -95,7 +96,7 @@ export class MapComponent implements OnInit {
     await this.mapContainer.draw();
 
     // update viewport
-    this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
+    this.viewport.resize(window.innerWidth - InitiativeListComponent.WIDTH, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
 
     // fit scale
     this.viewport.fitWorld(true);

@@ -10,6 +10,8 @@ import { DataService } from 'src/app/shared/services/data.service';
   styleUrls: ['./initiative-list.component.scss']
 })
 export class InitiativeListComponent implements OnInit {
+  // Used to store how much space it's current taking up.
+  static WIDTH = 0;
 
   @Input() 
   public state: AppState;
@@ -53,10 +55,12 @@ export class InitiativeListComponent implements OnInit {
   open(index: number): void {
     // open lightbox
     this.lightbox.open(this.images, index);
+    InitiativeListComponent.WIDTH = 150;
   }
 
   close(): void {
     // close lightbox programmatically
     this.lightbox.close();
+    InitiativeListComponent.WIDTH = 0;
   }
 }
