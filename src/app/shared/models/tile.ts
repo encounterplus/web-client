@@ -2,6 +2,7 @@ import { Light } from './light';
 import { Vision } from './vision';
 import { Asset } from './asset';
 import { Component } from './component';
+import { MapLayer } from './map';
 
 export class Tile {
     id: string;
@@ -10,7 +11,7 @@ export class Tile {
     width: number;
     height: number;
     rotation: number;
-    layer: string;
+    layer: MapLayer = MapLayer.object;
     zIndex: null
     asset: Asset;
     light: Light;

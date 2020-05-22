@@ -3,6 +3,7 @@ import { Grid } from '../models/grid';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Tile } from 'src/app/shared/models/tile';
 import { TileView } from '../views/tile-view';
+import { MapLayer } from 'src/app/shared/models/map';
 
 export class TilesLayer extends Layer {
     tiles: Array<Tile> = [];
@@ -19,6 +20,9 @@ export class TilesLayer extends Layer {
 
         // tiles
         for (let tile of this.tiles) {
+            if (tile.layer == MapLayer.dm) {
+                return;
+            }
             let tileView = new TileView(tile, this.grid);
             this.addChild(tileView);
             tileView.draw();
