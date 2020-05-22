@@ -42,7 +42,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
       this.app = new PIXI.Application(options);
 
       // prevents mouse zoom on document
-      window.addEventListener('wheel', e => {
+      this.element.addEventListener('wheel', e => {
         if (!(e.currentTarget as HTMLElement)?.closest('app-initiative-list')) {
           e.preventDefault();
         }
