@@ -1,3 +1,5 @@
+import { MapLayer } from './map';
+
 export enum DrawingShape {
     line = "line",
     rectangle = "rectangle",
@@ -7,7 +9,7 @@ export enum DrawingShape {
 export class Drawing {
     shape: DrawingShape = DrawingShape.line;
     data: Array<number> = [];
-    layer: string;
+    layer: MapLayer;
     strokeWidth: number;
     strokeColor: string;
     fillColor: string;

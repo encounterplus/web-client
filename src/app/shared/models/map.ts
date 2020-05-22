@@ -4,6 +4,15 @@ import { Drawing } from './drawing';
 import { Wall } from './wall';
 import { Marker } from './marker';
 
+export enum MapLayer {
+    token = "token",
+    object = "object",
+    map = "map",
+    dm = "dm",
+    wall = "wall",
+    floor = "floor"
+}
+
 export class Map {
     id: string;
     gridVisible: boolean;

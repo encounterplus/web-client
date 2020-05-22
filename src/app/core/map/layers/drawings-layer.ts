@@ -2,6 +2,7 @@ import { Layer } from './layer';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Drawing, DrawingShape } from 'src/app/shared/models/drawing';
 import { Graphics } from 'pixi.js';
+import { MapLayer } from 'src/app/shared/models/map';
 
 export class DrawingsLayer extends Layer {
     drawings: Array<Drawing> = [];
@@ -18,8 +19,13 @@ export class DrawingsLayer extends Layer {
     async draw() {
         this.clear();
 
-        // tiles
+        // drawings
         for (let drawing of this.drawings) {
+            // skip walls (legacy drawings) and dm layer
+            if (drawing.layer == MapLayer.dm || drawing.layer == MapLayer.wall) {
+                continue;
+            }
+
             let graphics = new PIXI.Graphics();
 
             switch (drawing.shape) {
