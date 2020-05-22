@@ -57,7 +57,11 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
       const box = el.getBoundingClientRect();
 
       if (box.top < 0 || box.bottom > window.innerHeight) {
-        el.scrollIntoView(box.top < 0);
+        el.scrollIntoView({
+          behavior: 'smooth',
+          block: box.top < 0 ? 'start' : 'end',
+          inline: 'nearest',
+        });
       }
     }
   }
