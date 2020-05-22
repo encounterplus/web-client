@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, SimpleChanges, HostListener } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, SimpleChanges, HostListener, OnChanges } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
 import { Viewport } from 'pixi-viewport';
 import { MapContainer } from './map-container';
@@ -9,24 +9,25 @@ window.PIXI = PIXI;
 import 'pixi.js';
 import 'pixi-layers';
 import { DataService } from 'src/app/shared/services/data.service';
+import { InitiativeListComponent } from '../initiative-list/initiative-list.component';
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss']
 })
-export class MapComponent implements OnInit {
+export class MapComponent implements OnInit, OnChanges {
 
-  @ViewChild(CanvasContainerDirective, {static: true})
+  @ViewChild(CanvasContainerDirective, { static: true })
   canvas: CanvasContainerDirective;
 
-  @Input() 
+  @Input()
   public state: AppState = new AppState();
 
-  width: number = 0;
-  height: number = 0;
+  width = 0;
+  height = 0;
 
-  isReady: boolean = false;
+  isReady = false;
 
   // PixiJS
   app: PIXI.Application;
@@ -37,14 +38,14 @@ export class MapComponent implements OnInit {
   // layers
   mapContainer: MapContainer;
 
-  constructor(private dataService: DataService) { 
+  constructor(private dataService: DataService) {
     this.mapContainer = new MapContainer(this.dataService);
   }
 
   ngOnInit(): void {
     if (this.canvas !== undefined) {
-      this.app  = this.canvas.app;
-      this.width  = this.canvas.width;
+      this.app = this.canvas.app;
+      this.width = this.canvas.width;
       this.height = this.canvas.height;
 
       // create viewport
@@ -54,8 +55,9 @@ export class MapComponent implements OnInit {
         worldWidth: 1000,
         worldHeight: 1000,
 
-        interaction: this.app.renderer.plugins.interaction // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
-      })
+        // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+        interaction: this.app.renderer.plugins.interaction
+      });
 
       // add the viewport to the stage
       this.app.stage.addChild(this.viewport)
@@ -66,23 +68,23 @@ export class MapComponent implements OnInit {
         .pinch()
         .wheel({
           percent: 0.001
-        })
-        // .snapZoom({
-        //   height: 20,
-        //   removeOnComplete: true,
-        //   removeOnInterrupt: true,
-        //   time: 2000,
-        // });
+        });
+      // .snapZoom({
+      //   height: 20,
+      //   removeOnComplete: true,
+      //   removeOnInterrupt: true,
+      //   time: 2000,
+      // });
 
       this.viewport.addChild(this.mapContainer);
 
       // this is not needed now
       // let gl = WebGLRenderingContext;
       // (this.app.renderer.state as any).blendModes[21] = [gl.ONE,  gl.ONE, gl.ZERO, gl.DST_ALPHA, gl.FUNC_ADD, gl.FUNC_ADD]
-       
+
       console.debug("map component initialized");
 
-      this.update()
+      this.update();
       this.draw();
     }
   }
@@ -95,13 +97,13 @@ export class MapComponent implements OnInit {
     await this.mapContainer.draw();
 
     // update viewport
-    this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
+    this.onResize();
 
     // fit scale
     this.viewport.fitWorld(true);
 
     // move center
-    this.viewport.moveCenter(this.mapContainer.w / 2,this.mapContainer.h / 2);
+    this.viewport.moveCenter(this.mapContainer.w / 2, this.mapContainer.h / 2);
 
     // upadate turned creature
     this.mapContainer.updateTurned(this.state.turned);
@@ -113,7 +115,8 @@ export class MapComponent implements OnInit {
   @HostListener('window:resize', ['$event'])
   onResize() {
     // update viewport
-    this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
+    this.viewport.resize(window.innerWidth - (InitiativeListComponent.el?.getBoundingClientRect()?.width ?? 0),
+      window.innerHeight, this.mapContainer.w, this.mapContainer.h);
   }
 
   ngOnChanges() {
