@@ -368,8 +368,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     configureRemoteHost() {
         let urlParams = new URLSearchParams(window.location.search);
         let remoteHost = urlParams.get('remoteHost') || localStorage.getItem("lastSuccessfullHost") || window.location.host;
-        this.dataService.remoteHost = remoteHost;
-        Loader.shared.remoteBaseURL = this.dataService.baseURL;
+	this.dataService.remoteHost = remoteHost;
+	this.dataService.protocol = window.location.protocol;
+	Loader.shared.remoteBaseURL = this.dataService.baseURL;
     }
 
     ngOnInit() {

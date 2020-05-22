@@ -16,21 +16,26 @@ export class DataService {
   state: AppState;
 
   private reconnectionDelay = 1000;
-  public remoteHost: string
+  public remoteHost: string;
+  public protocol: string;
 
   constructor(private httpClient: HttpClient) { 
   }
 
   get baseURL(): string {
-    return `http://${this.remoteHost}`
+    return `${this.protocol}//${this.remoteHost}`
   }
 
   get apiBaseURL(): string {
-    return `http://${this.remoteHost}/api`
+    return `${this.protocol}//${this.remoteHost}/api`
   }
 
   get wsBaseURL(): string {
-    return `ws://${this.remoteHost}/ws`
+    if (this.protocol == "https:") {
+      return `wss://${this.remoteHost}/ws`
+    } else {
+      return `ws://${this.remoteHost}/ws`
+    }
   }
 
   handleError(error: HttpErrorResponse) {
