@@ -3,6 +3,8 @@ import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Tile } from 'src/app/shared/models/tile';
+import { TilesLayer } from '../layers/tiles-layer';
+import { MapLayer } from 'src/app/shared/models/map';
 
 export class TileView extends View {
 
@@ -11,6 +13,8 @@ export class TileView extends View {
 
     assetTexture: PIXI.Texture;
     assetSprite: PIXI.Sprite;
+
+    mapLayer: MapLayer = MapLayer.object;
 
     constructor(tile: Tile, grid: Grid) {
         super();
@@ -57,6 +61,7 @@ export class TileView extends View {
         this.zIndex = this.tile.zIndex;
 
         this.visible = !this.tile.hidden;
+        this.mapLayer = this.tile.layer;
     }
 
     clear() {

@@ -235,9 +235,14 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.state.map.tiles[index] = model;
 
                 let view = this.mapComponent.mapContainer.tileViewById(model.id)
-                if (view != null) {
+                if (view != null && view.mapLayer == model.layer) {
+                    // update tile only
                     view.tile = model;
                     view.draw();
+                } else {
+                    // update all tiles
+                    this.mapComponent.mapContainer.updateTiles(this.state.map.tiles);
+                    this.mapComponent.mapContainer.drawTiles();
                 }
 
                 if (event.data.los != null) {
@@ -249,8 +254,11 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.state.map.tiles[index].vision.polygon = event.data.los;
                 }
                 
-                this.mapComponent.mapContainer.lightsLayer.draw();
+                // update los & ligts
+                this.mapComponent.mapContainer.lightsLayer.update();
+                this.mapComponent.mapContainer.visionLayer.update()
                 this.mapComponent.mapContainer.visionLayer.draw();
+                this.mapComponent.mapContainer.lightsLayer.draw();
                 break;
             }
 
