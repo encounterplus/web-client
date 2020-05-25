@@ -65,7 +65,6 @@
 
     .main-image {
         border: 5px solid #3F51B5;
-        // border-style: ridge;
     }
 
     h4 {
@@ -76,7 +75,6 @@
 :host(.creature-monster) {
     .main-image {
         border: 5px solid #631515;
-        // border-style: ridge;
     }
 
     h4 {
@@ -84,13 +82,32 @@
     }
 }
 
+:host(.role-hostile) {
+    h4 {
+        background-color: #581313;   
+    }
+}
+
+:host(.role-friendly) {
+    h4 {
+        background-color:rgb(51, 65, 146);   
+    }
+}
+
+:host(.role-neutral) {
+    h4 {
+        background-color:#964B00;   
+    }
+}
+
 :host(.creature-turned) {
     .main-image {
         border: 5px solid rgb(255, 149, 0);
-        // border-style: ridge;
     }
 
     h4 {
         background-color: rgb(255, 149, 0);   
     }
 }
+
+
