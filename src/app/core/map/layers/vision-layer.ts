@@ -68,7 +68,8 @@ export class VisionLayer extends Layer {
         this.msk.beginFill(0xffffff);
 
         for(let creature of this.creatures) {
-            if(creature.vision != null && creature.vision.polygon != null) {
+            if(creature.vision != null && creature.vision.enabled && creature.vision.polygon != null) {
+
                 let polygon = this.getGeometry(creature.vision.x, creature.vision.y, creature.vision.polygon)
                 // this might be better triangle filling function
                 // let polygon = PIXI.utils.earcut (creature.vision.polygon, null, 2);
@@ -100,7 +101,7 @@ export class VisionLayer extends Layer {
 
         // tiles
         for(let tile of this.tiles) {
-            if(tile.vision != null && tile.vision.polygon != null) {
+            if(tile.vision != null && tile.vision.enabled &&  tile.vision.polygon != null) {
                 let polygon = this.getGeometry(tile.vision.x, tile.vision.y, tile.vision.polygon)
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
 

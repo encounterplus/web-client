@@ -48,7 +48,7 @@ export class LightsLayer extends Layer {
         }
 
         for(let creature of this.creatures) {
-            if(creature.vision != null && creature.vision.polygon != null) {
+            if(creature.vision != null && creature.vision.enabled && creature.vision.polygon != null) {
                 let polygon = this.getGeometry2(creature.vision.x, creature.vision.y, creature.vision.polygon);;
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
 
@@ -73,7 +73,7 @@ export class LightsLayer extends Layer {
 
         // tiles
         for(let tile of this.tiles) {
-            if(tile.vision != null && tile.vision.polygon != null) {
+            if(tile.vision != null && tile.vision.enabled && tile.vision.polygon != null) {
                 let polygon = this.getGeometry2(tile.vision.x, tile.vision.y, tile.vision.polygon);
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
 

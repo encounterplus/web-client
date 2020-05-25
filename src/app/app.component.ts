@@ -340,7 +340,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.lineOfSightUpdated: {
-                console.log(event.data);
+                // console.log(event.data);
                 for(let vision of event.data as Array<Vision>) {
                     // search creature
                     var visionFound = false;
