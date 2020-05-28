@@ -3,4 +3,6 @@ export class Asset {
     name: string;
     type: string;
     resource: string;
+    frameWidth: number;
+    frameHeight: number;
 }
