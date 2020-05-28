@@ -18,6 +18,7 @@ import { SettingsModalComponent } from './core/settings-modal/settings-modal.com
 import { Loader } from './core/map/models/loader';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { Marker } from './shared/models/marker';
+import { Vision } from './shared/models/vision';
 
 @Component({
     selector: 'app-root',
@@ -234,9 +235,14 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.state.map.tiles[index] = model;
 
                 let view = this.mapComponent.mapContainer.tileViewById(model.id)
-                if (view != null) {
+                if (view != null && view.mapLayer == model.layer) {
+                    // update tile only
                     view.tile = model;
                     view.draw();
+                } else {
+                    // update all tiles
+                    this.mapComponent.mapContainer.updateTiles(this.state.map.tiles);
+                    this.mapComponent.mapContainer.drawTiles();
                 }
 
                 if (event.data.los != null) {
@@ -248,8 +254,11 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.state.map.tiles[index].vision.polygon = event.data.los;
                 }
                 
-                this.mapComponent.mapContainer.lightsLayer.draw();
+                // update los & ligts
+                this.mapComponent.mapContainer.lightsLayer.update();
+                this.mapComponent.mapContainer.visionLayer.update()
                 this.mapComponent.mapContainer.visionLayer.draw();
+                this.mapComponent.mapContainer.lightsLayer.draw();
                 break;
             }
 
@@ -337,6 +346,40 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.state.screen = event.data;
                 break;
             }
+
+            case WSEventName.lineOfSightUpdated: {
+                // console.log(event.data);
+                for(let vision of event.data as Array<Vision>) {
+                    // search creature
+                    var visionFound = false;
+                    for( let creature of this.state.game.creatures) {
+                        if (`creature-${creature.id}` == vision.id) {
+                            creature.vision = vision;
+                            visionFound = true;
+                            break;
+                        }
+                    }
+
+                    // continue if we found some creature already
+                    if (visionFound) { continue; }
+
+                    // search tile
+                    for( let tile of this.state.map.tiles) {
+                        if (`tile-${tile.id}` == vision.id) {
+                            tile.vision = vision;
+                            break;
+                        }
+                    }
+                }
+
+                // update container
+                this.mapComponent.mapContainer.update(this.state);
+
+                // draw vision & lights
+                this.mapComponent.mapContainer.lightsLayer.draw();
+                this.mapComponent.mapContainer.visionLayer.draw();
+                break;
+            }
         }
     }
 
@@ -368,9 +411,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     configureRemoteHost() {
         let urlParams = new URLSearchParams(window.location.search);
         let remoteHost = urlParams.get('remoteHost') || localStorage.getItem("lastSuccessfullHost") || window.location.host;
-	this.dataService.remoteHost = remoteHost;
-	this.dataService.protocol = window.location.protocol;
-	Loader.shared.remoteBaseURL = this.dataService.baseURL;
+	    this.dataService.remoteHost = remoteHost;
+	    this.dataService.protocol = window.location.protocol;
+	    Loader.shared.remoteBaseURL = this.dataService.baseURL;
     }
 
     ngOnInit() {

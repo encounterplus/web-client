@@ -68,7 +68,8 @@ export class VisionLayer extends Layer {
         this.msk.beginFill(0xffffff);
 
         for(let creature of this.creatures) {
-            if(creature.vision != null && creature.vision.polygon != null) {
+            if(creature.vision != null && creature.vision.enabled && creature.vision.polygon != null) {
+
                 let polygon = this.getGeometry(creature.vision.x, creature.vision.y, creature.vision.polygon)
                 // this might be better triangle filling function
                 // let polygon = PIXI.utils.earcut (creature.vision.polygon, null, 2);
@@ -94,13 +95,37 @@ export class VisionLayer extends Layer {
             }
         }
 
+        // tiles, always visible
+        for(let tile of this.tiles) {
+            if(tile.vision != null && tile.vision.enabled &&  tile.vision.polygon != null && tile.vision.alwaysVisible) {
+                let polygon = this.getGeometry(tile.vision.x, tile.vision.y, tile.vision.polygon)
+                let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
+
+                let geometry = new PIXI.Geometry()
+                    .addAttribute('aVertexPosition', polygon);
+
+                let mesh = new PIXI.Mesh(geometry, shader);
+               
+                mesh.shader.uniforms.position = [tile.vision.x, tile.vision.y]
+                mesh.shader.uniforms.radiusMin = [tile.vision.radiusMin];
+                mesh.shader.uniforms.radiusMax = [tile.vision.radiusMax];
+                mesh.shader.uniforms.intensity = 1.0;
+                mesh.blendMode = PIXI.BLEND_MODES.ADD;
+
+                this.addChild(mesh);
+                this.visions.push(mesh);
+
+                this.msk.drawPolygon(tile.vision.polygon);
+            }
+        }
+
         this.msk.endFill();
 
         let tilesWithVision = false;
 
-        // tiles
+        // tiles, not always visible
         for(let tile of this.tiles) {
-            if(tile.vision != null && tile.vision.polygon != null) {
+            if(tile.vision != null && tile.vision.enabled &&  tile.vision.polygon != null && !tile.vision.alwaysVisible) {
                 let polygon = this.getGeometry(tile.vision.x, tile.vision.y, tile.vision.polygon)
                 let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
 
@@ -119,6 +144,7 @@ export class VisionLayer extends Layer {
                 this.visions.push(mesh);
 
                 mesh.mask = this.msk;
+                
                 tilesWithVision = true
             }
         }

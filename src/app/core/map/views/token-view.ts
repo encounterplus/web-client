@@ -59,8 +59,10 @@ export class TokenView extends View {
             return 0x631515;
         } else if (this.creature.role == Role.friendly) {
             return 0x3F51B5;
+        } else if (this.creature.role == Role.neutral) {
+            return 0x964B00;
         } else {
-            return 0xFFCCFFCC;
+            return 0xFFCCFF;
         }
     }
 

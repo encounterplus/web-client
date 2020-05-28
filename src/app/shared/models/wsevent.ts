@@ -16,6 +16,7 @@ export enum WSEventName {
     pointerUpdated = "pointerUpdated",
     pointerMoved = "pointerMoved",
     interactionUpdated = "interactionUpdated",
+    lineOfSightUpdated = "lineOfSightUpdated",
     screenUpdated = "screenUpdated",
     drawingsUpdated = "drawingsUpdated",
     clientUpdated = "clientUpdated",
