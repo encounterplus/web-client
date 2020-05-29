@@ -9,7 +9,7 @@ export class AuraView extends View {
     grid: Grid;
 
     assetTexture: PIXI.Texture;
-    assetSprite: PIXI.Sprite;
+    assetSprite: PIXI.AnimatedSprite;
 
     shapeGraphics: PIXI.Graphics;
 
@@ -58,14 +58,31 @@ export class AuraView extends View {
         }
 
         // sprite
-        if (this.assetTexture != null) {
-            let sprite = new PIXI.Sprite(this.assetTexture);
+	if (this.assetTexture != null) {
+            let frames = [ ];
+            if (this.aura.asset.type == "spriteSheet") {
+                for(let x=0,y=0,framecount=0; x < this.assetTexture.baseTexture.width && y < this.assetTexture.baseTexture.height;framecount++) {
+                    let rect = new PIXI.Rectangle(x,y,this.aura.asset.frameWidth,this.aura.asset.frameHeight);
+                    let frame = new PIXI.Texture(this.assetTexture.baseTexture,rect);
+                    frames.push ( frame );
+                    x += this.aura.asset.frameWidth;
+                    if (x>=this.assetTexture.baseTexture.width) {
+                        x = 0;
+                        y += this.aura.asset.frameHeight;
+                    }
+                }
+	    } else {
+                frames.push(this.assetTexture);
+            }
+            let sprite = new PIXI.AnimatedSprite(frames);
             
             this.assetSprite = this.addChild(sprite);
             sprite.anchor.set(0.5, 0.5);
             sprite.position.set(-this.w / 2, -this.h / 2)
             sprite.width = this.w;
-            sprite.height = this.h;
+	    sprite.height = this.h;
+	    sprite.animationSpeed = .25;
+            sprite.play();
         }
 
         return this;

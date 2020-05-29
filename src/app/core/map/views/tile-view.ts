@@ -12,7 +12,7 @@ export class TileView extends View {
     grid: Grid;
 
     assetTexture: PIXI.Texture;
-    assetSprite: PIXI.Sprite;
+    assetSprite: PIXI.AnimatedSprite;
 
     mapLayer: MapLayer = MapLayer.object;
 
@@ -40,11 +40,28 @@ export class TileView extends View {
 
         // sprite
         if (this.assetTexture != null) {
-            let sprite = new PIXI.Sprite(this.assetTexture);
+            let frames = [ ];
+            if (this.tile.asset.type == "spriteSheet") {
+                for(let x=0,y=0,framecount=0; x < this.assetTexture.baseTexture.width && y < this.assetTexture.baseTexture.height;framecount++) {
+                    let rect = new PIXI.Rectangle(x,y,this.tile.asset.frameWidth,this.tile.asset.frameHeight);
+                    let frame = new PIXI.Texture(this.assetTexture.baseTexture,rect);
+                    frames.push ( frame );
+                    x += this.tile.asset.frameWidth;
+                    if (x>=this.assetTexture.baseTexture.width) {
+                        x = 0;
+                        y += this.tile.asset.frameHeight;
+                    }
+                }
+	    } else {
+                frames.push(this.assetTexture);
+            }
+            let sprite = new PIXI.AnimatedSprite(frames);
             sprite.anchor.set(0.5, 0.5);
             sprite.width = this.tile.width;
             sprite.height = this.tile.height;
             sprite.angle = this.tile.rotation;
+            sprite.animationSpeed = .25;
+            sprite.play();
             this.assetSprite = this.addChild(sprite);
         }
 
