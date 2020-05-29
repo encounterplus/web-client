@@ -17,7 +17,7 @@ export class AreaEffectView extends View {
     grid: Grid;
 
     assetTexture: PIXI.Texture;
-    assetSprite: PIXI.Sprite;
+    assetSprite: PIXI.AnimatedSprite;
 
     shapeGraphics: PIXI.Graphics;
     handlesGraphics: PIXI.Graphics;
@@ -177,9 +177,24 @@ export class AreaEffectView extends View {
         }
 
         // sprite
-        if (this.assetTexture != null) {
-            let sprite = new PIXI.Sprite(this.assetTexture);
-            
+	if (this.assetTexture != null) {
+            let frames = [ ];
+            if (this.areaEffect.asset.type == "spriteSheet") {
+                for(let x=0,y=0,framecount=0; x < this.assetTexture.baseTexture.width && y < this.assetTexture.baseTexture.height;framecount++) {
+                    let rect = new PIXI.Rectangle(x,y,this.areaEffect.asset.frameWidth,this.areaEffect.asset.frameHeight);
+                    let frame = new PIXI.Texture(this.assetTexture.baseTexture,rect);
+                    frames.push ( frame );
+                    x += this.areaEffect.asset.frameWidth;
+                    if (x>=this.assetTexture.baseTexture.width) {
+                        x = 0;
+                        y += this.areaEffect.asset.frameHeight;
+                    }
+                }
+	    } else {
+                frames.push(this.assetTexture);
+            }
+            let sprite = new PIXI.AnimatedSprite(frames);
+ 
             this.assetSprite = this.addChild(sprite);
 
             switch (this.areaEffect.shape) {
@@ -205,7 +220,9 @@ export class AreaEffectView extends View {
                     sprite.height = this.areaEffect.width;
                     sprite.rotation = this.areaEffect.angle;
                     break;
-            }
+	    }
+	    sprite.animationSpeed = .25;
+            sprite.play();
         }
 
         return this;
