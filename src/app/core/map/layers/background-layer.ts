@@ -32,6 +32,8 @@ export class BackgroundLayer extends Layer {
         this.clear();
 
         if (this.image == null) {
+            this.w = 2000;
+            this.h = 2000;
             return this;
         }
 
@@ -47,6 +49,8 @@ export class BackgroundLayer extends Layer {
         this.removeChildren();
 
         if(this.imageTexture == null) {
+            this.w = 2000;
+            this.h = 2000;
             return this;
         }
 
@@ -58,7 +62,7 @@ export class BackgroundLayer extends Layer {
         sprite.height = this.imageTexture.height;
         this.imageSprite = this.addChild(sprite);
 
-        console.log(`map size: ${this.width}x${this.height}`)
+        console.log(`map size: ${this.w}x${this.h}`)
     }
 
     clear() {
