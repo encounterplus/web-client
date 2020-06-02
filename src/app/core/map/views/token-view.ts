@@ -228,7 +228,7 @@ export class TokenView extends View {
             this.uidGraphics.clear();
             this.uidGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, this.w / 2).endFill();
             this.uidText.position.set(this.w / 2, this.h / 2);
-            this.uidText.style.fontSize = this.height / 2.5;
+            this.uidText.style.fontSize = this.h / 2.5;
         }
     }
 
