@@ -221,8 +221,13 @@ export class AreaEffectView extends View {
                     sprite.rotation = this.areaEffect.angle;
                     break;
 	    }
-	    sprite.animationSpeed = .25;
-            sprite.play();
+	    if (frames.length > 1) {
+              if (this.areaEffect.asset.duration === undefined) {
+                this.areaEffect.asset.duration = 1.0;
+              }
+	      sprite.animationSpeed = frames.length/this.areaEffect.asset.duration/60.00;
+	      sprite.play();
+            }
         }
 
         return this;

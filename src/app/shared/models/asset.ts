@@ -5,4 +5,5 @@ export class Asset {
     resource: string;
     frameWidth: number;
     frameHeight: number;
+    duration: number;
 }
