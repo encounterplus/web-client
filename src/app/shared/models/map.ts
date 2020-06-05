@@ -21,6 +21,7 @@ export class Map {
     gridOffsetX: number;
     gridOffsetY: number;
     image: string;
+    video: string;
     canvas: string;
     lineOfSight: boolean;
     fogVisible: boolean;
