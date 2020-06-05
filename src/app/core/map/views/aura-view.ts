@@ -81,8 +81,13 @@ export class AuraView extends View {
             sprite.position.set(-this.w / 2, -this.h / 2)
             sprite.width = this.w;
 	    sprite.height = this.h;
-	    sprite.animationSpeed = .25;
-            sprite.play();
+            if (frames.length > 1) {
+              if (this.aura.asset.duration === undefined) {
+                this.aura.asset.duration = 1.0;
+              }
+	      sprite.animationSpeed = frames.length/this.aura.asset.duration/60.00;
+	      sprite.play();
+            }
         }
 
         return this;
