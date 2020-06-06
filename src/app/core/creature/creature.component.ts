@@ -16,6 +16,10 @@ export class CreatureComponent implements OnInit {
     return this.creature.image ? `http://${this.dataService.remoteHost}${this.creature.image}` : "/assets/img/creature.png"
   }
 
+  get name(): string {
+    return this.creature.type == "player" ? this.creature.name : this.creature.uid;
+  }
+
   get overlayImage(): string {
     if (this.creature.dead) {
       return "/assets/img/dead.png";
