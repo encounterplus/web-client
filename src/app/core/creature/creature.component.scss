@@ -57,7 +57,12 @@
         width: 36px;
         padding: 4px;
         padding-left: 5px;
-        
+        text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+    }
+    h4:hover {
+	    white-space: normal;
     }
 }
 
