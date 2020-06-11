@@ -195,7 +195,7 @@ export class MapContainer extends Layer {
         await this.monstersLayer.draw();
         
         await this.playersLayer.draw();
-        this.aurasLayer.tokens = this.playersLayer.views;
+        this.aurasLayer.tokens = [...this.playersLayer.views,...this.monstersLayer.views];
         this.aurasLayer.draw();
         await this.drawTiles();
 
