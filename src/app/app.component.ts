@@ -12,7 +12,7 @@ import { AreaEffect } from './shared/models/area-effect';
 import { Tile } from './shared/models/tile';
 import { ToolbarComponent, Tool } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
-import { ToastService } from './shared/toast.service';
+import { ToastService } from './shared/services/toast.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
 import { Loader } from './core/map/models/loader';
@@ -380,6 +380,13 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.mapComponent.mapContainer.visionLayer.draw();
                 break;
             }
+
+            case WSEventName.messageCreated: {
+                this.state.messages.push(event.data);
+
+                this.toastService.showMessage(event.data);
+                break;
+            }
         }
     }
 
@@ -389,6 +396,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             this.state.game = data.game;
             this.state.map = data.map;
             this.state.screen = data.screen;
+            this.state.messages = data.messages;
 
             this.dataService.state = this.state;
         

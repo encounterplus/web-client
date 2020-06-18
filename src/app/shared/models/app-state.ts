@@ -3,11 +3,13 @@ import { Grid } from 'src/app/core/map/models/grid';
 import { Game } from './game';
 import { Map} from './map';
 import { Creature, CreatureType } from './creature';
+import { Message } from './message';
 
 export class AppState {
     map: Map;
     game: Game = new Game();
-    screen: Screen= new Screen();
+    screen: Screen = new Screen();
+    messages: Array<Message> = [];
     grid: Grid = new Grid();
     isDirty: boolean = false;
 

@@ -21,7 +21,10 @@ export enum WSEventName {
     drawingsUpdated = "drawingsUpdated",
     clientUpdated = "clientUpdated",
     mapLoaded = "mapLoaded",
-    reload = "reload"
+    reload = "reload",
+    messageCreated = "messageCreated",
+    messageDeleted = "messageDeleted",
+    createMessage = "createMessage"
 }
 
 export interface WSEvent {

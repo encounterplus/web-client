@@ -1,4 +1,5 @@
 import { Injectable, TemplateRef } from '@angular/core';
+import { Message } from '../models/message';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
@@ -14,6 +15,10 @@ export class ToastService {
 
   showError(text: string, autohide: boolean = true) {
     this.show(text, { classname: 'bg-danger text-light', delay: 5000, autohide: autohide });
+  }
+
+  showMessage(message: Message) {
+    this.show(message.content, { classname: 'bg-info text-light', delay: 5000, autohide: true });
   }
 
   clear() {

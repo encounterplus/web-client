@@ -13,7 +13,7 @@ import { CreatureComponent } from './core/creature/creature.component';
 import { DataService } from './shared/services/data.service';
 import { ToolbarComponent } from './core/toolbar/toolbar.component';
 import { DisableRightClickDirective } from './core/disable-right-click.directive';
-import { ToastService } from './shared/toast.service';
+import { ToastService } from './shared/services/toast.service';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
