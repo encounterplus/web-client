@@ -436,7 +436,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 localStorage.setItem("lastSuccessfullHost", this.dataService.remoteHost);
 
                 this.toastService.clear();
-                this.toastService.showSuccess("Websocket connected");
+                this.toastService.showSuccess("Connected to EncounterPlus host");
                 this.getData();
 
                 // update color
@@ -446,7 +446,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             } else {
                 console.log("Websocket disconnected");
-                this.toastService.showError("Websocket disconnected", false);
+                this.toastService.showError("Could not connect to EncounterPlus host", false);
             }
         });
     }
