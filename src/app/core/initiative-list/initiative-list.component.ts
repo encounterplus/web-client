@@ -25,7 +25,7 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
   get images(): Array<IAlbum> {
     const images: Array<IAlbum> = [];
     for (const creature of this.activeCreatures) {
-      images.push({ src: `http://${this.dataService.remoteHost}${creature.image}`, caption: null, thumb: null });
+      images.push({ src: `${this.dataService.protocol}//${this.dataService.remoteHost}${creature.image}`, caption: null, thumb: null });
     }
     return images;
   }

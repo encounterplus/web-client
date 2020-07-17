@@ -17,7 +17,7 @@ export class ImageHandoutComponent implements OnInit {
     if (this.screen.overlayImage && this.screen.overlayImage.startsWith("http")) {
       return this.screen.overlayImage;
     } else {
-      return `http://${this.dataService.remoteHost}${this.screen.overlayImage}`;
+      return `${this.dataService.protocol}//${this.dataService.remoteHost}${this.screen.overlayImage}`;
     }
   }
 

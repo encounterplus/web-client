@@ -21,7 +21,7 @@ export class AppState {
 
     get mapCreatures(): Array<Creature> {
         return this.game.creatures.filter( creature => {
-            return creature.mapId == this.map.id
+	    return (creature.mapId == undefined || creature.mapId == this.map.id)
         });
     }
 
