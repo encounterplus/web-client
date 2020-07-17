@@ -4,7 +4,7 @@
 
   <div id="side-bar">
     <app-initiative-list *ngIf="state.game.started" [state]="state" id="initiative-list"></app-initiative-list>
-    <app-message-list *ngIf="messages" [state]="state" id="message-list"></app-message-list>
+    <app-message-list *ngIf="messages && state.build > 1970" [state]="state" id="message-list"></app-message-list>
   </div>  
 
   <div id="bottom-bar">
