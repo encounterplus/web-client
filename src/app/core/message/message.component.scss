@@ -1,0 +1,67 @@
+:host {
+    color: darkgray;
+    padding: 8px;
+    display: block;
+    font-size: 0.9rem;
+
+    border-bottom: 1px solid #333;
+
+    .frame {
+        overflow-x: hidden;
+    }
+
+    .message-source {
+        font-size: 0.8rem;
+        color: white;
+        
+        time {
+            color: darkgray;
+            font-size: 0.6rem;
+        }
+    }
+
+    .message-roll {
+
+        p {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .message-roll-detail {
+            padding-top: 8px;
+           
+
+            .roll-name {
+                text-transform: uppercase;
+                font-size: 0.7rem;
+                font-weight: 600;
+                overflow: hidden;
+            }
+    
+            .roll-formula {
+                color: white;
+                font-size: 1.1rem;
+            }
+    
+            .roll-detail {
+                font-size: 0.7rem;
+            }
+        }
+
+        .message-roll-result {
+            margin-top: 8px;
+            display: block;
+            float: right;
+            font-size: 2.2rem;
+            color: white;
+            min-width: 60px;
+            max-width: 120px;
+            text-align: center;
+            // clip-rule: ;
+            overflow: visible;
+            overflow-wrap: break-word;
+            text-overflow: ellipsis;
+            // overflow: hidden;
+        }
+    }
+}

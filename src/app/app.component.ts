@@ -10,7 +10,7 @@ import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState } from './core/map/views/token-view';
 import { AreaEffect } from './shared/models/area-effect';
 import { Tile } from './shared/models/tile';
-import { ToolbarComponent, Tool } from './core/toolbar/toolbar.component';
+import { ToolbarComponent, Tool, Panel } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/services/toast.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -19,6 +19,7 @@ import { Loader } from './core/map/models/loader';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { Marker } from './shared/models/marker';
 import { Vision } from './shared/models/vision';
+import { MessageListComponent } from './core/message-list/message-list.component';
 
 @Component({
     selector: 'app-root',
@@ -40,6 +41,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     @ViewChild(InitiativeListComponent)
     public initiativeListComponent: InitiativeListComponent;
 
+    @ViewChild(MessageListComponent)
+    public messageListComponent: MessageListComponent;
+
     @ViewChild(ToolbarComponent)
     public toolbarComponent: ToolbarComponent;
 
@@ -51,6 +55,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         window['state'] = this.state;
     }
+
+    messages: Boolean = false;
 
     toolbarAction(type: string) {
         console.log(type);
@@ -78,6 +84,10 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (this.mapComponent) {
             this.mapComponent.mapContainer.activeTool = tool;
         }
+    }
+
+    activePanelAction(panel: Panel) {
+        this.messages = panel == Panel.messages;
     }
 
     // main websocket event handler
@@ -383,8 +393,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             case WSEventName.messageCreated: {
                 this.state.messages.push(event.data);
-
-                this.toastService.showMessage(event.data);
+                // this.toastService.showMessage(event.data);
+                // this.messageListComponent.scrollToBottom();
                 break;
             }
         }
@@ -397,6 +407,8 @@ export class AppComponent implements OnInit, AfterViewInit {
             this.state.map = data.map;
             this.state.screen = data.screen;
             this.state.messages = data.messages;
+            this.state.version = data.version;
+            this.state.build = data.build;
 
             this.dataService.state = this.state;
         
@@ -430,6 +442,9 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (!color) {
             localStorage.setItem("userColor", '#'+(Math.random()*0xFFFFFF<<0).toString(16));
         }
+
+        // update messages based on local storage settings
+        this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
 
         this.configureRemoteHost();
         this.wsConnect();

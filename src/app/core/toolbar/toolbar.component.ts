@@ -8,6 +8,11 @@ export enum Tool {
   pointer = "pointer",
 }
 
+export enum Panel {
+  none = "none",
+  messages = "messages",
+}
+
 @Component({
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
@@ -24,12 +29,24 @@ export class ToolbarComponent implements OnInit {
   @Output()
   public tool = new EventEmitter<Tool>();
 
+  @Output()
+  public panel = new EventEmitter<Panel>();
+
   constructor(private element: ElementRef, private modalService: NgbModal) { }
 
   activeTool: Tool = Tool.move;
 
+  messages: Boolean = false;
+
   activeToolChanged(newTool) {
     this.tool.emit(newTool);
+  }
+
+  messagesChanged(newValue) {
+    let activePanel =  newValue ? Panel.messages : Panel.none;
+    localStorage.setItem("activePanel", activePanel);
+
+    this.panel.emit(activePanel);
   }
 
   showSettings() {
@@ -40,7 +57,7 @@ export class ToolbarComponent implements OnInit {
     this.action.emit("showAbout");
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
+    this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
   }
-
 }

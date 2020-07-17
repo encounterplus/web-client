@@ -115,8 +115,8 @@ export class MapComponent implements OnInit, OnChanges {
   @HostListener('window:resize', ['$event'])
   onResize() {
     // update viewport
-    this.viewport.resize(window.innerWidth - (InitiativeListComponent.el?.getBoundingClientRect()?.width ?? 0),
-      window.innerHeight, this.mapContainer.w, this.mapContainer.h);
+    let sideBarWidth = (document.getElementById("side-bar")?.getBoundingClientRect()?.width ?? 0) + 8.0;
+    this.viewport.resize(window.innerWidth - sideBarWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
   }
 
   ngOnChanges() {

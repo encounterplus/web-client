@@ -8,9 +8,14 @@
         <button ngbDropdownItem (click)="showSettings()">Settings</button>
         <button ngbDropdownItem (click)="showAbout()">About</button>
       </div>
-    </div>    
+    </div> 
+    <div *ngIf="state.build > 1970" class="btn-group mr-2 btn-group-toggle" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" ngbRadioGroup name="radioTest" role="group" aria-label="Second group">
+      <label ngbButtonLabel class="btn btn-dark">
+        <input ngbButton [(ngModel)]="messages" (ngModelChange)="messagesChanged($event)" type="checkbox" value="messages"> <i class="fa fa-comments-o"></i>
+      </label>
+    </div> 
   </div>
-
+  
   <div class="btn-group mr-2 btn-group-toggle" ngbRadioGroup name="radioBasic" role="group" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)" aria-label="Second group">
     <label ngbButtonLabel class="btn btn-dark">
       <input ngbButton type="radio" value="move"> <i class="fa fa-arrows"></i>

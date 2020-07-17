@@ -1,0 +1,37 @@
+:host {
+    // position: absolute;
+    width: 300px;
+    // height: 100%;
+    // top: 0;
+    // right: 0;
+    // bottom: 0;
+    background-color: rgba($color: #1d2124, $alpha: 0.92);
+    flex: 1;
+
+    @media (max-width: 420px) {
+        width: 260px;
+    }
+
+    .frame {
+        height: 90%;
+        overflow: scroll;
+        // bottom: 100px;
+        // padding-bottom: 80px;
+    }
+
+    .message-input {
+        // display: flex;
+        border-top: 1px solid #666;
+        background-color: #1d2124;
+        position: absolute;
+        flex: 1;
+        width: 300px;
+        right: 0px;
+        bottom: 0px;
+        padding: 8px;
+
+        @media (max-width: 420px) {
+            width: 260px;
+        }
+    }
+}

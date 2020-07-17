@@ -1,6 +1,7 @@
 export enum MessageType {
-    chat = "cone",
-    roll = "roll"
+    chat = "chat",
+    roll = "roll",
+    command = "command",
 }
 
 export class Message {

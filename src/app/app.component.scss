@@ -6,3 +6,23 @@
     z-index: 1200;
     width: auto;
 }
+
+#side-bar {
+    position: absolute;
+    // width: 400px;
+    // height: 100%;
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
+
+
+    overflow: hidden;
+    border-radius: .25rem;
+
+    display: flex;
+    // height: 100vh;
+
+    @media (max-width: 420px) {
+        top: 56px;
+    }
+}

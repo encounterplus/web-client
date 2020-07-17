@@ -1,0 +1,13 @@
+<div class="frame" (scroll)="scrolled($event)" #scrollframe>
+    <app-message *ngFor="let message of messages; index as i;" [message]="message" [attr.data-id]="message.id" class="message" #message></app-message>
+</div>
+<div class="message-input">
+    <div class="form-group">
+        <div class="input-group">
+            <input [(ngModel)]="messageInput" (keyup.enter)="onEnter()" id="messageInput" type="text" class="form-control" placeholder="Enter msg or command..." />
+            <div class="input-group-append">
+                <button class="btn btn-dark" type="button" id="button-addon" (click)="onEnter()"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
+              </div>
+        </div>
+    </div>
+</div>

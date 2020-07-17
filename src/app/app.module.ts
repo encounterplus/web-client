@@ -20,6 +20,8 @@ import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { ImageHandoutComponent } from './core/image-handout/image-handout.component';
 import { LightboxModule } from 'ngx-lightbox';
+import { MessageComponent } from './core/message/message.component';
+import { MessageListComponent } from './core/message-list/message-list.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +35,9 @@ import { LightboxModule } from 'ngx-lightbox';
     DisableRightClickDirective,
     CreatureComponent,
     AboutModalComponent,
-    ImageHandoutComponent
+    ImageHandoutComponent,
+    MessageComponent,
+    MessageListComponent
   ],
   imports: [
     BrowserModule,

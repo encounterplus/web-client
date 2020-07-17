@@ -1,7 +1,11 @@
 <div id="app" class="h-100 d-flex flex-column" appDisableRightClick>
   <app-map *ngIf="state.map" [state]="state" class="h-100"></app-map>
-  <app-toolbar [state]="state" (action)="toolbarAction($event)" (tool)="activeToolAction($event)" id="toolbar"></app-toolbar>
-  <app-initiative-list *ngIf="state.game.started" [state]="state" id="initiative-list"></app-initiative-list>
+  <app-toolbar [state]="state" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)" id="toolbar"></app-toolbar>
+
+  <div id="side-bar">
+    <app-initiative-list *ngIf="state.game.started" [state]="state" id="initiative-list"></app-initiative-list>
+    <app-message-list *ngIf="messages" [state]="state" id="message-list"></app-message-list>
+  </div>  
 
   <div id="bottom-bar">
     <app-image-handout *ngIf="state.screen.overlayImage" [screen]="state.screen"></app-image-handout>
