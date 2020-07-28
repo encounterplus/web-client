@@ -5,6 +5,7 @@ export class Component {
     from: number;
     to: number;
     autoreverse: boolean;
+    repeat: number;
     color: string;
     hue: number;
     saturation: number;
