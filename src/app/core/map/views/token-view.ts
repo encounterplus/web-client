@@ -126,7 +126,9 @@ export class TokenView extends View {
             sprite.anchor.set(0.5, 0.5);
             this.tokenSprite = this.addChild(sprite);
         }
-
+	if (this.creature.role == Role.friendly) {
+		this.alpha = (this.creature.hidden)? 0.5 : 1
+	}
         this.updateToken();
 
         // overlay
@@ -177,7 +179,7 @@ export class TokenView extends View {
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
         if (this.creature.role == Role.friendly) {
-            this.visible = true;
+	    this.visible = true;
         } else {
             this.visible = !this.creature.hidden;
         }
