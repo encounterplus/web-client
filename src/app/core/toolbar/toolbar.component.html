@@ -11,7 +11,7 @@
     </div> 
     <div *ngIf="state.build > 1970" class="btn-group mr-2 btn-group-toggle" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" ngbRadioGroup name="radioTest" role="group" aria-label="Second group">
       <label ngbButtonLabel class="btn btn-dark">
-        <input ngbButton [(ngModel)]="messages" (ngModelChange)="messagesChanged($event)" type="checkbox" value="messages"> <i class="fa fa-comments-o"></i>
+	      <input ngbButton [(ngModel)]="messages" (ngModelChange)="messagesChanged($event)" type="checkbox" value="messages"> <i class="fa fa-comments-o">&nbsp;<span *ngIf="state.readCount<state.messages.length" class="badge badge-light">{{state.messages.length-state.readCount}}</span></i>
       </label>
     </div> 
   </div>
