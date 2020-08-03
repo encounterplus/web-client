@@ -477,10 +477,10 @@ export class AppComponent implements OnInit, AfterViewInit {
                 let color = localStorage.getItem("userColor");
                 this.dataService.send({name: WSEventName.clientUpdated, data: {name: name, color: color}});
 
-		let readMessages = JSON.parse(localStorage.getItem("readMessages"));
-		if (readMessages.lastHost == this.dataService.remoteHost) {
-			this.state.readCount = readMessages.seenCount;
-		}
+                let readMessages = JSON.parse(localStorage.getItem("readMessages"));
+                if (readMessages && readMessages.lastHost == this.dataService.remoteHost) {
+                    this.state.readCount = readMessages.seenCount;
+                }
             } else {
                 console.log("Websocket disconnected");
                 this.toastService.showError("Websocket disconnected", false);

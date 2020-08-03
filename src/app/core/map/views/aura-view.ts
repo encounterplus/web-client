@@ -75,8 +75,8 @@ export class AuraView extends View {
                 frames.push(this.assetTexture);
             }
             let sprite = new PIXI.AnimatedSprite(frames);
-            
-            this.assetSprite = this.addChild(sprite);
+            this.addChild(sprite);
+            this.assetSprite = sprite;
             sprite.anchor.set(0.5, 0.5);
             sprite.position.set(-this.w / 2, -this.h / 2)
             sprite.width = this.w;

@@ -59,7 +59,7 @@ export class TileView extends View {
             sprite.anchor.set(0.5, 0.5);
             sprite.width = this.tile.width;
             sprite.height = this.tile.height;
-	    sprite.angle = this.tile.rotation;
+	        sprite.angle = this.tile.rotation;
 	    if (frames.length > 1) {
               if (this.tile.asset.duration === undefined) {
                 this.tile.asset.duration = 1.0;
@@ -67,7 +67,8 @@ export class TileView extends View {
 	      sprite.animationSpeed = frames.length/this.tile.asset.duration/60.00;
 	      sprite.play();
             }
-            this.assetSprite = this.addChild(sprite);
+            this.addChild(sprite);
+            this.assetSprite = sprite;
         let ticker = PIXI.Ticker.shared;
         for (let x=0; x < this.tile.components.length; x++) {
             let component = this.tile.components[x];

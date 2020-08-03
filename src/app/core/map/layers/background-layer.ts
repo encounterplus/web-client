@@ -73,14 +73,16 @@ export class BackgroundLayer extends Layer {
             let sprite = new PIXI.Sprite(this.imageTexture);
             sprite.width = this.imageTexture.width;
             sprite.height = this.imageTexture.height;
-            this.imageSprite = this.addChild(sprite);
+            this.addChild(sprite);
+            this.imageSprite = sprite;
         }
 
         if (this.videoTexture) {
             let sprite = new PIXI.Sprite(this.videoTexture);
             sprite.width = this.videoTexture.width;
             sprite.height = this.videoTexture.height;
-            this.videoSprite = this.addChild(sprite);
+            this.addChild(sprite);
+            this.videoSprite = sprite;
 
             let videoResource = this.videoTexture.baseTexture.resource as PIXI.resources.VideoResource;
             let video = videoResource.source as HTMLVideoElement;

@@ -13,9 +13,6 @@ export class LightsLayer extends Layer {
     vert: PIXI.LoaderResource;
     frag: PIXI.LoaderResource;
 
-    lighting: PIXI.display.Layer
-    lightingSprite: PIXI.Sprite
-
     lights: Array<PIXI.Mesh> = [];
 
     constructor(private dataService: DataService) {
@@ -56,7 +53,7 @@ export class LightsLayer extends Layer {
                     .addAttribute('aVertexPosition', polygon)
                     // .addIndex([3,2,1,3,1,0]);
 
-                let mesh = new PIXI.Mesh(geometry, shader);
+                let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader);
                
                 mesh.shader.uniforms.position = [creature.vision.x, creature.vision.y]
                 mesh.shader.uniforms.radiusMin = creature.vision.radiusMin;
@@ -81,7 +78,7 @@ export class LightsLayer extends Layer {
                     .addAttribute('aVertexPosition', polygon)
                     // .addIndex([3,2,1,3,1,0]);
 
-                let mesh = new PIXI.Mesh(geometry, shader);
+                let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader);
                
                 mesh.shader.uniforms.position = [tile.vision.x, tile.vision.y]
                 mesh.shader.uniforms.radiusMin = tile.vision.radiusMin;

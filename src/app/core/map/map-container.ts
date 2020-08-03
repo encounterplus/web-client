@@ -54,7 +54,7 @@ export class MapContainer extends Layer {
     state: AppState;
     grid: Grid = new Grid();
 
-    data: PIXI.interaction.InteractionData;
+    data: PIXI.InteractionData;
     dragging: boolean = false;
     clicked: boolean = false;
 
@@ -67,21 +67,36 @@ export class MapContainer extends Layer {
     constructor(private dataService: DataService) {
         super();
 
-        this.backgroundLayer = this.addChild(new BackgroundLayer(this.dataService));
-        this.bottomLayer = this.addChild(new TilesLayer(this.dataService));
-        this.gridLayer = this.addChild(new GridLayer());
-        this.middleLayer = this.addChild(new TilesLayer(this.dataService));
-        this.lightsLayer = this.addChild(new LightsLayer(this.dataService));
-        this.aurasLayer = this.addChild(new AurasLayer(this.dataService));
-        this.topLayer = this.addChild(new TilesLayer(this.dataService));
-        this.drawingsLayer = this.addChild(new DrawingsLayer(this.dataService));
-        this.areaEffectsLayer = this.addChild(new AreaEffectsLayer(this.dataService));
-        this.markersLayer = this.addChild(new MarkersLayer(this.dataService));
-        this.monstersLayer = this.addChild(new TokensLayer(this.dataService));
-        this.visionLayer = this.addChild(new VisionLayer(this.dataService));
-        this.fogLayer = this.addChild(new FogLayer());
-        this.effectsLayer = this.addChild(new EffectsLayer(this.dataService));
-        this.playersLayer = this.addChild(new TokensLayer(this.dataService));
+        this.backgroundLayer = new BackgroundLayer(this.dataService);
+        this.addChild(this.backgroundLayer);
+        this.bottomLayer = new TilesLayer(this.dataService)
+        this.addChild(this.bottomLayer);
+        this.gridLayer = new GridLayer();
+        this.addChild(this.gridLayer);
+        this.middleLayer = new TilesLayer(this.dataService);
+        this.addChild(this.middleLayer);
+        this.lightsLayer = new LightsLayer(this.dataService);
+        this.addChild(this.lightsLayer);
+        this.aurasLayer = new AurasLayer(this.dataService);
+        this.addChild(this.aurasLayer);
+        this.topLayer = new TilesLayer(this.dataService);
+        this.addChild(this.topLayer);
+        this.drawingsLayer = new DrawingsLayer(this.dataService);
+        this.addChild(this.drawingsLayer);
+        this.areaEffectsLayer = new AreaEffectsLayer(this.dataService);
+        this.addChild(this.areaEffectsLayer);
+        this.markersLayer = new MarkersLayer(this.dataService);
+        this.addChild(this.markersLayer);
+        this.monstersLayer = new TokensLayer(this.dataService);
+        this.addChild(this.monstersLayer);
+        this.visionLayer = new VisionLayer(this.dataService);
+        this.addChild(this.visionLayer);
+        this.fogLayer = new FogLayer();
+        this.addChild(this.fogLayer);
+        this.effectsLayer = new EffectsLayer(this.dataService);
+        this.addChild(this.effectsLayer);
+        this.playersLayer = new TokensLayer(this.dataService)
+        this.addChild(this.playersLayer);
 
         this.interactive = true;
 
@@ -275,7 +290,7 @@ export class MapContainer extends Layer {
         return null;
     }
 
-    onPointerUp(event: PIXI.interaction.InteractionEvent) {
+    onPointerUp(event: PIXI.InteractionEvent) {
         this.dragging = false;
 
         if (this.activePointer) {
@@ -294,7 +309,7 @@ export class MapContainer extends Layer {
         }
     }
     
-    onPointerDown(event: PIXI.interaction.InteractionEvent) {
+    onPointerDown(event: PIXI.InteractionEvent) {
         if (event.data.originalEvent.shiftKey || this.activeTool == Tool.pointer) {
             event.stopPropagation();
             this.dragging = true;
@@ -322,7 +337,7 @@ export class MapContainer extends Layer {
         }
     }
     
-    onPointerMove(event: PIXI.interaction.InteractionEvent) {
+    onPointerMove(event: PIXI.InteractionEvent) {
         if (this.dragging && this.activePointer) {
             event.stopPropagation();
 

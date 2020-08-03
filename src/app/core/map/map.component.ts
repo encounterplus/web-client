@@ -7,7 +7,6 @@ import { AppState } from 'src/app/shared/models/app-state';
 window.PIXI = PIXI;
 
 import 'pixi.js';
-import 'pixi-layers';
 import { DataService } from 'src/app/shared/services/data.service';
 import { InitiativeListComponent } from '../initiative-list/initiative-list.component';
 

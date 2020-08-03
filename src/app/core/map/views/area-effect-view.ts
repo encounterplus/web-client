@@ -195,7 +195,8 @@ export class AreaEffectView extends View {
             }
             let sprite = new PIXI.AnimatedSprite(frames);
  
-            this.assetSprite = this.addChild(sprite);
+            this.addChild(sprite);
+            this.assetSprite = sprite;
 
             switch (this.areaEffect.shape) {
                 case AreaEffectShape.sphere:

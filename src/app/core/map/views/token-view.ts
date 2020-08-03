@@ -1,7 +1,7 @@
 
 import { Creature, Role } from 'src/app/shared/models/creature';
 import { View } from './view';
-import { interaction, Container } from 'pixi.js';
+import { Container, InteractionEvent } from 'pixi.js';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
@@ -38,7 +38,7 @@ export class TokenView extends View {
 
     distanceText: PIXI.Text;
 
-    data: PIXI.interaction.InteractionData;
+    data: PIXI.InteractionData;
     dragging: boolean = false;
 
     selected: boolean = false;
@@ -124,7 +124,8 @@ export class TokenView extends View {
         if (this.tokenTexture != null) {
             let sprite = new PIXI.Sprite(this.tokenTexture);
             sprite.anchor.set(0.5, 0.5);
-            this.tokenSprite = this.addChild(sprite);
+            this.addChild(sprite);
+            this.tokenSprite = sprite;
         }
 	if (this.creature.role == Role.friendly) {
 		this.alpha = (this.creature.hidden)? 0.5 : 1
@@ -136,12 +137,14 @@ export class TokenView extends View {
             this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-dead.png', true);
             let sprite = new PIXI.Sprite(this.overlayTexture);
             sprite.anchor.set(0.5, 0.5);
-            this.overlaySprite = this.addChild(sprite);
+            this.addChild(sprite);
+            this.overlaySprite = sprite;
         } else if (this.creature.bloodied) {
             this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-bloodied.png', true);
             let sprite = new PIXI.Sprite(this.overlayTexture);
             sprite.anchor.set(0.5, 0.5);
-            this.overlaySprite = this.addChild(sprite);
+            this.addChild(sprite);
+            this.overlaySprite = sprite;
         }
 
         this.updateOverlay();
@@ -274,7 +277,7 @@ export class TokenView extends View {
         this.removeChildren();
     }
 
-    onDragStart(event: interaction.InteractionEvent) {
+    onDragStart(event: InteractionEvent) {
 
         event.stopPropagation();
 

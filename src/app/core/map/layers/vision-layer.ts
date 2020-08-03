@@ -18,9 +18,6 @@ export class VisionLayer extends Layer {
     vert: PIXI.LoaderResource;
     frag: PIXI.LoaderResource;
 
-    lighting: PIXI.display.Layer
-    lightingSprite: PIXI.Sprite;
-
     bg: PIXI.Sprite;
 
     visions: Array<PIXI.Mesh> = [];
@@ -80,7 +77,7 @@ export class VisionLayer extends Layer {
                 let geometry = new PIXI.Geometry()
                     .addAttribute('aVertexPosition', polygon);
 
-                let mesh = new PIXI.Mesh(geometry, shader);
+                let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader);
                
                 mesh.shader.uniforms.position = [creature.vision.x, creature.vision.y]
                 mesh.shader.uniforms.radiusMin = [creature.vision.radiusMin];
@@ -104,7 +101,7 @@ export class VisionLayer extends Layer {
                 let geometry = new PIXI.Geometry()
                     .addAttribute('aVertexPosition', polygon);
 
-                let mesh = new PIXI.Mesh(geometry, shader);
+                let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader);
                
                 mesh.shader.uniforms.position = [tile.vision.x, tile.vision.y]
                 mesh.shader.uniforms.radiusMin = [tile.vision.radiusMin];
@@ -132,7 +129,7 @@ export class VisionLayer extends Layer {
                 let geometry = new PIXI.Geometry()
                     .addAttribute('aVertexPosition', polygon);
 
-                let mesh = new PIXI.Mesh(geometry, shader);
+                let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader);
                
                 mesh.shader.uniforms.position = [tile.vision.x, tile.vision.y]
                 mesh.shader.uniforms.radiusMin = [tile.vision.radiusMin];
