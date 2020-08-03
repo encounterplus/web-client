@@ -14,7 +14,7 @@ export class AppState {
     isDirty: boolean = false;
     version: string;
     build: number;
-
+    readCount: number;
     get activeCreatures(): Array<Creature> {
         return this.game.creatures.filter( creature => { return creature.initiative != -10 } ).sort((a, b) => (a.rank > b.rank) ? 1 : -1)
     }

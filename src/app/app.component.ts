@@ -87,7 +87,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     activePanelAction(panel: Panel) {
-        this.messages = panel == Panel.messages;
+	    this.messages = panel == Panel.messages;
+	    if (panel) {
+		    let lastHost = localStorage.getItem("lastSuccessfullHost");
+		    localStorage.setItem("readMessages",JSON.stringify({"lastHost": lastHost, seenCount: this.state.messages.length}));
+		    this.state.readCount = this.state.messages.length;
+	    }
     }
 
     // main websocket event handler
@@ -392,7 +397,12 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.messageCreated: {
-                this.state.messages.push(event.data);
+		    this.state.messages.push(event.data);
+		    if (this.messages) {
+			    let lastHost = localStorage.getItem("lastSuccessfullHost");
+			    localStorage.setItem("readMessages",JSON.stringify({"lastHost": lastHost, seenCount: this.state.messages.length}));
+			    this.state.readCount = this.state.messages.length;
+		    }
                 // this.toastService.showMessage(event.data);
                 // this.messageListComponent.scrollToBottom();
                 break;
@@ -467,6 +477,10 @@ export class AppComponent implements OnInit, AfterViewInit {
                 let color = localStorage.getItem("userColor");
                 this.dataService.send({name: WSEventName.clientUpdated, data: {name: name, color: color}});
 
+		let readMessages = JSON.parse(localStorage.getItem("readMessages"));
+		if (readMessages.lastHost == this.dataService.remoteHost) {
+			this.state.readCount = readMessages.seenCount;
+		}
             } else {
                 console.log("Websocket disconnected");
                 this.toastService.showError("Websocket disconnected", false);
