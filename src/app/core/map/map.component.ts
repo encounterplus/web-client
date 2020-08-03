@@ -1,14 +1,12 @@
-import { Component, OnInit, ViewChild, Input, SimpleChanges, HostListener, OnChanges } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, HostListener, OnChanges } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
 import { Viewport } from 'pixi-viewport';
 import { MapContainer } from './map-container';
 import { AppState } from 'src/app/shared/models/app-state';
-
-window.PIXI = PIXI;
-
-import 'pixi.js';
 import { DataService } from 'src/app/shared/services/data.service';
-import { InitiativeListComponent } from '../initiative-list/initiative-list.component';
+
+// window.PIXI = PIXI;
+// import 'pixi.js';
 
 @Component({
   selector: 'app-map',

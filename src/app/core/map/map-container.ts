@@ -26,7 +26,6 @@ import { Tool } from '../toolbar/toolbar.component';
 import { Pointer } from 'src/app/shared/models/pointer';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { v4 as uuidv4 } from 'uuid';
-import { ReturnStatement } from '@angular/compiler';
 
 export class MapContainer extends Layer {
 

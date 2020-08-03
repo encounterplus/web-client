@@ -36,7 +36,6 @@
             "scripts": [
               "./node_modules/pixi.js/dist/pixi.min.js",
               "./node_modules/pixi-viewport/dist/viewport.js",
-              "./node_modules/pixi-layers/dist/pixi-layers.js",
               "./node_modules/pixi-particles/dist/pixi-particles.js"
             ]
           },
