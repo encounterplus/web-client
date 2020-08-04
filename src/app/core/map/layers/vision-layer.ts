@@ -8,11 +8,13 @@ export class VisionLayer extends Layer {
 
     creatures: Array<Creature> = [];
     tiles: Array<Tile> = [];
+    intensity: number = 1.0;
 
     update() {
         this.creatures = this.dataService.state.mapCreatures;
         this.tiles = this.dataService.state.map.tiles;
         this.visible = this.dataService.state.map.lineOfSight;
+        this.intensity = 1.0 - this.dataService.state.map.daylight || this.dataService.state.map.dayLight || 0.0;
     }
 
     vert: PIXI.LoaderResource;
@@ -82,7 +84,7 @@ export class VisionLayer extends Layer {
                 mesh.shader.uniforms.position = [creature.vision.x, creature.vision.y]
                 mesh.shader.uniforms.radiusMin = [creature.vision.radiusMin];
                 mesh.shader.uniforms.radiusMax = [creature.vision.radiusMax];
-                mesh.shader.uniforms.intensity = 1.0;
+                mesh.shader.uniforms.intensity = this.intensity;
                 mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
                 this.addChild(mesh);
@@ -106,7 +108,7 @@ export class VisionLayer extends Layer {
                 mesh.shader.uniforms.position = [tile.vision.x, tile.vision.y]
                 mesh.shader.uniforms.radiusMin = [tile.vision.radiusMin];
                 mesh.shader.uniforms.radiusMax = [tile.vision.radiusMax];
-                mesh.shader.uniforms.intensity = 1.0;
+                mesh.shader.uniforms.intensity = this.intensity;
                 mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
                 this.addChild(mesh);
@@ -134,7 +136,7 @@ export class VisionLayer extends Layer {
                 mesh.shader.uniforms.position = [tile.vision.x, tile.vision.y]
                 mesh.shader.uniforms.radiusMin = [tile.vision.radiusMin];
                 mesh.shader.uniforms.radiusMax = [tile.vision.radiusMax];
-                mesh.shader.uniforms.intensity = 1.0;
+                mesh.shader.uniforms.intensity = this.intensity;
                 mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
                 this.addChild(mesh);

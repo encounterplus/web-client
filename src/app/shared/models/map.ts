@@ -25,6 +25,8 @@ export class Map {
     canvas: string;
     lineOfSight: boolean;
     fogVisible: boolean;
+    daylight: number;
+    dayLight: number; // TYPO, will be removed in next version
     fog: string;
     scale: number;
     x: number;
