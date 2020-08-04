@@ -9,14 +9,14 @@ export class VisionLayer extends Layer {
     creatures: Array<Creature> = [];
     tiles: Array<Tile> = [];
     intensity: number = 1.0;
-    bgScale: number = 1.0;
+    mapScale: number = 1.0;
 
     update() {
         this.creatures = this.dataService.state.mapCreatures;
         this.tiles = this.dataService.state.map.tiles;
         this.visible = this.dataService.state.map.lineOfSight;
         this.intensity = 1.0 - this.dataService.state.map.daylight || this.dataService.state.map.dayLight || 0.0;
-        this.bgScale = this.dataService.state.map.scale;
+        this.mapScale = this.dataService.state.map.scale;
     }
 
     vert: PIXI.LoaderResource;
@@ -46,8 +46,8 @@ export class VisionLayer extends Layer {
             return;
         }
 
-        this.bg.width = (this.w * this.bgScale) + 10;
-        this.bg.height = (this.h * this.bgScale) + 10;
+        this.bg.width = (this.w * this.mapScale) + 10;
+        this.bg.height = (this.h * this.mapScale) + 10;
         this.bg.position.set(-5, -5);
         this.addChild(this.bg);
 
