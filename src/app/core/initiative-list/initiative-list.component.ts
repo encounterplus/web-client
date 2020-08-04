@@ -67,6 +67,10 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
   }
 
   open(index: number): void {
+    // empty image check
+    if (this.activeCreatures[index].image == null) {
+      return;
+    }
     // open lightbox
     this.lightbox.open(this.images, index);
   }
