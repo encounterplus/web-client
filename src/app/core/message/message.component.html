@@ -13,7 +13,5 @@
     
 </div>
 
-<div *ngIf="isChat" class="message-chat">
-    {{message.content}}
-</div>
+<div *ngIf="isChat" class="message-chat" [innerHTML]="message.content"></div>
 

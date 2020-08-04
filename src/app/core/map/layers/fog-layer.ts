@@ -27,7 +27,6 @@ export class FogLayer extends Layer {
 
     update(map: Map) {
         this.fog = map.fog;
-        this.scale.set(map.scale, map.scale);
         this.visible = map.fogVisible;
     }
 

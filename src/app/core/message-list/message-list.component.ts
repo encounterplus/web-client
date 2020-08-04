@@ -4,7 +4,6 @@ import { Lightbox } from 'ngx-lightbox';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Message, MessageType } from 'src/app/shared/models/message';
 import { WSEventName } from 'src/app/shared/models/wsevent';
-import { DiceRoll } from 'src/app/shared/models/dice-roll';
 
 @Component({
   selector: 'app-message-list',
@@ -40,6 +39,28 @@ export class MessageListComponent implements OnInit {
     this.messageInput = "";
 
     if(text.trim() == "") {
+      return;
+    }
+
+    if (text == "/help" || text == "/h") {
+      let message = new Message();
+      message.type = MessageType.chat;
+      message.source = "Help Command";
+      message.color = "#6e7ed7";
+      message.content = "Dice roll command:</br><code>/r[oll] &lt;dice notation&gt; [[title[:check|save|attack|damage]]]</code>" +
+      "Examples:<br>" +
+      "<code>" + 
+      "/r 2d20kh — advantage\n" +
+      "/r 2d20kl — disadvantage\n" +
+      "/r 4d6dl — drop lowest\n" +
+      "<br>" +
+      "/r 1d20+3 [initiative]\n" +
+      "/r 1d20+3 [cha:save]\n" +
+      "/r 1d20+3 [acrobatics:check]\n" +
+      "/r 1d20+3 [dagger:attack]\n" +
+      "/r 1d4+3 [dagger:damage]" +
+      "</code>";
+      this.dataService.state.messages.push(message);
       return;
     }
 
