@@ -127,10 +127,15 @@ export class TokenView extends View {
             this.addChild(sprite);
             this.tokenSprite = sprite;
         }
-	if (this.creature.role == Role.friendly) {
-		this.alpha = (this.creature.hidden)? 0.5 : 1
-	}
+
+        // alpha
+        if (this.creature.role == Role.friendly) {
+            this.alpha = (this.creature.hidden)? 0.5 : 1
+        }
         this.updateToken();
+
+        // rotation
+        this.tokenSprite.rotation = this.creature.rotation * (Math.PI / 180);
 
         // overlay
         if (this.creature.dead) {

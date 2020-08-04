@@ -30,9 +30,10 @@ export class Creature {
     image: string;
     token: string;
     mapId: string;
-    scale: number;
     x: number;
     y: number;
+    scale: number;
+    rotation: number;
     cachedToken: string;
     vision: Vision;
     light: Light;
