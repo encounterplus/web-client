@@ -135,7 +135,7 @@ export class TokenView extends View {
         this.updateToken();
 
         // rotation
-        this.tokenSprite.rotation = this.creature.rotation * (Math.PI / 180);
+        this.tokenSprite.rotation = (this.creature.rotation)? this.creature.rotation * (Math.PI / 180) : 0;
 
         // overlay
         if (this.creature.dead) {
