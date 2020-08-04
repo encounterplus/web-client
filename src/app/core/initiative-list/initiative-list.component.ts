@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, ElementRef, AfterViewChecked, AfterViewInit, OnDestroy } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
-import { Creature } from 'src/app/shared/models/creature';
+import { Creature, Role } from 'src/app/shared/models/creature';
 import { Lightbox, IAlbum } from 'ngx-lightbox';
 import { DataService } from 'src/app/shared/services/data.service';
 
@@ -19,7 +19,7 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
   }
 
   get activeCreatures(): Array<Creature> {
-    return this.state.game.creatures.filter(creature => creature.initiative !== -10).sort((a, b) => (a.rank > b.rank) ? 1 : -1);
+    return this.state.game.creatures.filter(creature => creature.initiative !== -10 && (creature.role != Role.hostile || !creature.hidden)).sort((a, b) => (a.rank > b.rank) ? 1 : -1);
   }
 
   get images(): Array<IAlbum> {
