@@ -67,6 +67,10 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
       throw new Error('No WebGL Support!');
     }
 
+    const gl = this.app.renderer.gl;
+    const max = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    console.debug(`maximum texture size: ${max}`);
+
     // let ticker = PIXI.Ticker.shared;
     // ticker.autoStart = false;
     // ticker.stop();

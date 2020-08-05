@@ -58,6 +58,8 @@ export class FogLayer extends Layer {
         let imageSprite = new PIXI.Sprite(this.imageTexture);
         imageSprite.width = this.imageTexture.width;
         imageSprite.height = this.imageTexture.height;
+
+        console.log(imageSprite);
         this.addChild(imageSprite);      
     }
 
