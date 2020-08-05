@@ -6,6 +6,7 @@ export class Grid {
     offsetY: number = 0;
     color: string = '#cccccc';
     visible: boolean = true;
+    scale: number = 1;
 
     update(map: Map) {
         this.size = map.gridSize;
@@ -13,5 +14,6 @@ export class Grid {
         this.offsetY = map.gridOffsetY;
         this.color = map.gridColor;
         this.visible = map.gridVisible;
+        this.scale = map.scale;
     }
 }

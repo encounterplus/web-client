@@ -190,7 +190,6 @@ export class MapContainer extends Layer {
 
         this.w = this.backgroundLayer.w;
         this.h = this.backgroundLayer.h;
-
         // update size for all layers
         for(let layer of this.children) {
             if (layer instanceof Layer) {
@@ -221,7 +220,7 @@ export class MapContainer extends Layer {
 
         await this.effectsLayer.draw();
 
-        this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
+        this.hitArea = new PIXI.Rectangle(0, 0, this.w*this.map.scale, this.h*this.map.scale);
 
         return this;
     }
@@ -343,7 +342,7 @@ export class MapContainer extends Layer {
             const newPosition = event.data.getLocalPosition(this.parent);
 
             // out of bounds
-            if (newPosition.x < 0 || newPosition.x > this.w || newPosition.y < 0 || newPosition.y > this.h) {
+            if (newPosition.x < 0 || newPosition.x > this.w*this.map.scale || newPosition.y < 0 || newPosition.y > this.h*this.map.scale) {
                 this.activePointer.state = ControlState.end;
                 // send event
                 this.dataService.send({name: WSEventName.pointerUpdated, data: this.activePointer});
