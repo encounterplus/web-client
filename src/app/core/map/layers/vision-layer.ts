@@ -15,7 +15,7 @@ export class VisionLayer extends Layer {
         this.creatures = this.dataService.state.mapCreatures;
         this.tiles = this.dataService.state.map.tiles;
         this.visible = this.dataService.state.map.lineOfSight;
-        this.intensity = 1.0 - this.dataService.state.map.daylight || this.dataService.state.map.dayLight || 0.0;
+        this.intensity = 1.0 - (this.dataService.state.map.daylight || this.dataService.state.map.dayLight || 0.0);
         this.mapScale = this.dataService.state.map.scale;
     }
 
