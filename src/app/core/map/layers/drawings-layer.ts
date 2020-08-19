@@ -29,7 +29,14 @@ export class DrawingsLayer extends Layer {
             let graphics = new PIXI.Graphics();
 
             switch (drawing.shape) {
-                case DrawingShape.line:
+                case DrawingShape.ellipse:
+                    graphics.lineStyle(drawing.strokeWidth, PIXI.utils.string2hex(drawing.strokeColor));
+
+                    graphics.drawEllipse(drawing.data[0], drawing.data[1], drawing.data[2], drawing.data[3])
+                    
+                    break;
+
+                default:
                     graphics.lineStyle(drawing.strokeWidth, PIXI.utils.string2hex(drawing.strokeColor));
 
                     for(let i = 0; i < (drawing.data.length); i = i + 2) {

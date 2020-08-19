@@ -1,13 +1,14 @@
 import { MapLayer } from './map';
 
 export enum DrawingShape {
-    line = "line",
-    rectangle = "rectangle",
-    circle = "circle"
+    polygon = "polygon",
+    ellipse = "ellipse",
+    rectangle = "rectangle"
 }
 
 export class Drawing {
-    shape: DrawingShape = DrawingShape.line;
+    id: string;
+    shape: DrawingShape = DrawingShape.polygon;
     data: Array<number> = [];
     layer: MapLayer;
     strokeWidth: number;
