@@ -31,13 +31,17 @@ export class DrawingsLayer extends Layer {
             switch (drawing.shape) {
                 case DrawingShape.ellipse:
                     graphics.lineStyle(drawing.strokeWidth, PIXI.utils.string2hex(drawing.strokeColor));
-
                     graphics.drawEllipse(drawing.data[0], drawing.data[1], drawing.data[2], drawing.data[3])
                     
                     break;
 
                 default:
-                    graphics.lineStyle(drawing.strokeWidth, PIXI.utils.string2hex(drawing.strokeColor));
+                    // deprecated
+                    // graphics.lineStyle(drawing.strokeWidth, PIXI.utils.string2hex(drawing.strokeColor));
+
+                    // wtf? pixi.js.d.ts not updated for line style? ignoring error and force new options...
+                    // @ts-ignore
+                    graphics.lineStyle({width: drawing.strokeWidth, color: PIXI.utils.string2hex(drawing.strokeColor), cap: PIXI.LINE_CAP.ROUND, join: PIXI.LINE_JOIN.ROUND})
 
                     for(let i = 0; i < (drawing.data.length); i = i + 2) {
                         if (i == 0) {
