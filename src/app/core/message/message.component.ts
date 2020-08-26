@@ -32,10 +32,12 @@ export class MessageComponent implements OnInit {
             return "blue";
         case DiceRollType.damage:
             return "red";
+        case DiceRollType.heal:
+            return "turquoise";
         case DiceRollType.check:
             return "orange";
         case DiceRollType.save:
-            return "green";
+            return "limeGreen";
         default:
             return "yellow";
     }
