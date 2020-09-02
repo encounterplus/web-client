@@ -19,6 +19,7 @@ export class MessageListComponent implements OnInit {
   isNearBottom: boolean = true;
 
   @ViewChild('scrollframe', {static: false}) scrollFrame: ElementRef;
+  @ViewChild('messageinputarea', {static: true}) messageInputArea: ElementRef;
   @ViewChildren('message') itemElements: QueryList<any>;
 
   messageInput: string = "";
@@ -33,6 +34,79 @@ export class MessageListComponent implements OnInit {
   onEnter() {
     this.sendMessage();
   }
+
+    quickRoll(r) {
+        let rollStr = ""
+        let rollRE = /^(\/r(oll)? )?(([0-9]+)[dD]([0-9]+)|0)?((kh|kl)1?)?((\+|\-)[0-9]+)? ?(.*)?/;
+        let m = rollRE.exec(this.messageInput);
+        if (this.messageInput != "" && m == null) {
+            return;
+        }
+        rollStr = (m&&m[1])? m[1] : "/roll ";
+
+        let mod=0
+        if (m&&m[9]) {
+            mod = Number(m[8])
+        }
+        if (r == "-") {
+            mod -= 1;
+        } else if (r == "+") {
+            mod += 1;
+        }
+
+        if (m&&m[3]) {
+            if (r == m[5]) {
+                rollStr += (Number(m[4])+1).toString() + "d" + m[5];
+            } else if (!isNaN(r)) {
+                if (r == "adv" || r == "dis" || m[7]) {
+                    rollStr += "2d" + r;
+                } else {
+                    rollStr += "1d" + r;
+                }
+            } else {
+                if ((r == "adv" || r == "dis" || m[7]) && Number(m[4]) == 1) {
+                    rollStr += "2d" + m[5];
+                } else {
+                    rollStr += m[3];
+                }
+            }
+        } else if (!isNaN(r)) {
+            rollStr += "1d" + r;
+        } else if (mod != 0) {
+            rollStr += "0"
+        }
+
+        if (m&&m[6]) {
+            if (r == "adv" && m[7] != "kh") {
+                rollStr += "kh1";
+            } else if (r == "dis" && m[7] != "kl") {
+                rollStr += "kl1";
+            } else if (r != "adv" && r != "dis") {
+                rollStr += m[6];
+            }
+        } else if (r == "adv") {
+            rollStr += "kh1";
+        } else if (r == "dis") {
+            rollStr += "kl1";
+        }
+
+        if (mod > 0) {
+            rollStr += "+" + mod.toString();
+        } else if (mod < 0) {
+            rollStr += mod.toString();
+        }
+
+        if (m&&m[10]) {
+            if (/\[.*\]/.exec(m[10])) {
+                rollStr += " " + m[10];
+            } else {
+                rollStr += " [" + m[10] + "]";
+            }
+        }
+        this.messageInput = rollStr;
+
+        //this.sendMessage();
+    }
 
   sendMessage() {
     let text = this.messageInput || "";
@@ -80,8 +154,8 @@ export class MessageListComponent implements OnInit {
       message.type = MessageType.chat;
       message.content = text;
     }
-
     this.dataService.send({name: WSEventName.createMessage, data: message});
+    this.scrollToBottom();
   }
 
   private onItemElementsChanged(): void {
@@ -119,6 +193,8 @@ export class MessageListComponent implements OnInit {
 
   ngAfterViewInit() {
     this.scrollContainer = this.scrollFrame.nativeElement;
+    let inputArea = this.messageInputArea.nativeElement;
+    this.scrollContainer.style.paddingBottom = inputArea.offsetHeight.toString() + "px";
     this.itemElements.changes.subscribe(_ => this.onItemElementsChanged());
     this.scrollToBottomInstant();
   }
