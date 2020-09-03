@@ -37,16 +37,18 @@ export class MessageListComponent implements OnInit {
 
     quickRoll(r) {
         let rollStr = ""
-        let rollRE = /^(\/r(oll)? )?(([0-9]+)[dD]([0-9]+)|0)?((kh|kl)1?)?((\+|\-)[0-9]+)? ?(.*)?/;
-        let m = rollRE.exec(this.messageInput);
+        const rollRE = /^(\/r(?:oll)? )?(([0-9]+)[dD]([0-9]+)|0)?(?:(kh|kl)1?)?((?:\+|\-)[0-9]+)? ?(.*)?/;
+        const m = rollRE.exec(this.messageInput);
         if (this.messageInput != "" && m == null) {
             return;
         }
-        rollStr = (m&&m[1])? m[1] : "/roll ";
+        const [ cmd, roll, num, sides, keep, mods, text ] = m.slice(1);
+
+        rollStr = cmd || "/roll ";
 
         let mod=0
-        if (m&&m[9]) {
-            mod = Number(m[8])
+        if (mods) {
+            mod = Number(mods)
         }
         if (r == "-") {
             mod -= 1;
@@ -54,35 +56,35 @@ export class MessageListComponent implements OnInit {
             mod += 1;
         }
 
-        if (m&&m[3]) {
-            if (r == m[5]) {
-                rollStr += (Number(m[4])+1).toString() + "d" + m[5];
+        if (roll) {
+            if (r == sides) {
+                rollStr += (Number(num)+1).toString() + "d" + sides;
             } else if (!isNaN(r)) {
-                if (r == "adv" || r == "dis" || m[7]) {
+                if (r == "adv" || r == "dis" || keep) {
                     rollStr += "2d" + r;
                 } else {
                     rollStr += "1d" + r;
                 }
             } else {
-                if ((r == "adv" || r == "dis" || m[7]) && Number(m[4]) == 1) {
-                    rollStr += "2d" + m[5];
+                if ((r == "adv" || r == "dis" || keep) && Number(num) == 1) {
+                    rollStr += "2d" + sides;
                 } else {
-                    rollStr += m[3];
+                    rollStr += roll;
                 }
             }
         } else if (!isNaN(r)) {
             rollStr += "1d" + r;
-        } else if (mod != 0) {
+        } else if (mod != 0||keep||r=="adv"||r=="dis") {
             rollStr += "0"
         }
 
-        if (m&&m[6]) {
-            if (r == "adv" && m[7] != "kh") {
+        if (keep) {
+            if (r == "adv" && keep != "kh") {
                 rollStr += "kh1";
-            } else if (r == "dis" && m[7] != "kl") {
+            } else if (r == "dis" && keep != "kl") {
                 rollStr += "kl1";
             } else if (r != "adv" && r != "dis") {
-                rollStr += m[6];
+                rollStr += keep;
             }
         } else if (r == "adv") {
             rollStr += "kh1";
@@ -96,11 +98,11 @@ export class MessageListComponent implements OnInit {
             rollStr += mod.toString();
         }
 
-        if (m&&m[10]) {
-            if (/\[.*\]/.exec(m[10])) {
-                rollStr += " " + m[10];
+        if (text) {
+            if (/\[.*\]/.exec(text)) {
+                rollStr += " " + text;
             } else {
-                rollStr += " [" + m[10] + "]";
+                rollStr += " [" + text + "]";
             }
         }
         this.messageInput = rollStr;
