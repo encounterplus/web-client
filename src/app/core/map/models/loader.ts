@@ -83,32 +83,93 @@ export class Loader {
     }
 
     // TOOD: this is not working very well
-    async loadVideoTexture(src: string, local: boolean = false): Promise<PIXI.Texture> {
-        if (local == false) {
+    async loadVideoTexture(src: string, loadingText: PIXI.Text = null, local: boolean = false): Promise<PIXI.Texture> {
+        if (local == false && !src.startsWith("blob:")) {
             src = this.remoteBaseURL + src;
         }
 
-        let tex = this.cache.get(src)
+        const tex = this.cache.get(src)
         if ( tex && tex.baseTexture && tex.baseTexture.valid ) {
             console.log("video cache hit");
             return tex;
         }
-
-        let video = document.createElement("VIDEO") as HTMLVideoElement;
+        const video = document.createElement("VIDEO") as HTMLVideoElement;
         video.setAttribute('preload', 'auto');
         video.setAttribute('webkit-playsinline', '');
         video.setAttribute('playsinline', '');
         video.crossOrigin = "anonymous";
-        video.src = src;
-    
-        return new Promise((resolve, reject) => {
-            video.oncanplaythrough = () => {
+        //video.src = src;
 
-                console.log(video.videoWidth);
-                console.log(video.videoHeight)
+        const ppBtn = document.getElementById("video-play");
+        const ppBtnClass = (ppBtn.firstChild as HTMLElement).classList;
+        const muteBtn = document.getElementById("video-mute");
+        const muteBtnClass = (muteBtn.firstChild as HTMLElement).classList;
+        ppBtn.onclick = (_) => {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        };
+        muteBtn.onclick = (_) => video.muted = !video.muted;
+        video.onpause = (_) => {
+            if (ppBtnClass.contains('fa-pause')) ppBtnClass.remove('fa-pause');
+            if (!ppBtnClass.contains('fa-play')) ppBtnClass.add('fa-play');
+        };
+        video.onplay = (_) => {
+            if (ppBtnClass.contains('fa-play')) ppBtnClass.remove('fa-play');
+            if (!ppBtnClass.contains('fa-pause')) ppBtnClass.add('fa-pause');
+        };
+        video.onvolumechange = (_) => {
+            if (video.muted) {
+                if (muteBtnClass.contains('fa-volume-up')) muteBtnClass.remove('fa-volume-up');
+                if (!muteBtnClass.contains('fa-volume-off')) muteBtnClass.add('fa-volume-off');
+            } else {
+                if (muteBtnClass.contains('fa-volume-off')) muteBtnClass.remove('fa-volume-off');
+                if (!muteBtnClass.contains('fa-volume-up')) muteBtnClass.add('fa-volume-up');
+            }
+        };
+
+        if (!src.startsWith("blob:")) {
+            const res = await fetch(src);
+            const length = Number(res.headers.get('Content-Length'));
+            const mime = res.headers.get('Content-Type');
+            const arrayBuffer = new Uint8Array(length);
+            const reader = res.body.getReader();
+            let at = 0;
+            let pos = 0;
+            console.log("Downloading video");
+            while(true) {
+                const {done, value} = await reader.read();
+                if (done) {
+                    console.log("Finished");
+                    break;
+                }
+                arrayBuffer.set(value, at);
+                at += value.length;
+                if (Math.trunc(at/length*100) > pos) {
+                    pos = Math.trunc(at/length*100)
+                    loadingText.text = `Loading video map: ${pos}%`;
+                }
+            }
+            console.log("Loading blob...");
+            const videosrc = new Blob([arrayBuffer], { type: mime });
+            console.log("Setting src to blob url");
+            video.src = URL.createObjectURL(videosrc);
+        } else {
+            console.log("Setting src to existing blob url");
+            video.src = src;
+        }
+
+        console.log("returning promise");
+        return new Promise((resolve, reject) => {
+            video.oncanplay = () => {
+                console.log(`video size: ${video.videoWidth}x${video.videoHeight}`)
                 video.height = video.videoHeight;
                 video.width = video.videoWidth;
                 video.muted = true;
+                video.loop = true;
+                video.play();
                 const bt = PIXI.BaseTexture.from(video);
                 const tex = new PIXI.Texture(bt);
                 // console.log(tex);
@@ -126,7 +187,6 @@ export class Loader {
         if (local == false) {
             src = this.remoteBaseURL + src;
         }
-
         let tex = PIXI.Texture.from(src, {resourceOptions: this.RESOURCE_LOADER_OPTIONS});
 
         return new Promise((resolve, reject) => {
