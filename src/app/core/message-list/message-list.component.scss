@@ -13,10 +13,10 @@
     }
 
     .frame {
-        height: 90%;
+        height: 100%;
         overflow: scroll;
         // bottom: 100px;
-        // padding-bottom: 80px;
+        padding-bottom: 80px;
     }
 
     .message-input {
@@ -33,5 +33,14 @@
         @media (max-width: 420px) {
             width: 260px;
         }
+    }
+    .dice {
+        display: flex;
+        flex-flow: wrap;
+    }
+    .dice button {
+        flex: 1 0 calc(25% - 5px);
+        margin: 2px;
+        padding: 0;
     }
 }
