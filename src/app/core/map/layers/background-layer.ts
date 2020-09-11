@@ -27,7 +27,6 @@ export class BackgroundLayer extends Layer {
     }
 
     update(map: Map) {
-        this.map = map;
         if (map == null) {
             this.image = null;
             this.video = null;
@@ -39,6 +38,10 @@ export class BackgroundLayer extends Layer {
     }
 
     async draw() {
+        if (this.videoTexture && this.video == this.loadedVideoSrc && this.loadedVideoUrl != null) {
+            console.log("Video already loaded, skipping redraw");
+            return
+        }
         this.clear();
 
         if (this.image == null && this.video == null) {
@@ -139,17 +142,19 @@ export class BackgroundLayer extends Layer {
         if (this.videoTexture) {
             const videoResource = this.videoTexture.baseTexture.resource as PIXI.resources.VideoResource;
             const video = videoResource.source as HTMLVideoElement;
-            this.videoTexture.destroy();
+            video.onpause = video.onplay = video.onvolumechange = null;
             video.pause();
             video.muted = true;
             video.src = "";
             video.remove();
-            document.getElementById("video-play").onclick = document.getElementById("video-mute").onclick = null;
+            if (document.getElementById("video-play")) document.getElementById("video-play").onclick = null;
+            if (document.getElementById("video-mute")) document.getElementById("video-mute").onclick = null;
             if (this.video != this.loadedVideoSrc) {
                 URL.revokeObjectURL(video.src);
                 this.loadedVideoSrc = null;
                 this.loadedVideoUrl = null;
             }
+            this.videoTexture.destroy();
         }
         this.imageSprite = null;
         this.videoSprite = null;

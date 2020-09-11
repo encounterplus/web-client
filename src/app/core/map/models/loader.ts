@@ -99,37 +99,7 @@ export class Loader {
         video.setAttribute('playsinline', '');
         video.crossOrigin = "anonymous";
         //video.src = src;
-
-        const ppBtn = document.getElementById("video-play");
-        const ppBtnClass = (ppBtn.firstChild as HTMLElement).classList;
-        const muteBtn = document.getElementById("video-mute");
-        const muteBtnClass = (muteBtn.firstChild as HTMLElement).classList;
-        ppBtn.onclick = (_) => {
-            if (video.paused) {
-                video.play();
-            } else {
-                video.pause();
-            }
-        };
-        muteBtn.onclick = (_) => video.muted = !video.muted;
-        video.onpause = (_) => {
-            if (ppBtnClass.contains('fa-pause')) ppBtnClass.remove('fa-pause');
-            if (!ppBtnClass.contains('fa-play')) ppBtnClass.add('fa-play');
-        };
-        video.onplay = (_) => {
-            if (ppBtnClass.contains('fa-play')) ppBtnClass.remove('fa-play');
-            if (!ppBtnClass.contains('fa-pause')) ppBtnClass.add('fa-pause');
-        };
-        video.onvolumechange = (_) => {
-            if (video.muted) {
-                if (muteBtnClass.contains('fa-volume-up')) muteBtnClass.remove('fa-volume-up');
-                if (!muteBtnClass.contains('fa-volume-off')) muteBtnClass.add('fa-volume-off');
-            } else {
-                if (muteBtnClass.contains('fa-volume-off')) muteBtnClass.remove('fa-volume-off');
-                if (!muteBtnClass.contains('fa-volume-up')) muteBtnClass.add('fa-volume-up');
-            }
-        };
-
+        let videosrcurl: string;
         if (!src.startsWith("blob:")) {
             const res = await fetch(src);
             const length = Number(res.headers.get('Content-Length'));
@@ -155,16 +125,47 @@ export class Loader {
             console.log("Loading blob...");
             const videosrc = new Blob([arrayBuffer], { type: mime });
             console.log("Setting src to blob url");
-            video.src = URL.createObjectURL(videosrc);
+            videosrcurl = URL.createObjectURL(videosrc);
         } else {
             console.log("Setting src to existing blob url");
-            video.src = src;
+            videosrcurl = src;
         }
 
         console.log("returning promise");
         return new Promise((resolve, reject) => {
-            video.oncanplay = () => {
+            video.oncanplaythrough = () => {
                 console.log(`video size: ${video.videoWidth}x${video.videoHeight}`)
+                document.getElementById("video-ctls").style.display = "";
+                const ppBtn = document.getElementById("video-play");
+                const ppBtnClass = (ppBtn.firstChild as HTMLElement).classList;
+                const muteBtn = document.getElementById("video-mute");
+                const muteBtnClass = (muteBtn.firstChild as HTMLElement).classList;
+                ppBtn.onclick = (_) => {
+                    if (video.paused) {
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                };
+                muteBtn.onclick = (_) => video.muted = !video.muted;
+                video.onpause = (_) => {
+                    if (ppBtnClass.contains('fa-pause')) ppBtnClass.remove('fa-pause');
+                    if (!ppBtnClass.contains('fa-play')) ppBtnClass.add('fa-play');
+                };
+                video.onplay = (_) => {
+                    if (ppBtnClass.contains('fa-play')) ppBtnClass.remove('fa-play');
+                    if (!ppBtnClass.contains('fa-pause')) ppBtnClass.add('fa-pause');
+                };
+                video.onvolumechange = (_) => {
+                    if (video.muted) {
+                        if (muteBtnClass.contains('fa-volume-up')) muteBtnClass.remove('fa-volume-up');
+                        if (!muteBtnClass.contains('fa-volume-off')) muteBtnClass.add('fa-volume-off');
+                    } else {
+                        if (muteBtnClass.contains('fa-volume-off')) muteBtnClass.remove('fa-volume-off');
+                        if (!muteBtnClass.contains('fa-volume-up')) muteBtnClass.add('fa-volume-up');
+                    }
+                };
+
                 video.height = video.videoHeight;
                 video.width = video.videoWidth;
                 video.muted = true;
@@ -176,7 +177,12 @@ export class Loader {
                 // this.cache.set(src, tex);
                 resolve(tex);
             };
-            video.onerror = reject;
+            video.onerror = (e) => {
+                console.log("Error " + video.error.code + " loading video: " + video.error.message)
+                reject();
+            }
+            video.src = videosrcurl;
+            console.log("Loading video");
             video.load();
         });
     }
