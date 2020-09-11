@@ -111,11 +111,11 @@ export class MapContainer extends Layer {
         console.debug("updating map");
         this.map = this.state.map;
 
+        this.backgroundLayer.update(this.state.map);
+
         if (this.map == null) {
             return;
         }
-
-        this.backgroundLayer.update(this.state.map);
 
         // update grid
         this.grid.update(this.state.map);
@@ -190,6 +190,10 @@ export class MapContainer extends Layer {
 
         this.w = this.backgroundLayer.w;
         this.h = this.backgroundLayer.h;
+        if (this.map == null) {
+            this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
+            return this;
+        }
         // update size for all layers
         for(let layer of this.children) {
             if (layer instanceof Layer) {

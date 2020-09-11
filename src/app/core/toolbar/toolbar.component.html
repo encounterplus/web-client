@@ -24,5 +24,14 @@
       <input ngbButton type="radio" value="pointer"> <i class="fa fa-magic"></i>
     </label>
   </div>
+
+  <div *ngIf="state.map?.video" class="btn-group mr-2" role="group" aria-label="Video Controls" id="video-ctls" style="display: none">
+      <button class="btn btn-dark" id="video-play">
+          <i class="fa fa-fw fa-play"></i>
+      </button>
+      <button class="btn btn-dark" id="video-mute">
+          <i class="fa fa-fw fa-volume-off"></i>
+      </button>
+  </div>
 </div>
 
