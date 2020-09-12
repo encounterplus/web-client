@@ -40,7 +40,7 @@ export class BackgroundLayer extends Layer {
     async draw() {
         if (this.videoTexture && this.video == this.loadedVideoSrc && this.loadedVideoUrl != null) {
             console.log("Video already loaded, skipping redraw");
-            return
+            return this;
         }
         this.clear();
 
@@ -60,9 +60,13 @@ export class BackgroundLayer extends Layer {
             this.imageTexture = await Loader.shared.loadTexture(this.image);
         }
 
-        // TODO: video texture loader is not ready yet
         // load map video
-        if (this.video != null && this.image != null) {
+        if (this.video != null) {
+            //preset canvas to 1080p if no placeholder image
+            if (this.image == null) {
+                const baseRenderTexture = new PIXI.BaseRenderTexture({ width: 1920, height: 1080 });
+                this.imageTexture = new PIXI.RenderTexture(baseRenderTexture);
+            }
             let videoSrc = this.video;
             if (videoSrc == this.loadedVideoSrc && this.loadedVideoUrl != null) {
                 videoSrc = this.loadedVideoUrl;
@@ -73,27 +77,26 @@ export class BackgroundLayer extends Layer {
             } ).catch((error) => {
                 console.log(error)
             });
-        } else if (this.video != null) {
-            let videoSrc = this.video;
-            if (videoSrc == this.loadedVideoSrc && this.loadedVideoUrl != null) {
-                videoSrc = this.loadedVideoUrl;
-            }
-            this.videoTexture = await Loader.shared.loadVideoTexture(videoSrc,this.loadingText);
-            //this.videoTexture = await Loader.shared.loadVideoTextureFrom(this.video);
-        }
-
-        // remove loading node
-        this.removeChildren();
-
-        // return if there is no texture
-        if(this.imageTexture == null && this.videoTexture == null) {
-            this.w = 2000;
-            this.h = 2000;
-            return this;
         }
 
         this.w = this.imageTexture?.width || this.videoTexture?.width || 2000;
         this.h = this.imageTexture?.height || this.videoTexture?.height || 2000;
+
+        // remove loading node
+        this.removeChildren();
+
+        //add video loading node
+        if (this.video != null) {
+            this.addChild(this.vidloadingText);
+            this.vidloadingText.style.fontSize = this.h*.05;
+            this.vidloadingText.anchor.set(0, 1);
+            this.vidloadingText.position.set(0,this.h);
+        }
+
+        // return if there is no texture
+        if(this.imageTexture == null && this.videoTexture == null) {
+            return this;
+        }
 
         if (this.imageTexture) {
             let sprite = new PIXI.Sprite(this.imageTexture);
@@ -107,8 +110,6 @@ export class BackgroundLayer extends Layer {
                 this.vidloadingText.anchor.set(0, 1);
                 this.vidloadingText.position.set(0,sprite.height);
             }
-        } else if (this.videoTexture) {
-            this.drawVideo();
         }
 
         console.log(`map size: ${this.w}x${this.h}`)
