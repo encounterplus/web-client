@@ -24,7 +24,7 @@ export class GridLayer extends Layer {
 
     updateHighlight(path: Array<number>, scale: number, color: number) {
         this.highlightPath = path;
-        this.highlightScale = scale;
+        this.highlightScale = Math.max(scale, 1.0);
         this.highlightColor = color;
 
         if (scale > 1.0) {
