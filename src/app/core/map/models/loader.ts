@@ -104,22 +104,25 @@ export class Loader {
             const res = await fetch(src);
             const length = Number(res.headers.get('Content-Length'));
             const mime = res.headers.get('Content-Type');
-            const arrayBuffer = new Uint8Array(length);
-            const reader = res.body.getReader();
-            let at = 0;
-            let pos = 0;
-            console.log("Downloading video");
-            while(true) {
-                const {done, value} = await reader.read();
-                if (done) {
-                    console.log("Finished");
-                    break;
-                }
-                arrayBuffer.set(value, at);
-                at += value.length;
-                if (Math.trunc(at/length*100) > pos) {
-                    pos = Math.trunc(at/length*100)
-                    loadingText.text = `Loading video map: ${pos}%`;
+            const arrayBuffer = (length > 0)? new Uint8Array(length) : await res.arrayBuffer() as Uint8Array;
+            if (length > 0) {
+                const reader = res.body.getReader();
+                let at = 0;
+                let pos = 0;
+                console.log("Downloading video");
+                while(at < length) {
+                    const {done, value} = await reader.read();
+                    if (done) {
+                        console.log("Finished");
+                        break;
+                    }
+                    console.log(`Inserting ${value.length} bytes at ${at} (of ${length})`);
+                    arrayBuffer.set(value,at);
+                    at += value.length;
+                    if (Math.trunc(at/length*100) > pos) {
+                        pos = Math.trunc(at/length*100)
+                        loadingText.text = `Loading video map: ${pos}%`;
+                    }
                 }
             }
             console.log("Loading blob...");
