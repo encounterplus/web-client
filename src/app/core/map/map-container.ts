@@ -117,6 +117,9 @@ export class MapContainer extends Layer {
             return;
         }
 
+        if (this.map.video) {
+            this.backgroundLayer.once('videoloaded', () => this.draw());
+        }
         // update grid
         this.grid.update(this.state.map);
         this.gridLayer.update(this.grid);
