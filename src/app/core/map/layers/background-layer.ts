@@ -20,6 +20,8 @@ export class BackgroundLayer extends Layer {
     loadedVideoSrc: string;
     loadedVideoUrl: string;
 
+    allowVideo: boolean = (localStorage.getItem("allowVideo") || "true") == "true";
+
     map: Map;
 
     constructor(private dataService: DataService) {
@@ -34,6 +36,7 @@ export class BackgroundLayer extends Layer {
         }
         this.image = map.image;
         this.video = map.video;
+        this.allowVideo = (localStorage.getItem("allowVideo") || "true") == "true";
         this.scale.set(map.scale, map.scale);
     }
 
@@ -71,12 +74,14 @@ export class BackgroundLayer extends Layer {
             if (videoSrc == this.loadedVideoSrc && this.loadedVideoUrl != null) {
                 videoSrc = this.loadedVideoUrl;
             }
-            Loader.shared.loadVideoTexture(videoSrc,this.vidloadingText).then( vidtex => {
-                this.videoTexture = vidtex;
-                this.drawVideo();
-            } ).catch((error) => {
-                console.log(error)
-            });
+            if (this.allowVideo) {
+                Loader.shared.loadVideoTexture(videoSrc,this.vidloadingText).then( vidtex => {
+                    this.videoTexture = vidtex;
+                    this.drawVideo();
+                } ).catch((error) => {
+                    console.log(error)
+                });
+            }
         }
 
         this.w = this.imageTexture?.width || this.videoTexture?.width || 2000;
@@ -86,7 +91,7 @@ export class BackgroundLayer extends Layer {
         this.removeChildren();
 
         //add video loading node
-        if (this.video != null) {
+        if (this.allowVideo && this.video != null) {
             this.addChild(this.vidloadingText);
             this.vidloadingText.style.fontSize = this.h*.05;
             this.vidloadingText.anchor.set(0, 1);
@@ -104,7 +109,7 @@ export class BackgroundLayer extends Layer {
             sprite.height = this.imageTexture.height;
             this.addChild(sprite);
             this.imageSprite = sprite;
-            if (this.video) {
+            if (this.allowVideo && this.video) {
                 this.addChild(this.vidloadingText);
                 this.vidloadingText.style.fontSize = sprite.height*.05;
                 this.vidloadingText.anchor.set(0, 1);
@@ -117,8 +122,8 @@ export class BackgroundLayer extends Layer {
 
     drawVideo() {
         let sprite = new PIXI.Sprite(this.videoTexture);
-        sprite.width = this.videoTexture.width;
-        sprite.height = this.videoTexture.height;
+        this.w = sprite.width = this.videoTexture.width;
+        this.h = sprite.height = this.videoTexture.height;
         this.removeChildren();
         this.addChild(sprite);
         this.videoSprite = sprite;
@@ -128,6 +133,8 @@ export class BackgroundLayer extends Layer {
 
         this.loadedVideoSrc = this.video;
         this.loadedVideoUrl = video.src;
+
+        this.emit("videoloaded");
     }
 
     clear() {
