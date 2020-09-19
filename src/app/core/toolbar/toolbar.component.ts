@@ -2,6 +2,7 @@ import { Component, OnInit, Input, ElementRef, Output, EventEmitter } from '@ang
 import { AppState } from 'src/app/shared/models/app-state';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
+import { DataService } from 'src/app/shared/services/data.service';
 
 export enum Tool {
   move = "move",
@@ -32,11 +33,14 @@ export class ToolbarComponent implements OnInit {
   @Output()
   public panel = new EventEmitter<Panel>();
 
-  constructor(private element: ElementRef, private modalService: NgbModal) { }
+  constructor(private element: ElementRef, private modalService: NgbModal, private dataService: DataService) { }
 
   activeTool: Tool = Tool.move;
 
   messages: Boolean = false;
+  videoControlsVisible: Boolean = false;
+  videoPaused: boolean = false;
+  videoMuted: boolean = true;
 
   activeToolChanged(newTool) {
     this.tool.emit(newTool);
@@ -57,7 +61,20 @@ export class ToolbarComponent implements OnInit {
     this.action.emit("showAbout");
   }
 
+  videoPauseToggle() {
+    this.videoPaused = !this.videoPaused;
+    this.dataService.updateVideoPaused(this.videoPaused);
+  }
+
+  videoMuteToggle() {
+    this.videoMuted = !this.videoMuted;
+    this.dataService.updateVideoMuted(this.videoMuted);
+  }
+
   ngOnInit() {
     this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
+
+    this.dataService.videoMuted.subscribe(value => this.videoMuted);
+    this.dataService.videoPaused.subscribe(value => this.videoPaused);
   }
 }
