@@ -113,9 +113,9 @@ export class Loader {
         let videosrcurl: string;
 
         if (!src.startsWith("blob:")) {
-            const res = await fetch(src);
+            //const res = await fetch(src);
 
-            let videosrc = await res.blob();
+            //let videosrc = await res.blob();
 
             // const length = Number(res.headers.get('Content-Length'));
             // const mime = res.headers.get('Content-Type');
@@ -142,6 +142,21 @@ export class Loader {
             // }
             // console.log("Loading blob...");
             // const videosrc = new Blob([arrayBuffer], { type: mime });
+            const videosrc = await new Promise((resolve,reject) => {
+                const req = new XMLHttpRequest();
+                req.open('GET', src);
+                let pos = 0;
+                loadingText.text = `Loading video map...`;
+                req.onprogress = (e) => {
+                    if (e.lengthComputable && Math.trunc(e.loaded/e.total*100) > pos) {
+                        pos = Math.trunc(e.loaded/e.total*100)
+                        loadingText.text = `Loading video map: ${pos}%`;
+                    }
+                };
+                req.onload = () => resolve(req.response);
+                req.responseType = "blob";
+                req.send();
+            });
             console.log("Setting src to blob url");
             videosrcurl = URL.createObjectURL(videosrc);
             console.log(videosrcurl);
