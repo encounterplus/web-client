@@ -20,12 +20,38 @@ export class BackgroundLayer extends Layer {
     loadedVideoSrc: string;
     loadedVideoUrl: string;
 
-    allowVideo: boolean = (localStorage.getItem("allowVideo") || "true") == "true";
+    videoPaused: boolean = false;
+    videoMuted: boolean = true;
 
-    map: Map;
+    allowVideo: boolean = (localStorage.getItem("allowVideo") || "true") == "true";
 
     constructor(private dataService: DataService) {
         super();
+
+        dataService.videoMuted.subscribe(value => {
+            this.videoMuted = value;
+
+            if (this.videoTexture) {
+                const videoResource = this.videoTexture.baseTexture.resource as PIXI.resources.VideoResource;
+                const video = videoResource.source as HTMLVideoElement;
+                video.muted = value;
+            }  
+        })
+
+        dataService.videoPaused.subscribe(value => {
+            this.videoPaused = value;
+
+            if (this.videoTexture) {
+                const videoResource = this.videoTexture.baseTexture.resource as PIXI.resources.VideoResource;
+                const video = videoResource.source as HTMLVideoElement;
+                
+                if (value) {
+                    video.pause();
+                } else {
+                    video.play();
+                }
+            }  
+        })
     }
 
     update(map: Map) {
@@ -37,6 +63,10 @@ export class BackgroundLayer extends Layer {
         this.image = map.image;
         this.video = map.video;
         this.allowVideo = (localStorage.getItem("allowVideo") || "true") == "true";
+
+        this.w = map.width || 2048;
+        this.h = map.height || 2048;
+
         this.scale.set(map.scale, map.scale);
     }
 
@@ -48,8 +78,6 @@ export class BackgroundLayer extends Layer {
         this.clear();
 
         if (this.image == null && this.video == null) {
-            this.w = 2000;
-            this.h = 2000;
             return this;
         }
 
@@ -65,11 +93,11 @@ export class BackgroundLayer extends Layer {
 
         // load map video
         if (this.video != null) {
-            //preset canvas to 1080p if no placeholder image
-            if (this.image == null) {
-                const baseRenderTexture = new PIXI.BaseRenderTexture({ width: 1920, height: 1080 });
-                this.imageTexture = new PIXI.RenderTexture(baseRenderTexture);
-            }
+            // //preset canvas to 1080p if no placeholder image
+            // if (this.image == null) {
+            //     const baseRenderTexture = new PIXI.BaseRenderTexture({ width: 1920, height: 1080 });
+            //     this.imageTexture = new PIXI.RenderTexture(baseRenderTexture);
+            // }
             let videoSrc = this.video;
             if (videoSrc == this.loadedVideoSrc && this.loadedVideoUrl != null) {
                 videoSrc = this.loadedVideoUrl;
@@ -84,8 +112,8 @@ export class BackgroundLayer extends Layer {
             }
         }
 
-        this.w = this.imageTexture?.width || this.videoTexture?.width || 2000;
-        this.h = this.imageTexture?.height || this.videoTexture?.height || 2000;
+        this.w = this.imageTexture?.width || this.videoTexture?.width || 2048;
+        this.h = this.imageTexture?.height || this.videoTexture?.height || 2048;
 
         // remove loading node
         this.removeChildren();
@@ -134,6 +162,12 @@ export class BackgroundLayer extends Layer {
         this.loadedVideoSrc = this.video;
         this.loadedVideoUrl = video.src;
 
+        if (this.videoPaused) {
+            video.pause();
+        }
+
+        video.muted = this.videoMuted;
+
         this.emit("videoloaded");
     }
 
@@ -155,8 +189,9 @@ export class BackgroundLayer extends Layer {
             video.muted = true;
             video.src = "";
             video.remove();
-            if (document.getElementById("video-play")) document.getElementById("video-play").onclick = null;
-            if (document.getElementById("video-mute")) document.getElementById("video-mute").onclick = null;
+            
+            // if (document.getElementById("video-play")) document.getElementById("video-play").onclick = null;
+            // if (document.getElementById("video-mute")) document.getElementById("video-mute").onclick = null;
             if (this.video != this.loadedVideoSrc) {
                 URL.revokeObjectURL(video.src);
                 this.loadedVideoSrc = null;

@@ -25,12 +25,12 @@
     </label>
   </div>
 
-  <div *ngIf="state.map?.video" class="btn-group mr-2" role="group" aria-label="Video Controls" id="video-ctls" style="display: none">
-      <button class="btn btn-dark" id="video-play">
-          <i class="fa fa-fw fa-play"></i>
+  <div *ngIf="state.map?.video" class="btn-group mr-2" role="group" aria-label="Video Controls">
+      <button ngbButton class="btn btn-dark" (click)="videoPauseToggle()">
+          <i class="fa fa-fw" [ngClass]="videoPaused ? 'fa-play' : 'fa-pause'"></i>
       </button>
-      <button class="btn btn-dark" id="video-mute">
-          <i class="fa fa-fw fa-volume-off"></i>
+      <button ngbButton class="btn btn-dark" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" (click)="videoMuteToggle()">
+          <i class="fa fa-fw" [ngClass]="videoMuted ? 'fa-volume-off' : 'fa-volume-up'"></i>
       </button>
   </div>
 </div>

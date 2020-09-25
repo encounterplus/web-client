@@ -32,6 +32,8 @@ export class Map {
     x: number;
     y: number;
     zoom: number;
+    width: number;
+    height: number;
     tiles: Array<Tile> = [];
     areaEffects: Array<AreaEffect> = [];
     markers: Array<Marker> = [];

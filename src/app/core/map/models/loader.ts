@@ -1,3 +1,5 @@
+import { NineSlicePlane } from 'pixi.js';
+
 export class Loader {
 
     private static instance: Loader;
@@ -98,37 +100,69 @@ export class Loader {
         video.setAttribute('webkit-playsinline', '');
         video.setAttribute('playsinline', '');
         video.crossOrigin = "anonymous";
+
+        // revoke object url if necessary
+        let lastVideoURL = localStorage.getItem("lastVideoURL");
+        if (lastVideoURL) {
+            console.log(`revoking object url: ${lastVideoURL}`);
+            URL.revokeObjectURL(lastVideoURL);
+            localStorage.removeItem("lastVideoURL");
+        }
+
         //video.src = src;
         let videosrcurl: string;
+
         if (!src.startsWith("blob:")) {
-            const res = await fetch(src);
-            const length = Number(res.headers.get('Content-Length'));
-            const mime = res.headers.get('Content-Type');
-            const arrayBuffer = (length > 0)? new Uint8Array(length) : await res.arrayBuffer() as Uint8Array;
-            if (length > 0) {
-                const reader = res.body.getReader();
-                let at = 0;
+            //const res = await fetch(src);
+
+            //let videosrc = await res.blob();
+
+            // const length = Number(res.headers.get('Content-Length'));
+            // const mime = res.headers.get('Content-Type');
+            // const arrayBuffer = (length > 0)? new Uint8Array(length) : await res.arrayBuffer() as Uint8Array;
+            // if (length > 0) {
+            //     const reader = res.body.getReader();
+            //     let at = 0;
+            //     let pos = 0;
+            //     console.log("Downloading video");
+            //     while(at < length) {
+            //         const {done, value} = await reader.read();
+            //         if (done) {
+            //             console.log("Finished");
+            //             break;
+            //         }
+            //         // console.log(`Inserting ${value.length} bytes at ${at} (of ${length})`);
+            //         arrayBuffer.set(value,at);
+            //         at += value.length;
+            //         if (Math.trunc(at/length*100) > pos) {
+            //             pos = Math.trunc(at/length*100)
+            //             loadingText.text = `Loading video map: ${pos}%`;
+            //         }
+            //     }
+            // }
+            // console.log("Loading blob...");
+            // const videosrc = new Blob([arrayBuffer], { type: mime });
+            const videosrc = await new Promise((resolve,reject) => {
+                const req = new XMLHttpRequest();
+                req.open('GET', src);
                 let pos = 0;
-                console.log("Downloading video");
-                while(at < length) {
-                    const {done, value} = await reader.read();
-                    if (done) {
-                        console.log("Finished");
-                        break;
-                    }
-                    console.log(`Inserting ${value.length} bytes at ${at} (of ${length})`);
-                    arrayBuffer.set(value,at);
-                    at += value.length;
-                    if (Math.trunc(at/length*100) > pos) {
-                        pos = Math.trunc(at/length*100)
+                loadingText.text = `Loading video map...`;
+                req.onprogress = (e) => {
+                    if (e.lengthComputable && Math.trunc(e.loaded/e.total*100) > pos) {
+                        pos = Math.trunc(e.loaded/e.total*100)
                         loadingText.text = `Loading video map: ${pos}%`;
                     }
-                }
-            }
-            console.log("Loading blob...");
-            const videosrc = new Blob([arrayBuffer], { type: mime });
+                };
+                req.onload = () => resolve(req.response);
+                req.responseType = "blob";
+                req.send();
+            });
             console.log("Setting src to blob url");
             videosrcurl = URL.createObjectURL(videosrc);
+            console.log(videosrcurl);
+
+            localStorage.setItem("lastVideoURL", videosrcurl);
+
         } else {
             console.log("Setting src to existing blob url");
             videosrcurl = src;
@@ -138,36 +172,6 @@ export class Loader {
         return new Promise((resolve, reject) => {
             video.oncanplaythrough = () => {
                 console.log(`video size: ${video.videoWidth}x${video.videoHeight}`)
-                document.getElementById("video-ctls").style.display = "";
-                const ppBtn = document.getElementById("video-play");
-                const ppBtnClass = (ppBtn.firstChild as HTMLElement).classList;
-                const muteBtn = document.getElementById("video-mute");
-                const muteBtnClass = (muteBtn.firstChild as HTMLElement).classList;
-                ppBtn.onclick = (_) => {
-                    if (video.paused) {
-                        video.play();
-                    } else {
-                        video.pause();
-                    }
-                };
-                muteBtn.onclick = (_) => video.muted = !video.muted;
-                video.onpause = (_) => {
-                    if (ppBtnClass.contains('fa-pause')) ppBtnClass.remove('fa-pause');
-                    if (!ppBtnClass.contains('fa-play')) ppBtnClass.add('fa-play');
-                };
-                video.onplay = (_) => {
-                    if (ppBtnClass.contains('fa-play')) ppBtnClass.remove('fa-play');
-                    if (!ppBtnClass.contains('fa-pause')) ppBtnClass.add('fa-pause');
-                };
-                video.onvolumechange = (_) => {
-                    if (video.muted) {
-                        if (muteBtnClass.contains('fa-volume-up')) muteBtnClass.remove('fa-volume-up');
-                        if (!muteBtnClass.contains('fa-volume-off')) muteBtnClass.add('fa-volume-off');
-                    } else {
-                        if (muteBtnClass.contains('fa-volume-off')) muteBtnClass.remove('fa-volume-off');
-                        if (!muteBtnClass.contains('fa-volume-up')) muteBtnClass.add('fa-volume-up');
-                    }
-                };
 
                 video.height = video.videoHeight;
                 video.width = video.videoWidth;
@@ -178,7 +182,12 @@ export class Loader {
                 const tex = new PIXI.Texture(bt);
                 // console.log(tex);
                 // this.cache.set(src, tex);
+
+                video.oncanplaythrough = null;
+                video.onerror = null;
+
                 resolve(tex);
+
             };
             video.onerror = (e) => {
                 console.log("Error " + video.error.code + " loading video: " + video.error.message)
