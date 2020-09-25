@@ -195,8 +195,6 @@ export class MessageListComponent implements OnInit {
 
   ngAfterViewInit() {
     this.scrollContainer = this.scrollFrame.nativeElement;
-    let inputArea = this.messageInputArea.nativeElement;
-    this.scrollContainer.style.paddingBottom = inputArea.offsetHeight.toString() + "px";
     this.itemElements.changes.subscribe(_ => this.onItemElementsChanged());
     this.scrollToBottomInstant();
   }
