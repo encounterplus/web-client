@@ -16,7 +16,10 @@
         height: 100%;
         overflow: scroll;
         // bottom: 100px;
-        padding-bottom: 80px;
+    }
+
+    .frame > *:last-child {
+        margin-bottom: 161px;
     }
 
     .message-input {
