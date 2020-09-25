@@ -112,8 +112,8 @@ export class BackgroundLayer extends Layer {
             }
         }
 
-        this.w = this.imageTexture?.width || this.videoTexture?.width || 2048;
-        this.h = this.imageTexture?.height || this.videoTexture?.height || 2048;
+        //this.w = this.imageTexture?.width || this.videoTexture?.width || 2048;
+        //this.h = this.imageTexture?.height || this.videoTexture?.height || 2048;
 
         // remove loading node
         this.removeChildren();

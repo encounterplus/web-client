@@ -18,6 +18,7 @@ export class SettingsModalComponent implements OnInit {
   maxFPS: number = 60;
 
   allowVideo: boolean = true;
+  maxVideoSize: number = 200;
 
   constructor(public modalInstance: NgbActiveModal, private dataService: DataService) { 
   }
@@ -26,7 +27,11 @@ export class SettingsModalComponent implements OnInit {
     localStorage.setItem("userName", this.name);
     localStorage.setItem("userColor", this.color);
     localStorage.setItem("maxFPS", `${this.maxFPS}`);
-      localStorage.setItem("allowVideo", `${this.allowVideo}`);
+    localStorage.setItem("allowVideo", `${this.allowVideo}`);
+    if (this.maxVideoSize < 0) {
+        this.maxVideoSize = 0
+    }
+    localStorage.setItem("maxVideoSize", `${this.maxVideoSize}`);
 
     // update server
     this.dataService.send({name: WSEventName.clientUpdated, data: {name: this.name, color: this.color}});
@@ -46,5 +51,6 @@ export class SettingsModalComponent implements OnInit {
     this.color = this.color = localStorage.getItem("userColor") || '#'+(Math.random()*0xFFFFFF<<0).toString(16);
     this.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60;
     this.allowVideo = (localStorage.getItem("allowVideo") || "true") == "true";
+    this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200");
   }
 }
