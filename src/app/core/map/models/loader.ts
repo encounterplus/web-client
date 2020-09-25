@@ -86,6 +86,7 @@ export class Loader {
 
     // TOOD: this is not working very well
     async loadVideoTexture(src: string, loadingText: PIXI.Text = null, local: boolean = false): Promise<PIXI.Texture> {
+        loadingText.text = `Loading video map...`;
         if (local == false && !src.startsWith("blob:")) {
             src = this.remoteBaseURL + src;
         }
@@ -142,27 +143,41 @@ export class Loader {
             // }
             // console.log("Loading blob...");
             // const videosrc = new Blob([arrayBuffer], { type: mime });
-            const videosrc = await new Promise((resolve,reject) => {
+            const maxVideoSize = (parseInt(localStorage.getItem("maxVideoSize") || "200"))*1024*1024;
+            const contentSize = await new Promise((resolve,reject) => {
                 const req = new XMLHttpRequest();
-                req.open('GET', src);
-                let pos = 0;
-                loadingText.text = `Loading video map...`;
-                req.onprogress = (e) => {
-                    if (e.lengthComputable && Math.trunc(e.loaded/e.total*100) > pos) {
-                        pos = Math.trunc(e.loaded/e.total*100)
-                        loadingText.text = `Loading video map: ${pos}%`;
+                req.open('HEAD', src);
+                req.onreadystatechange = () => {
+                    if (req.readyState == req.HEADERS_RECEIVED) {
+                        const size = req.getResponseHeader("Content-Length");
+                        resolve(Number(size));
                     }
-                };
-                req.onload = () => resolve(req.response);
-                req.responseType = "blob";
+                }
                 req.send();
             });
-            console.log("Setting src to blob url");
-            videosrcurl = URL.createObjectURL(videosrc);
-            console.log(videosrcurl);
-
+            if (contentSize > maxVideoSize || contentSize == 0) {
+                console.log("Video size exceeds maximum, streaming instead.");
+                videosrcurl = src;
+            } else {
+                const videosrc = await new Promise((resolve,reject) => {
+                    const req = new XMLHttpRequest();
+                    req.open('GET', src);
+                    let pos = 0;
+                    req.onprogress = (e) => {
+                        if (e.lengthComputable && Math.trunc(e.loaded/e.total*100) > pos) {
+                            pos = Math.trunc(e.loaded/e.total*100)
+                            loadingText.text = `Loading video map: ${pos}%`;
+                        }
+                    };
+                    req.onload = () => resolve(req.response);
+                    req.responseType = "blob";
+                    req.send();
+                });
+                console.log("Setting src to blob url");
+                videosrcurl = URL.createObjectURL(videosrc);
+                console.log(videosrcurl);
+            }
             localStorage.setItem("lastVideoURL", videosrcurl);
-
         } else {
             console.log("Setting src to existing blob url");
             videosrcurl = src;
