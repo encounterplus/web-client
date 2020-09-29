@@ -13,7 +13,7 @@ export class BackgroundLayer extends Layer {
     videoSprite: PIXI.Sprite;
 
     loadingText = new PIXI.Text("Loading map resources...", {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'});
-    vidloadingText = new PIXI.Text("Loading video map...", {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'});
+    //    vidloadingText = new PIXI.Text("Loading video map...", {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'});
 
     image: string;
     video: string;
@@ -77,6 +77,8 @@ export class BackgroundLayer extends Layer {
         }
         this.clear();
 
+        this.dataService.updateVideoLoaded(false);
+
         if (this.image == null && this.video == null) {
             return this;
         }
@@ -103,7 +105,7 @@ export class BackgroundLayer extends Layer {
                 videoSrc = this.loadedVideoUrl;
             }
             if (this.allowVideo) {
-                Loader.shared.loadVideoTexture(videoSrc,this.vidloadingText).then( vidtex => {
+                Loader.shared.loadVideoTexture(videoSrc,this.dataService).then( vidtex => {
                     this.videoTexture = vidtex;
                     this.drawVideo();
                 } ).catch((error) => {
@@ -119,13 +121,13 @@ export class BackgroundLayer extends Layer {
         this.removeChildren();
 
         //add video loading node
-        if (this.allowVideo && this.video != null) {
-            this.addChild(this.vidloadingText);
-            this.vidloadingText.style.fontSize = this.h*.05;
-            this.vidloadingText.anchor.set(0, 1);
-            this.vidloadingText.position.set(0,this.h);
-        }
-
+        //        if (this.allowVideo && this.video != null) {
+        //            this.addChild(this.vidloadingText);
+        //            this.vidloadingText.style.fontSize = this.h*.05;
+        //            this.vidloadingText.anchor.set(0, 1);
+        //            this.vidloadingText.position.set(0,this.h);
+        //        }
+         
         // return if there is no texture
         if(this.imageTexture == null && this.videoTexture == null) {
             return this;
@@ -137,12 +139,12 @@ export class BackgroundLayer extends Layer {
             sprite.height = this.imageTexture.height;
             this.addChild(sprite);
             this.imageSprite = sprite;
-            if (this.allowVideo && this.video) {
-                this.addChild(this.vidloadingText);
-                this.vidloadingText.style.fontSize = sprite.height*.05;
-                this.vidloadingText.anchor.set(0, 1);
-                this.vidloadingText.position.set(0,sprite.height);
-            }
+            //            if (this.allowVideo && this.video) {
+            //                this.addChild(this.vidloadingText);
+            //                this.vidloadingText.style.fontSize = sprite.height*.05;
+            //                this.vidloadingText.anchor.set(0, 1);
+            //                this.vidloadingText.position.set(0,sprite.height);
+            //            }
         }
 
         console.log(`map size: ${this.w}x${this.h}`)
@@ -165,10 +167,32 @@ export class BackgroundLayer extends Layer {
         if (this.videoPaused) {
             video.pause();
         }
-
         video.muted = this.videoMuted;
 
+        video.onplay = () => this.dataService.updateVideoPaused(false);
+        video.onpause = () => this.dataService.updateVideoPaused(true);
+        this.dataService.updateVideoLoaded(true);
+        this.dataService.updateVideoLoadingText(null);
         this.emit("videoloaded");
+    }
+
+    videoControl(e) {
+        if (this.videoTexture) {
+            const videoResource = this.videoTexture.baseTexture.resource as PIXI.resources.VideoResource;
+            const video = videoResource.source as HTMLVideoElement;
+            const delay = Number(video.getAttribute('playbackdelay')) || 0;
+            const pos = ((e.time + delay) <= video.duration) ? (e.time + delay) : (e.time + delay - video.duration);
+            if (e.state == "play") {
+                video.play();
+            } else if (e.state == "pause") {
+                video.pause();
+            }
+            if (video.fastSeek) {
+                video.fastSeek(pos)
+            } else {
+                video.currentTime = pos;
+            }
+        }
     }
 
     clear() {

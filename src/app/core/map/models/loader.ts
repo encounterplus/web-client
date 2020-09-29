@@ -1,4 +1,5 @@
 import { NineSlicePlane } from 'pixi.js';
+import { DataService } from 'src/app/shared/services/data.service';
 
 export class Loader {
 
@@ -85,8 +86,8 @@ export class Loader {
     }
 
     // TOOD: this is not working very well
-    async loadVideoTexture(src: string, loadingText: PIXI.Text = null, local: boolean = false): Promise<PIXI.Texture> {
-        loadingText.text = `Loading video map...`;
+    async loadVideoTexture(src: string, dataService: DataService, local: boolean = false): Promise<PIXI.Texture> {
+        dataService.updateVideoLoadingText(`Loading video map...`);
         if (local == false && !src.startsWith("blob:")) {
             src = this.remoteBaseURL + src;
         }
@@ -150,6 +151,7 @@ export class Loader {
                 req.onreadystatechange = () => {
                     if (req.readyState == req.HEADERS_RECEIVED) {
                         const size = req.getResponseHeader("Content-Length");
+                        req.abort();
                         resolve(Number(size));
                     }
                 }
@@ -166,7 +168,7 @@ export class Loader {
                     req.onprogress = (e) => {
                         if (e.lengthComputable && Math.trunc(e.loaded/e.total*100) > pos) {
                             pos = Math.trunc(e.loaded/e.total*100)
-                            loadingText.text = `Loading video map: ${pos}%`;
+                            dataService.updateVideoLoadingText(`Loading video map: ${pos}%`);
                         }
                     };
                     req.onload = () => resolve(req.response);
@@ -186,6 +188,12 @@ export class Loader {
         console.log("returning promise");
         return new Promise((resolve, reject) => {
             video.oncanplaythrough = () => {
+                const start = new Date().getTime();
+                video.addEventListener('play',() => {
+                    const end = new Date().getTime();
+                    const diff = (end - start)/1000;
+                    video.setAttribute('playbackdelay', `${diff}`);
+                }, { once: true } );
                 console.log(`video size: ${video.videoWidth}x${video.videoHeight}`)
 
                 video.height = video.videoHeight;

@@ -25,7 +25,11 @@
     </label>
   </div>
 
-  <div *ngIf="state.map?.video" class="btn-group mr-2" role="group" aria-label="Video Controls">
+  <div *ngIf="this.videoLoadingText" class="btn-group mr-2" role="group" aria-label="Video Status">
+     <button ngbButton class="btn btn-dark">{{this.videoLoadingText}}</button>
+  </div>
+
+  <div *ngIf="this.videoLoaded" class="btn-group mr-2" role="group" aria-label="Video Controls">
       <button ngbButton class="btn btn-dark" (click)="videoPauseToggle()">
           <i class="fa fa-fw" [ngClass]="videoPaused ? 'fa-play' : 'fa-pause'"></i>
       </button>

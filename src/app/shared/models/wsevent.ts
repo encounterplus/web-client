@@ -24,7 +24,8 @@ export enum WSEventName {
     reload = "reload",
     messageCreated = "messageCreated",
     messageDeleted = "messageDeleted",
-    createMessage = "createMessage"
+    createMessage = "createMessage",
+    mapVideoControlUpdated = "mapVideoControlUpdated"
 }
 
 export interface WSEvent {
