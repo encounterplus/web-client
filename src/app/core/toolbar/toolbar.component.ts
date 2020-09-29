@@ -38,9 +38,10 @@ export class ToolbarComponent implements OnInit {
   activeTool: Tool = Tool.move;
 
   messages: Boolean = false;
-  videoControlsVisible: Boolean = false;
   videoPaused: boolean = false;
   videoMuted: boolean = true;
+  videoLoaded: boolean = false;
+  videoLoadingText: string;
 
   activeToolChanged(newTool) {
     this.tool.emit(newTool);
@@ -74,7 +75,9 @@ export class ToolbarComponent implements OnInit {
   ngOnInit() {
     this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
 
-    this.dataService.videoMuted.subscribe(value => this.videoMuted);
-    this.dataService.videoPaused.subscribe(value => this.videoPaused);
+    this.dataService.videoMuted.subscribe(value => this.videoMuted = value);
+    this.dataService.videoPaused.subscribe(value => this.videoPaused = value);
+    this.dataService.videoLoaded.subscribe(value => this.videoLoaded = value);
+    this.dataService.videoLoadingText.subscribe(value => this.videoLoadingText = value);
   }
 }

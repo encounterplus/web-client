@@ -19,11 +19,23 @@ export class DataService {
   public remoteHost: string;
   public protocol: string;
 
+  private videoLoadingText$ = new BehaviorSubject(null);
+  private videoLoaded$ = new BehaviorSubject(false);
   private videoPaused$ = new BehaviorSubject(false);
   private videoMuted$ = new BehaviorSubject(true);
 
+  videoLoadingText = this.videoLoadingText$.asObservable();
+  videoLoaded = this.videoLoaded$.asObservable();
   videoPaused = this.videoPaused$.asObservable();
   videoMuted = this.videoMuted$.asObservable();
+
+  updateVideoLoadingText(value: string) {
+      this.videoLoadingText$.next(value);
+  }
+
+  updateVideoLoaded(value: boolean) {
+      this.videoLoaded$.next(value);
+  }
 
   updateVideoPaused(value: boolean) {
     this.videoPaused$.next(value);

@@ -137,6 +137,10 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break;
             }
 
+            case WSEventName.mapVideoControlUpdated: {
+                this.mapComponent.mapContainer.backgroundLayer.videoControl(event.data);
+            }
+
             case WSEventName.creatureUpdated: {
 
                 // udpdate state
