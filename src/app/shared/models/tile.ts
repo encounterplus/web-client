@@ -18,4 +18,5 @@ export class Tile {
     vision: Vision;
     components: Array<Component> = [];
     hidden: boolean = false;
+    opacity: number;
 }

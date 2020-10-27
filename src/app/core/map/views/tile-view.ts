@@ -60,6 +60,7 @@ export class TileView extends View {
             sprite.width = this.tile.width;
             sprite.height = this.tile.height;
 	        sprite.angle = this.tile.rotation;
+            sprite.alpha = this.tile.opacity;
 	    if (frames.length > 1) {
               if (this.tile.asset.duration === undefined) {
                 this.tile.asset.duration = 1.0;
