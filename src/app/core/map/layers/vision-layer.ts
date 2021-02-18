@@ -36,7 +36,7 @@ export class VisionLayer extends Layer {
 
         let filter = new PIXI.filters.AlphaFilter(1.0)
         filter.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-        this.filters = [filter];
+        // this.filters = [filter];
     }
 
     async draw() {
@@ -87,7 +87,7 @@ export class VisionLayer extends Layer {
                 mesh.shader.uniforms.radiusMin = [creature.vision.radiusMin];
                 mesh.shader.uniforms.radiusMax = [creature.vision.radiusMax];
                 mesh.shader.uniforms.intensity = this.intensity;
-                mesh.blendMode = PIXI.BLEND_MODES.ADD;
+                mesh.blendMode = PIXI.BLEND_MODES.SCREEN;
 
                 this.addChild(mesh);
                 this.visions.push(mesh);

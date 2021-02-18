@@ -95,6 +95,8 @@ export class TokenView extends View {
     async drawAuras() {
         this.auraContainer.removeChildren();
 
+        return;
+
         for (let aura of this.creature.auras) {
             if (!aura.enabled) {
                 continue;

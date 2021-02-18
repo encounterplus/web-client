@@ -6,6 +6,8 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { Loader } from '../models/loader';
 import { Pointer } from 'src/app/shared/models/pointer';
 import { PointerView } from '../views/pointer-view';
+import { isNumericLiteral } from 'typescript';
+import { WeatherEffectView } from '../views/weather-effect-view';
 
 export class EffectsLayer extends Layer {
     grid: Grid;
@@ -14,11 +16,15 @@ export class EffectsLayer extends Layer {
         super();
     }
 
-    ringTexture: PIXI.Texture; 
+    ringTexture: PIXI.Texture;
+    snowTexture: PIXI.Texture;
+    rainTexture: PIXI.Texture;
 
     views = {};
 
     async draw() {
+        return
+
         // this.clear();
         this.w = this.parent.width;
         this.h = this.parent.height;
@@ -27,7 +33,21 @@ export class EffectsLayer extends Layer {
             this.ringTexture = await Loader.shared.loadTexture('/assets/img/particle.png', true);
         }
 
+        if (!this.snowTexture) {
+            this.snowTexture = await Loader.shared.loadTexture('/assets/img/snow.png', true);
+        }
+
+        if (!this.rainTexture) {
+            this.rainTexture = await Loader.shared.loadTexture('/assets/img/rain.png', true);
+        }
+
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
+
+        let weatherEffectView = new WeatherEffectView("snow", this.grid, this, this.rainTexture);
+        weatherEffectView.updatePosition(0, 0);
+        weatherEffectView.emitter.emit = true;
+        this.addChild(weatherEffectView);
+
         return this;
     }
 
