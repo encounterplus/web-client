@@ -23,7 +23,6 @@ export class EffectsLayer extends Layer {
     views = {};
 
     async draw() {
-        return
 
         // this.clear();
         this.w = this.parent.width;
@@ -33,20 +32,20 @@ export class EffectsLayer extends Layer {
             this.ringTexture = await Loader.shared.loadTexture('/assets/img/particle.png', true);
         }
 
-        if (!this.snowTexture) {
-            this.snowTexture = await Loader.shared.loadTexture('/assets/img/snow.png', true);
-        }
+        // if (!this.snowTexture) {
+        //     this.snowTexture = await Loader.shared.loadTexture('/assets/img/snow.png', true);
+        // }
 
-        if (!this.rainTexture) {
-            this.rainTexture = await Loader.shared.loadTexture('/assets/img/rain.png', true);
-        }
+        // if (!this.rainTexture) {
+        //     this.rainTexture = await Loader.shared.loadTexture('/assets/img/rain.png', true);
+        // }
 
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
-        let weatherEffectView = new WeatherEffectView("snow", this.grid, this, this.rainTexture);
-        weatherEffectView.updatePosition(0, 0);
-        weatherEffectView.emitter.emit = true;
-        this.addChild(weatherEffectView);
+        // let weatherEffectView = new WeatherEffectView("snow", this.grid, this, this.rainTexture);
+        // weatherEffectView.updatePosition(0, 0);
+        // weatherEffectView.emitter.emit = true;
+        // this.addChild(weatherEffectView);
 
         return this;
     }

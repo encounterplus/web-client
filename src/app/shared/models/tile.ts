@@ -13,9 +13,8 @@ export class Tile {
     rotation: number;
     layer: MapLayer = MapLayer.object;
     zIndex: null
-    asset: Asset;
-    light: Light;
-    vision: Vision;
+    asset?: Asset;
+    light?: Light;
     components: Array<Component> = [];
     hidden: boolean = false;
 }

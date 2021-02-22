@@ -26,6 +26,7 @@ import { Tool } from '../toolbar/toolbar.component';
 import { Pointer } from 'src/app/shared/models/pointer';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { v4 as uuidv4 } from 'uuid';
+import { Role } from 'src/app/shared/models/token';
 
 export class MapContainer extends Layer {
 
@@ -106,33 +107,33 @@ export class MapContainer extends Layer {
     }
 
     update(state: AppState) {
-        this.state = state;
+        this.state = state
 
-        console.debug("updating map");
-        this.map = this.state.map;
+        console.debug("updating map")
+        this.map = this.state.map
 
-        this.backgroundLayer.update(this.state.map);
+        this.backgroundLayer.update(this.state.map)
 
         if (this.map == null) {
-            return;
+            return
         }
 
         // if (this.map.video) {
         //     this.backgroundLayer.once('videoloaded', () => this.draw());
         // }
         // update grid
-        this.grid.update(this.state.map);
-        this.gridLayer.update(this.grid);
+        this.grid.update(this.state.map)
+        this.gridLayer.update(this.grid)
 
         this.lightsLayer.update();
         this.visionLayer.update();
-        this.fogLayer.update(this.state.map);
+        this.fogLayer.update(this.state.map)
         
-        this.monstersLayer.grid = this.grid;
-        this.playersLayer.grid = this.grid;
+        this.monstersLayer.grid = this.grid
+        this.playersLayer.grid = this.grid
 
-        this.monstersLayer.creatures = this.state.mapMonsters;
-        this.playersLayer.creatures = this.state.mapPlayers;
+        this.monstersLayer.tokens = this.state.map.tokens.filter(token => token.role != Role.friendly)
+        this.playersLayer.tokens = this.state.map.tokens.filter(token => token.role == Role.friendly)
         
         this.areaEffectsLayer.update();
         this.areaEffectsLayer.grid = this.grid;
@@ -158,7 +159,7 @@ export class MapContainer extends Layer {
             this.turned.updateInteraction();
         }
 
-        this.turned = this.tokenByCreature(creature);
+        this.turned = this.tokenViewById(creature.tokenId);
         if (this.turned != null) {
             this.turned.turned = true
             this.turned.updateUID();
@@ -232,67 +233,58 @@ export class MapContainer extends Layer {
         return this;
     }
 
-    tokenByCreature(creature: Creature): TokenView {
-        if (creature) {
-            return this.tokenByCreatureId(creature.id)
-        } else {
-            return null;
-        }
-    }
-
-    tokenByCreatureId(creatureId: string): TokenView {
-
+    tokenViewById(id: string): TokenView {
         for (let view of this.playersLayer.views) {
-            if (view.creature.id == creatureId) {
-                return view;
+            if (view.token.id == id) {
+                return view
             }
         }
 
         for (let view of this.monstersLayer.views) {
-            if (view.creature.id == creatureId) {
-                return view;
+            if (view.token.id == id) {
+                return view
             }
         }
 
-        return null;
+        return null
     }
 
     areaEffectViewById(id: string): AreaEffectView {
         for (let view of this.areaEffectsLayer.views) {
             if (view.areaEffect.id == id) {
-                return view;
+                return view
             }
         }
-        return null;
+        return null
     }
 
     tileViewById(id: string): TileView {
         for (let view of this.topLayer.views) {
             if (view.tile.id == id) {
-                return view;
+                return view
             }
         }
         for (let view of this.middleLayer.views) {
             if (view.tile.id == id) {
-                return view;
+                return view
             }
         }
 
         for (let view of this.bottomLayer.views) {
             if (view.tile.id == id) {
-                return view;
+                return view
             }
         }
-        return null;
+        return null
     }
 
     markerViewById(id: string): MarkerView {
         for (let view of this.markersLayer.views) {
             if (view.marker.id == id) {
-                return view;
+                return view
             }
         }
-        return null;
+        return null
     }
 
     onPointerUp(event: PIXI.InteractionEvent) {

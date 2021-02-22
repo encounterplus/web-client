@@ -140,84 +140,56 @@ export class AppComponent implements OnInit, AfterViewInit {
             case WSEventName.creatureUpdated: {
 
                 // udpdate state
-                let index =  this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
-                let creature = this.state.game.creatures[index];
+                let index =  this.state.game.creatures.findIndex((obj => obj.id == event.data.id))
+                let creature = this.state.game.creatures[index]
 
                 if (creature) {
-                    Object.assign(creature, event.data);
+                    Object.assign(creature, event.data)
                 }
 
                 // changes
-                console.debug(creature);
-
-                // check for empty map
-                if (!this.mapComponent) {
-                    return;
-                }
-
-                // update token
-                let token = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id)
-                if (token != null) {
-                    // TODO: more efecient draw
-                    token.draw();
-                } else {
-                    this.mapComponent.mapContainer.monstersLayer.creatures = this.state.mapMonsters;
-                    this.mapComponent.mapContainer.playersLayer.creatures = this.state.mapPlayers;
-                    
-                    this.mapComponent.mapContainer.monstersLayer.draw();
-                    this.mapComponent.mapContainer.playersLayer.draw();
-
-                    this.mapComponent.mapContainer.aurasLayer.tokens = this.mapComponent.mapContainer.playersLayer.views;
-                    this.mapComponent.mapContainer.aurasLayer.draw();
-                }
-
-                // update los & ligts
-                this.mapComponent.mapContainer.lightsLayer.update();
-                this.mapComponent.mapContainer.visionLayer.update()
-                this.mapComponent.mapContainer.visionLayer.draw();
-                this.mapComponent.mapContainer.lightsLayer.draw();
-
+                console.debug(creature)
                 break
             }
 
             case WSEventName.creatureMoved: {
-                let view = this.mapComponent.mapContainer.tokenByCreatureId(event.data.id);
+                let view = null //this.mapComponent.mapContainer.tokenByCreatureId(event.data.id);
                 if (view != null) {
-                    view.blocked = event.data.state == ControlState.block;
+                    // view.blocked = event.data.state == ControlState.block;
 
-                    if (!view.dragging) {
-                        view.creature.x = event.data.x;
-                        view.creature.y = event.data.y;
-                        view.controlled = event.data.state != ControlState.end && !view.dragging ? true : false
-                        view.update();
-                        view.updateTint();
-                    }
+                    // if (!view.dragging) {
+                    //     view.creature.x = event.data.x;
+                    //     view.creature.y = event.data.y;
+                    //     view.controlled = event.data.state != ControlState.end && !view.dragging ? true : false
+                    //     view.update();
+                    //     view.updateTint();
+                    // }
 
-                    view.distance = event.data.distance;
-                    view.updateDistance();
+                    // view.distance = event.data.distance;
+                    // view.updateDistance();
 
-                    if (event.data.path != null) {
-                        this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, view.creature.scale, view.color);
-                        this.mapComponent.mapContainer.gridLayer.drawHighlight();
-                    }
+                    // if (event.data.path != null) {
+                    //     this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, view.creature.scale, view.color);
+                    //     this.mapComponent.mapContainer.gridLayer.drawHighlight();
+                    // }
 
-                    if (event.data.state == ControlState.end) {
-                        this.mapComponent.mapContainer.gridLayer.updateHighlight([], view.creature.scale, view.color);
-                        this.mapComponent.mapContainer.gridLayer.drawHighlight();
-                    }
+                    // if (event.data.state == ControlState.end) {
+                    //     this.mapComponent.mapContainer.gridLayer.updateHighlight([], view.creature.scale, view.color);
+                    //     this.mapComponent.mapContainer.gridLayer.drawHighlight();
+                    // }
                 }
 
                 if (event.data.los != null) {
                     let index = this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
-                    if (index !== undefined && index !== null) {
-                        this.state.game.creatures[index].x = event.data.x;
-                        this.state.game.creatures[index].y = event.data.y;
-                        if (this.state.game.creatures[index].vision) {
-                            this.state.game.creatures[index].vision.x = event.data.x;
-                            this.state.game.creatures[index].vision.y = event.data.y;
-                            this.state.game.creatures[index].vision.polygon = event.data.los;
-                        }
-                    }
+                    // if (index !== undefined && index !== null) {
+                    //     this.state.game.creatures[index].x = event.data.x;
+                    //     this.state.game.creatures[index].y = event.data.y;
+                    //     if (this.state.game.creatures[index].vision) {
+                    //         this.state.game.creatures[index].vision.x = event.data.x;
+                    //         this.state.game.creatures[index].vision.y = event.data.y;
+                    //         this.state.game.creatures[index].vision.polygon = event.data.los;
+                    //     }
+                    // }
                 }
                 
                 this.mapComponent.mapContainer.lightsLayer.draw();
@@ -264,9 +236,9 @@ export class AppComponent implements OnInit, AfterViewInit {
                     let index =  this.state.map.tiles.findIndex((obj => obj.id == event.data.id));
                     this.state.map.tiles[index].x = event.data.x;
                     this.state.map.tiles[index].y = event.data.y;
-                    this.state.map.tiles[index].vision.x = event.data.x;
-                    this.state.map.tiles[index].vision.y = event.data.y;
-                    this.state.map.tiles[index].vision.polygon = event.data.los;
+                    this.state.map.tiles[index].light.sight.x = event.data.x;
+                    this.state.map.tiles[index].light.sight.y = event.data.y;
+                    this.state.map.tiles[index].light.sight.polygon = event.data.los;
                 }
                 
                 // update los & ligts
@@ -364,28 +336,28 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             case WSEventName.lineOfSightUpdated: {
                 // console.log(event.data);
-                for(let vision of event.data as Array<Vision>) {
-                    // search creature
-                    var visionFound = false;
-                    for( let creature of this.state.game.creatures) {
-                        if (`creature-${creature.id}` == vision.id) {
-                            creature.vision = vision;
-                            visionFound = true;
-                            break;
-                        }
-                    }
+                // for(let vision of event.data as Array<Vision>) {
+                //     // search creature
+                //     var visionFound = false;
+                //     for( let creature of this.state.game.creatures) {
+                //         if (`creature-${creature.id}` == vision.id) {
+                //             // creature.vision = vision;
+                //             visionFound = true;
+                //             break;
+                //         }
+                //     }
 
-                    // continue if we found some creature already
-                    if (visionFound) { continue; }
+                //     // continue if we found some creature already
+                //     if (visionFound) { continue; }
 
-                    // search tile
-                    for( let tile of this.state.map.tiles) {
-                        if (`tile-${tile.id}` == vision.id) {
-                            tile.vision = vision;
-                            break;
-                        }
-                    }
-                }
+                //     // search tile
+                //     for( let tile of this.state.map.tiles) {
+                //         if (`tile-${tile.id}` == vision.id) {
+                //             tile.vision = vision;
+                //             break;
+                //         }
+                //     }
+                // }
 
                 // update container
                 this.mapComponent.mapContainer.update(this.state);

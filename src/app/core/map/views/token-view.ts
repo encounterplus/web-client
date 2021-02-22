@@ -8,9 +8,10 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { AuraView } from './aura-view';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
+import { Token } from 'src/app/shared/models/token';
 
 function clamp(num: number, min: number, max: number) {
-    return num <= min ? min : num >= max ? max : num;
+    return num <= min ? min : num >= max ? max : num
 }
 
 export enum ControlState {
@@ -23,56 +24,68 @@ export enum ControlState {
 
 export class TokenView extends View {
 
-    creature: Creature;
-    grid: Grid;
+    token: Token
+    grid: Grid
 
-    overlayTexture: PIXI.Texture;
-    overlaySprite: PIXI.Sprite;
+    overlayTexture: PIXI.Texture
+    overlaySprite: PIXI.Sprite
 
-    tokenTexture: PIXI.Texture;
-    tokenSprite: PIXI.Sprite;
-    // tokenClip: boolean = false;
+    tokenTexture: PIXI.Texture
+    tokenSprite: PIXI.Sprite
 
-    uidGraphics: PIXI.Graphics;
-    uidText: PIXI.Text;
+    uidGraphics: PIXI.Graphics
+    uidText: PIXI.Text
 
-    distanceText: PIXI.Text;
+    distanceText: PIXI.Text
 
-    data: PIXI.InteractionData;
-    dragging: boolean = false;
+    data: PIXI.InteractionData
+    dragging: boolean = false
 
-    selected: boolean = false;
-    turned: boolean = false;
-    controlled: boolean = false;
-    blocked: boolean = false;
+    selected: boolean = false
+    turned: boolean = false
+    controlled: boolean = false
+    blocked: boolean = false
 
     distance: string;
 
     auraContainer: Container = new PIXI.Container();
 
+    get isPlayer(): boolean {
+        return this.token.reference?.includes("/player/") || false
+    }
+
+    get isDead(): boolean {
+        return this.token.health <= 0 && this.token.hitpoints > 0 && !this.isPlayer
+    }
+
+    get isBloodied(): boolean {
+        return this.token.health < this.token.hitpoints && this.token.hitpoints > 0
+    }
+
     get color(): number {
         if (this.turned) {
             return 0xff9500;
-        } else if (this.creature.dead) {
+        } else if (this.isDead) {
             return 0x333333;
-        } else if (this.creature.role == Role.hostile) {
+        } else if (this.token.role == Role.hostile) {
             return 0x631515;
-        } else if (this.creature.role == Role.friendly) {
+        } else if (this.token.role == Role.friendly) {
             return 0x3F51B5;
-        } else if (this.creature.role == Role.neutral) {
+        } else if (this.token.role == Role.neutral) {
             return 0x964B00;
         } else {
             return 0xFFCCFF;
         }
     }
 
-    constructor(creature: Creature, grid: Grid, private dataService: DataService) {
-        super();
-        this.creature = creature;
-        this.grid = grid;
+    constructor(token: Token, grid: Grid, private dataService: DataService) {
+        super()
+        this.token = token
+        this.grid = grid
 
         this.interactiveChildren = false
-        this.interactive = creature.role == Role.friendly;
+        // TODO: add active token selection
+        this.interactive = token.role == Role.friendly
         this.buttonMode = true;
 
         this
@@ -95,9 +108,8 @@ export class TokenView extends View {
     async drawAuras() {
         this.auraContainer.removeChildren();
 
-        return;
 
-        for (let aura of this.creature.auras) {
+        for (let aura of this.token.auras) {
             if (!aura.enabled) {
                 continue;
             }
@@ -111,16 +123,16 @@ export class TokenView extends View {
     }
 
     async drawToken() {
-        if (this.creature.cachedToken != null) {
-            this.tokenTexture = await Loader.shared.loadTexture(this.creature.cachedToken);
-        } else if (this.creature.token != null) {
-            this.tokenTexture = await Loader.shared.loadTexture(this.creature.token);
+        if (this.token.cachedImage != null) {
+            this.tokenTexture = await Loader.shared.loadTexture(this.token.cachedImage)
+        } else if (this.token.asset.resource != null) {
+            this.tokenTexture = await Loader.shared.loadTexture(this.token.asset.resource)
         } else {
             this.tokenTexture = null;
         }
 
-        this.w = this.grid.size * this.creature.scale;
-        this.h = this.grid.size * this.creature.scale;
+        this.w = this.grid.size * this.token.scale;
+        this.h = this.grid.size * this.token.scale;
 
         // sprite
         if (this.tokenTexture != null) {
@@ -130,37 +142,37 @@ export class TokenView extends View {
             this.tokenSprite = sprite;
 
             // rotation
-            this.tokenSprite.rotation = (this.creature.rotation)? this.creature.rotation * (Math.PI / 180) : 0;
+            this.tokenSprite.rotation = (this.token.rotation)? this.token.rotation * (Math.PI / 180) : 0;
         }
 
         // alpha
-        if (this.creature.role == Role.friendly) {
-            this.alpha = (this.creature.hidden)? 0.5 : 1
+        if (this.token.role == Role.friendly) {
+            this.alpha = (this.token.hidden)? 0.5 : 1
         }
         this.updateToken();
 
         // overlay
-        if (this.creature.dead) {
-            this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-dead.png', true);
-            let sprite = new PIXI.Sprite(this.overlayTexture);
-            sprite.anchor.set(0.5, 0.5);
-            this.addChild(sprite);
-            this.overlaySprite = sprite;
-        } else if (this.creature.bloodied) {
-            this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-bloodied.png', true);
-            let sprite = new PIXI.Sprite(this.overlayTexture);
-            sprite.anchor.set(0.5, 0.5);
-            this.addChild(sprite);
-            this.overlaySprite = sprite;
-        }
+        // if (this.creature.dead) {
+        //     this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-dead.png', true);
+        //     let sprite = new PIXI.Sprite(this.overlayTexture);
+        //     sprite.anchor.set(0.5, 0.5);
+        //     this.addChild(sprite);
+        //     this.overlaySprite = sprite;
+        // } else if (this.creature.bloodied) {
+        //     this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-bloodied.png', true);
+        //     let sprite = new PIXI.Sprite(this.overlayTexture);
+        //     sprite.anchor.set(0.5, 0.5);
+        //     this.addChild(sprite);
+        //     this.overlaySprite = sprite;
+        // }
 
         this.updateOverlay();
 
-        // uid
+        // label
         this.uidGraphics = new PIXI.Graphics();
         this.addChild(this.uidGraphics);
 
-        this.uidText = new PIXI.Text(this.creature.uid, {fontFamily : 'Arial', fontSize: 24, fill : 0xffffff, align : 'center'});
+        this.uidText = new PIXI.Text(this.token.label, {fontFamily : 'Arial', fontSize: 24, fill : 0xffffff, align : 'center'});
         this.uidText.anchor.set(0.5, 0.5);
         this.uidText.resolution = 4;
         this.addChild(this.uidText);
@@ -179,22 +191,22 @@ export class TokenView extends View {
     }
 
     update() {
-        this.w = this.grid.size * this.creature.scale;
-        this.h = this.grid.size * this.creature.scale;
+        this.w = this.grid.size * this.token.scale;
+        this.h = this.grid.size * this.token.scale;
 
-        this.zIndex = this.creature.role == Role.friendly ? 50 : 30;
+        this.zIndex = this.token.role == Role.friendly ? 50 : 30;
 
-        this.position.set(this.creature.x - (this.w / 2), this.creature.y - (this.h / 2));
-        this.auraContainer.position.set(this.creature.x, this.creature.y);
+        this.position.set(this.token.x - (this.w / 2), this.token.y - (this.h / 2));
+        this.auraContainer.position.set(this.token.x, this.token.y);
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
-        if (this.creature.role == Role.friendly) {
-	    this.visible = true;
+        if (this.token.role == Role.friendly) {
+	        this.visible = true;
         } else {
-            this.visible = !this.creature.hidden;
+            this.visible = !this.token.hidden;
         }
 
-        if (this.creature.dead) {
+        if (this.isDead) {
             this.zIndex = 29;
         }
     }
@@ -265,11 +277,11 @@ export class TokenView extends View {
         
         switch (this.dataService.state.screen.interaction) {
             case ScreenInteraction.all: 
-                this.interactive = this.creature.role == Role.friendly;
+                this.interactive = this.token.role == Role.friendly;
                 break;
 
             case ScreenInteraction.turn: 
-                this.interactive = this.creature.role == Role.friendly && (this.turned || !this.dataService.state.game.started);
+                this.interactive = this.token.role == Role.friendly && (this.turned || !this.dataService.state.game.started);
                 break;
 
             case ScreenInteraction.none: 
@@ -285,40 +297,42 @@ export class TokenView extends View {
     }
 
     onDragStart(event: InteractionEvent) {
-
-        event.stopPropagation();
-
         if (this.controlled) {
             return;
         }
+
+        // stop propagation
+        event.stopPropagation();
 
         this.data = event.data;
         this.dragging = true;
 
-        this.dataService.send({name: WSEventName.creatureMoved, data: {id: this.creature.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}});
+        this.dataService.send({name: WSEventName.creatureMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}});
     }
     
-    onDragEnd() {
-        event.stopPropagation();
-
+    onDragEnd(event: InteractionEvent) {
         if (this.controlled) {
             return;
         }
 
+        // stop propagation
+        event.stopPropagation();
+
         this.dragging = false;
         this.data = null;
 
-        this.dataService.send({name: WSEventName.creatureMoved, data: {id: this.creature.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end}});
+        this.dataService.send({name: WSEventName.creatureMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end}});
     }
     
-    onDragMove() {
-        event.stopPropagation();
-
+    onDragMove(event: InteractionEvent) {
         if (this.controlled) {
             return;
         }
 
         if (this.dragging) {
+            // stop propagation
+            event.stopPropagation();
+
             const newPosition = this.data.getLocalPosition(this.parent);
 
             if (!this.blocked) {
@@ -326,7 +340,7 @@ export class TokenView extends View {
                 this.auraContainer.position.set(newPosition.x, newPosition.y);
             }
         
-            this.dataService.send({name: WSEventName.creatureMoved, data: {id: this.creature.id, x: newPosition.x | 0, y: newPosition.y | 0, state: ControlState.control}});
+            // this.dataService.send({name: WSEventName.creatureMoved, data: {id: this.token.id, x: newPosition.x | 0, y: newPosition.y | 0, state: ControlState.control}});
         }
     }
 }

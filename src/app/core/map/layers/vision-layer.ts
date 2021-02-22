@@ -3,19 +3,25 @@ import { Layer } from './layer';
 import { Tile } from 'src/app/shared/models/tile';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
+import { Token } from 'src/app/shared/models/token';
+import { Light } from 'src/app/shared/models/light';
+import { literal } from '@angular/compiler/src/output/output_ast';
 
 export class VisionLayer extends Layer {
 
-    creatures: Array<Creature> = [];
+    tokens: Array<Token> = [];
     tiles: Array<Tile> = [];
+    lights: Array<Light> = [];
+    
     intensity: number = 1.0;
     mapScale: number = 1.0;
 
     update() {
-        this.creatures = this.dataService.state.mapCreatures;
+        this.tokens = this.dataService.state.map.tokens;
         this.tiles = this.dataService.state.map.tiles;
-        this.visible = this.dataService.state.map.lineOfSight;
-        this.intensity = 1.0 - (this.dataService.state.map.daylight || this.dataService.state.map.dayLight || 0.0);
+        this.lights = this.dataService.state.map.lights;
+        this.visible = this.dataService.state.map.lineOfSight || this.dataService.state.map.fogOfWar;
+        this.intensity = 1.0 - (this.dataService.state.map.daylight || 0.0);
         this.mapScale = this.dataService.state.map.scale;
     }
 
@@ -24,7 +30,7 @@ export class VisionLayer extends Layer {
 
     bg: PIXI.Sprite;
 
-    visions: Array<PIXI.Mesh> = [];
+    meshes: Array<PIXI.Mesh> = [];
 
     msk: PIXI.Graphics;
 
@@ -68,90 +74,148 @@ export class VisionLayer extends Layer {
         this.msk = new PIXI.Graphics();
         this.msk.beginFill(0xffffff);
 
-        for(let creature of this.creatures) {
-            if(creature.vision != null && creature.light.enabled && creature.vision.polygon != null) {
+        // tokens
+        for(let token of this.tokens) {
+            let vision = token.vision
 
-                let polygon = this.getGeometry(creature.vision.x, creature.vision.y, creature.vision.polygon)
-                // this might be better triangle filling function
-                // let polygon = PIXI.utils.earcut (creature.vision.polygon, null, 2);
-
-                let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
-
-                // TODO: add indicies
-                let geometry = new PIXI.Geometry()
-                    .addAttribute('aVertexPosition', polygon);
-
-                let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader);
-               
-                mesh.shader.uniforms.position = [creature.vision.x, creature.vision.y]
-                mesh.shader.uniforms.radiusMin = [creature.vision.radiusMin];
-                mesh.shader.uniforms.radiusMax = [creature.vision.radiusMax];
-                mesh.shader.uniforms.intensity = this.intensity;
-                mesh.blendMode = PIXI.BLEND_MODES.SCREEN;
-
-                this.addChild(mesh);
-                this.visions.push(mesh);
-
-                this.msk.drawPolygon(creature.vision.polygon);
+            // check vision state
+            if (vision == null || vision.sight == null || vision.sight.polygon == null || !vision.enabled) {
+                continue
             }
+
+            // create geometry polygon for mesh rendering
+            let polygon = this.getGeometry(vision.sight.x, vision.sight.y, vision.sight.polygon)
+            // this might be better triangle filling function
+            // let polygon = PIXI.utils.earcut (creature.vision.polygon, null, 2);
+
+            // init shaders
+            let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
+
+            // create custom mesh from geometry
+            let geometry = new PIXI.Geometry()
+                .addAttribute('aVertexPosition', polygon);
+            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+            
+            // populate uniforms
+            mesh.shader.uniforms.position = [vision.sight.x, vision.sight.y]
+            mesh.shader.uniforms.radiusMin = [vision.lightRadiusMin]
+            mesh.shader.uniforms.radiusMax = [vision.lightRadiusMax]
+            mesh.shader.uniforms.intensity = this.intensity;
+            mesh.blendMode = PIXI.BLEND_MODES.SCREEN;
+
+            this.addChild(mesh);
+            this.meshes.push(mesh);
+
+            // add mask
+            this.msk.drawPolygon(vision.sight.polygon);
         }
 
         // tiles, always visible
         for(let tile of this.tiles) {
-            if(tile.vision != null && tile.light.enabled &&  tile.vision.polygon != null && tile.vision.alwaysVisible) {
-                let polygon = this.getGeometry(tile.vision.x, tile.vision.y, tile.vision.polygon)
-                let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
+            let light = tile.light
 
-                let geometry = new PIXI.Geometry()
-                    .addAttribute('aVertexPosition', polygon);
-
-                let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader);
-               
-                mesh.shader.uniforms.position = [tile.vision.x, tile.vision.y]
-                mesh.shader.uniforms.radiusMin = [tile.vision.radiusMin];
-                mesh.shader.uniforms.radiusMax = [tile.vision.radiusMax];
-                mesh.shader.uniforms.intensity = this.intensity;
-                mesh.blendMode = PIXI.BLEND_MODES.ADD;
-
-                this.addChild(mesh);
-                this.visions.push(mesh);
-
-                this.msk.drawPolygon(tile.vision.polygon);
+            // check light state
+            if (light == null || light.sight == null || light.sight.polygon == null || !light.enabled || !light.alwaysVisible) {
+                continue
             }
+
+            // create geometry polygon for mesh rendering
+            let polygon = this.getGeometry(light.sight.x, light.sight.y, light.sight.polygon)
+
+            // init shaders
+            let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
+
+            // create custom mesh from geometry
+            let geometry = new PIXI.Geometry()
+                .addAttribute('aVertexPosition', polygon);
+            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+            
+            // populate uniforms
+            mesh.shader.uniforms.position = [light.sight.x, light.sight.y]
+            mesh.shader.uniforms.radiusMin = [light.radiusMin];
+            mesh.shader.uniforms.radiusMax = [light.radiusMax];
+            mesh.shader.uniforms.intensity = this.intensity;
+            mesh.blendMode = PIXI.BLEND_MODES.ADD;
+
+            this.addChild(mesh);
+            this.meshes.push(mesh);
+
+            this.msk.drawPolygon(light.sight.polygon);
+        }
+
+        // lights, always visible
+        for(let light of this.lights) {
+            // check light state
+            if (light.sight == null || light.sight.polygon == null || !light.enabled || !light.alwaysVisible) {
+                continue
+            }
+
+            // create geometry polygon for mesh rendering
+            let polygon = this.getGeometry(light.sight.x, light.sight.y, light.sight.polygon)
+
+            // init shaders
+            let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
+
+            // create custom mesh from geometry
+            let geometry = new PIXI.Geometry()
+                .addAttribute('aVertexPosition', polygon);
+            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+            
+            // populate uniforms
+            mesh.shader.uniforms.position = [light.sight.x, light.sight.y]
+            mesh.shader.uniforms.radiusMin = [light.radiusMin];
+            mesh.shader.uniforms.radiusMax = [light.radiusMax];
+            mesh.shader.uniforms.intensity = this.intensity;
+            mesh.blendMode = PIXI.BLEND_MODES.ADD;
+
+            this.addChild(mesh);
+            this.meshes.push(mesh);
+
+            this.msk.drawPolygon(light.sight.polygon);
         }
 
         this.msk.endFill();
 
-        let tilesWithVision = false;
+        let maskRequired = false;
 
         // tiles, not always visible
+        // tiles, always visible
         for(let tile of this.tiles) {
-            if(tile.vision != null && tile.light.enabled &&  tile.vision.polygon != null && !tile.vision.alwaysVisible) {
-                let polygon = this.getGeometry(tile.vision.x, tile.vision.y, tile.vision.polygon)
-                let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
+            let light = tile.light
 
-                let geometry = new PIXI.Geometry()
-                    .addAttribute('aVertexPosition', polygon);
-
-                let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader);
-               
-                mesh.shader.uniforms.position = [tile.vision.x, tile.vision.y]
-                mesh.shader.uniforms.radiusMin = [tile.vision.radiusMin];
-                mesh.shader.uniforms.radiusMax = [tile.vision.radiusMax];
-                mesh.shader.uniforms.intensity = this.intensity;
-                mesh.blendMode = PIXI.BLEND_MODES.ADD;
-
-                this.addChild(mesh);
-                this.visions.push(mesh);
-
-                mesh.mask = this.msk;
-                
-                tilesWithVision = true
+            // check light state
+            if (light == null || light.sight == null || light.sight.polygon == null || !light.enabled || light.alwaysVisible) {
+                continue
             }
-        }
 
+            // create geometry polygon for mesh rendering
+            let polygon = this.getGeometry(light.sight.x, light.sight.y, light.sight.polygon)
+
+            // init shaders
+            let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
+
+            // create custom mesh from geometry
+            let geometry = new PIXI.Geometry()
+                .addAttribute('aVertexPosition', polygon);
+            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+            
+            // populate uniforms
+            mesh.shader.uniforms.position = [light.sight.x, light.sight.y]
+            mesh.shader.uniforms.radiusMin = [light.radiusMin];
+            mesh.shader.uniforms.radiusMax = [light.radiusMax];
+            mesh.shader.uniforms.intensity = this.intensity;
+            mesh.blendMode = PIXI.BLEND_MODES.ADD;
+
+            this.addChild(mesh);
+            this.meshes.push(mesh);
+
+            mesh.mask = this.msk;
+            
+            maskRequired = true
+        }
+    
         // add mask only when tiles with vision are present
-        if (tilesWithVision) {
+        if (maskRequired) {
             this.addChild(this.msk);
         }
 
@@ -189,10 +253,10 @@ export class VisionLayer extends Layer {
     }
 
     clear() {
-        for(let mesh of this.visions) {
+        for(let mesh of this.meshes) {
             mesh.destroy();
         }
-        this.visions = [];
+        this.meshes = [];
         this.removeChildren();
     }
 }

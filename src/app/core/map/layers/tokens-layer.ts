@@ -3,10 +3,11 @@ import { Layer } from './layer';
 import { TokenView } from '../views/token-view';
 import { Grid } from '../models/grid';
 import { DataService } from 'src/app/shared/services/data.service';
+import { Token } from 'src/app/shared/models/token';
 
 export class TokensLayer extends Layer {
 
-    creatures: Array<Creature> = [];
+    tokens: Array<Token> = [];
     views: Array<TokenView> = [];
     grid: Grid;
 
@@ -18,8 +19,8 @@ export class TokensLayer extends Layer {
         this.clear();
 
         // creaetures
-        for (let creature of this.creatures) {
-            let tokenView = new TokenView(creature, this.grid, this.dataService);
+        for (let token of this.tokens) {
+            let tokenView = new TokenView(token, this.grid, this.dataService);
             this.addChild(tokenView);
             tokenView.draw();
 
