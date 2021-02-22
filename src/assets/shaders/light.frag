@@ -27,6 +27,7 @@ void main(void)
       gl_FragColor = darkColor;
    } else {
       // float attenuation = clamp( 10.0 / dist, 0.0, 1.0);
+      vec3 falloff = vec3(1.0, 0.5, 14.0 - ((radiusMin / radiusMax) * 10.0));
       // calculate attenuation
       float d = dist / radiusMax;
       float attenuation = 1.0 / (falloff.x + (falloff.y * d) + (falloff.z * d * d));

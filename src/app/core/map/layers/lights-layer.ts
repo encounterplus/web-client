@@ -5,6 +5,7 @@ import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Token } from 'src/app/shared/models/token';
 import { Light } from 'src/app/shared/models/light';
+import { VisionGeometry } from '../renderers/vision-renderer';
 
 export class LightsLayer extends Layer {
 
@@ -12,6 +13,13 @@ export class LightsLayer extends Layer {
     tokens: Array<Token> = [];
     tiles: Array<Tile> = [];
     lights: Array<Light> = [];
+
+    gridSize: number = 50.0
+    gridScale: number = 5.0;
+
+    get pixelRatio(): number {
+        return this.gridSize / this.gridScale
+    }
     
     vert: PIXI.LoaderResource;
     frag: PIXI.LoaderResource;
@@ -31,6 +39,7 @@ export class LightsLayer extends Layer {
     update() {
         this.tokens = this.dataService.state.map.tokens;
         this.tiles = this.dataService.state.map.tiles;
+        this.lights = this.dataService.state.map.lights;
         this.visible = this.dataService.state.map.lineOfSight;
     }
 
@@ -52,7 +61,7 @@ export class LightsLayer extends Layer {
             let vision = token.vision
 
             // check vision state
-            if (vision == null || !vision.light) {
+            if (vision == null || !vision.light || vision.sight == null || vision.lightColor == "#ffffff") {
                 continue
             }
 
@@ -69,8 +78,8 @@ export class LightsLayer extends Layer {
             
             // populate uniforms
             mesh.shader.uniforms.position = [vision.sight.x, vision.sight.y]
-            mesh.shader.uniforms.radiusMin = [vision.lightRadiusMin]
-            mesh.shader.uniforms.radiusMax = [vision.lightRadiusMax]
+            mesh.shader.uniforms.radiusMin = vision.lightRadiusMin * this.pixelRatio
+            mesh.shader.uniforms.radiusMax = vision.lightRadiusMax * this.pixelRatio
             mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(vision.lightColor));
             mesh.shader.uniforms.intensity = vision.lightOpacity
             mesh.blendMode = PIXI.BLEND_MODES.ADD;
@@ -84,7 +93,7 @@ export class LightsLayer extends Layer {
             let light = tile.light
 
             // check light state
-            if (light.sight == null || light.sight.polygon == null || !light.enabled) {
+            if (light == null || light.sight == null || light.sight.polygon == null || !light.enabled || light.color == "#ffffff") {
                 continue
             }
 
@@ -101,8 +110,8 @@ export class LightsLayer extends Layer {
             
             // populate uniforms
             mesh.shader.uniforms.position = [light.sight.x, light.sight.y]
-            mesh.shader.uniforms.radiusMin = light.radiusMin
-            mesh.shader.uniforms.radiusMax = light.radiusMax
+            mesh.shader.uniforms.radiusMin = light.radiusMin * this.pixelRatio
+            mesh.shader.uniforms.radiusMax = light.radiusMax * this.pixelRatio
             mesh.shader.uniforms.intensity = light.opacity
             mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(light.color))
             mesh.blendMode = PIXI.BLEND_MODES.ADD
@@ -114,7 +123,7 @@ export class LightsLayer extends Layer {
         // lights
         for(let light of this.lights) {
             // check light state
-            if (light.sight == null || light.sight.polygon == null || !light.enabled) {
+            if (light.sight == null || light.sight.polygon == null || !light.enabled || light.color == "#ffffff") {
                 continue
             }
 
@@ -131,8 +140,8 @@ export class LightsLayer extends Layer {
             
             // populate uniforms
             mesh.shader.uniforms.position = [light.sight.x, light.sight.y]
-            mesh.shader.uniforms.radiusMin = light.radiusMin
-            mesh.shader.uniforms.radiusMax = light.radiusMax
+            mesh.shader.uniforms.radiusMin = light.radiusMin * this.pixelRatio
+            mesh.shader.uniforms.radiusMax = light.radiusMax * this.pixelRatio
             mesh.shader.uniforms.intensity = light.opacity
             mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(light.color))
             mesh.blendMode = PIXI.BLEND_MODES.ADD
@@ -187,7 +196,7 @@ export class LightsLayer extends Layer {
         for(let mesh of this.meshes) {
             mesh.destroy();
         }
-        this.lights = [];
+        this.meshes = [];
         this.removeChildren();
     }
 }

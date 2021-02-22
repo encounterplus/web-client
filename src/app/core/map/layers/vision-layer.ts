@@ -16,6 +16,13 @@ export class VisionLayer extends Layer {
     intensity: number = 1.0;
     mapScale: number = 1.0;
 
+    gridSize: number = 50.0
+    gridScale: number = 5.0;
+
+    get pixelRatio(): number {
+        return this.gridSize / this.gridScale
+    }
+
     update() {
         this.tokens = this.dataService.state.map.tokens;
         this.tiles = this.dataService.state.map.tiles;
@@ -23,6 +30,8 @@ export class VisionLayer extends Layer {
         this.visible = this.dataService.state.map.lineOfSight || this.dataService.state.map.fogOfWar;
         this.intensity = 1.0 - (this.dataService.state.map.daylight || 0.0);
         this.mapScale = this.dataService.state.map.scale;
+        this.gridScale = this.dataService.state.map.gridScale;
+        this.gridSize = this.dataService.state.map.gridSize;
     }
 
     vert: PIXI.LoaderResource;
@@ -42,7 +51,7 @@ export class VisionLayer extends Layer {
 
         let filter = new PIXI.filters.AlphaFilter(1.0)
         filter.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-        // this.filters = [filter];
+        this.filters = [filter];
     }
 
     async draw() {
@@ -98,10 +107,10 @@ export class VisionLayer extends Layer {
             
             // populate uniforms
             mesh.shader.uniforms.position = [vision.sight.x, vision.sight.y]
-            mesh.shader.uniforms.radiusMin = [vision.lightRadiusMin]
-            mesh.shader.uniforms.radiusMax = [vision.lightRadiusMax]
+            mesh.shader.uniforms.radiusMin = vision.lightRadiusMin * this.pixelRatio
+            mesh.shader.uniforms.radiusMax = vision.lightRadiusMax * this.pixelRatio
             mesh.shader.uniforms.intensity = this.intensity;
-            mesh.blendMode = PIXI.BLEND_MODES.SCREEN;
+            mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
             this.addChild(mesh);
             this.meshes.push(mesh);
@@ -132,9 +141,9 @@ export class VisionLayer extends Layer {
             
             // populate uniforms
             mesh.shader.uniforms.position = [light.sight.x, light.sight.y]
-            mesh.shader.uniforms.radiusMin = [light.radiusMin];
-            mesh.shader.uniforms.radiusMax = [light.radiusMax];
-            mesh.shader.uniforms.intensity = this.intensity;
+            mesh.shader.uniforms.radiusMin = [light.radiusMin * this.pixelRatio]
+            mesh.shader.uniforms.radiusMax = [light.radiusMax * this.pixelRatio]
+            mesh.shader.uniforms.intensity = this.intensity
             mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
             this.addChild(mesh);
@@ -163,8 +172,8 @@ export class VisionLayer extends Layer {
             
             // populate uniforms
             mesh.shader.uniforms.position = [light.sight.x, light.sight.y]
-            mesh.shader.uniforms.radiusMin = [light.radiusMin];
-            mesh.shader.uniforms.radiusMax = [light.radiusMax];
+            mesh.shader.uniforms.radiusMin = light.radiusMin * this.pixelRatio;
+            mesh.shader.uniforms.radiusMax = light.radiusMax * this.pixelRatio;
             mesh.shader.uniforms.intensity = this.intensity;
             mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
@@ -179,7 +188,6 @@ export class VisionLayer extends Layer {
         let maskRequired = false;
 
         // tiles, not always visible
-        // tiles, always visible
         for(let tile of this.tiles) {
             let light = tile.light
 
@@ -201,8 +209,8 @@ export class VisionLayer extends Layer {
             
             // populate uniforms
             mesh.shader.uniforms.position = [light.sight.x, light.sight.y]
-            mesh.shader.uniforms.radiusMin = [light.radiusMin];
-            mesh.shader.uniforms.radiusMax = [light.radiusMax];
+            mesh.shader.uniforms.radiusMin = light.radiusMin * this.pixelRatio;
+            mesh.shader.uniforms.radiusMax = light.radiusMax * this.pixelRatio;
             mesh.shader.uniforms.intensity = this.intensity;
             mesh.blendMode = PIXI.BLEND_MODES.ADD;
 

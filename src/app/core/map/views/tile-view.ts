@@ -31,6 +31,11 @@ export class TileView extends View {
     }
 
     async drawAsset() {
+        // asset
+        if (this.tile.asset == null) {
+            return
+        }
+
         // texture
         if (this.tile.asset.resource != null) {
             this.assetTexture = await Loader.shared.loadTexture(this.tile.asset.resource);

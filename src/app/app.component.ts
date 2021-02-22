@@ -194,21 +194,21 @@ export class AppComponent implements OnInit, AfterViewInit {
                     }
                 }
 
-                if (event.data.los != null) {
-                    let index = this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
+                if (event.data.polygon != null) {
+                    let index = this.state.map.tokens.findIndex((obj => obj.id == event.data.id));
                     if (index !== undefined && index !== null) {
                         this.state.map.tokens[index].x = event.data.x;
                         this.state.map.tokens[index].y = event.data.y;
                         if (this.state.map.tokens[index].vision) {
                             this.state.map.tokens[index].vision.sight.x = event.data.x;
                             this.state.map.tokens[index].vision.sight.y = event.data.y;
-                            this.state.map.tokens[index].vision.sight.polygon = event.data.los;
+                            this.state.map.tokens[index].vision.sight.polygon = event.data.polygon;
                         }
                     }
                 }
                 
-                this.mapComponent.mapContainer.lightsLayer.draw();
                 this.mapComponent.mapContainer.visionLayer.draw();
+                this.mapComponent.mapContainer.lightsLayer.draw();
                 break;
             }
 

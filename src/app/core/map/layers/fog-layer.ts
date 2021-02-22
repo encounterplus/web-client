@@ -27,11 +27,13 @@ export class FogLayer extends Layer {
 
     update(map: Map) {
         this.fog = map.fog;
-        this.visible = map.fogOfWar;
+        this.visible = false // map.fogOfWar;
     }
 
     async draw() {
         this.clear();
+
+        return
 
         if (!this.visible) {
             return;
