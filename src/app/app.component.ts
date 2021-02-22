@@ -152,44 +152,59 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break
             }
 
-            case WSEventName.creatureMoved: {
-                let view = null //this.mapComponent.mapContainer.tokenByCreatureId(event.data.id);
+            case WSEventName.tokenUpdated: {
+
+                // udpdate state
+                let index =  this.state.map.tokens.findIndex((obj => obj.id == event.data.id))
+                let token = this.state.map.tokens[index]
+
+                if (token) {
+                    Object.assign(token, event.data)
+                }
+
+                // changes
+                console.debug(token)
+                break
+            }
+
+            case WSEventName.tokenMoved: {
+                let view = this.mapComponent.mapContainer.tokenViewById(event.data.id);
                 if (view != null) {
-                    // view.blocked = event.data.state == ControlState.block;
+                    view.blocked = event.data.state == ControlState.block;
 
-                    // if (!view.dragging) {
-                    //     view.creature.x = event.data.x;
-                    //     view.creature.y = event.data.y;
-                    //     view.controlled = event.data.state != ControlState.end && !view.dragging ? true : false
-                    //     view.update();
-                    //     view.updateTint();
-                    // }
+                    if (!view.dragging) {
+                        view.token.x = event.data.x;
+                        view.token.y = event.data.y;
+                        view.controlled = event.data.state != ControlState.end && !view.dragging ? true : false
+                        view.update();
+                        view.updateTint();
+                    }
 
-                    // view.distance = event.data.distance;
-                    // view.updateDistance();
+                    view.distance = event.data.distance;
+                    view.updateDistance();
 
-                    // if (event.data.path != null) {
-                    //     this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, view.creature.scale, view.color);
-                    //     this.mapComponent.mapContainer.gridLayer.drawHighlight();
-                    // }
+                    if (event.data.path != null) {
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, view.token.scale, view.color);
+                        this.mapComponent.mapContainer.gridLayer.drawHighlight();
+                    }
 
-                    // if (event.data.state == ControlState.end) {
-                    //     this.mapComponent.mapContainer.gridLayer.updateHighlight([], view.creature.scale, view.color);
-                    //     this.mapComponent.mapContainer.gridLayer.drawHighlight();
-                    // }
+                    if (event.data.state == ControlState.end) {
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight([], view.token.scale, view.color);
+                        this.mapComponent.mapContainer.gridLayer.drawHighlight();
+                    }
                 }
 
                 if (event.data.los != null) {
                     let index = this.state.game.creatures.findIndex((obj => obj.id == event.data.id));
-                    // if (index !== undefined && index !== null) {
-                    //     this.state.game.creatures[index].x = event.data.x;
-                    //     this.state.game.creatures[index].y = event.data.y;
-                    //     if (this.state.game.creatures[index].vision) {
-                    //         this.state.game.creatures[index].vision.x = event.data.x;
-                    //         this.state.game.creatures[index].vision.y = event.data.y;
-                    //         this.state.game.creatures[index].vision.polygon = event.data.los;
-                    //     }
-                    // }
+                    if (index !== undefined && index !== null) {
+                        this.state.map.tokens[index].x = event.data.x;
+                        this.state.map.tokens[index].y = event.data.y;
+                        if (this.state.map.tokens[index].vision) {
+                            this.state.map.tokens[index].vision.sight.x = event.data.x;
+                            this.state.map.tokens[index].vision.sight.y = event.data.y;
+                            this.state.map.tokens[index].vision.sight.polygon = event.data.los;
+                        }
+                    }
                 }
                 
                 this.mapComponent.mapContainer.lightsLayer.draw();
