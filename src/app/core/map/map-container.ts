@@ -65,6 +65,8 @@ export class MapContainer extends Layer {
 
     turned: TokenView
 
+    msk: PIXI.Graphics
+
     constructor(private dataService: DataService) {
         super();
 
@@ -246,6 +248,22 @@ export class MapContainer extends Layer {
         await this.effectsLayer.draw()
 
         this.hitArea = new PIXI.Rectangle(0, 0, this.w * this.map.scale, this.h * this.map.scale)
+
+        // cleanup otherwise msk will leak memory
+        if(this.msk) {
+            this.msk.destroy();
+            this.msk = null;
+        }
+
+        // create new mask
+        this.msk = new PIXI.Graphics();
+        this.msk.beginFill(0xffffff);
+        this.msk.drawRect(0, 0, this.w, this.h)
+        this.msk.endFill()
+
+        // apply mask
+        this.addChild(this.msk)
+        this.mask = this.msk
 
         return this;
     }
