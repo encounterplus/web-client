@@ -4,13 +4,14 @@ import { Game } from './game'
 import { Map} from './map'
 import { Creature, CreatureType } from './creature'
 import { Message } from './message'
+import { SquareGrid } from 'src/app/core/map/models/square-grid'
 
 export class AppState {
     map: Map
     game: Game = new Game()
     screen: Screen = new Screen()
     messages: Array<Message> = []
-    grid: Grid = new Grid()
+    grid: Grid = new SquareGrid()
     isDirty: boolean = false
     version: string
     build: number

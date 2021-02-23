@@ -1,19 +1,47 @@
-import { Map } from 'src/app/shared/models/map';
+import { GridStyle, GridType, Map } from 'src/app/shared/models/map';
 
-export class Grid {
-    size: number = 50;
-    offsetX: number = 0;
-    offsetY: number = 0;
-    color: string = '#cccccc';
-    visible: boolean = true;
-    scale: number = 1;
+export interface GridInterface {
+    size: number
+    offsetX: number
+    offsetY: number
+    color: string
+    visible: boolean
+    opacity: number
+    style: GridStyle
+    type: GridType
+    scale: number
+    units: string
+
+    gridGraphics(width: number, height: number): PIXI.Graphics
+}
+
+export abstract class Grid implements GridInterface {
+    size: number = 50
+    offsetX: number = 0
+    offsetY: number = 0
+    color: string = '#cccccc'
+    visible: boolean = true
+    opacity: number = 1.0
+    style: GridStyle = GridStyle.solid
+    type: GridType = GridType.square
+    scale: number = 5.0
+    units: string = 'ft'
+
+    get pixelRatio(): number {
+        return this.size / this.scale
+    }
 
     update(map: Map) {
-        this.size = map.gridSize;
-        this.offsetX = map.gridOffsetX;
-        this.offsetY = map.gridOffsetY;
-        this.color = map.gridColor;
-        this.visible = map.gridVisible;
-        this.scale = map.scale;
+        this.size = map.gridSize
+        this.offsetX = map.gridOffsetX
+        this.offsetY = map.gridOffsetY
+        this.color = map.gridColor
+        this.opacity = map.gridOpacity
+        this.visible = map.gridVisible
+        this.scale = map.gridScale
+        this.units = map.gridUnits
+        this.type = map.gridType
     }
+
+    abstract gridGraphics(width: number, height: number): PIXI.Graphics
 }

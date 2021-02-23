@@ -1,11 +1,11 @@
 import * as PIXI from 'pixi.js';
 import { Creature } from 'src/app/shared/models/creature';
-import { Map } from 'src/app/shared/models/map';
+import { GridType, Map } from 'src/app/shared/models/map';
 import { Layer } from './layers/layer';
 import { GridLayer } from './layers/grid-layer';
 import { BackgroundLayer } from './layers/background-layer';
 import { TokensLayer } from './layers/tokens-layer';
-import { Grid } from './models/grid';
+import { Grid, GridInterface } from './models/grid';
 import { VisionLayer } from './layers/vision-layer';
 import { LightsLayer } from './layers/lights-layer';
 import { DataService } from 'src/app/shared/services/data.service';
@@ -27,6 +27,8 @@ import { Pointer } from 'src/app/shared/models/pointer';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { v4 as uuidv4 } from 'uuid';
 import { Role } from 'src/app/shared/models/token';
+import { SquareGrid } from './models/square-grid';
+import { HexGrid } from './models/hex-grid';
 
 export class MapContainer extends Layer {
 
@@ -52,17 +54,16 @@ export class MapContainer extends Layer {
     // data
     map: Map;
     state: AppState;
-    grid: Grid = new Grid();
+    grid: Grid = new SquareGrid()
 
-    data: PIXI.InteractionData;
-    dragging: boolean = false;
-    clicked: boolean = false;
+    data: PIXI.InteractionData
+    dragging: boolean = false
+    clicked: boolean = false
 
-    activePointer: Pointer;
-    activeTool: Tool;
+    activePointer: Pointer
+    activeTool: Tool
 
-    turned: TokenView;
-    tiles: Array<Tile> = [];
+    turned: TokenView
 
     constructor(private dataService: DataService) {
         super();
@@ -121,7 +122,14 @@ export class MapContainer extends Layer {
         // if (this.map.video) {
         //     this.backgroundLayer.once('videoloaded', () => this.draw());
         // }
-        // update grid
+
+        // create grid
+        if(this.state.map.gridType == GridType.square) {
+            this.grid = new SquareGrid()
+        } else {
+            this.grid = new HexGrid()
+        }
+
         this.grid.update(this.state.map)
         this.gridLayer.update(this.grid)
 

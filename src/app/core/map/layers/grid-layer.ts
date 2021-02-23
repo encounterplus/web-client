@@ -59,24 +59,7 @@ export class GridLayer extends Layer {
     }
 
     async drawGrid() {
-        
-        let width = this.w * this.grid.scale;
-        let height = this.h * this.grid.scale;
-
-        // columns
-        let cols = Math.floor((width + this.grid.size*.9)/ this.grid.size);
-        for (let i = 0; i < cols; i++) {
-            let x = (i * this.grid.size) + this.grid.offsetX;
-            if (x<=width) this.addChild(this._drawLine([x, 0, x, height], PIXI.utils.string2hex(this.grid.color), 0.8));
-        }
-
-        // rows
-        let rows = Math.ceil((height + this.grid.size*.9)/ this.grid.size);
-        for (let i = 0; i < rows; i++) {
-            let y = (i * this.grid.size) + this.grid.offsetY;
-            if (y<=height) this.addChild(this._drawLine([0, y, width, y], PIXI.utils.string2hex(this.grid.color), 0.8));
-        }
-
+        this.addChild(this.grid.gridGraphics(this.w, this.h))
         return this;
     }
 
@@ -93,14 +76,6 @@ export class GridLayer extends Layer {
         }
 
         return this;
-    }
-
-    _drawLine(points, lineColor, lineAlpha) {
-        let line = new PIXI.Graphics();
-        line.lineStyle(1.0, lineColor, lineAlpha, 0.5, false)
-            .moveTo(points[0], points[1])
-            .lineTo(points[2], points[3]);
-        return line;
     }
 
     clear() {

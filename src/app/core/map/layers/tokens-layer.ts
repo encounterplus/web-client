@@ -1,7 +1,7 @@
 import { Creature } from 'src/app/shared/models/creature';
 import { Layer } from './layer';
 import { TokenView } from '../views/token-view';
-import { Grid } from '../models/grid';
+import { Grid, GridInterface } from '../models/grid';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Token } from 'src/app/shared/models/token';
 

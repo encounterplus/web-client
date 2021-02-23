@@ -41,6 +41,8 @@ export class LightsLayer extends Layer {
         this.tiles = this.dataService.state.map.tiles;
         this.lights = this.dataService.state.map.lights;
         this.visible = this.dataService.state.map.lineOfSight;
+        this.gridScale = this.dataService.state.map.gridScale
+        this.gridSize = this.dataService.state.map.gridSize
     }
 
     async draw() {
