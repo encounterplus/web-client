@@ -1,37 +1,35 @@
-import { Creature } from 'src/app/shared/models/creature';
-import { Layer } from './layer';
-import { Tile } from 'src/app/shared/models/tile';
-import { Loader } from '../models/loader';
-import { DataService } from 'src/app/shared/services/data.service';
-import { Token } from 'src/app/shared/models/token';
-import { Light } from 'src/app/shared/models/light';
-import { literal } from '@angular/compiler/src/output/output_ast';
+import { Layer } from './layer'
+import { Tile } from 'src/app/shared/models/tile'
+import { Loader } from '../models/loader'
+import { DataService } from 'src/app/shared/services/data.service'
+import { Token } from 'src/app/shared/models/token'
+import { Light } from 'src/app/shared/models/light'
 
 export class VisionLayer extends Layer {
 
-    tokens: Array<Token> = [];
-    tiles: Array<Tile> = [];
-    lights: Array<Light> = [];
+    tokens: Array<Token> = []
+    tiles: Array<Tile> = []
+    lights: Array<Light> = []
     
-    intensity: number = 1.0;
-    mapScale: number = 1.0;
+    intensity: number = 1.0
+    mapScale: number = 1.0
 
     gridSize: number = 50.0
-    gridScale: number = 5.0;
+    gridScale: number = 5.0
 
     get pixelRatio(): number {
         return this.gridSize / this.gridScale
     }
 
     update() {
-        this.tokens = this.dataService.state.map.tokens;
-        this.tiles = this.dataService.state.map.tiles;
-        this.lights = this.dataService.state.map.lights;
-        this.visible = this.dataService.state.map.lineOfSight || this.dataService.state.map.fogOfWar;
-        this.intensity = 1.0 - (this.dataService.state.map.daylight || 0.0);
-        this.mapScale = this.dataService.state.map.scale;
-        this.gridScale = this.dataService.state.map.gridScale;
-        this.gridSize = this.dataService.state.map.gridSize;
+        this.tokens = this.dataService.state.map.tokens
+        this.tiles = this.dataService.state.map.tiles
+        this.lights = this.dataService.state.map.lights
+        this.visible = this.dataService.state.map.lineOfSight // || this.dataService.state.map.fogOfWar
+        this.intensity = 1.0 - (this.dataService.state.map.daylight || 0.0)
+        this.mapScale = this.dataService.state.map.scale
+        this.gridScale = this.dataService.state.map.gridScale
+        this.gridSize = this.dataService.state.map.gridSize
     }
 
     vert: PIXI.LoaderResource;
@@ -49,9 +47,14 @@ export class VisionLayer extends Layer {
         this.bg = new PIXI.Sprite(PIXI.Texture.WHITE);
         this.bg.tint = 0x000000;
 
-        let filter = new PIXI.filters.AlphaFilter(1.0)
-        filter.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-        this.filters = [filter];
+        let alphaFilter = new PIXI.filters.AlphaFilter(1.0)
+        alphaFilter.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+
+        let blurFilter = new PIXI.filters.BlurFilter()
+        blurFilter.quality = 2
+        blurFilter.blur = 3
+
+        this.filters = [blurFilter, alphaFilter];
     }
 
     async draw() {

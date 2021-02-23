@@ -27,13 +27,13 @@ export class FogLayer extends Layer {
 
     update(map: Map) {
         this.fog = map.fog;
-        this.visible = false // map.fogOfWar;
+        this.visible = map.fogOfWar;
     }
 
     async draw() {
-        this.clear();
+        // return
 
-        return
+        this.clear();
 
         if (!this.visible) {
             return;
@@ -58,8 +58,8 @@ export class FogLayer extends Layer {
         }
 
         let imageSprite = new PIXI.Sprite(this.imageTexture);
-        imageSprite.width = this.imageTexture.width;
-        imageSprite.height = this.imageTexture.height;
+        imageSprite.width = this.imageTexture.width * 2;
+        imageSprite.height = this.imageTexture.height * 2;
 
         console.log(imageSprite);
         this.addChild(imageSprite);      
