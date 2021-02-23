@@ -107,8 +107,7 @@ export class TokenView extends View {
 
     async drawAuras() {
         this.auraContainer.removeChildren();
-
-
+        
         for (let aura of this.token.auras) {
             if (!aura.enabled) {
                 continue;
@@ -125,7 +124,7 @@ export class TokenView extends View {
     async drawToken() {
         if (this.token.cachedImage != null) {
             this.tokenTexture = await Loader.shared.loadTexture(this.token.cachedImage)
-        } else if (this.token.asset.resource != null) {
+        } else if (this.token.asset != null && this.token.asset.resource != null) {
             this.tokenTexture = await Loader.shared.loadTexture(this.token.asset.resource)
         } else {
             this.tokenTexture = null;

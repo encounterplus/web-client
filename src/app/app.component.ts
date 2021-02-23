@@ -20,6 +20,7 @@ import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { Marker } from './shared/models/marker';
 import { Vision } from './shared/models/vision';
 import { MessageListComponent } from './core/message-list/message-list.component';
+import { Token } from './shared/models/token';
 
 @Component({
     selector: 'app-root',
@@ -152,21 +153,6 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break
             }
 
-            case WSEventName.tokenUpdated: {
-
-                // udpdate state
-                let index =  this.state.map.tokens.findIndex((obj => obj.id == event.data.id))
-                let token = this.state.map.tokens[index]
-
-                if (token) {
-                    Object.assign(token, event.data)
-                }
-
-                // changes
-                console.debug(token)
-                break
-            }
-
             case WSEventName.tokenMoved: {
                 let view = this.mapComponent.mapContainer.tokenViewById(event.data.id);
                 if (view != null) {
@@ -212,12 +198,43 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break;
             }
 
+            case WSEventName.tokenUpdated: {
+                let model = Object.assign(new Token, event.data) as Token
+                
+                // udpdate state
+                let index = this.state.map.areaEffects.findIndex((obj => obj.id == model.id))
+                this.state.map.tokens[index] = model
+
+                let view = this.mapComponent.mapContainer.tokenViewById(model.id)
+                if (view != null) {
+                    // update token only
+                    view.token = model;
+                    view.draw();
+                } else {
+                    // update all tokens
+                    this.mapComponent.mapContainer.updateTokens()
+                    this.mapComponent.mapContainer.drawTokens()
+                }
+
+                if (model.vision != null && model.vision.sight != null) {
+                    // update los & ligts
+                    this.mapComponent.mapContainer.lightsLayer.update();
+                    this.mapComponent.mapContainer.visionLayer.update()
+                    this.mapComponent.mapContainer.visionLayer.draw();
+                    this.mapComponent.mapContainer.lightsLayer.draw();
+                }
+
+                // changes
+                console.debug(model)
+                break
+            }
+
             case WSEventName.areaEffectUpdated: {
                 let model = Object.assign(new AreaEffect, event.data) as AreaEffect;
                 console.debug(model);
     
                 // udpdate state
-                let index =  this.state.map.areaEffects.findIndex((obj => obj.id == model.id));
+                let index = this.state.map.areaEffects.findIndex((obj => obj.id == model.id));
                 this.state.map.areaEffects[index] = model;
     
                 let view = this.mapComponent.mapContainer.areaEffectViewById(model.id)
@@ -243,8 +260,8 @@ export class AppComponent implements OnInit, AfterViewInit {
                     view.draw();
                 } else {
                     // update all tiles
-                    this.mapComponent.mapContainer.updateTiles(this.state.map.tiles);
-                    this.mapComponent.mapContainer.drawTiles();
+                    this.mapComponent.mapContainer.updateTiles()
+                    this.mapComponent.mapContainer.drawTiles()
                 }
 
                 if (event.data.los != null) {
@@ -338,9 +355,16 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.tilesUpdated: {
-                this.state.map.tiles = event.data;
-                this.mapComponent.mapContainer.updateTiles(event.data);
-                this.mapComponent.mapContainer.drawTiles();
+                this.state.map.tiles = event.data
+                this.mapComponent.mapContainer.updateTiles()
+                this.mapComponent.mapContainer.drawTiles()
+                break;
+            }
+
+            case WSEventName.tokensUpdated: {
+                this.state.map.tokens = event.data
+                this.mapComponent.mapContainer.updateTokens()
+                this.mapComponent.mapContainer.drawTokens()
                 break;
             }
 

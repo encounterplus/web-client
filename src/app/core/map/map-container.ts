@@ -125,15 +125,13 @@ export class MapContainer extends Layer {
         this.grid.update(this.state.map)
         this.gridLayer.update(this.grid)
 
-        this.lightsLayer.update();
-        this.visionLayer.update();
+        this.lightsLayer.update()
+        this.visionLayer.update()
         this.fogLayer.update(this.state.map)
         
         this.monstersLayer.grid = this.grid
         this.playersLayer.grid = this.grid
-
-        this.monstersLayer.tokens = this.state.map.tokens.filter(token => token.role != Role.friendly)
-        this.playersLayer.tokens = this.state.map.tokens.filter(token => token.role == Role.friendly)
+        this.updateTokens()
         
         this.areaEffectsLayer.update();
         this.areaEffectsLayer.grid = this.grid;
@@ -145,11 +143,18 @@ export class MapContainer extends Layer {
         this.markersLayer.grid = this.grid;
         this.markersLayer.update();
 
-        this.tiles = state.map.tiles;
+        this.updateTiles()
     }
 
-    updateTiles(tiles: Array<Tile>) {
-        this.tiles = tiles;
+    updateTiles() {
+        this.bottomLayer.tiles = this.state.map.tiles.filter(tile => tile.layer == "map");
+        this.middleLayer.tiles = this.state.map.tiles.filter(tile => tile.layer == "object");
+        this.topLayer.tiles = this.state.map.tiles.filter(tile => tile.layer == "token");
+    }
+
+    updateTokens() {
+        this.monstersLayer.tokens = this.state.map.tokens.filter(token => token.role != Role.friendly)
+        this.playersLayer.tokens = this.state.map.tokens.filter(token => token.role == Role.friendly)
     }
 
     updateTurned(creature: Creature) {
@@ -180,55 +185,59 @@ export class MapContainer extends Layer {
     }
 
     async drawTiles() {
-        this.bottomLayer.tiles = this.tiles.filter(tile => tile.layer == "map");
-        this.middleLayer.tiles = this.tiles.filter(tile => tile.layer == "object");
-        this.topLayer.tiles = this.tiles.filter(tile => tile.layer == "token");
+        await this.bottomLayer.draw()
+        await this.middleLayer.draw()
+        await this.topLayer.draw()
+    }
 
-        await this.bottomLayer.draw();
-        await this.middleLayer.draw();
-        await this.topLayer.draw();
+    async drawTokens() {
+        await this.monstersLayer.draw()
+        await this.playersLayer.draw()
     }
 
     async draw() {
-        await this.backgroundLayer.draw();
+        // main background laayer
+        await this.backgroundLayer.draw()
 
-        this.w = this.backgroundLayer.w;
-        this.h = this.backgroundLayer.h;
+        // update size
+        this.w = this.backgroundLayer.w
+        this.h = this.backgroundLayer.h
+
         if (this.map == null) {
-            this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
-            return this;
+            this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h)
+            return this
         }
         // update size for all layers
         for(let layer of this.children) {
             if (layer instanceof Layer) {
-                layer.w = this.w;
-                layer.h = this.h;
+                layer.w = this.w
+                layer.h = this.h
             }
         }
 
-        // vision
-        await this.visionLayer.draw();
-        await this.fogLayer.draw();
+        // vision & light
+        await this.visionLayer.draw()
+        await this.fogLayer.draw()
+        await this.lightsLayer.draw()
 
-        await this.gridLayer.draw();
-        await this.lightsLayer.draw();
-
-        await this.monstersLayer.draw();
+        // grid
+        await this.gridLayer.draw()
         
-        await this.playersLayer.draw();
+        // tokens
+        await this.drawTokens()
+
+        // auras
         this.aurasLayer.tokens = [...this.playersLayer.views,...this.monstersLayer.views];
-        this.aurasLayer.draw();
-        await this.drawTiles();
+        this.aurasLayer.draw()
 
-        await this.areaEffectsLayer.draw();
+        // others
+        await this.drawTiles()
+        await this.areaEffectsLayer.draw()
+        await this.markersLayer.draw()
+        await this.drawingsLayer.draw()
+        await this.effectsLayer.draw()
 
-        await this.markersLayer.draw();
-
-        await this.drawingsLayer.draw();
-
-        await this.effectsLayer.draw();
-
-        this.hitArea = new PIXI.Rectangle(0, 0, this.w*this.map.scale, this.h*this.map.scale);
+        this.hitArea = new PIXI.Rectangle(0, 0, this.w * this.map.scale, this.h * this.map.scale)
 
         return this;
     }
