@@ -170,14 +170,14 @@ export class MapContainer extends Layer {
     updateTurned(creature: Creature) {
         if (this.turned != null) {
             this.turned.turned = false;
-            this.turned.updateUID();
+            this.turned.updateLabel();
             this.turned.updateInteraction();
         }
 
         this.turned = this.tokenViewById(creature.tokenId);
         if (this.turned != null) {
             this.turned.turned = true
-            this.turned.updateUID();
+            this.turned.updateLabel();
             this.turned.updateInteraction();
         }
     }

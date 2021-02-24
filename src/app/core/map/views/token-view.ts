@@ -33,8 +33,8 @@ export class TokenView extends View {
     tokenTexture: PIXI.Texture
     tokenSprite: PIXI.Sprite
 
-    uidGraphics: PIXI.Graphics
-    uidText: PIXI.Text
+    labelGraphics: PIXI.Graphics
+    labelText: PIXI.Text
 
     distanceText: PIXI.Text
 
@@ -54,19 +54,11 @@ export class TokenView extends View {
         return this.token.reference?.includes("/player/") || false
     }
 
-    get isDead(): boolean {
-        return this.token.health <= 0 && this.token.hitpoints > 0 && !this.isPlayer
-    }
-
-    get isBloodied(): boolean {
-        return this.token.health < this.token.hitpoints && this.token.hitpoints > 0
-    }
-
     get color(): number {
         if (this.turned) {
             return 0xff9500;
-        } else if (this.isDead) {
-            return 0x333333;
+        } else if (this.token.dead) {
+            return 0x555555;
         } else if (this.token.role == Role.hostile) {
             return 0x631515;
         } else if (this.token.role == Role.friendly) {
@@ -87,6 +79,7 @@ export class TokenView extends View {
         // TODO: add active token selection
         this.interactive = token.role == Role.friendly
         this.buttonMode = true;
+        this.sortableChildren = true
 
         this
             .on('pointerdown', this.onDragStart)
@@ -135,10 +128,12 @@ export class TokenView extends View {
 
         // sprite
         if (this.tokenTexture != null) {
-            let sprite = new PIXI.Sprite(this.tokenTexture);
-            sprite.anchor.set(0.5, 0.5);
-            this.addChild(sprite);
-            this.tokenSprite = sprite;
+            let sprite = new PIXI.Sprite(this.tokenTexture)
+            sprite.anchor.set(0.5, 0.5)
+            this.addChild(sprite)
+            this.tokenSprite = sprite
+            this.tokenSprite.visible = true
+            this.tokenSprite.zIndex = 0
 
             // rotation
             this.tokenSprite.rotation = (this.token.rotation)? this.token.rotation * (Math.PI / 180) : 0;
@@ -151,39 +146,68 @@ export class TokenView extends View {
         this.updateToken();
 
         // overlay
-        // if (this.creature.dead) {
-        //     this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-dead.png', true);
-        //     let sprite = new PIXI.Sprite(this.overlayTexture);
-        //     sprite.anchor.set(0.5, 0.5);
-        //     this.addChild(sprite);
-        //     this.overlaySprite = sprite;
-        // } else if (this.creature.bloodied) {
-        //     this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-bloodied.png', true);
-        //     let sprite = new PIXI.Sprite(this.overlayTexture);
-        //     sprite.anchor.set(0.5, 0.5);
-        //     this.addChild(sprite);
-        //     this.overlaySprite = sprite;
-        // }
+        if (this.token.dead) {
+            this.overlayTexture = await Loader.shared.loadTexture('/assets/img/corpse.png', true);
+            let sprite = new PIXI.Sprite(this.overlayTexture);
+            sprite.anchor.set(0.5, 0.5);
+            this.addChild(sprite);
+            this.overlaySprite = sprite;
+            this.tokenSprite.visible = false
+
+            // change z order
+            this.tokenSprite.zIndex = 0
+            this.overlaySprite.zIndex = 1
+        } else if (this.token.bloodied) {
+            if ( this.token.asset != null || this.token.cachedImageToken) {
+                this.overlayTexture = await Loader.shared.loadTexture('/assets/img/bloodied.png', true)
+                let sprite = new PIXI.Sprite(this.overlayTexture)
+                sprite.anchor.set(0.5, 0.5)
+                this.addChild(sprite)
+                this.overlaySprite = sprite
+
+                // change z order
+                this.tokenSprite.zIndex = 1
+                this.overlaySprite.zIndex = 0
+            } else {
+                this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-bloodied.png', true)
+                let sprite = new PIXI.Sprite(this.overlayTexture)
+                sprite.anchor.set(0.5, 0.5)
+                this.addChild(sprite)
+                this.overlaySprite = sprite
+
+                // change z order
+                this.tokenSprite.zIndex = 0
+                this.overlaySprite.zIndex = 1
+            }
+        }
 
         this.updateOverlay();
 
-        // label
-        this.uidGraphics = new PIXI.Graphics();
-        this.addChild(this.uidGraphics);
+        if (this.token.label != null || this.tokenTexture == null) {
+            // label
+            this.labelGraphics = new PIXI.Graphics();
+            this.labelGraphics.zIndex = 3
+            this.addChild(this.labelGraphics);
 
-        this.uidText = new PIXI.Text(this.token.label, {fontFamily : 'Arial', fontSize: 24, fill : 0xffffff, align : 'center'});
-        this.uidText.anchor.set(0.5, 0.5);
-        this.uidText.resolution = 4;
-        this.addChild(this.uidText);
+            // text
+            let text = this.token.label || (this.token.name || "Unknown").toUpperCase().charAt(0)
+
+            this.labelText = new PIXI.Text(text, {fontFamily : 'Arial', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
+            this.labelText.anchor.set(0.5, 0.5);
+            this.labelText.resolution = 4;
+            this.labelText.zIndex = 4
+            this.addChild(this.labelText);
+        }   
 
         // distance
         this.distanceText = new PIXI.Text(this.distance, {fontFamily : 'Arial', fontSize: 30, fill : 0xffffff, align : 'center', dropShadow: true,
         dropShadowColor: '#000000', dropShadowBlur: 6, dropShadowDistance: 0});
         this.distanceText.anchor.set(0.5, 0.5);
         this.distanceText.resolution = 2;
+        this.distanceText.zIndex = 5
         this.addChild(this.distanceText);
 
-        this.updateUID();
+        this.updateLabel();
         this.updateTint();
         this.updateDistance();
         this.updateInteraction();
@@ -205,7 +229,7 @@ export class TokenView extends View {
             this.visible = !this.token.hidden;
         }
 
-        if (this.isDead) {
+        if (this.token.dead) {
             this.zIndex = 29;
         }
     }
@@ -228,8 +252,8 @@ export class TokenView extends View {
         }
     }
 
-    updateUID() {
-        if (!this.uidGraphics || !this.uidText) {
+    updateLabel() {
+        if (!this.labelGraphics || !this.labelText) {
             return;
         }
 
@@ -241,17 +265,19 @@ export class TokenView extends View {
             x = clamp(x, 0, (this.w) - (badgeSize / 2));
             y = clamp(y, 0, (this.h) - (badgeSize / 2));
 
-            this.uidGraphics.clear();
-            this.uidGraphics.beginFill(this.color).drawCircle(x, y, badgeSize / 2).endFill();
+            this.labelGraphics.clear();
+            this.labelGraphics.lineStyle(2, 0x000000, 0.2)
+            this.labelGraphics.beginFill(this.color).drawCircle(x, y, badgeSize / 2).endFill();
 
-            this.uidText.position.set(x, y);
-            this.uidText.style.fontSize = badgeSize / 2.5;
+            this.labelText.position.set(x, y);
+            this.labelText.style.fontSize = badgeSize / 2.5;
             
         } else {
-            this.uidGraphics.clear();
-            this.uidGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, this.w / 2).endFill();
-            this.uidText.position.set(this.w / 2, this.h / 2);
-            this.uidText.style.fontSize = this.h / 2.5;
+            this.labelGraphics.clear();
+            this.labelGraphics.lineStyle(2, 0x000000, 0.2)
+            this.labelGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, this.w / 2).endFill();
+            this.labelText.position.set(this.w / 2, this.h / 2);
+            this.labelText.style.fontSize = this.h / 2.5;
         }
     }
 

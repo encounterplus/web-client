@@ -20,11 +20,13 @@ export enum Size {
 
 export class Token {
     id: string
-    name: string
-    label: string
+    name?: string
+    label?: string
     role: Role
-    health: number
-    hitpoints: number
+    health?: number
+    hitpoints?: number
+    bloodied: boolean
+    dead: boolean
     x: number
     y: number
     scale: number
@@ -32,8 +34,9 @@ export class Token {
     rotation: number
     elevation: number
     hidden: boolean
-    reference: string
-    cachedImage: string
+    reference?: string
+    cachedImage?: string
+    cachedImageToken?: boolean
     asset?: Asset
     vision?: Vision
     auras: Array<Aura> = []

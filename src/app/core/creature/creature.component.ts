@@ -22,9 +22,9 @@ export class CreatureComponent implements OnInit {
 
   get overlayImage(): string {
     if (this.creature.dead) {
-      return "/assets/img/dead.png";
+      return "/assets/img/creature-dead.png";
     } else if (this.creature.bloodied) {
-      return "/assets/img/bloodied.png";
+      return "/assets/img/creature-bloodied.png";
     } else {
       return "";
     }
