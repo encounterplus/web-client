@@ -36,6 +36,9 @@ export class TokenView extends View {
     labelGraphics: PIXI.Graphics
     labelText: PIXI.Text
 
+    elevationGraphics: PIXI.Graphics
+    elevationText: PIXI.Text
+
     distanceText: PIXI.Text
 
     data: PIXI.InteractionData
@@ -181,12 +184,30 @@ export class TokenView extends View {
             }
         }
 
-        this.updateOverlay();
+        this.updateOverlay()
 
+        // elevation
+        if ((this.token.elevation || 0) != 0) {
+            // graphics
+            this.elevationGraphics = new PIXI.Graphics();
+            this.elevationGraphics.zIndex = 3
+            this.addChild(this.elevationGraphics);
+
+            // text
+            let text = (this.token.elevation || 0) > 0 ? "↑" + Math.abs(this.token.elevation) : "↓" + Math.abs(this.token.elevation)
+
+            this.elevationText = new PIXI.Text(text, {fontFamily : '-apple-system, Helvetica', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
+            this.elevationText.anchor.set(0.5, 0.5);
+            this.elevationText.resolution = 4;
+            this.elevationText.zIndex = 4
+            this.addChild(this.elevationText);
+        }   
+
+        // label
         if (this.token.label != null || this.tokenTexture == null) {
-            // label
+            // graphics
             this.labelGraphics = new PIXI.Graphics();
-            this.labelGraphics.zIndex = 3
+            this.labelGraphics.zIndex = 5
             this.addChild(this.labelGraphics);
 
             // text
@@ -195,19 +216,21 @@ export class TokenView extends View {
             this.labelText = new PIXI.Text(text, {fontFamily : 'Arial', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
             this.labelText.anchor.set(0.5, 0.5);
             this.labelText.resolution = 4;
-            this.labelText.zIndex = 4
+            this.labelText.zIndex = 6
             this.addChild(this.labelText);
-        }   
+        }
+
 
         // distance
         this.distanceText = new PIXI.Text(this.distance, {fontFamily : 'Arial', fontSize: 30, fill : 0xffffff, align : 'center', dropShadow: true,
         dropShadowColor: '#000000', dropShadowBlur: 6, dropShadowDistance: 0});
         this.distanceText.anchor.set(0.5, 0.5);
         this.distanceText.resolution = 2;
-        this.distanceText.zIndex = 5
+        this.distanceText.zIndex = 10
         this.addChild(this.distanceText);
 
-        this.updateLabel();
+        this.updateLabel()
+        this.updateElevation()
         this.updateTint();
         this.updateDistance();
         this.updateInteraction();
@@ -278,6 +301,50 @@ export class TokenView extends View {
             this.labelGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, this.w / 2).endFill();
             this.labelText.position.set(this.w / 2, this.h / 2);
             this.labelText.style.fontSize = this.h / 2.5;
+        }
+    }
+
+    updateElevation() {
+        if (!this.elevationGraphics || !this.elevationText) {
+            return;
+        }
+
+        if (this.token.label != null && this.tokenTexture != null ) {
+            let badgeSize = this.grid.size * 0.4;
+            // new position
+            var x = (this.w / 2) + (this.w / 2) * Math.cos(45 * (Math.PI / 180))
+            var y = (this.w / 2) + (this.w / 2) * Math.cos(45 *  (Math.PI / 180))
+            x = clamp(x, 0, (this.w) - (badgeSize * 2.2)) 
+            y = clamp(y, 0, (this.h) - (badgeSize))
+
+            this.elevationGraphics.clear()
+            this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
+            this.elevationGraphics.beginFill(0x333333, 0.9).drawRoundedRect(0, 0, badgeSize * 2, badgeSize, badgeSize / 2).endFill();
+            this.elevationGraphics.position.set(x, y)
+
+            this.elevationText.position.set(x + badgeSize * 0.7, y + badgeSize / 2);
+            this.elevationText.style.fontSize = badgeSize / 2.5;
+            
+        } else {
+            let badgeSize = this.grid.size * 0.4;
+            // new position
+            var x = (this.w / 2) + (this.w / 2) * Math.cos(45 * (Math.PI / 180))
+            var y = (this.w / 2) + (this.w / 2) * Math.cos(45 *  (Math.PI / 180))
+            x = clamp(x, 0, (this.w) - (badgeSize * 1.4)) 
+            y = clamp(y, 0, (this.h) - (badgeSize))
+
+            this.elevationGraphics.clear()
+            this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
+            this.elevationGraphics.beginFill(0x333333, 0.9).drawRoundedRect(0, 0, badgeSize * 1.3, badgeSize, badgeSize / 2).endFill();
+            this.elevationGraphics.position.set(x, y)
+
+            this.elevationText.position.set(x + badgeSize * 0.6, y + badgeSize / 2);
+            this.elevationText.style.fontSize = badgeSize / 2.5;
+        }
+
+        if (this.tokenTexture == null) {
+            this.elevationGraphics.zIndex = 10
+            this.elevationText.zIndex = 11
         }
     }
 
