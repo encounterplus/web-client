@@ -1,7 +1,16 @@
 import { pathToFileURL } from "url";
+import { GridSize } from "../views/token-view";
 import { Grid, GridInterface } from "./grid";
 
 export class SquareGrid extends Grid implements GridInterface {
+
+    get blockSize(): PIXI.ISize {
+        return {width: this.size, height: this.size}
+    }
+
+    get adjustedSize(): PIXI.ISize {
+        return {width: this.size, height: this.size}
+    }
     
     gridGraphics(width: number, height: number): PIXI.Graphics {
         let graphics = new PIXI.Graphics();
@@ -23,6 +32,10 @@ export class SquareGrid extends Grid implements GridInterface {
         }
 
         return graphics
+    }
+
+    sizeFromGridSize(gridSize: GridSize): PIXI.ISize {
+        return {width: gridSize.width * this.size, height: gridSize.height * this.size }
     }
 
 }

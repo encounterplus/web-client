@@ -8,7 +8,8 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { AuraView } from './aura-view';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
-import { Token } from 'src/app/shared/models/token';
+import { Size, Token } from 'src/app/shared/models/token';
+import { HexGrid } from '../models/hex-grid';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
@@ -20,6 +21,11 @@ export enum ControlState {
     end = 2,
     block = 3,
     cancel = 4
+}
+
+export interface GridSize {
+    readonly width: number
+    readonly height: number
 }
 
 export class TokenView extends View {
@@ -53,6 +59,8 @@ export class TokenView extends View {
 
     auraContainer: Container = new PIXI.Container();
 
+
+
     get isPlayer(): boolean {
         return this.token.reference?.includes("/player/") || false
     }
@@ -71,6 +79,35 @@ export class TokenView extends View {
         } else {
             return 0xFFCCFF;
         }
+    }
+
+    get gridSize(): GridSize {
+        if (this.token.size.includes('x')) {
+            let parts = this.token.size.split("x")
+            return {width: Number(parts[0]), height: Number(parts[1])}
+        } else {
+            switch (this.token.size) {
+                case Size.large: {
+                    return {width: 2, height: 2}
+                }
+                case Size.huge: {
+                    return {width: 3, height: 3}
+                }  
+                case Size.gargantuan: {
+                    return {width: 4, height: 4}
+                }
+                case Size.colossal: {
+                    return {width: 6, height: 6}
+                }
+                default: {
+                    return {width: 1, height: 1}
+                }      
+            }
+        }
+    }
+
+    get scaleFactor(): number {
+        return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0)
     }
 
     constructor(token: Token, grid: Grid, private dataService: DataService) {
@@ -126,8 +163,10 @@ export class TokenView extends View {
             this.tokenTexture = null;
         }
 
-        this.w = this.grid.size * this.token.scale;
-        this.h = this.grid.size * this.token.scale;
+        console.debug(this.token)
+
+        this.w = this.grid.sizeFromGridSize(this.gridSize).width
+        this.h = this.grid.sizeFromGridSize(this.gridSize).height
 
         // sprite
         if (this.tokenTexture != null) {
@@ -234,11 +273,17 @@ export class TokenView extends View {
         this.updateTint();
         this.updateDistance();
         this.updateInteraction();
+
+        // debug frame
+        let graphics = new PIXI.Graphics()
+        graphics.lineStyle(1, 0xff00000, 1.0)
+        graphics.drawRect(0, 0, this.w, this.h)
+        this.addChild(graphics)
     }
 
     update() {
-        this.w = this.grid.size * this.token.scale;
-        this.h = this.grid.size * this.token.scale;
+        this.w = this.grid.sizeFromGridSize(this.gridSize).width
+        this.h = this.grid.sizeFromGridSize(this.gridSize).height
 
         this.zIndex = this.token.role == Role.friendly ? 50 : 30;
 
@@ -257,10 +302,20 @@ export class TokenView extends View {
         }
     }
 
+    fitScaleFactor(srcWidth: number, srcHeight: number, dstWidth: number, dstHeight: number): number {
+        let srcRatio = srcWidth / srcHeight
+        let dstRatio = dstWidth / dstHeight
+
+        if (srcRatio > dstRatio) {
+            return dstWidth / srcWidth
+        } else {
+             return dstHeight / srcHeight
+        }
+    }
+
     updateToken() {
         if (this.tokenTexture != null) {
-            let ratio = this.tokenTexture.width / this.tokenTexture.height;
-            let scale = ratio > 1 ?  this.h / this.tokenTexture.height : this.w / this.tokenTexture.width
+            var scale = this.fitScaleFactor(this.tokenTexture.width, this.tokenTexture.height, this.w, this.h) * this.scaleFactor
             this.tokenSprite.width = this.tokenTexture.width * scale;
             this.tokenSprite.height = this.tokenTexture.height * scale;
             this.tokenSprite.position.set(this.w / 2, this.h / 2);
@@ -269,9 +324,10 @@ export class TokenView extends View {
 
     updateOverlay() {
         if (this.overlayTexture != null) {
-            this.overlaySprite.width = this.w;
-            this.overlaySprite.height = this.h;
-            this.overlaySprite.position.set(this.w / 2, this.h / 2);
+            let size = Math.min(this.w, this.h) * this.scaleFactor
+            this.overlaySprite.width = Math.min(size, this.w)
+            this.overlaySprite.height = Math.min(size, this.h)
+            this.overlaySprite.position.set(this.w / 2, this.h / 2)
         }
     }
 
@@ -281,26 +337,39 @@ export class TokenView extends View {
         }
 
         if (this.tokenTexture != null ) {
-            let badgeSize = this.grid.size * 0.4;
-            // new position
-            var x = (this.w / 2) + (this.w / 2) * Math.cos(45 * (Math.PI / 180));
-            var y = (this.w / 2) + (this.w / 2) * Math.cos(45 *  (Math.PI / 180));
-            x = clamp(x, 0, (this.w) - (badgeSize / 2));
-            y = clamp(y, 0, (this.h) - (badgeSize / 2));
+            let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
+            let labelSize = this.grid.adjustedSize.width * 0.4
+
+            // position
+            var x: number, y: number
+
+            // grid size check
+            if (this.gridSize.width == this.gridSize.height) {
+                x = (this.w / 2) - 2 + (size / 2) * Math.cos(45 * (Math.PI / 180))
+                y = (this.h / 2) - 2 + (size / 2) * Math.cos(45 *  (Math.PI / 180))
+            } else {
+                x = this.w
+                y = this.h
+            }
+
+            // clamp
+            x = clamp(x, 0, (this.w) - (labelSize / 2))
+            y = clamp(y, 0, (this.h) - (labelSize / 2))
 
             this.labelGraphics.clear();
             this.labelGraphics.lineStyle(2, 0x000000, 0.2)
-            this.labelGraphics.beginFill(this.color).drawCircle(x, y, badgeSize / 2).endFill();
+            this.labelGraphics.beginFill(this.color).drawCircle(x, y, labelSize / 2).endFill();
 
             this.labelText.position.set(x, y);
-            this.labelText.style.fontSize = badgeSize / 2.5;
+            this.labelText.style.fontSize = labelSize / 2.5;
             
         } else {
+            let size = Math.min(this.w, this.h) * this.scaleFactor
             this.labelGraphics.clear();
             this.labelGraphics.lineStyle(2, 0x000000, 0.2)
-            this.labelGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, this.w / 2).endFill();
+            this.labelGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, size / 2).endFill();
             this.labelText.position.set(this.w / 2, this.h / 2);
-            this.labelText.style.fontSize = this.h / 2.5;
+            this.labelText.style.fontSize = size / 2.5;
         }
     }
 
@@ -310,36 +379,60 @@ export class TokenView extends View {
         }
 
         if (this.token.label != null && this.tokenTexture != null ) {
-            let badgeSize = this.grid.size * 0.4;
-            // new position
-            var x = (this.w / 2) + (this.w / 2) * Math.cos(45 * (Math.PI / 180))
-            var y = (this.w / 2) + (this.w / 2) * Math.cos(45 *  (Math.PI / 180))
-            x = clamp(x, 0, (this.w) - (badgeSize * 2.2)) 
-            y = clamp(y, 0, (this.h) - (badgeSize))
+            let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
+            let labelSize = this.grid.adjustedSize.width * 0.4
+            
+            // position
+            var x: number, y: number
+
+            // grid size check
+            if (this.gridSize.width == this.gridSize.height) {
+            x = (this.w / 2) - 2 - (labelSize * 0.7) - labelSize + (size / 2) * Math.cos(45 * (Math.PI / 180))
+            y = (this.h / 2) - 2 - (labelSize / 2) + (size / 2) * Math.cos(45 *  (Math.PI / 180))
+            } else {
+                x = this.w
+                y = this.h
+            }
+
+            // clamp
+            x = clamp(x, 0, (this.w) - (labelSize * 2.2))
+            y = clamp(y, 0, (this.h) - (labelSize))
 
             this.elevationGraphics.clear()
             this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
-            this.elevationGraphics.beginFill(0x333333, 0.9).drawRoundedRect(0, 0, badgeSize * 2, badgeSize, badgeSize / 2).endFill();
+            this.elevationGraphics.beginFill(0x333333, 0.9).drawRoundedRect(0, 0, labelSize * 2, labelSize, labelSize / 2).endFill();
             this.elevationGraphics.position.set(x, y)
 
-            this.elevationText.position.set(x + badgeSize * 0.7, y + badgeSize / 2);
-            this.elevationText.style.fontSize = badgeSize / 2.5;
+            this.elevationText.position.set(x + labelSize * 0.7, y + labelSize / 2);
+            this.elevationText.style.fontSize = labelSize / 2.5;
             
         } else {
-            let badgeSize = this.grid.size * 0.4;
-            // new position
-            var x = (this.w / 2) + (this.w / 2) * Math.cos(45 * (Math.PI / 180))
-            var y = (this.w / 2) + (this.w / 2) * Math.cos(45 *  (Math.PI / 180))
-            x = clamp(x, 0, (this.w) - (badgeSize * 1.4)) 
-            y = clamp(y, 0, (this.h) - (badgeSize))
+            let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
+            let labelSize = this.grid.adjustedSize.width * 0.4
+
+            // position
+            var x: number, y: number
+
+            // grid size check
+            if (this.gridSize.width == this.gridSize.height) {
+            x = (this.w / 2) - 2 -  (labelSize * 0.8) + (size / 2) * Math.cos(45 * (Math.PI / 180))
+            y = (this.h / 2) - 2 - (labelSize / 2) + (size / 2) * Math.cos(45 *  (Math.PI / 180))
+            } else {
+                x = this.w
+                y = this.h
+            }
+
+            // clamp
+            x = clamp(x, 0, (this.w) - (labelSize * 1.3))
+            y = clamp(y, 0, (this.h) - (labelSize))
 
             this.elevationGraphics.clear()
             this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
-            this.elevationGraphics.beginFill(0x333333, 0.9).drawRoundedRect(0, 0, badgeSize * 1.3, badgeSize, badgeSize / 2).endFill();
+            this.elevationGraphics.beginFill(0x333333, 0.9).drawRoundedRect(0, 0, labelSize * 1.3, labelSize, labelSize / 2).endFill();
             this.elevationGraphics.position.set(x, y)
 
-            this.elevationText.position.set(x + badgeSize * 0.6, y + badgeSize / 2);
-            this.elevationText.style.fontSize = badgeSize / 2.5;
+            this.elevationText.position.set(x + labelSize * 0.6, y + labelSize / 2);
+            this.elevationText.style.fontSize = labelSize / 2.5;
         }
 
         if (this.tokenTexture == null) {

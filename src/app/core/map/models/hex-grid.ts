@@ -1,6 +1,7 @@
 import { Grid, GridInterface } from "./grid";
 import { Hex, OffsetCoord, Orientation } from "./hex";
 import { GridStyle, GridType, Map } from 'src/app/shared/models/map';
+import { GridSize } from "../views/token-view";
 
 export class HexGrid extends Grid implements GridInterface {
 
@@ -9,6 +10,18 @@ export class HexGrid extends Grid implements GridInterface {
     update(map: Map) {
         super.update(map)
         this.orientation = (map.gridType == GridType.hexFlat) ? Orientation.flat : Orientation.pointy
+    }
+
+    get blockSize(): PIXI.ISize {
+        if (this.orientation == Orientation.flat) {
+            return {width: 2.0 * this.size, height: Math.sqrt(3) * this.size}
+        } else {
+            return {width: Math.sqrt(3) * this.size, height: 2.0 * this.size}
+        }
+    }
+
+    get adjustedSize(): PIXI.ISize {
+        return {width: Math.sqrt(3) * this.size * 0.8, height: Math.sqrt(3) * this.size * 0.8}
     }
 
     hex(point: PIXI.Point): Hex {
@@ -48,7 +61,7 @@ export class HexGrid extends Grid implements GridInterface {
         
         // caclulate number of cols and rows
         if (this.orientation == Orientation.flat) {
-            cols = Math.round(width / (2.0 * 3/4 *this.size)) + 1
+            cols = Math.round(width / (2.0 * 3/4 * this.size)) + 1
             rows = Math.round(height / (Math.sqrt(3.0) * this.size)) + 1
         } else {
             cols = Math.round(width / (Math.sqrt(3.0) * this.size)) + 1
@@ -81,5 +94,13 @@ export class HexGrid extends Grid implements GridInterface {
         console.debug("rendering hex grid")
 
         return graphics
+    }
+
+    sizeFromGridSize(gridSize: GridSize): PIXI.ISize {
+        if (this.orientation == Orientation.flat) {
+            return {width: (2.0 * this.size * 3/4 * gridSize.width) + (this.size / 2.0), height: Math.sqrt(3) * this.size * gridSize.height }
+        } else {
+            return {width: Math.sqrt(3) * this.size * gridSize.width, height: (2.0 * this.size * 3/4 * gridSize.height) + (this.size / 2.0) }
+        }
     }
 }
