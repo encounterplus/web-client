@@ -170,12 +170,12 @@ export class AppComponent implements OnInit, AfterViewInit {
                     view.updateDistance();
 
                     if (event.data.path != null) {
-                        this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, view.token.scale, view.color);
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, view.gridSize, view.color);
                         this.mapComponent.mapContainer.gridLayer.drawHighlight();
                     }
 
                     if (event.data.state == ControlState.end) {
-                        this.mapComponent.mapContainer.gridLayer.updateHighlight([], view.token.scale, view.color);
+                        this.mapComponent.mapContainer.gridLayer.updateHighlight([], view.gridSize, view.color);
                         this.mapComponent.mapContainer.gridLayer.drawHighlight();
                     }
                 }

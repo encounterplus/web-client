@@ -96,6 +96,30 @@ export class HexGrid extends Grid implements GridInterface {
         return graphics
     }
 
+    pathGraphics(path: Array<number>, gridSize: GridSize, color: number): PIXI.Graphics {
+        let graphics = new PIXI.Graphics();
+        graphics.beginFill(color)
+
+        for (let i = 0; i < path.length; i=i+2) {
+            let x = path[i]
+            let y = path[i + 1]
+
+            let coord = new OffsetCoord(x, y)
+            let hex = this.orientation == Orientation.flat ? OffsetCoord.qoffsetToCube(OffsetCoord.EVEN, coord) : OffsetCoord.roffsetToCube(OffsetCoord.EVEN, coord)
+            let polygon = this.polygon(hex)
+
+            graphics.moveTo(polygon[1].x, polygon[1].y)
+            graphics.lineTo(polygon[2].x, polygon[2].y)
+            graphics.lineTo(polygon[3].x, polygon[3].y)
+            graphics.lineTo(polygon[4].x, polygon[4].y)
+            graphics.lineTo(polygon[5].x, polygon[5].y)
+            graphics.closePath()
+        }
+
+        graphics.endFill()
+        return graphics
+    }
+
     sizeFromGridSize(gridSize: GridSize): PIXI.ISize {
         if (this.orientation == Orientation.flat) {
             return {width: (2.0 * this.size * 3/4 * gridSize.width) + (this.size / 2.0), height: Math.sqrt(3) * this.size * gridSize.height }

@@ -46,5 +46,7 @@ export abstract class Grid implements GridInterface {
     abstract get blockSize(): PIXI.ISize
     abstract get adjustedSize(): PIXI.ISize
     abstract gridGraphics(width: number, height: number): PIXI.Graphics
+    abstract pathGraphics(path: Array<number>, gridSize: GridSize, color: number): PIXI.Graphics
     abstract sizeFromGridSize(gridSize: GridSize): PIXI.ISize
+   
 }

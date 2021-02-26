@@ -3,13 +3,14 @@ import { Creature } from 'src/app/shared/models/creature';
 import { Layer } from './layer';
 import { Map } from 'src/app/shared/models/map';
 import { Grid } from '../models/grid';
+import { GridSize } from '../views/token-view';
 
 export class GridLayer extends Layer {
     grid: Grid;
-    highlightPath: Array<number> = [];
-    highlightScale: number = 1.0;
-    highlightColor: number = 0xffffff;
-    highlightGraphics: PIXI.Graphics = new PIXI.Graphics();
+    highlightPath: Array<number> = []
+    highlightSize: GridSize
+    highlightColor: number = 0xffffff
+    highlightGraphics: PIXI.Graphics = new PIXI.Graphics()
 
     alphaFilter = new PIXI.filters.AlphaFilter();
 
@@ -22,18 +23,12 @@ export class GridLayer extends Layer {
         this.grid = grid;
     }
 
-    updateHighlight(path: Array<number>, scale: number, color: number) {
-        this.highlightPath = path;
-        this.highlightScale = Math.max(scale, 1.0);
-        this.highlightColor = color;
+    updateHighlight(path: Array<number>, gridSize: GridSize, color: number) {
+        this.highlightPath = path
+        this.highlightSize = gridSize
+        this.highlightColor = color
 
-        if (scale > 1.0) {
-            this.highlightGraphics.filters = [this.alphaFilter];
-            this.highlightGraphics.alpha = 1.0;
-        } else {
-            this.highlightGraphics.filters = [];
-            this.highlightGraphics.alpha = 0.5;
-        }
+        
     }
 
     pointForPosition(x: number, y: number): PIXI.Point {
@@ -42,19 +37,14 @@ export class GridLayer extends Layer {
 
     async drawHighlight() {
 
-        this.highlightGraphics.clear();
-        this.highlightGraphics.beginFill(this.highlightColor);
-
-        for (let i = 0; i < this.highlightPath.length; i=i+2) {
-            let x = this.highlightPath[i];
-            let y = this.highlightPath[i + 1];
-
-            let point = this.pointForPosition(x, y);
-
-            this.highlightGraphics.drawRect(point.x, point.y, this.grid.size * this.highlightScale, this.grid.size * this.highlightScale);
+        this.highlightGraphics = this.grid.pathGraphics(this.highlightPath, this.highlightSize, this.highlightColor)
+        if (this.highlightSize.width > 1.0 || this.highlightSize.height > 0) {
+            this.highlightGraphics.filters = [this.alphaFilter];
+            this.highlightGraphics.alpha = 1.0;
+        } else {
+            this.highlightGraphics.filters = [];
+            this.highlightGraphics.alpha = 0.5;
         }
-
-        this.highlightGraphics.endFill();
         return this;
     }
 

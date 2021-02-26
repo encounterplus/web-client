@@ -34,6 +34,28 @@ export class SquareGrid extends Grid implements GridInterface {
         return graphics
     }
 
+    pathGraphics(path: Array<number>, gridSize: GridSize, color: number): PIXI.Graphics {
+        let graphics = new PIXI.Graphics();
+        graphics.beginFill(color)
+
+        for (let i = 0; i < path.length; i=i+2) {
+            let x = path[i]
+            let y = path[i + 1]
+
+            let width = gridSize.width * this.size
+            let height = gridSize.height * this.size
+
+            graphics.moveTo(x, y)
+            graphics.lineTo(x + width, y)
+            graphics.lineTo(x + width, y + height)
+            graphics.lineTo(x , y + height)
+            graphics.closePath()
+        }
+
+        graphics.endFill()
+        return graphics
+    }
+
     sizeFromGridSize(gridSize: GridSize): PIXI.ISize {
         return {width: gridSize.width * this.size, height: gridSize.height * this.size }
     }
