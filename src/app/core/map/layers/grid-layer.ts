@@ -27,8 +27,6 @@ export class GridLayer extends Layer {
         this.highlightPath = path
         this.highlightSize = gridSize
         this.highlightColor = color
-
-        
     }
 
     pointForPosition(x: number, y: number): PIXI.Point {
@@ -37,14 +35,22 @@ export class GridLayer extends Layer {
 
     async drawHighlight() {
 
+        if (this.highlightGraphics) {
+            this.highlightGraphics.removeChild()
+            this.highlightGraphics.destroy()
+        }
+
         this.highlightGraphics = this.grid.pathGraphics(this.highlightPath, this.highlightSize, this.highlightColor)
         if (this.highlightSize.width > 1.0 || this.highlightSize.height > 0) {
             this.highlightGraphics.filters = [this.alphaFilter];
-            this.highlightGraphics.alpha = 1.0;
+            this.highlightGraphics.alpha = 1.0
         } else {
-            this.highlightGraphics.filters = [];
-            this.highlightGraphics.alpha = 0.5;
+            this.highlightGraphics.filters = []
+            this.highlightGraphics.alpha = 0.5
         }
+
+        this.addChild(this.highlightGraphics)
+
         return this;
     }
 

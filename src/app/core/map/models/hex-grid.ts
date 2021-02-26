@@ -101,14 +101,15 @@ export class HexGrid extends Grid implements GridInterface {
         graphics.beginFill(color)
 
         for (let i = 0; i < path.length; i=i+2) {
-            let x = path[i]
-            let y = path[i + 1]
+            let q = path[i]
+            let r = path[i + 1]
 
-            let coord = new OffsetCoord(x, y)
-            let hex = this.orientation == Orientation.flat ? OffsetCoord.qoffsetToCube(OffsetCoord.EVEN, coord) : OffsetCoord.roffsetToCube(OffsetCoord.EVEN, coord)
+            // wtf?
+            let hex = new Hex(q, r, null)
             let polygon = this.polygon(hex)
 
-            graphics.moveTo(polygon[1].x, polygon[1].y)
+            graphics.moveTo(polygon[0].x, polygon[0].y)
+            graphics.lineTo(polygon[1].x, polygon[1].y)
             graphics.lineTo(polygon[2].x, polygon[2].y)
             graphics.lineTo(polygon[3].x, polygon[3].y)
             graphics.lineTo(polygon[4].x, polygon[4].y)
