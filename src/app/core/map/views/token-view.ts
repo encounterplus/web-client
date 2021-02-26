@@ -59,8 +59,6 @@ export class TokenView extends View {
 
     auraContainer: Container = new PIXI.Container();
 
-
-
     get isPlayer(): boolean {
         return this.token.reference?.includes("/player/") || false
     }
@@ -107,7 +105,11 @@ export class TokenView extends View {
     }
 
     get scaleFactor(): number {
-        return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0)
+        return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0) * (this.token.asset?.scale || 1.0)
+    }
+
+    get tokenOffset(): PIXI.Point {
+        return new PIXI.Point(this.token.asset?.offsetX || 0, this.token.asset?.offsetY || 0)
     }
 
     constructor(token: Token, grid: Grid, private dataService: DataService) {
@@ -171,7 +173,7 @@ export class TokenView extends View {
         // sprite
         if (this.tokenTexture != null) {
             let sprite = new PIXI.Sprite(this.tokenTexture)
-            sprite.anchor.set(0.5, 0.5)
+            sprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
             this.addChild(sprite)
             this.tokenSprite = sprite
             this.tokenSprite.visible = true
@@ -259,7 +261,6 @@ export class TokenView extends View {
             this.addChild(this.labelText);
         }
 
-
         // distance
         this.distanceText = new PIXI.Text(this.distance, {fontFamily : 'Arial', fontSize: 30, fill : 0xffffff, align : 'center', dropShadow: true,
         dropShadowColor: '#000000', dropShadowBlur: 6, dropShadowDistance: 0});
@@ -316,8 +317,10 @@ export class TokenView extends View {
     updateToken() {
         if (this.tokenTexture != null) {
             var scale = this.fitScaleFactor(this.tokenTexture.width, this.tokenTexture.height, this.w, this.h) * this.scaleFactor
-            this.tokenSprite.width = this.tokenTexture.width * scale;
-            this.tokenSprite.height = this.tokenTexture.height * scale;
+            this.tokenSprite.width = this.tokenTexture.width * scale
+            this.tokenSprite.height = this.tokenTexture.height * scale
+            
+            this.tokenSprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
             this.tokenSprite.position.set(this.w / 2, this.h / 2);
         }
     }
