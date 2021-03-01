@@ -275,11 +275,11 @@ export class TokenView extends View {
         this.updateDistance();
         this.updateInteraction();
 
-        // debug frame
-        let graphics = new PIXI.Graphics()
-        graphics.lineStyle(1, 0xff00000, 1.0)
-        graphics.drawRect(0, 0, this.w, this.h)
-        this.addChild(graphics)
+        // // debug frame
+        // let graphics = new PIXI.Graphics()
+        // graphics.lineStyle(1, 0xff00000, 1.0)
+        // graphics.drawRect(0, 0, this.w, this.h)
+        // this.addChild(graphics)
     }
 
     update() {
