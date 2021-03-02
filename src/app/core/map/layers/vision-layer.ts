@@ -173,7 +173,7 @@ export class VisionLayer extends Layer {
         // lights, not always visible
         for(let light of this.lights) {
             // check light state
-            if (light.sight == null || light.sight.polygon == null || !light.enabled || !light.alwaysVisible) {
+            if (light.sight == null || light.sight.polygon == null || !light.enabled || light.alwaysVisible) {
                 continue
             }
 

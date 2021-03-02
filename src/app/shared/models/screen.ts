@@ -6,7 +6,8 @@ export enum ScreenInteraction {
 }
 
 export class Screen {
-    interaction: ScreenInteraction;
-    overlayImage: string;
-    overlayType: string;
+    interaction: ScreenInteraction
+    overlayImage: string
+    overlayType: string
+    sharedVision: boolean
 }
