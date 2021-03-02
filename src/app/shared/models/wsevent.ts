@@ -4,6 +4,8 @@ export enum WSEventName {
     creatureUpdated = "creatureUpdated",
     tileUpdated = "tileUpdated",
     tilesUpdated = "tilesUpdated",
+    lightUpdated = "lightUpdated",
+    lightsUpdated = "lightsUpdated",
     areaEffectUpdated = "areaEffectUpdated",
     areaEffectsUpdated = "areaEffectsUpdated",
     markerUpdated = "markerUpdated",

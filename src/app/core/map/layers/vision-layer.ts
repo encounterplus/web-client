@@ -2,13 +2,14 @@ import { Layer } from './layer'
 import { Tile } from 'src/app/shared/models/tile'
 import { Loader } from '../models/loader'
 import { DataService } from 'src/app/shared/services/data.service'
-import { Token } from 'src/app/shared/models/token'
+import { Size, Token } from 'src/app/shared/models/token'
 import { Light } from 'src/app/shared/models/light'
+import { GridType } from 'src/app/shared/models/map'
+import { Grid } from '../models/grid'
 
 export class VisionLayer extends Layer {
-
     tokens: Array<Token> = []
-    tiles: Array<Tile> = []
+    // tiles: Array<Tile> = []
     lights: Array<Light> = []
     
     intensity: number = 1.0
@@ -17,19 +18,24 @@ export class VisionLayer extends Layer {
     gridSize: number = 50.0
     gridScale: number = 5.0
 
+    grid: Grid
+
+
     get pixelRatio(): number {
         return this.gridSize / this.gridScale
     }
 
     update() {
         this.tokens = this.dataService.state.map.tokens
-        this.tiles = this.dataService.state.map.tiles
-        this.lights = this.dataService.state.map.lights
+        // this.tiles = this.dataService.state.map.tiles
+        this.lights = [...(this.dataService.state.map.tiles.filter(tile => tile.light != null).map(tile => tile.light)), ...this.dataService.state.map.lights] 
         this.visible = this.dataService.state.map.lineOfSight // || this.dataService.state.map.fogOfWar
         this.intensity = 1.0 - (this.dataService.state.map.daylight || 0.0)
         this.mapScale = this.dataService.state.map.scale
         this.gridScale = this.dataService.state.map.gridScale
-        this.gridSize = this.dataService.state.map.gridSize
+
+        // adjusted grid size
+        this.gridSize = (this.dataService.state.map.gridType != GridType.square) ? this.dataService.state.map.gridSize * Math.sqrt(3) * 0.8 : this.dataService.state.map.gridSize
     }
 
     vert: PIXI.LoaderResource;
@@ -54,7 +60,11 @@ export class VisionLayer extends Layer {
         blurFilter.quality = 2
         blurFilter.blur = 3
 
-        this.filters = [blurFilter, alphaFilter];
+        if (localStorage['softEdges'] == 'true') {
+            this.filters = [blurFilter, alphaFilter]
+        } else {
+            this.filters = [alphaFilter]
+        }
     }
 
     async draw() {
@@ -107,11 +117,14 @@ export class VisionLayer extends Layer {
             let geometry = new PIXI.Geometry()
                 .addAttribute('aVertexPosition', polygon);
             let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+
+            let size = this.grid.sizeFromGridSize(Size.toGridSize(token.size))
+            let minSize = Math.max(size.width, size.height) / 2.0
             
             // populate uniforms
             mesh.shader.uniforms.position = [vision.sight.x, vision.sight.y]
-            mesh.shader.uniforms.radiusMin = vision.lightRadiusMin * this.pixelRatio
-            mesh.shader.uniforms.radiusMax = vision.lightRadiusMax * this.pixelRatio
+            mesh.shader.uniforms.radiusMin = vision.lightRadiusMin * this.pixelRatio + minSize
+            mesh.shader.uniforms.radiusMax = vision.lightRadiusMax * this.pixelRatio + minSize
             mesh.shader.uniforms.intensity = this.intensity;
             mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
@@ -120,39 +133,6 @@ export class VisionLayer extends Layer {
 
             // add mask
             this.msk.drawPolygon(vision.sight.polygon);
-        }
-
-        // tiles, always visible
-        for(let tile of this.tiles) {
-            let light = tile.light
-
-            // check light state
-            if (light == null || light.sight == null || light.sight.polygon == null || !light.enabled || !light.alwaysVisible) {
-                continue
-            }
-
-            // create geometry polygon for mesh rendering
-            let polygon = this.getGeometry(light.sight.x, light.sight.y, light.sight.polygon)
-
-            // init shaders
-            let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
-
-            // create custom mesh from geometry
-            let geometry = new PIXI.Geometry()
-                .addAttribute('aVertexPosition', polygon);
-            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
-            
-            // populate uniforms
-            mesh.shader.uniforms.position = [light.sight.x, light.sight.y]
-            mesh.shader.uniforms.radiusMin = [light.radiusMin * this.pixelRatio]
-            mesh.shader.uniforms.radiusMax = [light.radiusMax * this.pixelRatio]
-            mesh.shader.uniforms.intensity = this.intensity
-            mesh.blendMode = PIXI.BLEND_MODES.ADD;
-
-            this.addChild(mesh);
-            this.meshes.push(mesh);
-
-            this.msk.drawPolygon(light.sight.polygon);
         }
 
         // lights, always visible
@@ -190,12 +170,10 @@ export class VisionLayer extends Layer {
 
         let maskRequired = false;
 
-        // tiles, not always visible
-        for(let tile of this.tiles) {
-            let light = tile.light
-
+        // lights, not always visible
+        for(let light of this.lights) {
             // check light state
-            if (light == null || light.sight == null || light.sight.polygon == null || !light.enabled || light.alwaysVisible) {
+            if (light.sight == null || light.sight.polygon == null || !light.enabled || !light.alwaysVisible) {
                 continue
             }
 

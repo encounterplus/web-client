@@ -33,7 +33,7 @@ void main(void)
       if (st <= intensity) {
          gl_FragColor = mix(intensityColor, color, st);
       } else {
-         gl_FragColor = mix(intensityColor, color, intensity);;
+         gl_FragColor = mix(intensityColor, color, intensity);
       }
    }
 }

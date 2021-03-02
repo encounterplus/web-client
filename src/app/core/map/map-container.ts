@@ -135,6 +135,7 @@ export class MapContainer extends Layer {
         this.grid.update(this.state.map)
         this.gridLayer.update(this.grid)
 
+        this.visionLayer.grid = this.grid
         this.lightsLayer.update()
         this.visionLayer.update()
         this.fogLayer.update(this.state.map)

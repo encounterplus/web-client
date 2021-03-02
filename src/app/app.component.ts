@@ -21,6 +21,7 @@ import { Marker } from './shared/models/marker';
 import { Vision } from './shared/models/vision';
 import { MessageListComponent } from './core/message-list/message-list.component';
 import { Token } from './shared/models/token';
+import { Light } from './shared/models/light';
 
 @Component({
     selector: 'app-root',
@@ -283,6 +284,30 @@ export class AppComponent implements OnInit, AfterViewInit {
                 break;
             }
 
+            case WSEventName.lightUpdated: {
+                let model = Object.assign(new Light, event.data) as Light
+                console.debug(model)
+
+                // udpdate state
+                let index =  this.state.map.lights.findIndex((obj => obj.id == model.id))
+                this.state.map.lights[index] = model
+
+                if (event.data.los != null) {
+                    this.state.map.lights[index].x = event.data.x;
+                    this.state.map.lights[index].y = event.data.y;
+                    this.state.map.lights[index].sight.x = event.data.x;
+                    this.state.map.lights[index].sight.y = event.data.y;
+                    this.state.map.lights[index].sight.polygon = event.data.los;
+                }
+                
+                // update los & ligts
+                this.mapComponent.mapContainer.lightsLayer.update();
+                this.mapComponent.mapContainer.visionLayer.update()
+                this.mapComponent.mapContainer.visionLayer.draw();
+                this.mapComponent.mapContainer.lightsLayer.draw();
+                break;
+            }
+
             case WSEventName.fogUpdated: {
                 let base64image = event.data.image;
 
@@ -360,6 +385,17 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.state.map.tiles = event.data
                 this.mapComponent.mapContainer.updateTiles()
                 this.mapComponent.mapContainer.drawTiles()
+                break;
+            }
+
+            case WSEventName.lightsUpdated: {
+                this.state.map.lights = event.data
+                
+                // update los & ligts
+                this.mapComponent.mapContainer.lightsLayer.update()
+                this.mapComponent.mapContainer.visionLayer.update()
+                this.mapComponent.mapContainer.visionLayer.draw()
+                this.mapComponent.mapContainer.lightsLayer.draw()
                 break;
             }
 

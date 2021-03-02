@@ -80,28 +80,7 @@ export class TokenView extends View {
     }
 
     get gridSize(): GridSize {
-        if (this.token.size.includes('x')) {
-            let parts = this.token.size.split("x")
-            return {width: Number(parts[0]), height: Number(parts[1])}
-        } else {
-            switch (this.token.size) {
-                case Size.large: {
-                    return {width: 2, height: 2}
-                }
-                case Size.huge: {
-                    return {width: 3, height: 3}
-                }  
-                case Size.gargantuan: {
-                    return {width: 4, height: 4}
-                }
-                case Size.colossal: {
-                    return {width: 6, height: 6}
-                }
-                default: {
-                    return {width: 1, height: 1}
-                }      
-            }
-        }
+        return Size.toGridSize(this.token.size)
     }
 
     get scaleFactor(): number {
