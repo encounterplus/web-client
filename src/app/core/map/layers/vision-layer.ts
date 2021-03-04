@@ -6,6 +6,7 @@ import { Size, Token } from 'src/app/shared/models/token'
 import { Light } from 'src/app/shared/models/light'
 import { GridType } from 'src/app/shared/models/map'
 import { Grid } from '../models/grid'
+import { Vision, VisionType } from 'src/app/shared/models/vision'
 
 export class VisionLayer extends Layer {
     tokens: Array<Token> = []
@@ -23,6 +24,27 @@ export class VisionLayer extends Layer {
 
     get pixelRatio(): number {
         return this.gridSize / this.gridScale
+    }
+
+    get activeToken(): Token {
+        if (this.dataService.state.screen.sharedVision) {
+            return null
+        }
+
+        // get tokenId from storage
+        let activeTokenId = localStorage['userTokenId']
+        if (activeTokenId) {
+            // outside of turn
+            if (!this.dataService.state.game.started || this.dataService.state.turned.tokenId != activeTokenId) {
+                return null
+            }
+            for (let token of this.dataService.state.map.tokens) {
+                if (token.id == activeTokenId) {
+                    return token
+                }
+            }
+        }
+        return null
     }
 
     update() {
@@ -67,6 +89,72 @@ export class VisionLayer extends Layer {
         }
     }
 
+    drawToken(token: Token, type: VisionType, masked: boolean): PIXI.Mesh {
+        let vision = token.vision
+
+        // check vision state
+        if (vision == null || vision.sight == null || vision.sight.polygon == null) {
+            return
+        }
+
+        // create geometry polygon for mesh rendering
+        let polygon = this.getGeometry(vision.sight.x, vision.sight.y, vision.sight.polygon)
+        // this might be better triangle filling function
+        // let polygon = PIXI.utils.earcut (creature.vision.polygon, null, 2);
+
+        // init shaders
+        let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
+
+        // create custom mesh from geometry
+        let geometry = new PIXI.Geometry()
+            .addAttribute('aVertexPosition', polygon);
+        let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+
+        let size = this.grid.sizeFromGridSize(Size.toGridSize(token.size))
+        let minSize = Math.max(size.width, size.height) / 2.0
+
+        // temporary radius
+        let lightRadiusMin = vision.light ? vision.lightRadiusMin * this.pixelRatio + minSize : 0
+        let lightRadiusMax = vision.light ? vision.lightRadiusMax * this.pixelRatio + minSize : 0
+        let darkRadiusMin = vision.dark ? vision.darkRadiusMin * this.pixelRatio + minSize : 0
+        let darkRadiusMax = vision.dark ? vision.darkRadiusMax * this.pixelRatio + minSize : 0
+
+        // final radius for shader
+        let radiusMin: number
+        let radiusMax: number
+
+        switch (type) {
+            case VisionType.light:
+                radiusMin = lightRadiusMin
+                radiusMax = lightRadiusMax
+                break
+            case VisionType.dark:
+                radiusMin = darkRadiusMin
+                radiusMax = darkRadiusMax
+                break
+            default:
+                radiusMin = darkRadiusMin > lightRadiusMin ? darkRadiusMin : lightRadiusMin
+                radiusMax = darkRadiusMax > lightRadiusMax ? darkRadiusMax : lightRadiusMax
+        }
+
+        // populate uniforms
+        mesh.shader.uniforms.position = [vision.sight.x, vision.sight.y]
+        mesh.shader.uniforms.radiusMin = radiusMin
+        mesh.shader.uniforms.radiusMax = radiusMax
+        mesh.shader.uniforms.intensity = this.intensity
+        mesh.blendMode = PIXI.BLEND_MODES.ADD;
+
+        this.addChild(mesh);
+        this.meshes.push(mesh);
+
+        // add mask
+        if (masked) {
+            mesh.mask = this.msk;
+        } else {
+            this.msk.drawPolygon(vision.sight.polygon);
+        }
+    }
+
     async draw() {
         this.clear();
 
@@ -97,42 +185,24 @@ export class VisionLayer extends Layer {
         this.msk.beginFill(0xffffff);
 
         // tokens
-        for(let token of this.tokens) {
-            let vision = token.vision
+        let activeToken = this.activeToken
 
-            // check vision state
-            if (vision == null || vision.sight == null || vision.sight.polygon == null || !vision.enabled) {
-                continue
+        // render active tokens
+        if (activeToken) {
+            let vision = activeToken.vision
+            if (vision != null && vision.sight != null && vision.sight.polygon != null && vision.enabled) {
+                this.drawToken(activeToken, VisionType.combined, false)
             }
+        } else {
+            for(let token of this.tokens) {
+                // skip tokens without vision and sight
+                let vision = token.vision
+                if (vision == null || vision.sight == null || vision.sight.polygon == null || (!vision.enabled && !vision.light)) {
+                    continue
+                }
 
-            // create geometry polygon for mesh rendering
-            let polygon = this.getGeometry(vision.sight.x, vision.sight.y, vision.sight.polygon)
-            // this might be better triangle filling function
-            // let polygon = PIXI.utils.earcut (creature.vision.polygon, null, 2);
-
-            // init shaders
-            let shader = PIXI.Shader.from(this.vert.data, this.frag.data);
-
-            // create custom mesh from geometry
-            let geometry = new PIXI.Geometry()
-                .addAttribute('aVertexPosition', polygon);
-            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
-
-            let size = this.grid.sizeFromGridSize(Size.toGridSize(token.size))
-            let minSize = Math.max(size.width, size.height) / 2.0
-            
-            // populate uniforms
-            mesh.shader.uniforms.position = [vision.sight.x, vision.sight.y]
-            mesh.shader.uniforms.radiusMin = vision.lightRadiusMin * this.pixelRatio + minSize
-            mesh.shader.uniforms.radiusMax = vision.lightRadiusMax * this.pixelRatio + minSize
-            mesh.shader.uniforms.intensity = this.intensity;
-            mesh.blendMode = PIXI.BLEND_MODES.ADD;
-
-            this.addChild(mesh);
-            this.meshes.push(mesh);
-
-            // add mask
-            this.msk.drawPolygon(vision.sight.polygon);
+                this.drawToken(token, VisionType.combined, false)
+            }
         }
 
         // lights, always visible
@@ -169,6 +239,23 @@ export class VisionLayer extends Layer {
         this.msk.endFill();
 
         let maskRequired = false;
+
+        // inactive tokens
+        if (activeToken) {
+            for(let token of this.tokens) {
+                // skip active token
+                if (token.id == activeToken.id) {
+                    continue
+                }
+                // skip tokens without vision and light
+                let vision = token.vision
+                if (vision == null || vision.sight == null || vision.sight.polygon == null || !vision.light) {
+                    continue
+                }
+                
+                this.drawToken(token, VisionType.light, true)
+            }
+        }
 
         // lights, not always visible
         for(let light of this.lights) {

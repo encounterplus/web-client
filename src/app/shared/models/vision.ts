@@ -1,5 +1,11 @@
 import { Sight } from "./sight"
 
+export enum VisionType {
+    light = "light",
+    dark = " dark",
+    combined = "combined",
+}
+
 export class Vision {
     id: string;
     enabled: boolean

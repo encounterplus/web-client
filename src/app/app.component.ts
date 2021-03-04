@@ -70,6 +70,8 @@ export class AppComponent implements OnInit, AfterViewInit {
                     console.debug(`Settings component closed with: ${result}`);
                     // update maxFPS
                     this.mapComponent.app.ticker.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60;
+                    this.mapComponent.mapContainer.visionLayer.draw()
+                    this.mapComponent.mapContainer.lightsLayer.draw()
                 }, reason => {
                     console.debug(`Setting component dismissed ${reason}`)
                 });
@@ -124,6 +126,13 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.mapComponent.mapContainer.updateInteraction();
                     this.mapComponent.mapContainer.updateTurned(this.state.turned);
                 }
+
+                // this could be more optimised
+                if (!this.state.screen.sharedVision) {
+                    this.mapComponent.mapContainer.visionLayer.draw()
+                    this.mapComponent.mapContainer.lightsLayer.draw()
+                }
+                
                 
                 break;
             }

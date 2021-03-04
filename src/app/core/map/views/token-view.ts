@@ -144,7 +144,7 @@ export class TokenView extends View {
             this.tokenTexture = null;
         }
 
-        console.debug(this.token)
+        // console.debug(this.token)
 
         this.w = this.grid.sizeFromGridSize(this.gridSize).width
         this.h = this.grid.sizeFromGridSize(this.gridSize).height

@@ -22,7 +22,6 @@ export class SettingsModalComponent implements OnInit {
   maxFPSOptions: Array<number> = [5, 15, 30, 60]
   maxFPS: number = 60
   
-  token?: Token
   tokenId?: string
 
   get tokens(): Array<Token> {
@@ -39,7 +38,7 @@ export class SettingsModalComponent implements OnInit {
   save() {
     localStorage.setItem("userName", this.name)
     localStorage.setItem("userColor", this.color)
-    localStorage.setItem("userTokenId", this.token?.id)
+    localStorage.setItem("userTokenId", this.tokenId)
 
     localStorage.setItem("maxFPS", `${this.maxFPS}`)
     localStorage.setItem("allowVideo", `${this.allowVideo}`)
@@ -70,12 +69,5 @@ export class SettingsModalComponent implements OnInit {
     this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200")
     this.softEdges = (localStorage.getItem("softEdges") || "true") == "true"
     this.tokenId = localStorage.getItem("userTokenId")
-    
-    // get current token from active tokens
-    for(let token of this.tokens) {
-      if (token.id == this.tokenId) {
-        this.token = token
-      }
-    }
   }
 }

@@ -21,8 +21,9 @@
 
     <div class="form-group">
         <label for="token">Token</label>
-        <select [(ngModel)]="token" class="form-control" id="token">
-            <option *ngFor="let token of tokens; let i = index" [ngValue]="tokens[i]">{{token.name || 'Unknown'}}</option>
+        <select [(ngModel)]="tokenId" class="form-control" id="token" >
+            <option *ngFor="let token of tokens" [ngValue]="token.id">{{token.name || 'Unknown'}}</option>
+            <option value=null>None</option>
         </select>
     </div>
 
