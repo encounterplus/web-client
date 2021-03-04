@@ -166,8 +166,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.tokenMoved: {
-                console.debug(event.data)
-
+                // console.debug(event.data)
                 let view = this.mapComponent.mapContainer.tokenViewById(event.data.id);
                 if (view != null) {
                     view.blocked = event.data.state == ControlState.block;
