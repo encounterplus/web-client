@@ -22,6 +22,7 @@ import { Vision } from './shared/models/vision';
 import { MessageListComponent } from './core/message-list/message-list.component';
 import { Token } from './shared/models/token';
 import { Light } from './shared/models/light';
+import { CacheManager } from './core/map/layers/vision-layer';
 
 @Component({
     selector: 'app-root',
@@ -202,6 +203,10 @@ export class AppComponent implements OnInit, AfterViewInit {
                             this.state.map.tokens[index].vision.sight.x = event.data.x;
                             this.state.map.tokens[index].vision.sight.y = event.data.y;
                             this.state.map.tokens[index].vision.sight.polygon = event.data.polygon;
+
+                            // clear cache
+                            CacheManager.sightPolygon.delete(this.state.map.tokens[index].vision.id)
+                            CacheManager.geometryPolygon.delete(this.state.map.tokens[index].vision.id)
                         }
                     }
                 }
@@ -321,8 +326,8 @@ export class AppComponent implements OnInit, AfterViewInit {
             case WSEventName.fogUpdated: {
                 let base64image = event.data.image;
 
-                this.mapComponent.mapContainer.fogLayer.fogBase64 = base64image;
-                this.mapComponent.mapContainer.fogLayer.drawPartialFog();
+                this.mapComponent.mapContainer.visionLayer.updateFogFromData(base64image)
+                this.mapComponent.mapContainer.visionLayer.draw()
                 break;
             }
 
@@ -456,12 +461,12 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.messageCreated: {
-		    this.state.messages.push(event.data);
-		    if (this.messages) {
-			    let lastHost = localStorage.getItem("lastSuccessfullHost");
-			    localStorage.setItem("readMessages",JSON.stringify({"lastHost": lastHost, seenCount: this.state.messages.length}));
-			    this.state.readCount = this.state.messages.length;
-		    }
+                this.state.messages.push(event.data);
+                if (this.messages) {
+                    let lastHost = localStorage.getItem("lastSuccessfullHost");
+                    localStorage.setItem("readMessages",JSON.stringify({"lastHost": lastHost, seenCount: this.state.messages.length}));
+                    this.state.readCount = this.state.messages.length;
+                }
                 // this.toastService.showMessage(event.data);
                 // this.messageListComponent.scrollToBottom();
                 break;

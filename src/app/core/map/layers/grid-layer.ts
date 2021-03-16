@@ -54,7 +54,7 @@ export class GridLayer extends Layer {
         return this;
     }
 
-    async drawGrid() {
+    drawGrid() {
         this.addChild(this.grid.gridGraphics(this.w, this.h))
         return this;
     }
@@ -64,11 +64,11 @@ export class GridLayer extends Layer {
         this.addChild(this.highlightGraphics);
 
         if (this.grid.visible) {
-            await this.drawGrid();
+            this.drawGrid();
         }
 
         if (this.highlightPath.length > 0) {
-            await this.drawHighlight();
+            this.drawHighlight();
         }
 
         return this;

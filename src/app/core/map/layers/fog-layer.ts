@@ -31,7 +31,7 @@ export class FogLayer extends Layer {
     }
 
     async draw() {
-        // return
+        return
 
         this.clear();
 

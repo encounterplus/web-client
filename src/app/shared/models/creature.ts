@@ -26,6 +26,6 @@ export class Creature {
     bloodied: boolean
     dead: boolean
     hidden: boolean
-    tokenId: string
-    image: string
+    tokenId?: string
+    image?: string
 }

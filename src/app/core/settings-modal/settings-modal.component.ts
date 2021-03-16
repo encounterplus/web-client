@@ -25,7 +25,11 @@ export class SettingsModalComponent implements OnInit {
   tokenId?: string
 
   get tokens(): Array<Token> {
-    return this.state.map.tokens.filter( token => { return token.role == Role.friendly && token.reference?.includes('/player/') } ).sort((a, b) => (a.name > b.name) ? 1 : -1)
+    if (this.state.map != null) {
+      return this.state.map.tokens.filter( token => { return token.role == Role.friendly && token.reference?.includes('/player/') } ).sort((a, b) => (a.name > b.name) ? 1 : -1)
+    } else {
+      return []
+    }
   }
 
   allowVideo: boolean = true

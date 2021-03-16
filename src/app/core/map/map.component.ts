@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, HostListener, OnChanges } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, HostListener, OnChanges, NgZone } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
 import { Viewport } from 'pixi-viewport';
 import { MapContainer } from './map-container';
@@ -35,7 +35,7 @@ export class MapComponent implements OnInit, OnChanges {
   // layers
   mapContainer: MapContainer;
 
-  constructor(private dataService: DataService) {
+  constructor(private dataService: DataService, private zone: NgZone) {
     this.mapContainer = new MapContainer(this.dataService);
   }
 
@@ -45,19 +45,25 @@ export class MapComponent implements OnInit, OnChanges {
       this.width = this.canvas.width;
       this.height = this.canvas.height;
 
-      // create viewport
-      this.viewport = new Viewport({
-        screenWidth: window.innerWidth,
-        screenHeight: window.innerHeight,
-        worldWidth: 1000,
-        worldHeight: 1000,
+      // sigh, we need to run this outside angular
+      // to prevent triggering changes
+      this.zone.runOutsideAngular(() => {
+        // create viewport
+        this.viewport = new Viewport({
+          screenWidth: window.innerWidth,
+          screenHeight: window.innerHeight,
+          worldWidth: 1000,
+          worldHeight: 1000,
 
-        // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
-        interaction: this.app.renderer.plugins.interaction
+          // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+          interaction: this.app.renderer.plugins.interaction
+        });
       });
 
       // add the viewport to the stage
       this.app.stage.addChild(this.viewport)
+      this.mapContainer.x = 0
+      this.mapContainer.y = 0
 
       // activate plugins
       this.viewport
@@ -66,14 +72,9 @@ export class MapComponent implements OnInit, OnChanges {
         .wheel({
           percent: 0.001
         });
-      // .snapZoom({
-      //   height: 20,
-      //   removeOnComplete: true,
-      //   removeOnInterrupt: true,
-      //   time: 2000,
-      // });
 
       this.viewport.addChild(this.mapContainer);
+      this.mapContainer.app = this.app
 
       // this is not needed now
       // let gl = WebGLRenderingContext;
@@ -127,6 +128,10 @@ export class MapComponent implements OnInit, OnChanges {
     this.update();
     this.mapContainer.draw();
   }
+
+  // ngAfterViewChecked() {
+  //   console.log('Change detection triggered!');
+  // }
 
   protected _destroy(): void {
     // this.mapLayer.destroy();
