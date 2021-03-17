@@ -122,10 +122,8 @@ export class VisionLayer extends Layer {
 
     update() {
         this.tokens = this.dataService.state.map.tokens
-        // this.tiles = this.dataService.state.map.tiles
         this.lights = [...(this.dataService.state.map.tiles.filter(tile => tile.light != null).map(tile => tile.light)), ...this.dataService.state.map.lights] 
-        
-        
+
         this.mapScale = this.dataService.state.map.scale
         this.gridScale = this.dataService.state.map.gridScale
 
@@ -153,15 +151,15 @@ export class VisionLayer extends Layer {
             return;
         }
 
-        // prevent showing map while loading textures
-        if (this.fog && !this.fogLoaded) {
-            this.bg = new PIXI.Sprite(Texture.WHITE)
-            this.bg.width = this.w
-            this.bg.height = this.h
-            this.bg.tint = 0x000000;
+        // // prevent showing map while loading textures
+        // if (this.fog && !this.fogLoaded) {
+        //     this.bg = new PIXI.Sprite(Texture.WHITE)
+        //     this.bg.width = this.w
+        //     this.bg.height = this.h
+        //     this.bg.tint = 0x000000;
 
-            this.addChild(this.bg)
-        }
+        //     this.addChild(this.bg)
+        // }
         
         // console.time('visionDraw')
 
@@ -338,6 +336,8 @@ export class VisionLayer extends Layer {
             
             maskRequired = true
         }
+
+        
     
         // add mask only when tiles with vision are present
         if (maskRequired) {
@@ -345,7 +345,7 @@ export class VisionLayer extends Layer {
         }
 
         // render to texture
-        if (this.lineOfSight) {
+        if (this.lineOfSight || (this.fogOfWar && this.fogExplore)) {
             this.app.renderer.render(this.visionContainer, this.visionTexture, true)
         } 
 
@@ -358,7 +358,7 @@ export class VisionLayer extends Layer {
         }
         
         // update fog with vision
-        if (this.fogExplore) {
+        if (this.fogOfWar && this.fogExplore) {
             this.drawFog()
         }
 
@@ -390,7 +390,8 @@ export class VisionLayer extends Layer {
         mesh.shader.uniforms.texMap = this.mapTexture
         mesh.shader.uniforms.texFog = this.fogTexture
         mesh.shader.uniforms.texVision = this.visionTexture
-        mesh.shader.uniforms.fogOnly = !this.lineOfSight && this.fogOfWar
+        mesh.shader.uniforms.fog = this.fogOfWar
+        mesh.shader.uniforms.los = this.lineOfSight
 
         this.addChild(mesh);
 
@@ -564,6 +565,8 @@ export class VisionLayer extends Layer {
         fogTexture.destroy(true);
 
         this.fogLoaded = true
+
+        this.draw()
     }
 
     async updateFogFromTexture(fog: string) {

@@ -7,7 +7,7 @@ import { DataService } from './shared/services/data.service';
 import { environment } from 'src/environments/environment';
 import { AppState } from './shared/models/app-state';
 import { WSEventName, WSEvent } from './shared/models/wsevent';
-import { ControlState } from './core/map/views/token-view';
+import { ControlState, TokenView } from './core/map/views/token-view';
 import { AreaEffect } from './shared/models/area-effect';
 import { Tile } from './shared/models/tile';
 import { ToolbarComponent, Tool, Panel } from './core/toolbar/toolbar.component';
@@ -23,6 +23,7 @@ import { MessageListComponent } from './core/message-list/message-list.component
 import { Token } from './shared/models/token';
 import { Light } from './shared/models/light';
 import { CacheManager } from './core/map/layers/vision-layer';
+import { View } from './core/map/views/view';
 
 @Component({
     selector: 'app-root',
@@ -60,6 +61,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     messages: Boolean = false;
+    movingTokenView?: TokenView = null
 
     toolbarAction(type: string) {
         console.log(type);
@@ -168,7 +170,13 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             case WSEventName.tokenMoved: {
                 // console.debug(event.data)
-                let view = this.mapComponent.mapContainer.tokenViewById(event.data.id);
+
+                // check cached moving view first
+                let view = this.movingTokenView || this.mapComponent.mapContainer.tokenViewById(event.data.id);
+                // find new if empty or different id
+                if (view?.token.id || "" != event.data.id) {
+                    view = this.mapComponent.mapContainer.tokenViewById(event.data.id);
+                }
                 if (view != null) {
                     view.blocked = event.data.state == ControlState.block;
 
@@ -208,11 +216,13 @@ export class AppComponent implements OnInit, AfterViewInit {
                             CacheManager.sightPolygon.delete(this.state.map.tokens[index].vision.id)
                             CacheManager.geometryPolygon.delete(this.state.map.tokens[index].vision.id)
                         }
+
+                        this.mapComponent.mapContainer.visionLayer.draw();
+                        this.mapComponent.mapContainer.lightsLayer.draw();
                     }
                 }
                 
-                this.mapComponent.mapContainer.visionLayer.draw();
-                this.mapComponent.mapContainer.lightsLayer.draw();
+               
                 break;
             }
 
@@ -220,7 +230,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 let model = Object.assign(new Token, event.data) as Token
                 
                 // udpdate state
-                let index = this.state.map.areaEffects.findIndex((obj => obj.id == model.id))
+                let index = this.state.map.tokens.findIndex((obj => obj.id == model.id))
                 this.state.map.tokens[index] = model
 
                 let view = this.mapComponent.mapContainer.tokenViewById(model.id)
@@ -234,12 +244,12 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.mapComponent.mapContainer.drawTokens()
                 }
 
-                if (model.vision != null && model.vision.sight != null) {
+                if (model.vision != null) {
                     // update los & ligts
-                    this.mapComponent.mapContainer.lightsLayer.update();
+                    this.mapComponent.mapContainer.lightsLayer.update()
                     this.mapComponent.mapContainer.visionLayer.update()
-                    this.mapComponent.mapContainer.visionLayer.draw();
-                    this.mapComponent.mapContainer.lightsLayer.draw();
+                    this.mapComponent.mapContainer.visionLayer.draw()
+                    this.mapComponent.mapContainer.lightsLayer.draw()
                 }
 
                 // changes
@@ -282,20 +292,21 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.mapComponent.mapContainer.drawTiles()
                 }
 
-                if (event.data.los != null) {
+                if (model.light != null) {
                     let index =  this.state.map.tiles.findIndex((obj => obj.id == event.data.id));
                     this.state.map.tiles[index].x = event.data.x;
                     this.state.map.tiles[index].y = event.data.y;
                     this.state.map.tiles[index].light.sight.x = event.data.x;
                     this.state.map.tiles[index].light.sight.y = event.data.y;
                     this.state.map.tiles[index].light.sight.polygon = event.data.los;
+
+                    // update los & ligts
+                    this.mapComponent.mapContainer.lightsLayer.update()
+                    this.mapComponent.mapContainer.visionLayer.update()
+                    this.mapComponent.mapContainer.visionLayer.draw()
+                    this.mapComponent.mapContainer.lightsLayer.draw()
                 }
-                
-                // update los & ligts
-                this.mapComponent.mapContainer.lightsLayer.update();
-                this.mapComponent.mapContainer.visionLayer.update()
-                this.mapComponent.mapContainer.visionLayer.draw();
-                this.mapComponent.mapContainer.lightsLayer.draw();
+
                 break;
             }
 
@@ -307,19 +318,19 @@ export class AppComponent implements OnInit, AfterViewInit {
                 let index =  this.state.map.lights.findIndex((obj => obj.id == model.id))
                 this.state.map.lights[index] = model
 
-                if (event.data.los != null) {
+                if (model.enabled != null) {
                     this.state.map.lights[index].x = event.data.x;
                     this.state.map.lights[index].y = event.data.y;
                     this.state.map.lights[index].sight.x = event.data.x;
                     this.state.map.lights[index].sight.y = event.data.y;
                     this.state.map.lights[index].sight.polygon = event.data.los;
+
+                    // update los & ligts
+                    this.mapComponent.mapContainer.lightsLayer.update()
+                    this.mapComponent.mapContainer.visionLayer.update()
+                    this.mapComponent.mapContainer.visionLayer.draw()
+                    this.mapComponent.mapContainer.lightsLayer.draw()
                 }
-                
-                // update los & ligts
-                this.mapComponent.mapContainer.lightsLayer.update();
-                this.mapComponent.mapContainer.visionLayer.update()
-                this.mapComponent.mapContainer.visionLayer.draw();
-                this.mapComponent.mapContainer.lightsLayer.draw();
                 break;
             }
 
@@ -327,7 +338,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 let base64image = event.data.image;
 
                 this.mapComponent.mapContainer.visionLayer.updateFogFromData(base64image)
-                this.mapComponent.mapContainer.visionLayer.draw()
+                // this.mapComponent.mapContainer.visionLayer.draw()
                 break;
             }
 
@@ -400,6 +411,12 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.state.map.tiles = event.data
                 this.mapComponent.mapContainer.updateTiles()
                 this.mapComponent.mapContainer.drawTiles()
+
+                // update los & ligts
+                this.mapComponent.mapContainer.lightsLayer.update()
+                this.mapComponent.mapContainer.visionLayer.update()
+                this.mapComponent.mapContainer.visionLayer.draw()
+                this.mapComponent.mapContainer.lightsLayer.draw()
                 break;
             }
 
@@ -418,6 +435,12 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.state.map.tokens = event.data
                 this.mapComponent.mapContainer.updateTokens()
                 this.mapComponent.mapContainer.drawTokens()
+
+                // update los & ligts
+                this.mapComponent.mapContainer.lightsLayer.update()
+                this.mapComponent.mapContainer.visionLayer.update()
+                this.mapComponent.mapContainer.visionLayer.draw()
+                this.mapComponent.mapContainer.lightsLayer.draw()
                 break;
             }
 

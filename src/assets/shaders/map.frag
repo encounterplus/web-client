@@ -10,13 +10,17 @@ uniform float time;
 uniform sampler2D texVision;
 uniform sampler2D texMap;
 uniform sampler2D texFog;
-uniform bool fogOnly;
+uniform bool fog;
+uniform bool los;
 
 void main(void)
 {
-   if (fogOnly) {
+   if (fog && !los) {
       vec4 fog = texture2D(texFog, vTextureCoord);
       gl_FragColor = vec4(0, 0, 0, 1.0 - fog.r);
+   } else if (!fog && los) {
+      vec4 vision = texture2D(texVision, vTextureCoord);
+      gl_FragColor = vec4(0, 0, 0, 1.0 - vision.a);
    } else {
       vec4 vision = texture2D(texVision, vTextureCoord);
       vec4 map = texture2D(texMap, vTextureCoord);

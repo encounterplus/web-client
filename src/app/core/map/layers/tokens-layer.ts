@@ -32,6 +32,6 @@ export class TokensLayer extends Layer {
 
     clear() {
         this.views = []
-        this.removeChildren();
+        this.removeChildren()
     }
 }

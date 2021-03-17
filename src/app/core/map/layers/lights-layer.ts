@@ -42,11 +42,13 @@ export class LightsLayer extends Layer {
         this.tokens = this.dataService.state.map.tokens;
         this.tiles = this.dataService.state.map.tiles;
         this.lights = this.dataService.state.map.lights;
-        this.visible = this.dataService.state.map.lineOfSight;
+        
         this.gridScale = this.dataService.state.map.gridScale
         
         // adjusted grid size
         this.gridSize = (this.dataService.state.map.gridType != GridType.square) ? this.dataService.state.map.gridSize * Math.sqrt(3) * 0.8 : this.dataService.state.map.gridSize
+    
+        this.visible = this.dataService.state.map.lineOfSight || this.dataService.state.map.fogOfWar ;
     }
 
     async draw() {

@@ -143,10 +143,12 @@ export class MapContainer extends Layer {
 
         this.visionLayer.grid = this.grid
         this.visionLayer.app = this.app
+        this.visionLayer.update()
+        this.visionLayer.fogLoaded = false
 
         this.lightsLayer.grid = this.grid
         this.lightsLayer.update()
-        this.visionLayer.update()
+
         // this.fogLayer.update(this.state.map)
         
         this.monstersLayer.grid = this.grid
@@ -257,11 +259,11 @@ export class MapContainer extends Layer {
         // render to texture
         this.app.renderer.render(this.mapLayer, this.mapTexture, true)
 
-        // vision & light
+        // vision
         this.visionLayer.size = this.size
         this.visionLayer.draw()
-        // this.fogLayer.draw()
 
+        // lights
         this.lightsLayer.size = this.size
         this.lightsLayer.draw()
 
