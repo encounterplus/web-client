@@ -24,6 +24,7 @@ import { Token } from './shared/models/token';
 import { Light } from './shared/models/light';
 import { CacheManager } from './core/map/layers/vision-layer';
 import { View } from './core/map/views/view';
+import { Sight } from './shared/models/sight';
 
 @Component({
     selector: 'app-root',
@@ -175,7 +176,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 }
 
                 // changes
-                console.debug(creature)
+                // console.debug(creature)
                 break
             }
 
@@ -262,7 +263,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 }
 
                 // changes
-                console.debug(model)
+                // console.debug(model)
                 break
             }
 
@@ -460,35 +461,40 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             case WSEventName.lineOfSightUpdated: {
                 // console.log(event.data);
-                // for(let vision of event.data as Array<Vision>) {
-                //     // search creature
-                //     var visionFound = false;
-                //     for( let creature of this.state.game.creatures) {
-                //         if (`creature-${creature.id}` == vision.id) {
-                //             // creature.vision = vision;
-                //             visionFound = true;
-                //             break;
-                //         }
-                //     }
+                for(let sight of event.data as Array<Sight>) {
+                    // search tokens
+                    if (sight.key.includes("vision-")) {
+                        for( let token of this.state.map.tokens) {
+                            if (token.vision?.sight?.key == sight.key) {
+                                token.vision.sight = sight
+                                break
+                            }
+                        }
+                    }
+                    
+                    // search tiles and lights
+                    if (sight.key.includes("light-")) {
+                        for( let tile of this.state.map.tiles) {
+                            if (tile.light?.sight?.key == sight.key) {
+                                tile.light.sight = sight
+                                break
+                            }
+                        }
 
-                //     // continue if we found some creature already
-                //     if (visionFound) { continue; }
+                        for( let light of this.state.map.lights) {
+                            if (light.sight?.key == sight.key) {
+                                light.sight = sight
+                                break
+                            }
+                        }
+                    }
+                }
 
-                //     // search tile
-                //     for( let tile of this.state.map.tiles) {
-                //         if (`tile-${tile.id}` == vision.id) {
-                //             tile.vision = vision;
-                //             break;
-                //         }
-                //     }
-                // }
-
-                // update container
-                this.mapComponent.mapContainer.update(this.state);
-
-                // draw vision & lights
-                this.mapComponent.mapContainer.lightsLayer.draw();
-                this.mapComponent.mapContainer.visionLayer.draw();
+                // update los & ligts
+                this.mapComponent.mapContainer.lightsLayer.update()
+                this.mapComponent.mapContainer.visionLayer.update()
+                this.mapComponent.mapContainer.visionLayer.draw()
+                this.mapComponent.mapContainer.lightsLayer.draw()
                 break;
             }
 
