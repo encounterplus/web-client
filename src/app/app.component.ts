@@ -67,6 +67,9 @@ export class AppComponent implements OnInit, AfterViewInit {
         console.log(type);
         switch (type) {
             case "showSettings":
+                // pause viewport events to prevent interactions with map
+                this.mapComponent.viewport.pause = true
+                
                 let modal = this.modalService.open(SettingsModalComponent)
                 modal.componentInstance.state = this.state
                 modal.result.then(result => {
@@ -78,8 +81,13 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.mapComponent.mapContainer.visionLayer.draw()
                     this.mapComponent.mapContainer.lightsLayer.draw()
                     this.mapComponent.mapContainer.updateInteraction();
+
+                    // unpause viewport events
+                    this.mapComponent.viewport.pause = false
                 }, reason => {
                     console.debug(`Setting component dismissed ${reason}`)
+                    // unpause viewport events
+                    this.mapComponent.viewport.pause = false
                 });
                 break;
             case "showAbout":
