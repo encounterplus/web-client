@@ -164,7 +164,7 @@ export class VisionLayer extends Layer {
             this.addChild(this.bg)
         }
         
-        console.time('visionDraw')
+        // console.time('visionDraw')
 
         this.visionContainer.width = Math.ceil(this.w / 2)
         this.visionContainer.height = Math.ceil(this.h / 2)
@@ -411,7 +411,7 @@ export class VisionLayer extends Layer {
 
         // this.addChild(sprite)
 
-        console.timeEnd('visionDraw')
+        // console.timeEnd('visionDraw')
         
         if (this.bg != null) {
             this.bg.visible = false

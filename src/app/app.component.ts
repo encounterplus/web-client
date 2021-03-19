@@ -106,7 +106,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     // main websocket event handler
     handleEvent(event: WSEvent) {
-        // console.log(`Event received: ${event.name}`)
+        console.log(`Event received: ${event.name}`)
         // console.log(JSON.stringify(event));
 
         switch (event.name) {

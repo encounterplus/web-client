@@ -71,7 +71,26 @@ export class MapComponent implements OnInit, OnChanges {
         .pinch()
         .wheel({
           percent: 0.001
-        });
+        })
+        .clampZoom({
+          minScale: 0.2, maxScale: 5.0
+        })
+
+      // persist viewport state
+      this.viewport.on("zoomed-end", (viewport) => {
+          let obj = {x: Math.round(viewport.center.x), y: Math.round(viewport.center.y), zoom: viewport.scale.x}
+          sessionStorage.setItem(`map-${this.state.map.id}`, JSON.stringify(obj))
+
+          console.debug(obj)
+      });
+
+      this.viewport.on("drag-end", (event) => {
+        let viewport = event.viewport
+        let obj = {x: Math.round(viewport.center.x), y: Math.round(viewport.center.y), zoom: viewport.scale.x}
+        sessionStorage.setItem(`map-${this.state.map.id}`, JSON.stringify(obj))
+
+        console.debug(obj)
+    });
 
       this.viewport.addChild(this.mapContainer);
       this.mapContainer.app = this.app
@@ -97,11 +116,16 @@ export class MapComponent implements OnInit, OnChanges {
     // update viewport
     this.onResize();
 
-    // fit scale
-    this.viewport.fitWorld(true);
-
-    // move center
-    this.viewport.moveCenter(this.mapContainer.w / 2, this.mapContainer.h / 2);
+    let mapData = sessionStorage.getItem(`map-${this.state.map.id}`)
+    if (mapData) {
+      let mapObj = JSON.parse(mapData)
+      this.viewport.setZoom(mapObj.zoom)
+      this.viewport.moveCenter(mapObj.x, mapObj.y);
+    } else {
+      // fit scale
+      this.viewport.fitWorld(true);
+      this.viewport.moveCenter(this.mapContainer.w / 2, this.mapContainer.h / 2);
+    }
 
     // upadate turned creature
     this.mapContainer.updateTurned(this.state.turned);
