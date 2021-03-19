@@ -8,7 +8,6 @@ import { GridType } from 'src/app/shared/models/map'
 import { Grid } from '../models/grid'
 import { Vision, VisionType } from 'src/app/shared/models/vision'
 import { Texture } from 'pixi.js'
-import { map } from 'rxjs/operators'
 
 export class ProgramManager {
     static cached = new Map<string, PIXI.Program>()
@@ -70,6 +69,8 @@ export class VisionLayer extends Layer {
     fogTexture: PIXI.RenderTexture
     mapTexture: PIXI.RenderTexture
     tmpTexture: PIXI.RenderTexture
+    fogBlurTexture: PIXI.RenderTexture
+    visionBlurTexture: PIXI.RenderTexture
 
     fog: string
     fogOfWar = false
@@ -82,6 +83,7 @@ export class VisionLayer extends Layer {
     msk: PIXI.Graphics;
     app: PIXI.Application
     blurFilter: PIXI.filters.BlurFilter
+    blur: boolean = false
 
     get pixelRatio(): number {
         return this.gridSize / this.gridScale
@@ -114,10 +116,6 @@ export class VisionLayer extends Layer {
         this.blurFilter = new PIXI.filters.BlurFilter(3, 1, 0.5, 5)
 
         this.visionContainer = new PIXI.Container()
-
-        if ((localStorage.getItem("softEdges") || "true") == "true") {
-            this.visionContainer.filters = [this.blurFilter]
-        }
     }
 
     update() {
@@ -142,6 +140,11 @@ export class VisionLayer extends Layer {
         // clear cache
         CacheManager.sightPolygon.clear()
         CacheManager.geometryPolygon.clear()
+
+        // do we need blur?
+        this.blur = (localStorage.getItem("softEdges") || "true") == "true"
+
+        this.visionContainer.filters = this.blur && this.lineOfSight ? [this.blurFilter] : null
     }
 
     async draw() {
@@ -151,17 +154,17 @@ export class VisionLayer extends Layer {
             return;
         }
 
-        // // prevent showing map while loading textures
-        // if (this.fog && !this.fogLoaded) {
-        //     this.bg = new PIXI.Sprite(Texture.WHITE)
-        //     this.bg.width = this.w
-        //     this.bg.height = this.h
-        //     this.bg.tint = 0x000000;
+        // prevent showing map while loading textures
+        if (this.fog && !this.fogLoaded) {
+            this.bg = new PIXI.Sprite(Texture.WHITE)
+            this.bg.width = this.w
+            this.bg.height = this.h
+            this.bg.tint = 0x000000;
 
-        //     this.addChild(this.bg)
-        // }
+            this.addChild(this.bg)
+        }
         
-        // console.time('visionDraw')
+        console.time('visionDraw')
 
         this.visionContainer.width = Math.ceil(this.w / 2)
         this.visionContainer.height = Math.ceil(this.h / 2)
@@ -170,11 +173,13 @@ export class VisionLayer extends Layer {
 
         if (this.visionTexture == null || this.visionTexture.width != Math.ceil(this.w / 2) || this.visionTexture.height != Math.ceil(this.h / 2)) {
             this.visionTexture = PIXI.RenderTexture.create({width: Math.ceil(this.w / 2), height: Math.ceil(this.h / 2)})
+            this.visionBlurTexture = PIXI.RenderTexture.create({width: Math.ceil(this.w / 2), height: Math.ceil(this.h / 2)})
             console.debug("creating vision texture");
         }
 
         if (this.fogTexture == null || this.fogTexture.width != Math.ceil(this.w / 2) || this.fogTexture.height != Math.ceil(this.h / 2)) {
             this.fogTexture = PIXI.RenderTexture.create({width: Math.ceil(this.w / 2), height: Math.ceil(this.h / 2)})
+            this.fogBlurTexture = PIXI.RenderTexture.create({width: Math.ceil(this.w / 2), height: Math.ceil(this.h / 2)})
             console.debug("creating fog texture");
         }
 
@@ -244,7 +249,6 @@ export class VisionLayer extends Layer {
             }
 
             // init shaders
-            // let shader = PIXI.Shader.from(this.visionVert.data, this.visionFrag.data);
             let shader = new PIXI.Shader(ProgramManager.cached.get("vision"))
 
             // create custom mesh from geometry
@@ -336,8 +340,6 @@ export class VisionLayer extends Layer {
             
             maskRequired = true
         }
-
-        
     
         // add mask only when tiles with vision are present
         if (maskRequired) {
@@ -357,19 +359,23 @@ export class VisionLayer extends Layer {
             await this.updateFogFromTexture(this.fog)
         }
         
-        // update fog with vision
-        if (this.fogOfWar && this.fogExplore) {
-            this.drawFog()
+        // bake vision into fog texture
+        if (this.fogOfWar) {
+            this.updateFog()
         }
 
-        // let sprite = new PIXI.Sprite(this.visionTexture)
-        // sprite.width = this.w
-        // sprite.height = this.h
-        // // sprite.filters = [this.blurFilter]
-        // this.addChild(sprite)
+        // blur like a boss?
+        if (this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore) {
+            let sprite = new PIXI.Sprite(this.fogTexture)
+            sprite.filters = [this.blurFilter]
+            this.app.renderer.render(sprite, this.fogBlurTexture, true)
+        }
 
-        // init shaders
-        // let shader = PIXI.Shader.from(this.mapVert.data, this.mapFrag.data);
+        if (this.lineOfSight && !this.fogOfWar) {
+            this.fogTexture = this.visionTexture
+        }
+
+        // init shader
         const shader = new PIXI.Shader(ProgramManager.cached.get("map"))
 
         let geometry = new PIXI.Geometry();
@@ -388,14 +394,24 @@ export class VisionLayer extends Layer {
             
         // populate uniforms
         mesh.shader.uniforms.texMap = this.mapTexture
-        mesh.shader.uniforms.texFog = this.fogTexture
-        mesh.shader.uniforms.texVision = this.visionTexture
+        mesh.shader.uniforms.texVision = this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore ? this.fogBlurTexture : this.fogTexture
         mesh.shader.uniforms.fog = this.fogOfWar
         mesh.shader.uniforms.los = this.lineOfSight
 
+        // workaround to fix bleading edges in exploration mode
+        // mesh.filters = this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore ? [this.blurFilter] : null
+
         this.addChild(mesh);
 
-        // console.timeEnd('visionDraw')
+        // debug
+        // let sprite = new PIXI.Sprite(this.fogTexture)
+        // sprite.filters = [this.blurFilter]
+        // sprite.width = this.w
+        // sprite.height = this.h
+
+        // this.addChild(sprite)
+
+        console.timeEnd('visionDraw')
         
         if (this.bg != null) {
             this.bg.visible = false
@@ -437,7 +453,6 @@ export class VisionLayer extends Layer {
         }
 
         // init shaders
-        // let shader = PIXI.Shader.from(this.visionVert.data, this.visionFrag.data)
         const shader = new PIXI.Shader(ProgramManager.cached.get("vision"))
 
         // create custom mesh from geometry
@@ -478,7 +493,6 @@ export class VisionLayer extends Layer {
         mesh.shader.uniforms.radiusMin = radiusMin / 2
         mesh.shader.uniforms.radiusMax = radiusMax / 2
         mesh.shader.uniforms.intensity = this.intensity
-        // mesh.filters = [this.blurFilter]
         // mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
         this.visionContainer.addChild(mesh);
@@ -493,12 +507,8 @@ export class VisionLayer extends Layer {
         }
     }
 
-    drawFog() {
-
-        // return
-
+    updateFog() {
         // init shaders
-        // let shader = PIXI.Shader.from(this.mapVert.data, this.fogFrag.data);
         const shader = new PIXI.Shader(ProgramManager.cached.get("fog"))
 
         let geometry = new PIXI.Geometry();
@@ -518,9 +528,10 @@ export class VisionLayer extends Layer {
         // // populate uniforms
         mesh.shader.uniforms.texFog = this.fogTexture
         mesh.shader.uniforms.texVision = this.visionTexture
+        mesh.shader.uniforms.exploration = this.fogExplore
 
         this.app.renderer.render(mesh, this.tmpTexture, true)
-
+        
         // gpu texture copy function?
         // texture swap
         let tmp = this.fogTexture
@@ -552,9 +563,7 @@ export class VisionLayer extends Layer {
         }
 
         let sprite = new PIXI.Sprite(fogTexture)
-        if ((localStorage.getItem("softEdges") || "true") == "true") {
-            sprite.filters = [this.blurFilter]
-        }
+        sprite.filters = this.blur ? [this.blurFilter] : null
 
          // render offscreen
         this.app.renderer.render(sprite, this.fogTexture, true)
@@ -582,9 +591,7 @@ export class VisionLayer extends Layer {
         }
 
         let sprite = new PIXI.Sprite(fogTexture)
-        if ((localStorage.getItem("softEdges") || "true") == "true") {
-            sprite.filters = [this.blurFilter]
-        }
+        sprite.filters = this.blur ? [this.blurFilter] : null
 
         // render offscreen
         this.app.renderer.render(sprite, this.fogTexture, true)

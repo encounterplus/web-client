@@ -8,6 +8,7 @@ uniform float time;
 
 uniform sampler2D texVision;
 uniform sampler2D texFog;
+uniform bool exploration;
 
 void main(void)
 {
@@ -16,9 +17,13 @@ void main(void)
    vec4 vision = texture2D(texVision, vTextureCoord);
    vec4 fog = texture2D(texFog, vTextureCoord);
 
-   if (vision.a > fog.r) {
-      gl_FragColor = vec4(vision.a, vision.a, vision.a, 1.0);
+   if (exploration) {
+      if (vision.a > fog.r) {
+            gl_FragColor = vec4(vision.a, vision.a, 0, 1.0);
+         } else {
+            gl_FragColor = vec4(fog.r, vision.a, 0, 1.0);
+         }
    } else {
-      gl_FragColor = vec4(fog.r, fog.r, fog.r, 1.0);
+      gl_FragColor = vec4(fog.r, vision.a, 0, 1.0);
    }
 }
