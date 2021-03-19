@@ -73,8 +73,11 @@ export class AppComponent implements OnInit, AfterViewInit {
                     console.debug(`Settings component closed with: ${result}`);
                     // update maxFPS
                     this.mapComponent.app.ticker.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60;
+                    this.mapComponent.mapContainer.visionLayer.update()
+                    this.mapComponent.mapContainer.lightsLayer.update()
                     this.mapComponent.mapContainer.visionLayer.draw()
                     this.mapComponent.mapContainer.lightsLayer.draw()
+                    this.mapComponent.mapContainer.updateInteraction();
                 }, reason => {
                     console.debug(`Setting component dismissed ${reason}`)
                 });
