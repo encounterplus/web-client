@@ -78,14 +78,15 @@ export class MapComponent implements OnInit, OnChanges {
         })
 
       // save viewport state on zoom
-      this.viewport.on("zoomed-end", (viewport) => {
-          let obj = {x: Math.round(viewport.center.x), y: Math.round(viewport.center.y), zoom: viewport.scale.x}
-          sessionStorage.setItem(`map-${this.state.map.id}`, JSON.stringify(obj))
+      this.viewport.on("zoomed-end", (event) => {
+        let viewport = this.viewport
+        let obj = {x: Math.round(viewport.center.x), y: Math.round(viewport.center.y), zoom: viewport.scale.x}
+        sessionStorage.setItem(`map-${this.state.map.id}`, JSON.stringify(obj))
       });
 
       // save viewport zoom state on drag
       this.viewport.on("drag-end", (event) => {
-        let viewport = event.viewport
+        let viewport = this.viewport
         let obj = {x: Math.round(viewport.center.x), y: Math.round(viewport.center.y), zoom: viewport.scale.x}
         sessionStorage.setItem(`map-${this.state.map.id}`, JSON.stringify(obj))
       });
