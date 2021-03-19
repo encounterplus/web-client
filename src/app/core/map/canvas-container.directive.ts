@@ -1,5 +1,6 @@
 import { Directive, AfterViewInit, ElementRef, HostListener, NgZone, Input, OnDestroy } from '@angular/core';
 import * as PIXI from 'pixi.js';
+import { ToastService } from 'src/app/shared/services/toast.service';
 window.PIXI = PIXI;
 
 @Directive({
@@ -13,6 +14,8 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
   app: PIXI.Application;
   width: number;
   height: number;
+
+  maxTextureSize: number;
 
   @Input()
   // public devicePixelRatio = window.devicePixelRatio || 1;
@@ -31,7 +34,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
     // autoStart: false
   };
 
-  constructor(private el: ElementRef, private zone: NgZone) {
+  constructor(private el: ElementRef, private zone: NgZone, private toastService: ToastService) {
     this.element = el.nativeElement as HTMLDivElement;
 
     const options = Object.assign({ width: this.element.clientWidth, height: this.element.clientHeight },
@@ -39,7 +42,14 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
 
     this.zone.runOutsideAngular(() => {
       // prevents pixi ticker to clash with zone
-      this.app = new PIXI.Application(options);
+
+      try {
+        this.app = new PIXI.Application(options);
+      } catch(err) {
+          // show error
+          this.toastService.showError(err.message, false);
+          throw err
+      }
 
       // prevents mouse zoom on document
       this.element.addEventListener('wheel', e => {
@@ -64,12 +74,13 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
 
     // Confirm that WebGL is available
     if (this.app.renderer.type !== PIXI.RENDERER_TYPE.WEBGL) {
-      throw new Error('No WebGL Support!');
+      this.toastService.showError('No WebGL Support!', false);
+      throw new Error('No WebGL Support!')
     }
 
     const gl = this.app.renderer.gl;
-    const max = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-    console.debug(`maximum texture size: ${max}`);
+    this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    console.debug(`maximum texture size: ${this.maxTextureSize}`);
 
     // let ticker = PIXI.Ticker.shared;
     // ticker.autoStart = false;

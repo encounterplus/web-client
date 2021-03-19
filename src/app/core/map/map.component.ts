@@ -4,6 +4,7 @@ import { Viewport } from 'pixi-viewport';
 import { MapContainer } from './map-container';
 import { AppState } from 'src/app/shared/models/app-state';
 import { DataService } from 'src/app/shared/services/data.service';
+import { ToastService } from 'src/app/shared/services/toast.service';
 
 // window.PIXI = PIXI;
 // import 'pixi.js';
@@ -35,7 +36,7 @@ export class MapComponent implements OnInit, OnChanges {
   // layers
   mapContainer: MapContainer;
 
-  constructor(private dataService: DataService, private zone: NgZone) {
+  constructor(private dataService: DataService, private zone: NgZone, private toastService: ToastService) {
     this.mapContainer = new MapContainer(this.dataService);
   }
 
@@ -76,28 +77,22 @@ export class MapComponent implements OnInit, OnChanges {
           minScale: 0.2, maxScale: 5.0
         })
 
-      // persist viewport state
+      // save viewport state on zoom
       this.viewport.on("zoomed-end", (viewport) => {
           let obj = {x: Math.round(viewport.center.x), y: Math.round(viewport.center.y), zoom: viewport.scale.x}
           sessionStorage.setItem(`map-${this.state.map.id}`, JSON.stringify(obj))
-
-          console.debug(obj)
       });
 
+      // save viewport zoom state on drag
       this.viewport.on("drag-end", (event) => {
         let viewport = event.viewport
         let obj = {x: Math.round(viewport.center.x), y: Math.round(viewport.center.y), zoom: viewport.scale.x}
         sessionStorage.setItem(`map-${this.state.map.id}`, JSON.stringify(obj))
+      });
 
-        console.debug(obj)
-    });
-
+      // add map container
       this.viewport.addChild(this.mapContainer);
       this.mapContainer.app = this.app
-
-      // this is not needed now
-      // let gl = WebGLRenderingContext;
-      // (this.app.renderer.state as any).blendModes[21] = [gl.ONE,  gl.ONE, gl.ZERO, gl.DST_ALPHA, gl.FUNC_ADD, gl.FUNC_ADD]
 
       console.debug("map component initialized");
 
@@ -112,6 +107,11 @@ export class MapComponent implements OnInit, OnChanges {
 
   async draw() {
     await this.mapContainer.draw();
+
+    if (this.mapContainer.w > this.canvas.maxTextureSize || this.mapContainer.h > this.canvas.maxTextureSize) {
+      console.error("Unable to render map texture")
+      this.toastService.showError(`Unable to render map texture! Map size: ${this.mapContainer.w}x${this.mapContainer.h}px, maximum texture size: ${this.canvas.maxTextureSize}px`, false);
+    }
 
     // update viewport
     this.onResize();
@@ -142,7 +142,6 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
-
     console.debug("data changed");
 
     if (!this.isReady) {
