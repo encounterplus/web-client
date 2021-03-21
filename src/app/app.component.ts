@@ -69,26 +69,33 @@ export class AppComponent implements OnInit, AfterViewInit {
         switch (type) {
             case "showSettings":
                 // pause viewport events to prevent interactions with map
-                this.mapComponent.viewport.pause = true
+                if (this.mapComponent) {
+                    this.mapComponent.viewport.pause = true
+                }
                 
                 let modal = this.modalService.open(SettingsModalComponent)
                 modal.componentInstance.state = this.state
                 modal.result.then(result => {
                     console.debug(`Settings component closed with: ${result}`);
-                    // update maxFPS
-                    this.mapComponent.app.ticker.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60;
-                    this.mapComponent.mapContainer.visionLayer.update()
-                    this.mapComponent.mapContainer.lightsLayer.update()
-                    this.mapComponent.mapContainer.visionLayer.draw()
-                    this.mapComponent.mapContainer.lightsLayer.draw()
-                    this.mapComponent.mapContainer.updateInteraction();
 
-                    // unpause viewport events
-                    this.mapComponent.viewport.pause = false
+                    if (this.mapComponent) {
+                        // update maxFPS
+                        this.mapComponent.app.ticker.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60;
+                        this.mapComponent.mapContainer.visionLayer.update()
+                        this.mapComponent.mapContainer.lightsLayer.update()
+                        this.mapComponent.mapContainer.visionLayer.draw()
+                        this.mapComponent.mapContainer.lightsLayer.draw()
+                        this.mapComponent.mapContainer.updateInteraction();
+
+                        // unpause viewport events                    
+                        this.mapComponent.viewport.pause = false
+                    }
                 }, reason => {
                     console.debug(`Setting component dismissed ${reason}`)
                     // unpause viewport events
-                    this.mapComponent.viewport.pause = false
+                    if (this.mapComponent) {
+                        this.mapComponent.viewport.pause = false
+                    }
                 });
                 break;
             case "showAbout":
@@ -166,7 +173,6 @@ export class AppComponent implements OnInit, AfterViewInit {
             }
 
             case WSEventName.creatureUpdated: {
-
                 // udpdate state
                 let index =  this.state.game.creatures.findIndex((obj => obj.id == event.data.id))
                 let creature = this.state.game.creatures[index]
