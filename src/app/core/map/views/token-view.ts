@@ -122,13 +122,21 @@ export class TokenView extends View {
     async drawAuras() {
         this.auraContainer.removeChildren();
 
+        const size = this.grid.sizeFromGridSize(Size.toGridSize(this.token.size))
+        const minSize = Math.max(size.width, size.height) / 2.0
+        const pixelRatio = this.grid.size / this.grid.scale
+
         for (let aura of this.token.auras) {
             if (!aura.enabled) {
                 continue;
             }
             let view = new AuraView(aura, this.grid);
-            view.w = ((aura.radius / 5) * this.grid.size * 2) + this.w;
-            view.h = ((aura.radius / 5) * this.grid.size * 2) + this.h;
+
+            
+
+            view.w = (aura.radius * pixelRatio * 2) + this.w;
+            view.h = (aura.radius * pixelRatio * 2) + this.h;
+            // view.h = ((aura.radius / 5) * this.grid.size * 2) + this.h;
             await view.draw();
             view.position.set(view.w / 2, view.h / 2);
             this.auraContainer.addChild(view);

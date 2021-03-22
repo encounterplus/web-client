@@ -53,7 +53,7 @@ export class Map {
     lineOfSight: boolean
     daylight: number
     fogOfWar: boolean
-    fogExplore: boolean
+    fogExploration: boolean
     fog: string
     weatherType: WeatherType
     weatherIntensity: number

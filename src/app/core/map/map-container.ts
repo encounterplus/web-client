@@ -148,8 +148,6 @@ export class MapContainer extends Layer {
 
         this.lightsLayer.grid = this.grid
         this.lightsLayer.update()
-
-        // this.fogLayer.update(this.state.map)
         
         this.monstersLayer.grid = this.grid
         this.playersLayer.grid = this.grid
@@ -275,7 +273,7 @@ export class MapContainer extends Layer {
         this.drawingsLayer.draw()
 
         // tokens
-        this.drawTokens()
+        await this.drawTokens()
     
         // auras
         this.aurasLayer.size = this.size

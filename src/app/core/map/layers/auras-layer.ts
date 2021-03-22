@@ -17,7 +17,7 @@ export class AurasLayer extends Layer {
     async draw() {
         this.clear();
 
-        // creaetures
+        // tokens
         for (let view of this.tokens) {
             this.addChild(view.auraContainer);
             view.draw();

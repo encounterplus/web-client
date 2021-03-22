@@ -1,12 +1,11 @@
 import { Layer } from './layer'
-import { Tile } from 'src/app/shared/models/tile'
 import { Loader } from '../models/loader'
 import { DataService } from 'src/app/shared/services/data.service'
 import { Size, Token } from 'src/app/shared/models/token'
 import { Light } from 'src/app/shared/models/light'
 import { GridType } from 'src/app/shared/models/map'
 import { Grid } from '../models/grid'
-import { Vision, VisionType } from 'src/app/shared/models/vision'
+import { VisionType } from 'src/app/shared/models/vision'
 import { Texture } from 'pixi.js'
 
 export class ProgramManager {
@@ -98,7 +97,7 @@ export class VisionLayer extends Layer {
         let activeTokenId = localStorage['userTokenId']
         if (activeTokenId) {
             // outside of turn
-            if (!this.dataService.state.game.started || this.dataService.state.turned.tokenId != activeTokenId) {
+            if (!this.dataService.state.game.started || this.dataService.state.turned?.tokenId != activeTokenId) {
                 return null
             }
             for (let token of this.dataService.state.map.tokens) {
@@ -129,7 +128,7 @@ export class VisionLayer extends Layer {
         this.fogOfWar = this.dataService.state.map.fogOfWar
 
         this.fog = this.dataService.state.map.fog
-        this.fogExplore = this.dataService.state.map.fogExplore
+        this.fogExplore = this.dataService.state.map.fogExploration
         this.intensity = 1.0 - (this.dataService.state.map.daylight || 0.0)
         
         this.visible = this.lineOfSight || this.fogOfWar
