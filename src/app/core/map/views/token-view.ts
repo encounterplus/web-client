@@ -132,11 +132,9 @@ export class TokenView extends View {
             }
             let view = new AuraView(aura, this.grid);
 
-            
-
             view.w = (aura.radius * pixelRatio * 2) + this.w;
             view.h = (aura.radius * pixelRatio * 2) + this.h;
-            // view.h = ((aura.radius / 5) * this.grid.size * 2) + this.h;
+            
             await view.draw();
             view.position.set(view.w / 2, view.h / 2);
             this.auraContainer.addChild(view);
