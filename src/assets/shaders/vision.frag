@@ -21,7 +21,7 @@ void main(void)
    
    vec4 finalColor = color * intensityColor;
 
-   if (radiusMin <= 0.0 || radiusMax <= 0.0) {
+   if (radiusMin <= 0.0 && radiusMax <= 0.0) {
       discard;
    }
 

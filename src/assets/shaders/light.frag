@@ -18,7 +18,7 @@ void main(void)
    float dist = length(center - uv);
    // vec4 darkColor = vec4(0.0, 0.0, 0.0, 0.0);
 
-   if (radiusMin <= 0.0 || radiusMax <= 0.0) {
+   if (radiusMin <= 0.0 && radiusMax <= 0.0) {
       discard;
    }
 
