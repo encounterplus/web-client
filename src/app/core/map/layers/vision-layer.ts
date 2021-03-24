@@ -129,7 +129,8 @@ export class VisionLayer extends Layer {
 
         this.fog = this.dataService.state.map.fog
         this.fogExplore = this.dataService.state.map.fogExploration
-        this.intensity = 1.0 - (this.dataService.state.map.daylight || 0.0)
+        // this.intensity = 1.0 - (this.dataService.state.map.daylight || 0.0)
+        this.intensity = this.dataService.state.map.daylight || 0.0
         
         this.visible = this.lineOfSight || this.fogOfWar
 
@@ -352,6 +353,12 @@ export class VisionLayer extends Layer {
 
         // debug
         // this.addChild(this.visionContainer)
+        // let sprite = new PIXI.Sprite(this.visionTexture)
+        // sprite.width = this.w
+        // sprite.height = this.h
+
+        // this.addChild(sprite)
+        // return
 
         // load texture if necessary
         if (this.fogOfWar && !this.fogLoaded) {
@@ -492,7 +499,7 @@ export class VisionLayer extends Layer {
         mesh.shader.uniforms.radiusMin = radiusMin / 2
         mesh.shader.uniforms.radiusMax = radiusMax / 2
         mesh.shader.uniforms.intensity = this.intensity
-        // mesh.blendMode = PIXI.BLEND_MODES.ADD;
+        mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
         this.visionContainer.addChild(mesh);
         this.meshes.push(mesh);
