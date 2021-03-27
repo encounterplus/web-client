@@ -21,6 +21,7 @@ export class VisionLayer extends Layer {
 
     grid: Grid
 
+    baseFogTexture: PIXI.Texture
     visionContainer: PIXI.Container
     visionTexture: PIXI.RenderTexture
     fogTexture: PIXI.RenderTexture
@@ -543,27 +544,30 @@ export class VisionLayer extends Layer {
     }
 
     async updateFogFromTexture(fog: string) {
-        console.debug("loading fog from texture")
         if (this.fog == null) {
             return this
         }
 
-        const fogTexture = await Loader.shared.loadTexture(this.fog)
+        // skip if base fog texture exists and it's same
+        if (this.baseFogTexture == null || this.fog != fog) {
+            console.debug("loading fog from texture")
+            this.baseFogTexture = await Loader.shared.loadTexture(this.fog)
+        }
 
-        if(fogTexture == null) {
+        if(this.baseFogTexture == null) {
             return this
         }
 
-        let sprite = new PIXI.Sprite(fogTexture)
+        let sprite = new PIXI.Sprite(this.baseFogTexture)
         sprite.filters = this.blur ? [this.blurFilter] : null
 
         // render offscreen
         this.app.renderer.render(sprite, this.fogTexture, true)
 
         sprite.destroy()
-        PIXI.BaseTexture.removeFromCache(fogTexture.baseTexture.textureCacheIds[1]);
-        PIXI.Texture.removeFromCache(fogTexture.textureCacheIds[1]);
-        fogTexture.destroy(true);
+        // PIXI.BaseTexture.removeFromCache(fogTexture.baseTexture.textureCacheIds[1]);
+        // PIXI.Texture.removeFromCache(fogTexture.textureCacheIds[1]);
+        // fogTexture.destroy(true);
 
         this.fogLoaded = true
     }

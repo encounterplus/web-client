@@ -255,6 +255,10 @@ export class MapContainer extends Layer {
         // tiles
         await this.drawTiles()
 
+        // grid
+        this.gridLayer.size = this.size
+        this.gridLayer.draw()
+
         // render to texture
         this.app.renderer.render(this.mapLayer, this.mapTexture, true)
 
@@ -265,10 +269,6 @@ export class MapContainer extends Layer {
         // lights
         this.lightsLayer.size = this.size
         this.lightsLayer.draw()
-
-        // grid
-        this.gridLayer.size = this.size
-        this.gridLayer.draw()
 
         this.drawingsLayer.size = this.size
         this.drawingsLayer.draw()
