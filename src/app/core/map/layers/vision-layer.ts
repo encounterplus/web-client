@@ -49,6 +49,17 @@ export class Utils {
         }
         return stringArr.join('-');
     }
+
+    static fitScaleFactor(srcWidth: number, srcHeight: number, dstWidth: number, dstHeight: number): number {
+        let srcRatio = srcWidth / srcHeight
+        let dstRatio = dstWidth / dstHeight
+
+        if (srcRatio > dstRatio) {
+            return dstWidth / srcWidth
+        } else {
+             return dstHeight / srcHeight
+        }
+    }
 }
 
 export class VisionLayer extends Layer {
