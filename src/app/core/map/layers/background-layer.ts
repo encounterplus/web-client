@@ -3,6 +3,7 @@ import { Layer } from './layer';
 import { Map } from 'src/app/shared/models/map';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
+import { mapToMapExpression } from '@angular/compiler/src/render3/util';
 
 export class BackgroundLayer extends Layer {
 
@@ -64,8 +65,8 @@ export class BackgroundLayer extends Layer {
         this.video = map.video;
         this.allowVideo = (localStorage.getItem("allowVideo") || "true") == "true";
 
-        this.w = map.width || 2048;
-        this.h = map.height || 2048;
+        this.w = (map.width || 2048) * map.scale;
+        this.h = (map.height || 2048) * map.scale;
 
         this.scale.set(map.scale, map.scale);
     }
@@ -150,8 +151,8 @@ export class BackgroundLayer extends Layer {
 
     drawVideo() {
         let sprite = new PIXI.Sprite(this.videoTexture);
-        this.w = sprite.width = this.videoTexture.width;
-        this.h = sprite.height = this.videoTexture.height;
+        sprite.width = this.videoTexture.width;
+        sprite.height = this.videoTexture.height;
         this.removeChildren();
         this.addChild(sprite);
         this.videoSprite = sprite;

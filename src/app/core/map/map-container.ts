@@ -289,7 +289,7 @@ export class MapContainer extends Layer {
         this.effectsLayer.size = this.size
         this.effectsLayer.draw()
 
-        this.hitArea = new PIXI.Rectangle(0, 0, this.w * this.map.scale, this.h * this.map.scale)
+        this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h)
 
         // cleanup otherwise msk will leak memory
         if(this.msk) {
