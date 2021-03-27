@@ -499,7 +499,7 @@ export class VisionLayer extends Layer {
         mesh.shader.uniforms.radiusMin = radiusMin / 2
         mesh.shader.uniforms.radiusMax = radiusMax / 2
         mesh.shader.uniforms.intensity = this.intensity
-        mesh.blendMode = PIXI.BLEND_MODES.ADD;
+        // mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
         this.visionContainer.addChild(mesh);
         this.meshes.push(mesh);

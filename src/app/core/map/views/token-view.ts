@@ -181,10 +181,13 @@ export class TokenView extends View {
             sprite.anchor.set(0.5, 0.5);
             this.addChild(sprite);
             this.overlaySprite = sprite;
-            this.tokenSprite.visible = false
-
-            // change z order
-            this.tokenSprite.zIndex = 0
+            
+            if (this.tokenSprite) {
+                this.tokenSprite.visible = false
+                // change z order
+                this.tokenSprite.zIndex = 0
+            }
+        
             this.overlaySprite.zIndex = 1
         } else if (this.token.bloodied) {
             if ( this.token.asset != null || this.token.cachedImageToken) {
@@ -195,7 +198,9 @@ export class TokenView extends View {
                 this.overlaySprite = sprite
 
                 // change z order
-                this.tokenSprite.zIndex = 1
+                if (this.tokenSprite) {
+                    this.tokenSprite.zIndex = 1
+                }
                 this.overlaySprite.zIndex = 0
             } else {
                 this.overlayTexture = await Loader.shared.loadTexture('/assets/img/token-bloodied.png', true)
@@ -205,7 +210,9 @@ export class TokenView extends View {
                 this.overlaySprite = sprite
 
                 // change z order
-                this.tokenSprite.zIndex = 0
+                if (this.tokenSprite) {
+                    this.tokenSprite.zIndex = 0
+                }
                 this.overlaySprite.zIndex = 1
             }
         }
