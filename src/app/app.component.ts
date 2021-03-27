@@ -18,13 +18,11 @@ import { SettingsModalComponent } from './core/settings-modal/settings-modal.com
 import { Loader } from './core/map/models/loader';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { Marker } from './shared/models/marker';
-import { Vision } from './shared/models/vision';
 import { MessageListComponent } from './core/message-list/message-list.component';
 import { Token } from './shared/models/token';
 import { Light } from './shared/models/light';
-import { CacheManager } from './core/map/layers/vision-layer';
-import { View } from './core/map/views/view';
 import { Sight } from './shared/models/sight';
+import { CacheManager } from './shared/utils';
 
 @Component({
     selector: 'app-root',

@@ -10,7 +10,7 @@ import { AuraView } from './aura-view';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
 import { Size, Token } from 'src/app/shared/models/token';
 import { HexGrid } from '../models/hex-grid';
-import { Utils } from '../layers/vision-layer';
+import { Utils } from 'src/app/shared/utils';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
@@ -295,8 +295,6 @@ export class TokenView extends View {
             this.zIndex = 29;
         }
     }
-
-    
 
     updateToken() {
         if (this.tokenTexture != null) {

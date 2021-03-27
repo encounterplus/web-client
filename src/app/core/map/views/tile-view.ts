@@ -5,7 +5,7 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { Tile } from 'src/app/shared/models/tile';
 import { TilesLayer } from '../layers/tiles-layer';
 import { MapLayer } from 'src/app/shared/models/map';
-import { Utils } from '../layers/vision-layer';
+import { Utils } from 'src/app/shared/utils';
 
 export class TileView extends View {
 

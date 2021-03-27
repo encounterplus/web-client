@@ -6,7 +6,6 @@ import { GridLayer } from './layers/grid-layer';
 import { BackgroundLayer } from './layers/background-layer';
 import { TokensLayer } from './layers/tokens-layer';
 import { Grid, GridInterface } from './models/grid';
-import { ProgramManager, VisionLayer } from './layers/vision-layer';
 import { LightsLayer } from './layers/lights-layer';
 import { DataService } from 'src/app/shared/services/data.service';
 import { AppState } from 'src/app/shared/models/app-state';
@@ -29,6 +28,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { Role } from 'src/app/shared/models/token';
 import { SquareGrid } from './models/square-grid';
 import { HexGrid } from './models/hex-grid';
+import { ProgramManager } from 'src/app/shared/utils';
+import { VisionLayer } from './layers/vision-layer';
 
 export class MapContainer extends Layer {
 

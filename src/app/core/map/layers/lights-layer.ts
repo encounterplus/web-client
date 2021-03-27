@@ -8,7 +8,7 @@ import { Light } from 'src/app/shared/models/light';
 import { VisionGeometry } from '../renderers/vision-renderer';
 import { GridType } from 'src/app/shared/models/map';
 import { Grid } from '../models/grid';
-import { CacheManager, ProgramManager } from './vision-layer';
+import { CacheManager, ProgramManager } from 'src/app/shared/utils';
 
 export class LightsLayer extends Layer {
 
