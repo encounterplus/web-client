@@ -336,10 +336,6 @@ export class VisionLayer extends Layer {
             this.app.renderer.render(sprite, this.fogBlurTexture, true)
         }
 
-        if (this.lineOfSight && !this.fogOfWar) {
-            this.fogTexture = this.visionTexture
-        }
-
         // init shader
         const shader = new PIXI.Shader(ProgramManager.cached.get("map"))
 
@@ -356,10 +352,20 @@ export class VisionLayer extends Layer {
             .addIndex([0, 1, 2, 0, 2, 3]);
 
         let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+
+        // bleh
+        let texVision: PIXI.Texture
+        if (this.lineOfSight && !this.fogOfWar) {
+            texVision = this.visionTexture
+        } else if (!this.lineOfSight && this.fogOfWar) {
+            texVision = this.blur && this.fogExplore ? this.fogBlurTexture : this.fogTexture
+        } else if (this.lineOfSight && this.fogOfWar) {
+            texVision = this.fogTexture
+        }
             
         // populate uniforms
         mesh.shader.uniforms.texMap = this.mapTexture
-        mesh.shader.uniforms.texVision = this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore ? this.fogBlurTexture : this.fogTexture
+        mesh.shader.uniforms.texVision = texVision
         mesh.shader.uniforms.fog = this.fogOfWar
         mesh.shader.uniforms.los = this.lineOfSight
 
@@ -367,14 +373,6 @@ export class VisionLayer extends Layer {
         // mesh.filters = this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore ? [this.blurFilter] : null
 
         this.addChild(mesh);
-
-        // debug
-        // let sprite = new PIXI.Sprite(this.fogTexture)
-        // sprite.filters = [this.blurFilter]
-        // sprite.width = this.w
-        // sprite.height = this.h
-
-        // this.addChild(sprite)
 
         // console.timeEnd('visionDraw')
         
@@ -544,17 +542,19 @@ export class VisionLayer extends Layer {
     }
 
     async updateFogFromTexture(fog: string) {
+        console.debug("loading fog from texture")
         if (this.fog == null) {
             return this
         }
 
         // skip if base fog texture exists and it's same
-        if (this.baseFogTexture == null || this.fog != fog) {
-            console.debug("loading fog from texture")
+        if (this.baseFogTexture == null) {
+            console.debug("loading fog texture")
             this.baseFogTexture = await Loader.shared.loadTexture(this.fog)
         }
 
         if(this.baseFogTexture == null) {
+            console.error("empty fog texture")
             return this
         }
 
