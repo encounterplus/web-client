@@ -14,6 +14,7 @@ export class Tile {
     layer: MapLayer = MapLayer.object;
     zIndex: null
     opacity: number;
+    scale: number;
     asset?: Asset;
     light?: Light;
     components: Array<Component> = [];

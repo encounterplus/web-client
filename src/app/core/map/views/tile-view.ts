@@ -64,7 +64,7 @@ export class TileView extends View {
             
             let sprite = new PIXI.AnimatedSprite(frames);
             sprite.anchor.set(0.5, 0.5);
-            var scale = Utils.fitScaleFactor(frames[0].width, frames[0].height, this.tile.width, this.tile.height)
+            var scale = Utils.fitScaleFactor(frames[0].width, frames[0].height, this.tile.width, this.tile.height) * (this.tile.scale || 1)
             sprite.width = frames[0].width * scale;
             sprite.height = frames[0].height * scale;
             sprite.angle = this.tile.rotation;
