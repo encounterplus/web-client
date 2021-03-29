@@ -25,7 +25,7 @@ export class HexGrid extends Grid implements GridInterface {
     }
 
     get pixelRatio(): number {
-        return (Math.sqrt(3) * this.size) / Math.max(this.scale, 1)
+        return (Math.sqrt(3) * this.size) / Math.max(this.scale, 0.1)
     }
 
     hex(point: PIXI.Point): Hex {

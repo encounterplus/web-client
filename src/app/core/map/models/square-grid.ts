@@ -13,7 +13,7 @@ export class SquareGrid extends Grid implements GridInterface {
     }
 
     get pixelRatio(): number {
-        return this.size / Math.max(this.scale, 1)
+        return this.size / Math.max(this.scale, 0.1)
     }
     
     gridGraphics(width: number, height: number): PIXI.Graphics {
