@@ -8,16 +8,18 @@ import { Grid } from '../models/grid'
 import { VisionType } from 'src/app/shared/models/vision'
 import { Texture } from 'pixi.js'
 import { CacheManager, ProgramManager, Utils } from 'src/app/shared/utils'
+import { Tile } from 'src/app/shared/models/tile'
 
 export class VisionLayer extends Layer {
     tokens: Array<Token> = []
+    tiles: Array<Tile> = []
     lights: Array<Light> = []
-    
-    intensity: number = 1.0
-    mapScale: number = 1.0
 
-    gridSize: number = 50.0
-    gridScale: number = 5.0
+    intensity: number = 1.0
+    // mapScale: number = 1.0
+
+    // gridSize: number = 50.0
+    // gridScale: number = 5.0
 
     grid: Grid
 
@@ -42,10 +44,6 @@ export class VisionLayer extends Layer {
     app: PIXI.Application
     blurFilter: PIXI.filters.BlurFilter
     blur: boolean = false
-
-    get pixelRatio(): number {
-        return this.gridSize / this.gridScale
-    }
 
     get activeToken(): Token {
         if (this.dataService.state.screen.sharedVision) {
@@ -78,23 +76,17 @@ export class VisionLayer extends Layer {
 
     update() {
         this.tokens = this.dataService.state.map.tokens
-        this.lights = [...(this.dataService.state.map.tiles.filter(tile => tile.light != null).map(tile => tile.light)), ...this.dataService.state.map.lights] 
-
-        this.mapScale = this.dataService.state.map.scale
-        this.gridScale = this.dataService.state.map.gridScale
+        this.tiles = this.dataService.state.map.tiles
+        this.lights = this.dataService.state.map.lights
 
         this.lineOfSight = this.dataService.state.map.lineOfSight
         this.fogOfWar = this.dataService.state.map.fogOfWar
 
         this.fog = this.dataService.state.map.fog
         this.fogExplore = this.dataService.state.map.fogExploration
-        // this.intensity = 1.0 - (this.dataService.state.map.daylight || 0.0)
         this.intensity = this.dataService.state.map.daylight || 0.0
         
         this.visible = this.lineOfSight || this.fogOfWar
-
-        // adjusted grid size
-        this.gridSize = (this.dataService.state.map.gridType != GridType.square) ? this.dataService.state.map.gridSize * Math.sqrt(3) * 0.8 : this.dataService.state.map.gridSize
 
         // clear cache
         CacheManager.sightPolygon.clear()
@@ -163,14 +155,14 @@ export class VisionLayer extends Layer {
 
         // render active tokens
         if (activeToken) {
-            let vision = activeToken.vision
+            const vision = activeToken.vision
             if (vision != null && vision.sight != null && vision.sight.polygon != null && vision.enabled) {
                 this.drawToken(activeToken, VisionType.combined, false)
             }
         } else {
             for(let token of this.tokens) {
                 // skip tokens without vision and sight
-                let vision = token.vision
+                const vision = token.vision
                 if (vision == null || vision.sight == null || vision.sight.polygon == null || (!vision.enabled && !vision.light)) {
                     continue
                 }
@@ -179,53 +171,25 @@ export class VisionLayer extends Layer {
             }
         }
 
-        // lights, always visible
-        for(let light of this.lights) {
+        // tiles, always visible
+        for(let tile of this.tiles) {
             // check light state
-            if (light.sight == null || light.sight.polygon == null || !light.enabled || !light.alwaysVisible || light.sight.polygon.length == 0) {
+            const light = tile.light
+            if (light == null || !light.alwaysVisible || !light.enabled || light.sight == null || light.sight.polygon == null) {
                 continue
             }
 
-            // cached values
-            let sightPolygon = CacheManager.sightPolygon.get(light.id)
-            let geometryPolygon = CacheManager.geometryPolygon.get(light.id)
+            this.drawTile(tile, false)
+        }
 
-            // cache miss
-            if (sightPolygon == undefined) {
-                sightPolygon = light.sight.polygon.map(point => point / 2)
-
-                // update cache
-                CacheManager.sightPolygon.set(light.id, sightPolygon)
+        // lights, always visible
+        for(let light of this.lights) {
+            // check light state
+            if (!light.alwaysVisible || !light.enabled || light.sight == null || light.sight.polygon == null) {
+                continue
             }
 
-            // cache miss
-            if (geometryPolygon == undefined) {
-                // create geometry polygon for mesh rendering
-                geometryPolygon = this.getGeometry(light.sight.x / 2, light.sight.y / 2, sightPolygon)
-
-                // update cache
-                CacheManager.geometryPolygon.set(light.id, geometryPolygon)
-            }
-
-            // init shaders
-            let shader = new PIXI.Shader(ProgramManager.cached.get("vision"))
-
-            // create custom mesh from geometry
-            let geometry = new PIXI.Geometry()
-                .addAttribute('aVertexPosition', geometryPolygon);
-            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
-            
-            // populate uniforms
-            mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
-            mesh.shader.uniforms.radiusMin = light.radiusMin * this.pixelRatio / 2;
-            mesh.shader.uniforms.radiusMax = light.radiusMax * this.pixelRatio / 2;
-            mesh.shader.uniforms.intensity = this.intensity;
-            // mesh.blendMode = PIXI.BLEND_MODES.ADD;
-
-            this.visionContainer.addChild(mesh);
-            this.meshes.push(mesh);
-
-            this.msk.drawPolygon(sightPolygon);
+            this.drawLight(light, false)
         }
 
         this.msk.endFill();
@@ -240,7 +204,7 @@ export class VisionLayer extends Layer {
                     continue
                 }
                 // skip tokens without vision and light
-                let vision = token.vision
+                const vision = token.vision
                 if (vision == null || vision.sight == null || vision.sight.polygon == null || !vision.light) {
                     continue
                 }
@@ -249,54 +213,26 @@ export class VisionLayer extends Layer {
             }
         }
 
-        // lights, not always visible
-        for(let light of this.lights) {
+        // tiles, not always visible
+        for(let tile of this.tiles) {
             // check light state
-            if (light.sight == null || light.sight.polygon == null || !light.enabled || light.alwaysVisible || light.sight.polygon.length == 0) {
+            const light = tile.light
+            if (light == null || light.alwaysVisible || !light.enabled || light.sight == null || light.sight.polygon == null) {
                 continue
             }
 
-            // cached values
-            let sightPolygon = CacheManager.sightPolygon.get(light.id)
-            let geometryPolygon = CacheManager.geometryPolygon.get(light.id)
+            this.drawTile(tile, true)
+            maskRequired = true
+        }
 
-            // cache miss
-            if (sightPolygon == undefined) {
-                sightPolygon = light.sight.polygon.map(point => point / 2)
-
-                // update cache
-                CacheManager.sightPolygon.set(light.id, sightPolygon)
+        // lights, not always visible
+        for(let light of this.lights) {
+            // check light state
+            if (light.alwaysVisible || !light.enabled || light.sight == null || light.sight.polygon == null) {
+                continue
             }
 
-            // cache miss
-            if (geometryPolygon == undefined) {
-                // create geometry polygon for mesh rendering
-                geometryPolygon = this.getGeometry(light.sight.x / 2, light.sight.y / 2, sightPolygon)
-
-                // update cache
-                CacheManager.geometryPolygon.set(light.id, geometryPolygon)
-            }
-
-            // init shaders
-            let shader = new PIXI.Shader(ProgramManager.cached.get("vision"))
-
-            // create custom mesh from geometry
-            let geometry = new PIXI.Geometry()
-                .addAttribute('aVertexPosition', geometryPolygon);
-            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
-            
-            // populate uniforms
-            mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
-            mesh.shader.uniforms.radiusMin = light.radiusMin * this.pixelRatio / 2;
-            mesh.shader.uniforms.radiusMax = light.radiusMax * this.pixelRatio / 2;
-            mesh.shader.uniforms.intensity = this.intensity;
-            // mesh.blendMode = PIXI.BLEND_MODES.ADD;
-
-            this.visionContainer.addChild(mesh);
-            this.meshes.push(mesh);
-
-            mesh.mask = this.msk;
-            
+            this.drawLight(light, true)
             maskRequired = true
         }
     
@@ -309,15 +245,6 @@ export class VisionLayer extends Layer {
         if (this.lineOfSight || (this.fogOfWar && this.fogExplore)) {
             this.app.renderer.render(this.visionContainer, this.visionTexture, true)
         } 
-
-        // debug
-        // this.addChild(this.visionContainer)
-        // let sprite = new PIXI.Sprite(this.visionTexture)
-        // sprite.width = this.w
-        // sprite.height = this.h
-
-        // this.addChild(sprite)
-        // return
 
         // load texture if necessary
         if (this.fogOfWar && !this.fogLoaded) {
@@ -384,7 +311,7 @@ export class VisionLayer extends Layer {
         return this;
     }
 
-    drawToken(token: Token, type: VisionType, masked: boolean): PIXI.Mesh {
+    drawToken(token: Token, type: VisionType, masked: boolean) {
         const vision = token.vision
 
         // check vision state
@@ -428,10 +355,10 @@ export class VisionLayer extends Layer {
         const minSize = Math.max(size.width, size.height) / 2.0
 
         // temporary radius
-        const lightRadiusMin = vision.light ? vision.lightRadiusMin * this.pixelRatio + minSize : 0
-        const lightRadiusMax = vision.light ? vision.lightRadiusMax * this.pixelRatio + minSize : 0
-        const darkRadiusMin = vision.dark ? vision.darkRadiusMin * this.pixelRatio + minSize : 0
-        const darkRadiusMax = vision.dark ? vision.darkRadiusMax * this.pixelRatio + minSize : 0
+        const lightRadiusMin = vision.light ? (vision.lightRadiusMin * this.grid.pixelRatio) + minSize : 0
+        const lightRadiusMax = vision.light ? (vision.lightRadiusMax * this.grid.pixelRatio) + minSize : 0
+        const darkRadiusMin = vision.dark ? (vision.darkRadiusMin * this.grid.pixelRatio) + minSize : 0
+        const darkRadiusMax = vision.dark ? (vision.darkRadiusMax * this.grid.pixelRatio) + minSize : 0
 
         // final radius for shader
         let radiusMin: number
@@ -456,6 +383,119 @@ export class VisionLayer extends Layer {
         mesh.shader.uniforms.radiusMin = radiusMin / 2
         mesh.shader.uniforms.radiusMax = radiusMax / 2
         mesh.shader.uniforms.intensity = this.intensity
+        // mesh.blendMode = PIXI.BLEND_MODES.ADD;
+
+        this.visionContainer.addChild(mesh);
+        this.meshes.push(mesh);
+
+        // add mask
+        if (masked) {
+            mesh.mask = this.msk;
+        } else {
+            // performance hog
+            this.msk.drawPolygon(sightPolygon)
+        }
+    }
+
+    drawTile(tile: Tile, masked: boolean) {
+        //   light
+        const light = tile.light
+
+        // check light state
+        if (light.sight == null || light.sight.polygon == null || !light.enabled || light.sight.polygon.length == 0) {
+            return
+        }
+
+        // cached values
+        let sightPolygon = CacheManager.sightPolygon.get(light.id)
+        let geometryPolygon = CacheManager.geometryPolygon.get(light.id)
+
+        // cache miss
+        if (sightPolygon == undefined) {
+            sightPolygon = light.sight.polygon.map(point => point / 2)
+
+            // update cache
+            CacheManager.sightPolygon.set(light.id, sightPolygon)
+        }
+
+        // cache miss
+        if (geometryPolygon == undefined) {
+            // create geometry polygon for mesh rendering
+            geometryPolygon = this.getGeometry(light.sight.x / 2, light.sight.y / 2, sightPolygon)
+
+            // update cache
+            CacheManager.geometryPolygon.set(light.id, geometryPolygon)
+        }
+
+        // init shaders
+        let shader = new PIXI.Shader(ProgramManager.cached.get("vision"))
+
+        // create custom mesh from geometry
+        let geometry = new PIXI.Geometry()
+            .addAttribute('aVertexPosition', geometryPolygon);
+        let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+
+        const minSize = Math.max(tile.width, tile.height) / 2.0
+        
+        // populate uniforms
+        mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
+        mesh.shader.uniforms.radiusMin = ((light.radiusMin * this.grid.pixelRatio) + minSize) / 2;
+        mesh.shader.uniforms.radiusMax = ((light.radiusMax * this.grid.pixelRatio) + minSize) / 2;
+        mesh.shader.uniforms.intensity = this.intensity;
+        // mesh.blendMode = PIXI.BLEND_MODES.ADD;
+
+        this.visionContainer.addChild(mesh);
+        this.meshes.push(mesh);
+
+        // add mask
+        if (masked) {
+            mesh.mask = this.msk;
+        } else {
+            // performance hog
+            this.msk.drawPolygon(sightPolygon)
+        }
+    }
+
+    drawLight(light: Light, masked: boolean) {
+        // check light state
+        if (light.sight == null || light.sight.polygon == null || !light.enabled || light.sight.polygon.length == 0) {
+            return
+        }
+
+        // cached values
+        let sightPolygon = CacheManager.sightPolygon.get(light.id)
+        let geometryPolygon = CacheManager.geometryPolygon.get(light.id)
+
+        // cache miss
+        if (sightPolygon == undefined) {
+            sightPolygon = light.sight.polygon.map(point => point / 2)
+
+            // update cache
+            CacheManager.sightPolygon.set(light.id, sightPolygon)
+        }
+
+        // cache miss
+        if (geometryPolygon == undefined) {
+            // create geometry polygon for mesh rendering
+            geometryPolygon = this.getGeometry(light.sight.x / 2, light.sight.y / 2, sightPolygon)
+
+            // update cache
+            CacheManager.geometryPolygon.set(light.id, geometryPolygon)
+        }
+
+        // init shaders
+        let shader = new PIXI.Shader(ProgramManager.cached.get("vision"))
+
+        // create custom mesh from geometry
+        let geometry = new PIXI.Geometry()
+            .addAttribute('aVertexPosition', geometryPolygon);
+        let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+        
+        // populate uniforms
+        mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
+        mesh.shader.uniforms.radiusMin = light.radiusMin * this.grid.pixelRatio / 2;
+        mesh.shader.uniforms.radiusMax = light.radiusMax * this.grid.pixelRatio / 2;
+        mesh.shader.uniforms.intensity = this.intensity;
         // mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
         this.visionContainer.addChild(mesh);

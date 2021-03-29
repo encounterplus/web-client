@@ -11,6 +11,7 @@ import { ScreenInteraction } from 'src/app/shared/models/screen';
 import { Size, Token } from 'src/app/shared/models/token';
 import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
+import { min } from 'rxjs/operators';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
@@ -123,9 +124,8 @@ export class TokenView extends View {
     async drawAuras() {
         this.auraContainer.removeChildren();
 
-        const size = this.grid.sizeFromGridSize(Size.toGridSize(this.token.size))
-        const minSize = Math.max(size.width, size.height) / 2.0
-        const pixelRatio = this.grid.size / this.grid.scale
+        const maxSize = Math.max(this.w, this.h)
+        const pixelRatio = this.grid.pixelRatio
 
         for (let aura of this.token.auras) {
             if (!aura.enabled) {
@@ -133,8 +133,8 @@ export class TokenView extends View {
             }
             let view = new AuraView(aura, this.grid);
 
-            view.w = (aura.radius * pixelRatio * 2) + this.w;
-            view.h = (aura.radius * pixelRatio * 2) + this.h;
+            view.w = (aura.radius * pixelRatio * 2) + maxSize;
+            view.h = (aura.radius * pixelRatio * 2) + maxSize;
             
             await view.draw();
             view.position.set(view.w / 2, view.h / 2);
@@ -269,10 +269,10 @@ export class TokenView extends View {
         this.updateInteraction();
 
         // // debug frame
-        // let graphics = new PIXI.Graphics()
-        // graphics.lineStyle(1, 0xff00000, 1.0)
-        // graphics.drawRect(0, 0, this.w, this.h)
-        // this.addChild(graphics)
+        let graphics = new PIXI.Graphics()
+        graphics.lineStyle(1, 0xff00000, 1.0)
+        graphics.drawRect(0, 0, this.w, this.h)
+        this.addChild(graphics)
     }
 
     update() {

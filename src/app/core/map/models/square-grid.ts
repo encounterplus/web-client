@@ -11,6 +11,10 @@ export class SquareGrid extends Grid implements GridInterface {
     get adjustedSize(): PIXI.ISize {
         return {width: this.size, height: this.size}
     }
+
+    get pixelRatio(): number {
+        return this.size / Math.max(this.scale, 1)
+    }
     
     gridGraphics(width: number, height: number): PIXI.Graphics {
         let graphics = new PIXI.Graphics();

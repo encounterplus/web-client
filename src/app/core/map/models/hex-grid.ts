@@ -24,6 +24,10 @@ export class HexGrid extends Grid implements GridInterface {
         return {width: Math.sqrt(3) * this.size * 0.8, height: Math.sqrt(3) * this.size * 0.8}
     }
 
+    get pixelRatio(): number {
+        return (Math.sqrt(3) * this.size) / Math.max(this.scale, 1)
+    }
+
     hex(point: PIXI.Point): Hex {
         var M:Orientation = this.orientation;
         var pt:PIXI.Point = new PIXI.Point((point.x - this.offsetX) / this.size, (point.y - this.offsetY) / this.size);
