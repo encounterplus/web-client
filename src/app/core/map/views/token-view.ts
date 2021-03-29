@@ -447,11 +447,12 @@ export class TokenView extends View {
         
         switch (this.dataService.state.screen.interaction) {
             case ScreenInteraction.all: 
-                this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || this.token.id == localStorage.getItem("userTokenId");
+                this.interactive = this.token.role == Role.friendly
                 break;
 
-            case ScreenInteraction.turn: 
-                this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.turned || !this.dataService.state.game.started) && this.token.id == localStorage.getItem("userTokenId");
+            case ScreenInteraction.token: 
+                // this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.turned || !this.dataService.state.game.started) && this.token.id == localStorage.getItem("userTokenId");
+                this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.token.id == localStorage.getItem("userTokenId"));
                 break;
 
             case ScreenInteraction.none: 

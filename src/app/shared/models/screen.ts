@@ -1,7 +1,7 @@
 
 export enum ScreenInteraction {
     none = "none",
-    turn = "turn",
+    token = "token",
     all = "all",
 }
 
