@@ -307,14 +307,6 @@ export class AppComponent implements OnInit, AfterViewInit {
                 }
 
                 if (model.light != null) {
-                    let index =  this.state.map.tiles.findIndex((obj => obj.id == event.data.id));
-                    this.state.map.tiles[index].x = event.data.x;
-                    this.state.map.tiles[index].y = event.data.y;
-                    this.state.map.tiles[index].light.sight.x = event.data.x;
-                    this.state.map.tiles[index].light.sight.y = event.data.y;
-                    this.state.map.tiles[index].light.sight.polygon = event.data.los;
-
-                    // update los & ligts
                     this.mapComponent.mapContainer.lightsLayer.update()
                     this.mapComponent.mapContainer.visionLayer.update()
                     this.mapComponent.mapContainer.visionLayer.draw()
@@ -332,19 +324,10 @@ export class AppComponent implements OnInit, AfterViewInit {
                 let index =  this.state.map.lights.findIndex((obj => obj.id == model.id))
                 this.state.map.lights[index] = model
 
-                if (model.enabled != null) {
-                    this.state.map.lights[index].x = event.data.x;
-                    this.state.map.lights[index].y = event.data.y;
-                    this.state.map.lights[index].sight.x = event.data.x;
-                    this.state.map.lights[index].sight.y = event.data.y;
-                    this.state.map.lights[index].sight.polygon = event.data.los;
-
-                    // update los & ligts
-                    this.mapComponent.mapContainer.lightsLayer.update()
-                    this.mapComponent.mapContainer.visionLayer.update()
-                    this.mapComponent.mapContainer.visionLayer.draw()
-                    this.mapComponent.mapContainer.lightsLayer.draw()
-                }
+                this.mapComponent.mapContainer.lightsLayer.update()
+                this.mapComponent.mapContainer.visionLayer.update()
+                this.mapComponent.mapContainer.visionLayer.draw()
+                this.mapComponent.mapContainer.lightsLayer.draw()
                 break;
             }
 
