@@ -5,9 +5,15 @@ export enum ScreenInteraction {
     all = "all",
 }
 
+export enum SharedVision {
+    never = "never",
+    partial = "partial",
+    always = "always",
+}
+
 export class Screen {
-    interaction: ScreenInteraction
     overlayImage: string
     overlayType: string
-    sharedVision: boolean
+    interaction: ScreenInteraction
+    sharedVision: SharedVision
 }

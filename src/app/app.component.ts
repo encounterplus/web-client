@@ -23,6 +23,7 @@ import { Token } from './shared/models/token';
 import { Light } from './shared/models/light';
 import { Sight } from './shared/models/sight';
 import { CacheManager } from './shared/utils';
+import { SharedVision } from './shared/models/screen';
 
 @Component({
     selector: 'app-root',
@@ -148,11 +149,10 @@ export class AppComponent implements OnInit, AfterViewInit {
                 }
 
                 // this could be more optimised
-                if (!this.state.screen.sharedVision) {
+                if (this.state.screen.sharedVision == SharedVision.partial) {
                     this.mapComponent.mapContainer.visionLayer.draw()
                     this.mapComponent.mapContainer.lightsLayer.draw()
                 }
-                
                 
                 break;
             }
@@ -443,6 +443,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             case WSEventName.screenUpdated: {
                 this.state.screen = event.data;
+
+                // render los & ligts
+                this.mapComponent.mapContainer.visionLayer.draw()
+                this.mapComponent.mapContainer.lightsLayer.draw()
                 break;
             }
 

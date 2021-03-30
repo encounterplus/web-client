@@ -9,6 +9,7 @@ import { VisionType } from 'src/app/shared/models/vision'
 import { Texture } from 'pixi.js'
 import { CacheManager, ProgramManager, Utils } from 'src/app/shared/utils'
 import { Tile } from 'src/app/shared/models/tile'
+import { SharedVision } from 'src/app/shared/models/screen'
 
 export class VisionLayer extends Layer {
     tokens: Array<Token> = []
@@ -46,22 +47,34 @@ export class VisionLayer extends Layer {
     blur: boolean = false
 
     get activeToken(): Token {
-        if (this.dataService.state.screen.sharedVision) {
+        if (this.dataService.state.screen.sharedVision == SharedVision.always) {
             return null
         }
 
         // get tokenId from storage
         let activeTokenId = localStorage['userTokenId']
         if (activeTokenId) {
-            // outside of turn
-            if (!this.dataService.state.game.started || this.dataService.state.turned?.tokenId != activeTokenId) {
+
+            if (this.dataService.state.screen.sharedVision == SharedVision.never) {
+                for (let token of this.dataService.state.map.tokens) {
+                    if (token.id == activeTokenId) {
+                        return token
+                    }
+                }
+                return null
+            } else if (this.dataService.state.screen.sharedVision == SharedVision.partial) {
+                // outside of turn
+                if (!this.dataService.state.game.started || this.dataService.state.turned?.tokenId != activeTokenId) {
+                    return null
+                }
+                for (let token of this.dataService.state.map.tokens) {
+                    if (token.id == activeTokenId) {
+                        return token
+                    }
+                }
                 return null
             }
-            for (let token of this.dataService.state.map.tokens) {
-                if (token.id == activeTokenId) {
-                    return token
-                }
-            }
+            
         }
         return null
     }
