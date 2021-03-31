@@ -17,6 +17,7 @@ export class VisionLayer extends Layer {
     lights: Array<Light> = []
 
     intensity: number = 1.0
+    visionLimit: number = -1
     // mapScale: number = 1.0
 
     // gridSize: number = 50.0
@@ -97,8 +98,10 @@ export class VisionLayer extends Layer {
 
         this.fog = this.dataService.state.map.fog
         this.fogExplore = this.dataService.state.map.fogExploration
-        this.intensity = this.dataService.state.map.daylight || 0.0
         
+        this.visionLimit = this.dataService.state.map.losVisionLimit || -1
+        this.intensity = this.visionLimit >= 0 ? 0.0 : this.dataService.state.map.losDaylight || 0.0
+
         this.visible = this.lineOfSight || this.fogOfWar
 
         // clear cache
@@ -218,7 +221,7 @@ export class VisionLayer extends Layer {
                 }
                 // skip tokens without vision and light
                 const vision = token.vision
-                if (vision == null || vision.sight == null || vision.sight.polygon == null || !vision.light) {
+                if (vision == null || vision.sight == null || vision.sight.polygon == null || !vision.light || this.visionLimit >= 0 ) {
                     continue
                 }
                 
@@ -230,7 +233,7 @@ export class VisionLayer extends Layer {
         for(let tile of this.tiles) {
             // check light state
             const light = tile.light
-            if (light == null || light.alwaysVisible || !light.enabled || light.sight == null || light.sight.polygon == null) {
+            if (light == null || light.alwaysVisible || !light.enabled || light.sight == null || light.sight.polygon == null || this.visionLimit >= 0) {
                 continue
             }
 
@@ -241,7 +244,7 @@ export class VisionLayer extends Layer {
         // lights, not always visible
         for(let light of this.lights) {
             // check light state
-            if (light.alwaysVisible || !light.enabled || light.sight == null || light.sight.polygon == null) {
+            if (light.alwaysVisible || !light.enabled || light.sight == null || light.sight.polygon == null || this.visionLimit >= 0) {
                 continue
             }
 
@@ -367,6 +370,8 @@ export class VisionLayer extends Layer {
         const size = this.grid.sizeFromGridSize(Size.toGridSize(token.size))
         const minSize = Math.max(size.width, size.height) / 2.0
 
+        
+
         // temporary radius
         const lightRadiusMin = vision.light ? (vision.lightRadiusMin * this.grid.pixelRatio) + minSize : 0
         const lightRadiusMax = vision.light ? (vision.lightRadiusMax * this.grid.pixelRatio) + minSize : 0
@@ -389,6 +394,13 @@ export class VisionLayer extends Layer {
             default:
                 radiusMin = darkRadiusMin > lightRadiusMin ? darkRadiusMin : lightRadiusMin
                 radiusMax = darkRadiusMax > lightRadiusMax ? darkRadiusMax : lightRadiusMax
+        }
+
+        // vision limit
+        const limit = this.visionLimit * this.grid.pixelRatio
+        if (limit >= 0) {
+            radiusMin = Math.min(radiusMin, limit)
+            radiusMax = Math.min(radiusMax, limit)
         }
 
         // populate uniforms

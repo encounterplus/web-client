@@ -51,7 +51,8 @@ export class Map {
     video: string
     scale: number
     lineOfSight: boolean
-    daylight: number
+    losDaylight: number
+    losVisionLimit: number
     fogOfWar: boolean
     fogExploration: boolean
     fog: string
