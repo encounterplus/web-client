@@ -19,6 +19,11 @@ export enum Size {
     colossal = "C",
 }
 
+export enum TokenStyle {
+    circle = "circle",
+    topdown = "topdown",
+}
+
 export namespace Size {
     export function toGridSize(size: String): GridSize {
         if (size == '') {
@@ -61,6 +66,7 @@ export class Token {
     y: number
     scale: number
     size: string
+    style?: TokenStyle
     rotation: number
     elevation: number
     hidden: boolean

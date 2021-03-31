@@ -8,7 +8,7 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { AuraView } from './aura-view';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
-import { Size, Token } from 'src/app/shared/models/token';
+import { Size, Token, TokenStyle } from 'src/app/shared/models/token';
 import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
 import { min } from 'rxjs/operators';
@@ -191,7 +191,7 @@ export class TokenView extends View {
         
             this.overlaySprite.zIndex = 1
         } else if (this.token.bloodied) {
-            if ( this.token.asset != null || this.token.cachedImageToken) {
+            if ( this.token.asset != null || this.token.style == TokenStyle.topdown) {
                 this.overlayTexture = await Loader.shared.loadTexture('/assets/img/bloodied.png', true)
                 let sprite = new PIXI.Sprite(this.overlayTexture)
                 sprite.anchor.set(0.5, 0.5)
