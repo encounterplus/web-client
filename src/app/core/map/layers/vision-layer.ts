@@ -179,11 +179,15 @@ export class VisionLayer extends Layer {
             for(let token of this.tokens) {
                 // skip tokens without vision and sight
                 const vision = token.vision
-                if (vision == null || vision.sight == null || vision.sight.polygon == null || (!vision.enabled && !vision.light)) {
+                if (vision == null || vision.sight == null || vision.sight.polygon == null) {
                     continue
                 }
 
-                this.drawToken(token, VisionType.combined, false)
+                if (vision.enabled) {
+                    this.drawToken(token, VisionType.combined, false)
+                } else if (vision.light) {
+                    this.drawToken(token, VisionType.light, false)
+                }
             }
         }
 
@@ -369,8 +373,6 @@ export class VisionLayer extends Layer {
  
         const size = this.grid.sizeFromGridSize(Size.toGridSize(token.size))
         const minSize = Math.max(size.width, size.height) / 2.0
-
-        
 
         // temporary radius
         const lightRadiusMin = vision.light ? (vision.lightRadiusMin * this.grid.pixelRatio) + minSize : 0

@@ -22,7 +22,12 @@ void main(void)
    vec4 finalColor = color * intensityColor;
 
    if (radiusMin <= 0.0 && radiusMax <= 0.0) {
-      discard;
+      if (intensity > 0.0) {
+         gl_FragColor = vec4(1.0 * intensity, 1.0, 0.0, intensity);
+      } else {
+         discard;
+      } 
+      return;
    }
 
    if (dist >= radiusMax) {
