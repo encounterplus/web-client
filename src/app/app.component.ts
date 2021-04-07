@@ -419,6 +419,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             case WSEventName.lightsUpdated: {
                 this.state.map.lights = event.data
+
+                console.debug(this.state.map.lights)
                 
                 // update los & ligts
                 this.mapComponent.mapContainer.lightsLayer.update()
@@ -466,14 +468,14 @@ export class AppComponent implements OnInit, AfterViewInit {
                     // search tiles and lights
                     if (sight.key.includes("light-")) {
                         for( let tile of this.state.map.tiles) {
-                            if (tile.light?.sight?.key == sight.key) {
+                            if (tile.light?.sight?.key == sight.key || tile.light?.id == sight.key.slice(6)) {
                                 tile.light.sight = sight
                                 break
                             }
                         }
 
                         for( let light of this.state.map.lights) {
-                            if (light.sight?.key == sight.key) {
+                            if (light.sight?.key == sight.key || light.id == sight.key.slice(6)) {
                                 light.sight = sight
                                 break
                             }

@@ -32,10 +32,10 @@ export class LightsLayer extends Layer {
     grid: Grid
 
     update() {
-        this.tokens = this.dataService.state.map.tokens;
-        this.tiles = this.dataService.state.map.tiles;
-        this.lights = this.dataService.state.map.lights;
-        this.visible = this.dataService.state.map.lineOfSight || this.dataService.state.map.fogOfWar ;
+        this.tokens = this.dataService.state.map.tokens
+        this.tiles = this.dataService.state.map.tiles
+        this.lights = this.dataService.state.map.lights
+        this.visible = this.dataService.state.map.lineOfSight
     }
 
     async draw() {
