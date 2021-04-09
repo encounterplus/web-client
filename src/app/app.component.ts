@@ -24,6 +24,7 @@ import { Light } from './shared/models/light';
 import { Sight } from './shared/models/sight';
 import { CacheManager } from './shared/utils';
 import { SharedVision } from './shared/models/screen';
+import { textChangeRangeIsUnchanged } from 'typescript';
 
 @Component({
     selector: 'app-root',
@@ -523,6 +524,12 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.mapComponent.draw();
             }
             console.debug(this.state);
+
+            // legacy build check
+            if (data.build < 2280 && data.build != 1) {
+                this.toastService.showError("Incompatible server version: " + data.version + " || Please use: http://legacy-client.encounter.plus/?remoteHost=" + this.dataService.remoteHost, false);
+            }
+
         }, err => this.toastService.showError("API error: " + err));
     }
 
