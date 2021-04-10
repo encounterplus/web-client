@@ -174,8 +174,8 @@ export class MapContainer extends Layer {
     }
 
     updateTokens() {
-        this.monstersLayer.tokens = this.state.map.tokens.filter(token => !(token.reference?.includes("player-") || token.role == Role.friendly && token.vision.enabled))
-        this.playersLayer.tokens = this.state.map.tokens.filter(token => token.reference?.includes("player-") || token.role == Role.friendly && token.vision.enabled)
+        this.monstersLayer.tokens = this.state.map.tokens.filter(token => !(token.reference?.includes("player-") || token.role == Role.friendly && token.vision != null && token.vision?.enabled))
+        this.playersLayer.tokens = this.state.map.tokens.filter(token => token.reference?.includes("player-") || token.role == Role.friendly && token.vision != null && token.vision?.enabled)
     }
 
     updateTurned(creature: Creature) {
