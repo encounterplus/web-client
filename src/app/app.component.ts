@@ -150,7 +150,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 }
 
                 // this could be more optimised
-                if (this.state.screen.sharedVision == SharedVision.partial) {
+                if (this.state.screen.sharedVision != SharedVision.always) {
                     this.mapComponent.mapContainer.visionLayer.draw()
                     this.mapComponent.mapContainer.lightsLayer.draw()
                 }

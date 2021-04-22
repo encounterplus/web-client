@@ -48,34 +48,51 @@ export class VisionLayer extends Layer {
     blur: boolean = false
 
     get activeToken(): Token {
+        // no active token shared vision is always
         if (this.dataService.state.screen.sharedVision == SharedVision.always) {
             return null
         }
 
-        // get tokenId from storage
-        let activeTokenId = localStorage['userTokenId']
-        if (activeTokenId) {
+        // get userTokenId from storage
+        let userTokenId = localStorage['userTokenId']
 
+        // check for empty user token or `null` string
+        if (userTokenId && userTokenId != "null") {
             if (this.dataService.state.screen.sharedVision == SharedVision.never) {
+                // search using userTokenId
                 for (let token of this.dataService.state.map.tokens) {
-                    if (token.id == activeTokenId) {
+                    if (token.id == userTokenId) {
                         return token
                     }
                 }
                 return null
             } else if (this.dataService.state.screen.sharedVision == SharedVision.partial) {
                 // outside of turn
-                if (!this.dataService.state.game.started || this.dataService.state.turned?.tokenId != activeTokenId) {
+                if (!this.dataService.state.game.started || this.dataService.state.turned?.tokenId != userTokenId) {
                     return null
                 }
+                // search using userTokenId
                 for (let token of this.dataService.state.map.tokens) {
-                    if (token.id == activeTokenId) {
+                    if (token.id == userTokenId) {
                         return token
                     }
                 }
                 return null
             }
             
+        } else {
+            // outside of turn
+            if (!this.dataService.state.game.started) {
+                return null
+            }
+            
+            // search using creature tokenId
+            for (let token of this.dataService.state.map.tokens) {
+                if (token.id == this.dataService.state.turned?.tokenId) {
+                    return token
+                }
+            }
+            return null
         }
         return null
     }
