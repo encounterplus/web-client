@@ -22,6 +22,7 @@ import { ImageHandoutComponent } from './core/image-handout/image-handout.compon
 import { LightboxModule } from 'ngx-lightbox';
 import { MessageComponent } from './core/message/message.component';
 import { MessageListComponent } from './core/message-list/message-list.component';
+import { PausedComponent } from './core/paused/paused.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { MessageListComponent } from './core/message-list/message-list.component
     AboutModalComponent,
     ImageHandoutComponent,
     MessageComponent,
-    MessageListComponent
+    MessageListComponent,
+    PausedComponent
   ],
   imports: [
     BrowserModule,

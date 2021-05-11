@@ -134,6 +134,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.state.game.turn = event.data.turn;
                 this.state.game.round = event.data.round;
                 this.state.game.started = event.data.started;
+                this.state.game.paused = event.data.paused;
     
                 if (event.data.creatures) {
                     this.state.game.creatures = event.data.creatures;

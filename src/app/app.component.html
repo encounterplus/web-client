@@ -8,6 +8,7 @@
   </div>  
 
   <div id="bottom-bar">
+    <app-paused *ngIf="state.game.paused"></app-paused>
     <app-image-handout *ngIf="state.screen.overlayImage" [screen]="state.screen"></app-image-handout>
     <app-toast-list aria-live="polite" aria-atomic="true"></app-toast-list>
   </div>

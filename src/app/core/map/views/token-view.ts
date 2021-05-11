@@ -444,7 +444,13 @@ export class TokenView extends View {
     }
 
     updateInteraction() {
+        // disable interactions when game is paused
+        if (this.dataService.state.game.paused) {
+            this.interactive = false
+            return
+        }
         
+        // enable interactions based on screen settings
         switch (this.dataService.state.screen.interaction) {
             case ScreenInteraction.all: 
                 this.interactive = this.token.role == Role.friendly
