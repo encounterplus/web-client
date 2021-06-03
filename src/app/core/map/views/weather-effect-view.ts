@@ -1,8 +1,7 @@
 import { View } from './view';
 import { Grid } from '../models/grid';
 import * as particles from "pixi-particles";
-import { Pointer } from 'src/app/shared/models/pointer';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import * as PIXI from 'pixi.js'
 import { Layer } from '../layers/layer';
 
 export class WeatherEffectView extends View {

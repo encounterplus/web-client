@@ -32,7 +32,7 @@ export class BackgroundLayer extends Layer {
             this.videoMuted = value;
 
             if (this.videoTexture) {
-                const videoResource = this.videoTexture.baseTexture.resource as PIXI.resources.VideoResource;
+                const videoResource = this.videoTexture.baseTexture.resource as PIXI.VideoResource;
                 const video = videoResource.source as HTMLVideoElement;
                 video.muted = value;
             }  
@@ -42,7 +42,7 @@ export class BackgroundLayer extends Layer {
             this.videoPaused = value;
 
             if (this.videoTexture) {
-                const videoResource = this.videoTexture.baseTexture.resource as PIXI.resources.VideoResource;
+                const videoResource = this.videoTexture.baseTexture.resource as PIXI.VideoResource;
                 const video = videoResource.source as HTMLVideoElement;
                 
                 if (value) {
@@ -156,7 +156,7 @@ export class BackgroundLayer extends Layer {
         this.addChild(sprite);
         this.videoSprite = sprite;
 
-        const videoResource = this.videoTexture.baseTexture.resource as PIXI.resources.VideoResource;
+        const videoResource = this.videoTexture.baseTexture.resource as PIXI.VideoResource;
         const video = videoResource.source as HTMLVideoElement;
 
         this.loadedVideoSrc = this.video;
@@ -182,7 +182,7 @@ export class BackgroundLayer extends Layer {
 
         // if (this.imageTexture) this.imageTexture.destroy();
         if (this.videoTexture) {
-            const videoResource = this.videoTexture.baseTexture.resource as PIXI.resources.VideoResource;
+            const videoResource = this.videoTexture.baseTexture.resource as PIXI.VideoResource;
             const video = videoResource.source as HTMLVideoElement;
             video.onpause = video.onplay = video.onvolumechange = null;
             video.pause();

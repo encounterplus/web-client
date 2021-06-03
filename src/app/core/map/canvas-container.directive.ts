@@ -1,7 +1,7 @@
 import { Directive, AfterViewInit, ElementRef, HostListener, NgZone, Input, OnDestroy } from '@angular/core';
-import * as PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js'
 import { ToastService } from 'src/app/shared/services/toast.service';
-window.PIXI = PIXI;
+// window.PIXI = PIXI;
 
 @Directive({
   selector: '[appCanvasContainer]'
@@ -27,7 +27,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
     resolution: window.devicePixelRatio || 1,
     // resolution:  1,
     antialias: true,
-    transparent: false,
+    // transparent: false,
     // forceFXAA: true,
     autoResize: true,
     // sharedTicker: true,
@@ -78,9 +78,9 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
       throw new Error('No WebGL Support!')
     }
 
-    const gl = this.app.renderer.gl;
-    this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-    console.debug(`maximum texture size: ${this.maxTextureSize}`);
+    // const gl = this.app.renderer.gl;
+    // this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    // console.debug(`maximum texture size: ${this.maxTextureSize}`);
 
     // let ticker = PIXI.Ticker.shared;
     // ticker.autoStart = false;
@@ -91,7 +91,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     // debuging tools
-    window.PIXI = PIXI;
+    // window.PIXI = PIXI;
   }
 
   @HostListener('window:resize', ['$event'])

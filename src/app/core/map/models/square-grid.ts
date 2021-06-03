@@ -1,4 +1,4 @@
-import { pathToFileURL } from "url";
+import * as PIXI from 'pixi.js'
 import { GridSize } from "../views/token-view";
 import { Grid, GridInterface } from "./grid";
 

@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js'
 import { GridStyle, GridType, Map } from 'src/app/shared/models/map';
 import { GridSize } from '../views/token-view';
 

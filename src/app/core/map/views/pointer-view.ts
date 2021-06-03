@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
 import * as particles from "pixi-particles";

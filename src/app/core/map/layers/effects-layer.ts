@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js'
 import { Layer } from './layer';
 import { ControlState } from '../views/token-view';
 import { Grid } from '../models/grid';

@@ -1,12 +1,9 @@
-import { Creature } from 'src/app/shared/models/creature';
+import * as PIXI from 'pixi.js'
 import { Layer } from './layer';
 import { Tile } from 'src/app/shared/models/tile';
-import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Size, Token } from 'src/app/shared/models/token';
 import { Light } from 'src/app/shared/models/light';
-import { VisionGeometry } from '../renderers/vision-renderer';
-import { GridType } from 'src/app/shared/models/map';
 import { Grid } from '../models/grid';
 import { CacheManager, ProgramManager } from 'src/app/shared/utils';
 

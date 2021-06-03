@@ -1,7 +1,9 @@
+import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
 import { AreaEffect, AreaEffectShape } from 'src/app/shared/models/area-effect';
+import { Utils } from 'src/app/shared/utils';
 
 export function toRadians(degrees: number) {
 	return degrees * Math.PI / 180;
@@ -241,16 +243,11 @@ export class AreaEffectView extends View {
                             let hfilter = new PIXI.filters.ColorMatrixFilter();
                             let sfilter = new PIXI.filters.ColorMatrixFilter();
                             let bfilter = new PIXI.filters.ColorMatrixFilter();
-                            hfilter.hue(component.hue,false);
-                            sfilter.saturate(component.saturation/100,true);
-                            let l = component.brightness/100;
-                            let v = 1 + l
-                            bfilter._loadMatrix(
-                                [v,0,0,0,l,
-                                 0,v,0,0,l,
-                                 0,0,v,0,l,
-                                 0,0,0,1,0],(l<0));
-                            sprite.filters = [hfilter,sfilter,bfilter];
+
+                            hfilter.hue(component.hue, false);
+                            sfilter.saturate(component.saturation / 100, false)
+                            bfilter.matrix = Utils.brightnessMatrix(component.brightness / 100)
+                            sprite.filters = [hfilter, sfilter, bfilter];
                         }
                     }
                     if (component.type.startsWith("animation.")) {

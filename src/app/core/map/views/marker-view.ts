@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
 import { Marker } from 'src/app/shared/models/marker';

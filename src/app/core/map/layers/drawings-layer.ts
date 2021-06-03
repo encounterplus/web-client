@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js'
 import { Layer } from './layer';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Drawing, DrawingShape } from 'src/app/shared/models/drawing';

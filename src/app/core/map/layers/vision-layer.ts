@@ -1,12 +1,11 @@
+import * as PIXI from 'pixi.js'
 import { Layer } from './layer'
 import { Loader } from '../models/loader'
 import { DataService } from 'src/app/shared/services/data.service'
 import { Size, Token } from 'src/app/shared/models/token'
 import { Light } from 'src/app/shared/models/light'
-import { GridType } from 'src/app/shared/models/map'
 import { Grid } from '../models/grid'
 import { VisionType } from 'src/app/shared/models/vision'
-import { Texture } from 'pixi.js'
 import { CacheManager, ProgramManager, Utils } from 'src/app/shared/utils'
 import { Tile } from 'src/app/shared/models/tile'
 import { SharedVision } from 'src/app/shared/models/screen'
@@ -40,11 +39,11 @@ export class VisionLayer extends Layer {
     fogLoaded = false
     lineOfSight = false
 
-    bg: PIXI.Sprite;
-    meshes: Array<PIXI.Mesh> = [];
-    msk: PIXI.Graphics;
+    bg: PIXI.Sprite
+    meshes: Array<PIXI.Mesh> = []
+    msk: PIXI.Graphics
     app: PIXI.Application
-    blurFilter: PIXI.filters.BlurFilter
+    blurFilter: PIXI.Filter
     blur: boolean = false
 
     get activeToken(): Token {
@@ -140,7 +139,7 @@ export class VisionLayer extends Layer {
 
         // prevent showing map while loading textures
         if (this.fog && !this.fogLoaded) {
-            this.bg = new PIXI.Sprite(Texture.WHITE)
+            this.bg = new PIXI.Sprite(PIXI.Texture.WHITE)
             this.bg.width = this.w
             this.bg.height = this.h
             this.bg.tint = 0x000000;
@@ -280,7 +279,7 @@ export class VisionLayer extends Layer {
 
         // render to texture
         if (this.lineOfSight || (this.fogOfWar && this.fogExplore)) {
-            this.app.renderer.render(this.visionContainer, this.visionTexture, true)
+            this.app.renderer.render(this.visionContainer, {renderTexture: this.visionTexture, clear: true})
         } 
 
         // load texture if necessary
@@ -297,7 +296,7 @@ export class VisionLayer extends Layer {
         if (this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore) {
             let sprite = new PIXI.Sprite(this.fogTexture)
             sprite.filters = [this.blurFilter]
-            this.app.renderer.render(sprite, this.fogBlurTexture, true)
+            this.app.renderer.render(sprite, {renderTexture: this.fogBlurTexture, clear: true})
         }
 
         // init shader
@@ -577,7 +576,7 @@ export class VisionLayer extends Layer {
         mesh.shader.uniforms.texVision = this.visionTexture
         mesh.shader.uniforms.exploration = this.fogExplore
 
-        this.app.renderer.render(mesh, this.tmpTexture, true)
+        this.app.renderer.render(mesh, {renderTexture: this.tmpTexture, clear: true})
         
         // gpu texture copy function?
         // texture swap
@@ -613,7 +612,7 @@ export class VisionLayer extends Layer {
         sprite.filters = this.blur ? [this.blurFilter] : null
 
          // render offscreen
-        this.app.renderer.render(sprite, this.fogTexture, true)
+        this.app.renderer.render(sprite, {renderTexture: this.fogTexture, clear: true})
 
         sprite.destroy()
         PIXI.BaseTexture.removeFromCache(fogTexture.baseTexture.textureCacheIds[1]);
@@ -646,7 +645,7 @@ export class VisionLayer extends Layer {
         sprite.filters = this.blur ? [this.blurFilter] : null
 
         // render offscreen
-        this.app.renderer.render(sprite, this.fogTexture, true)
+        this.app.renderer.render(sprite, {renderTexture: this.fogTexture, clear: true})
 
         sprite.destroy()
         // PIXI.BaseTexture.removeFromCache(fogTexture.baseTexture.textureCacheIds[1]);

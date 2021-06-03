@@ -1,4 +1,4 @@
-import { NineSlicePlane } from 'pixi.js';
+import * as PIXI from 'pixi.js'
 
 export class Loader {
 
@@ -236,14 +236,14 @@ export class Loader {
         });
     }
 
-    getResource(src: string): PIXI.LoaderResource {
+    getResource(src: string): PIXI.ILoaderResource {
         const loader = PIXI.Loader.shared;
         let cached = loader.resources[src];
         if ( !cached ) return null;
         return cached;
     }
 
-    async loadResource(src: string): Promise<PIXI.LoaderResource> {
+    async loadResource(src: string): Promise<PIXI.ILoaderResource> {
         let res = this.getResource(src);
         if ( res ) return res;
 

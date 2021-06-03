@@ -1,4 +1,8 @@
+import * as PIXI from 'pixi.js'
+import type { ArrayFixed } from '@pixi/utils';
+// import ColorMatrix from PIXI.filters.ColorMatrixFilter
 import { Loader } from "../core/map/models/loader"
+import { ReturnStatement } from '@angular/compiler';
 
 export class ProgramManager {
     static cached = new Map<string, PIXI.Program>()
@@ -50,6 +54,22 @@ export class Utils {
             return dstWidth / srcWidth
         } else {
              return dstHeight / srcHeight
+        }
+    }
+
+    static brightnessMatrix(b: number): ArrayFixed<number, 20> {
+        if(b > 0){
+            return [
+                1-b, 0, 0, 0, b,
+                0, 1-b, 0, 0, b,
+                0, 0, 1-b, 0, b,
+                0, 0, 0, 1, 0];
+        } else {
+            return [
+                1, 0, 0, 0, b,
+                0, 1, 0, 0, b,
+                0, 0, 1, 0, b,
+                0, 0, 0, 1, 0];
         }
     }
 }

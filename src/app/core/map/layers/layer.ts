@@ -1,5 +1,4 @@
 import * as PIXI from 'pixi.js';
-import { AppState } from 'src/app/shared/models/app-state';
 
 export class Layer extends PIXI.Container {
 

@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js'
 import { Grid, GridInterface } from "./grid";
 import { Hex, OffsetCoord, Orientation } from "./hex";
 import { GridStyle, GridType, Map } from 'src/app/shared/models/map';

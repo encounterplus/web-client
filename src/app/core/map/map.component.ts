@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, Input, HostListener, OnChanges, NgZone } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
+import * as PIXI from 'pixi.js'
 import { Viewport } from 'pixi-viewport';
 import { MapContainer } from './map-container';
 import { AppState } from 'src/app/shared/models/app-state';

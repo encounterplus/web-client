@@ -1,5 +1,5 @@
 
-import { Creature, Role } from 'src/app/shared/models/creature';
+import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Container, InteractionEvent } from 'pixi.js';
 import { Grid } from '../models/grid';
@@ -8,10 +8,9 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { AuraView } from './aura-view';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
-import { Size, Token, TokenStyle } from 'src/app/shared/models/token';
+import { Role, Size, Token, TokenStyle } from 'src/app/shared/models/token';
 import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
-import { min } from 'rxjs/operators';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
