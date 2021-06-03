@@ -3,7 +3,6 @@ import { Layer } from './layer';
 import { Map } from 'src/app/shared/models/map';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
-import { mapToMapExpression } from '@angular/compiler/src/render3/util';
 
 export class BackgroundLayer extends Layer {
 
