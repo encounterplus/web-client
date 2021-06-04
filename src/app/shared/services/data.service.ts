@@ -7,6 +7,12 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { webSocket } from 'rxjs/webSocket';
 import { AppState } from '../models/app-state';
 
+export enum ViewMode {
+  dm = "dm",
+  player = "player",
+  spectator = "spectator",
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,6 +24,8 @@ export class DataService {
   private reconnectionDelay = 1000;
   public remoteHost: string;
   public protocol: string;
+  public viewMode: ViewMode = ViewMode.player
+  public allInteractions = false
 
   private videoPaused$ = new BehaviorSubject(false);
   private videoMuted$ = new BehaviorSubject(true);

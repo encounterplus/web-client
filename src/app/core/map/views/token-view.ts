@@ -11,6 +11,7 @@ import { ScreenInteraction } from 'src/app/shared/models/screen';
 import { Role, Size, Token, TokenStyle } from 'src/app/shared/models/token';
 import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
@@ -448,6 +449,12 @@ export class TokenView extends View {
         // disable interactions when game is paused
         if (this.dataService.state.game.paused) {
             this.interactive = false
+            return
+        }
+
+        // interactions override
+        if (this.dataService.allInteractions) {
+            this.interactive = true
             return
         }
         

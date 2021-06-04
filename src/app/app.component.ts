@@ -3,7 +3,7 @@ import { MapComponent } from './core/map/map.component';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 import { ApiData } from './shared/models/api-data';
-import { DataService } from './shared/services/data.service';
+import { DataService, ViewMode } from './shared/services/data.service';
 import { environment } from 'src/environments/environment';
 import { AppState } from './shared/models/app-state';
 import { WSEventName, WSEvent } from './shared/models/wsevent';
@@ -24,7 +24,6 @@ import { Light } from './shared/models/light';
 import { Sight } from './shared/models/sight';
 import { CacheManager } from './shared/utils';
 import { SharedVision } from './shared/models/screen';
-import { textChangeRangeIsUnchanged } from 'typescript';
 
 @Component({
     selector: 'app-root',
@@ -549,6 +548,12 @@ export class AppComponent implements OnInit, AfterViewInit {
 	    Loader.shared.remoteBaseURL = this.dataService.baseURL;
     }
 
+    configureParams() {
+        let urlParams = new URLSearchParams(window.location.search);
+	    this.dataService.viewMode = ViewMode[urlParams.get('viewMode') || "player"]
+        this.dataService.allInteractions = urlParams.get('interactions') == "all"
+    }
+
     ngOnInit() {
         // init user color
         let color = localStorage.getItem("userColor");
@@ -559,7 +564,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         // update messages based on local storage settings
         this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
 
-        this.configureRemoteHost();
+        this.configureRemoteHost()
+        this.configureParams()
         this.wsConnect();
 
         this.dataService.connectionStatus$.subscribe(status => {
