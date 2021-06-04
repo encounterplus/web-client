@@ -55,6 +55,8 @@ export class MapContainer extends Layer {
     drawingsLayer: DrawingsLayer;
     markersLayer: MarkersLayer;
 
+    overlaySprite: PIXI.Sprite
+
     // data
     map: Map;
     state: AppState;
@@ -73,6 +75,10 @@ export class MapContainer extends Layer {
 
     constructor(private dataService: DataService) {
         super();
+
+        // create black overlay
+        this.overlaySprite = new PIXI.Sprite(PIXI.Texture.WHITE)
+        this.overlaySprite.tint = 0x000000
 
         this.mapLayer = new Layer()
         this.addChild(this.mapLayer)
@@ -107,6 +113,8 @@ export class MapContainer extends Layer {
         this.addChild(this.effectsLayer);
         this.playersLayer = new TokensLayer(this.dataService)
         this.addChild(this.playersLayer);
+
+        this.addChild(this.overlaySprite)
 
         this.interactive = true;
 
@@ -235,11 +243,34 @@ export class MapContainer extends Layer {
 
         // main background laayer
         await this.backgroundLayer.draw()
+        // this.backgroundLayer.visible = false
 
         // update size
         this.w = this.backgroundLayer.w
         this.h = this.backgroundLayer.h
 
+        // update overlay sprite to hide stuff during asset loading
+        this.overlaySprite.width = this.w
+        this.overlaySprite.height = this.h
+        this.overlaySprite.visible = true
+
+        // cleanup otherwise msk will leak memory
+        if(this.msk) {
+            this.msk.destroy();
+            this.msk = null;
+        }
+
+        // create new mask
+        this.msk = new PIXI.Graphics();
+        this.msk.beginFill(0xffffff);
+        this.msk.drawRect(0, 0, this.w, this.h)
+        this.msk.endFill()
+
+        // apply mask
+        this.addChild(this.msk)
+        this.mask = this.msk
+
+        // map layer
         this.mapLayer.size = this.size
 
         if (this.mapTexture == null || this.mapTexture.width != this.w || this.mapTexture.height != this.h) {
@@ -273,6 +304,11 @@ export class MapContainer extends Layer {
         this.drawingsLayer.size = this.size
         this.drawingsLayer.draw()
 
+        // hide overlay
+        this.overlaySprite.visible = false
+
+        // this.backgroundLayer.visible = true
+
         // tokens
         await this.drawTokens()
     
@@ -291,23 +327,6 @@ export class MapContainer extends Layer {
         this.effectsLayer.draw()
 
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h)
-
-        // cleanup otherwise msk will leak memory
-        if(this.msk) {
-            this.msk.destroy();
-            this.msk = null;
-        }
-
-        // create new mask
-        this.msk = new PIXI.Graphics();
-        this.msk.beginFill(0xffffff);
-        this.msk.drawRect(0, 0, this.w, this.h)
-        this.msk.endFill()
-
-        // apply mask
-        this.addChild(this.msk)
-        this.mask = this.msk
-
         return this;
     }
 
