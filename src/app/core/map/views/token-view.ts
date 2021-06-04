@@ -177,7 +177,6 @@ export class TokenView extends View {
 
         // overlay
         if (this.token.dead) {
-            console.log("token dead: " + this.token.id)
             this.overlayTexture = await Loader.shared.loadTexture('/assets/img/corpse.png', true);
             let sprite = new PIXI.Sprite(this.overlayTexture);
             sprite.anchor.set(0.5, 0.5);
@@ -185,7 +184,6 @@ export class TokenView extends View {
             this.overlaySprite = sprite;
             
             if (this.tokenSprite) {
-                console.log("token sprite visible")
                 this.tokenSprite.visible = false
                 // change z order
                 this.tokenSprite.zIndex = 0

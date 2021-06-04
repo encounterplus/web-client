@@ -7,8 +7,8 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { Loader } from '../models/loader';
 import { Pointer } from 'src/app/shared/models/pointer';
 import { PointerView } from '../views/pointer-view';
-import { isNumericLiteral } from 'typescript';
 import { WeatherEffectView } from '../views/weather-effect-view';
+import { WeatherType } from 'src/app/shared/models/map';
 
 export class EffectsLayer extends Layer {
     grid: Grid;
@@ -20,34 +20,69 @@ export class EffectsLayer extends Layer {
     ringTexture: PIXI.Texture;
     snowTexture: PIXI.Texture;
     rainTexture: PIXI.Texture;
+    fogTexture: PIXI.Texture;
 
     views = {};
+
+    weatherEffectView: WeatherEffectView
 
     async draw() {
 
         // this.clear();
-        this.w = this.parent.width;
-        this.h = this.parent.height;
+        // this.w = this.parent.width;
+        // this.h = this.parent.height;
 
         if (!this.ringTexture) {
             this.ringTexture = await Loader.shared.loadTexture('/assets/img/particle.png', true);
         }
 
-        // if (!this.snowTexture) {
-        //     this.snowTexture = await Loader.shared.loadTexture('/assets/img/snow.png', true);
-        // }
+        if (!this.snowTexture) {
+            this.snowTexture = await Loader.shared.loadTexture('/assets/img/snow.png', true);
+        }
 
-        // if (!this.rainTexture) {
-        //     this.rainTexture = await Loader.shared.loadTexture('/assets/img/rain.png', true);
-        // }
+        if (!this.rainTexture) {
+            this.rainTexture = await Loader.shared.loadTexture('/assets/img/rain.png', true);
+        }
+
+        if (!this.fogTexture) {
+            this.fogTexture = await Loader.shared.loadTexture('/assets/img/smoke.png', true);
+        }
 
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
-        // let weatherEffectView = new WeatherEffectView("snow", this.grid, this, this.rainTexture);
-        // weatherEffectView.updatePosition(0, 0);
-        // weatherEffectView.emitter.emit = true;
-        // this.addChild(weatherEffectView);
+        if (this.weatherEffectView != null) {
+            this.weatherEffectView.emitter.emit = false;
+            this.weatherEffectView.emitter.destroy()
+            this.weatherEffectView.destroy()
+            this.removeChild(this.weatherEffectView)
+            this.weatherEffectView = null
+        }
 
+        const weatherType = this.dataService.state.map.weatherType
+        const weatherIntensity = this.dataService.state.map.weatherIntensity
+        let particleTexture: PIXI.Texture
+    
+        if (weatherType != null && weatherType != WeatherType.none) {
+            console.debug("creating weather effect: " + weatherType)
+
+            switch(weatherType) {
+                case WeatherType.fog:
+                    particleTexture = this.fogTexture
+                    break
+                case WeatherType.rain:
+                    particleTexture = this.rainTexture
+                    break
+                case WeatherType.snow:
+                    particleTexture = this.snowTexture
+                    break
+            }
+
+            this.weatherEffectView = new WeatherEffectView(weatherType, weatherIntensity, this.grid, this, particleTexture);
+            this.weatherEffectView.updatePosition(0, 0);
+            this.weatherEffectView.emitter.emit = true;
+            this.addChild(this.weatherEffectView);
+        }
+        
         return this;
     }
 

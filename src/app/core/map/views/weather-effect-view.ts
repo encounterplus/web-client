@@ -3,29 +3,35 @@ import { Grid } from '../models/grid';
 import * as particles from "pixi-particles";
 import * as PIXI from 'pixi.js'
 import { Layer } from '../layers/layer';
+import { WeatherType } from 'src/app/shared/models/map';
+import { NgbTypeaheadWindow } from '@ng-bootstrap/ng-bootstrap/typeahead/typeahead-window';
 
 export class WeatherEffectView extends View {
 
-    grid: Grid;
     weatherEffect: String;
     particleTexture: PIXI.Texture;
 
     emitter: particles.Emitter;
 
-    constructor(weatherEffect: String, grid: Grid, parent: Layer, texture: PIXI.Texture) {
-        super();
+    snowConfig() : any {
+        const scale = (this.grid.size / 64.0) * 0.15;
+        const edge =  Math.max(this.w, this.h) * 1.2
 
-        let particleScale = (grid.size / 64.0) * 0.8;
+        const intensity = this.intensity
+        const intensity2 = this.intensity * this.intensity
+        const intensity3 = this.intensity * this.intensity * this.intensity
+        const intensity4 = this.intensity * this.intensity * this.intensity * this.intensity
+
 
         let config = {
             alpha: {
-                start: .6,
+                start: .8,
                 end: 0,
                 minimumAlphaMultiplier: 1,
                 maximumAlphaMultiplier: 2
             },
             scale: {
-                start: .4,
+                start: scale,
                 end: 0,
                 minimumScaleMultiplier: 1,
                 maximumScaleMultiplier: 2
@@ -58,9 +64,9 @@ export class WeatherEffectView extends View {
                 max: 2.5
             },
             blendMode: "normal",
-            frequency: 5e-4,
+            frequency: 1 / (300 * (intensity <= 1 ? intensity : intensity4 )),
             emitterLifetime: -1,
-            maxParticles: 400,
+            maxParticles: 2000,
             pos: {
                 x: 0,
                 y: 0
@@ -68,14 +74,38 @@ export class WeatherEffectView extends View {
             addAtBack: false,
             spawnType: 'ring',
             spawnCircle: {
-                x: parent.w / 2,
-                y: parent.h / 2,
-                r: parent.w * 0.6,
-                minR: parent.h * 0.2
+                x: this.w / 2,
+                y: this.h / 2,
+                r: edge / 2,
+                minR: edge * 0.15
             }
         };
 
-        this.emitter = new particles.Emitter(parent, texture, config);
+        return config
+    }
+
+    constructor(type: WeatherType, private intensity: number, private grid: Grid, private parentLayer: Layer, texture: PIXI.Texture) {
+        super();
+
+        this.w = parentLayer.w
+        this.h = parentLayer.h
+        
+        let config: particles.EmitterConfig | particles.OldEmitterConfig;
+
+        switch(type) {
+            case WeatherType.fog:
+                config = this.snowConfig()
+                break
+            case WeatherType.rain:
+                config = this.snowConfig()
+                break
+            case WeatherType.snow:
+                config = this.snowConfig()
+                break
+        }
+        
+
+        this.emitter = new particles.Emitter(parentLayer, texture, config);
         this.emitter.autoUpdate = true;
         // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD;
 

@@ -33,7 +33,6 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "./node_modules/pixi-particles/dist/pixi-particles.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,

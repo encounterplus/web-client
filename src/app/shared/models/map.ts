@@ -56,7 +56,7 @@ export class Map {
     fogOfWar: boolean
     fogExploration: boolean
     fog: string
-    weatherType: WeatherType
+    weatherType: WeatherType = WeatherType.none
     weatherIntensity: number
     x: number
     y: number

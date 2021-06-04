@@ -125,7 +125,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     // main websocket event handler
     handleEvent(event: WSEvent) {
         console.log(`Event received: ${event.name}`)
-        console.log(JSON.stringify(event));
+        // console.log(JSON.stringify(event));
 
         switch (event.name) {
 
@@ -164,6 +164,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 
                 if (map) {
                     Object.assign(map, event.data);
+
+                    // force weather type asssignment
+                    map.weatherType = event.data.weatherType
                 }
 
                 this.mapComponent.mapContainer.update(this.state);
