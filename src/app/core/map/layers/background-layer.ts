@@ -145,7 +145,7 @@ export class BackgroundLayer extends Layer {
             }
         }
 
-        console.log(`map size: ${this.w}x${this.h}`)
+        console.debug(`map size: ${this.w}x${this.h}`)
     }
 
     drawVideo() {

@@ -125,7 +125,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     // main websocket event handler
     handleEvent(event: WSEvent) {
         console.log(`Event received: ${event.name}`)
-        // console.log(JSON.stringify(event));
+        console.log(JSON.stringify(event));
 
         switch (event.name) {
 
@@ -523,7 +523,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.mapComponent.update();
                 this.mapComponent.draw();
             }
-            console.debug(this.state);
+            // console.debug(this.state);
 
             // legacy build check
             if (data.build < 2280 && data.build != 1) {
