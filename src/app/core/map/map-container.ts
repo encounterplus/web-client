@@ -307,8 +307,6 @@ export class MapContainer extends Layer {
         // hide overlay
         this.overlaySprite.visible = false
 
-        // this.backgroundLayer.visible = true
-
         // tokens
         await this.drawTokens()
     
