@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 import { Layer } from './layer'
 import { Loader } from '../models/loader'
 import { DataService } from 'src/app/shared/services/data.service'
-import { Size, Token } from 'src/app/shared/models/token'
+import { Role, Size, Token } from 'src/app/shared/models/token'
 import { Light } from 'src/app/shared/models/light'
 import { Grid } from '../models/grid'
 import { VisionType } from 'src/app/shared/models/vision'
@@ -84,10 +84,11 @@ export class VisionLayer extends Layer {
             if (!this.dataService.state.game.started) {
                 return null
             }
-            
+
             // search using creature tokenId
             for (let token of this.dataService.state.map.tokens) {
                 if (token.id == this.dataService.state.turned?.tokenId) {
+
                     return token
                 }
             }
@@ -182,10 +183,17 @@ export class VisionLayer extends Layer {
         this.msk = new PIXI.Graphics();
         this.msk.beginFill(0xffffff);
 
-        // tokens
+        // active token
         let activeToken = this.activeToken
 
+        // HOTFIX: check vision data for active token
+        if (activeToken && activeToken.role == Role.friendly && activeToken.vision && activeToken.vision.sight && activeToken.vision.sight.polygon) {
+        } else {
+            activeToken = null
+        }
+
         // render active tokens
+        
         if (activeToken) {
             const vision = activeToken.vision
             if (vision != null && vision.sight != null && vision.sight.polygon != null && vision.enabled) {
