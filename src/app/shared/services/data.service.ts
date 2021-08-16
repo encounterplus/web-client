@@ -13,18 +13,24 @@ export enum ViewMode {
   spectator = "spectator",
 }
 
+export enum RunMode {
+  normal = "normal",
+  tabletop = "tabletop",
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
 
   // hmm, global state?
-  state: AppState;
+  state: AppState = new AppState()
 
   private reconnectionDelay = 1000;
   public remoteHost: string;
   public protocol: string;
   public viewMode: ViewMode = ViewMode.player
+  public runMode: RunMode
   public allInteractions = false
 
   private videoPaused$ = new BehaviorSubject(false);

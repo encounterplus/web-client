@@ -16,7 +16,7 @@ export class GridLayer extends Layer {
 
     constructor() {
         super();
-        this.alphaFilter.alpha = 0.5;
+        this.alphaFilter.alpha = 0.3;
     }
 
     update(grid: Grid) {
@@ -46,7 +46,7 @@ export class GridLayer extends Layer {
             this.highlightGraphics.alpha = 1.0
         } else {
             this.highlightGraphics.filters = []
-            this.highlightGraphics.alpha = 0.5
+            this.highlightGraphics.alpha = 0.3
         }
 
         this.addChild(this.highlightGraphics)

@@ -25,8 +25,9 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
   @Input()
   public applicationOptions = {
     backgroundColor: 0x00000,
+    autoDensity: true,
     resolution: window.devicePixelRatio || 1,
-    // resolution:  1,
+    // resolution: 1,
     antialias: true,
     // transparent: false,
     // forceFXAA: true,
@@ -81,13 +82,13 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
 
     const gl = (this.app.renderer as PIXI.Renderer).gl;
     this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-    console.debug(`maximum texture size: ${this.maxTextureSize}`);
+    // console.debug(`maximum texture size: ${this.maxTextureSize}`);
 
     // let ticker = PIXI.Ticker.shared;
     // ticker.autoStart = false;
     // ticker.stop();
 
-    console.debug(`canvas container initialized`);
+    // console.debug(`canvas container initialized`);
   }
 
   ngAfterViewInit(): void {

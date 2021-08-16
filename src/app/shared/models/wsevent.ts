@@ -1,6 +1,11 @@
 export enum WSEventName {
     gameUpdated = "gameUpdated",
     mapUpdated = "mapUpdated",
+    mapLoaded = "mapLoaded",
+    mapFrameUpdated = "mapFrameUpdated",
+    mapViewportUpdated = "mapViewportUpdated",
+    mapFitScreen = "mapFitScreen",
+    mapFocus = "mapFocus",
     creatureUpdated = "creatureUpdated",
     tileUpdated = "tileUpdated",
     tilesUpdated = "tilesUpdated",
@@ -24,11 +29,16 @@ export enum WSEventName {
     screenUpdated = "screenUpdated",
     drawingsUpdated = "drawingsUpdated",
     clientUpdated = "clientUpdated",
-    mapLoaded = "mapLoaded",
     reload = "reload",
     messageCreated = "messageCreated",
     messageDeleted = "messageDeleted",
-    createMessage = "createMessage"
+    createMessage = "createMessage",
+    measurementUpdated = "measurementUpdated",
+    measurementsUpdated = "measurementsUpdated",
+    trackedObjectCreated = "trackedObjectCreated",
+    trackedObjectUpdated = "trackedObjectUpdated",
+    trackedObjectDeleted = "trackedObjectDeleted",
+    trackedObjectsUpdated = "trackedObjectsUpdated"
 }
 
 export interface WSEvent {

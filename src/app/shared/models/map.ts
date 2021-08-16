@@ -5,6 +5,7 @@ import { Wall } from './wall';
 import { Marker } from './marker';
 import { Token } from './token';
 import { Light } from './light';
+import { Measurement } from './measurement';
 
 export enum MapLayer {
     token = "token",
@@ -70,4 +71,5 @@ export class Map {
     drawings: Array<Drawing> = []
     walls: Array<Wall> = []
     lights: Array<Light> = []
+    measurements: Array<Measurement> = []
 }

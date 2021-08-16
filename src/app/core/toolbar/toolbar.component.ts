@@ -71,6 +71,18 @@ export class ToolbarComponent implements OnInit {
     this.dataService.updateVideoMuted(this.videoMuted);
   }
 
+  zoomIn() {
+    this.action.emit("zoomIn");
+  }
+
+  zoomOut() {
+    this.action.emit("zoomOut");
+  }
+
+  focusToken() {
+    this.action.emit("focusToken");
+  }
+
   ngOnInit() {
     this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
 

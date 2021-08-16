@@ -65,15 +65,27 @@ export class TokenView extends View {
         return this.token.reference?.includes("/player/") || false
     }
 
+    get baseColor(): number {
+        if (this.token.role == Role.hostile) {
+            return 0x631515;
+        } else if (this.token.role == Role.friendly) {
+            return 0x3F51B5;
+        } else if (this.token.role == Role.neutral) {
+            return 0x964B00;
+        } else {
+            return 0xFFCCFF;
+        }
+    }
+
     get color(): number {
         if (this.turned) {
             return 0xff9500;
         } else if (this.token.dead) {
             return 0x555555;
         } else if (this.token.role == Role.hostile) {
-            return 0x631515;
+            return this.token.trackingId != null ? 0xff3b30 : 0x631515;
         } else if (this.token.role == Role.friendly) {
-            return 0x3F51B5;
+            return this.token.trackingId != null ? 0x007aff : 0x3F51B5;
         } else if (this.token.role == Role.neutral) {
             return 0x964B00;
         } else {
@@ -86,7 +98,7 @@ export class TokenView extends View {
     }
 
     get scaleFactor(): number {
-        return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0) * (this.token.asset?.scale || 1.0)
+        return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0) * (this.token.asset?.scale || 1.0) * (this.token.trackingId != null ? 1.5 : 1.0)
     }
 
     get tokenOffset(): PIXI.Point {
@@ -143,9 +155,9 @@ export class TokenView extends View {
     }
 
     async drawToken() {
-        if (this.token.cachedImage != null) {
+        if (this.token.cachedImage != null && this.token.trackingId == null) {
             this.tokenTexture = await Loader.shared.loadTexture(this.token.cachedImage)
-        } else if (this.token.asset != null && this.token.asset.resource != null) {
+        } else if (this.token.asset != null && this.token.asset.resource != null && this.token.trackingId == null) {
             this.tokenTexture = await Loader.shared.loadTexture(this.token.asset.resource)
         } else {
             this.tokenTexture = null;
@@ -157,7 +169,7 @@ export class TokenView extends View {
         this.h = this.grid.sizeFromGridSize(this.gridSize).height
 
         // sprite
-        if (this.tokenTexture != null) {
+        if (this.tokenTexture != null && this.token.trackingId == null) {
             let sprite = new PIXI.Sprite(this.tokenTexture)
             sprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
             this.addChild(sprite)
@@ -175,6 +187,15 @@ export class TokenView extends View {
         }
         this.updateToken();
 
+        // tracking shape
+        if (this.token.trackingId != null) {
+            let graphics = new PIXI.Graphics();
+            graphics.lineStyle(2, 0x000000, 0.2)
+            graphics.beginFill(0xffffff, 0.2).drawCircle(this.w / 2, this.h/2, this.w * 0.6).endFill();
+
+            this.addChild(graphics);
+        }
+
         // overlay
         if (this.token.dead) {
             this.overlayTexture = await Loader.shared.loadTexture('/assets/img/corpse.png', true);
@@ -191,7 +212,7 @@ export class TokenView extends View {
         
             this.overlaySprite.zIndex = 1
         } else if (this.token.bloodied) {
-            if ( this.token.asset != null || this.token.style == TokenStyle.topdown) {
+            if ( this.token.asset != null || this.token.style == TokenStyle.topdown || this.token.trackingId) {
                 this.overlayTexture = await Loader.shared.loadTexture('/assets/img/bloodied.png', true)
                 let sprite = new PIXI.Sprite(this.overlayTexture)
                 sprite.anchor.set(0.5, 0.5)
@@ -238,7 +259,7 @@ export class TokenView extends View {
         }   
 
         // label
-        if (this.token.label != null || this.tokenTexture == null) {
+        if (this.token.label != null) {
             // graphics
             this.labelGraphics = new PIXI.Graphics();
             this.labelGraphics.zIndex = 5
@@ -321,7 +342,7 @@ export class TokenView extends View {
             return;
         }
 
-        if (this.tokenTexture != null ) {
+        if (this.tokenTexture != null || this.token.trackingId != null ) {
             let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
             let labelSize = this.grid.adjustedSize.width * 0.4
 
@@ -338,8 +359,13 @@ export class TokenView extends View {
             }
 
             // clamp
-            x = clamp(x, 0, (this.w) - (labelSize / 2))
-            y = clamp(y, 0, (this.h) - (labelSize / 2))
+            if (this.token.trackingId != null) {
+                x = x * 1.2  
+                y = y * 1.2  
+            } else {
+                x = clamp(x, 0, (this.w) - (labelSize / 2))
+                y = clamp(y, 0, (this.h) - (labelSize / 2))
+            }
 
             this.labelGraphics.clear();
             this.labelGraphics.lineStyle(2, 0x000000, 0.2)
@@ -363,7 +389,7 @@ export class TokenView extends View {
             return;
         }
 
-        if (this.token.label != null && this.tokenTexture != null ) {
+        if (this.token.label != null && this.tokenTexture != null) {
             let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
             let labelSize = this.grid.adjustedSize.width * 0.4
             
@@ -380,8 +406,13 @@ export class TokenView extends View {
             }
 
             // clamp
-            x = clamp(x, 0, (this.w) - (labelSize * 2.2))
-            y = clamp(y, 0, (this.h) - (labelSize))
+            if (this.token.trackingId != null) {
+                x = x * 2
+                y = y * 1.5  
+            } else {
+                x = clamp(x, 0, (this.w) - (labelSize * 2.2))
+                y = clamp(y, 0, (this.h) - (labelSize))
+            }
 
             this.elevationGraphics.clear()
             this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
@@ -408,8 +439,14 @@ export class TokenView extends View {
             }
 
             // clamp
-            x = clamp(x, 0, (this.w) - (labelSize * 1.3))
-            y = clamp(y, 0, (this.h) - (labelSize))
+            if (this.token.trackingId) {
+                x = 0 - (x * 0.5)
+                y = y * 1.25
+            } else {
+                x = clamp(x, 0, (this.w) - (labelSize * 1.3))
+                y = clamp(y, 0, (this.h) - (labelSize))
+            }
+            
 
             this.elevationGraphics.clear()
             this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
@@ -420,7 +457,7 @@ export class TokenView extends View {
             this.elevationText.style.fontSize = labelSize / 2.5;
         }
 
-        if (this.tokenTexture == null) {
+        if (this.tokenTexture == null && this.token.trackingId == null) {
             this.elevationGraphics.zIndex = 10
             this.elevationText.zIndex = 11
         }

@@ -76,4 +76,5 @@ export class Token {
     asset?: Asset
     vision?: Vision
     auras: Array<Aura> = []
+    trackingId?: number
 }

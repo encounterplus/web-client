@@ -16,4 +16,8 @@ export class Screen {
     overlayType: string
     interaction: ScreenInteraction
     sharedVision: SharedVision
+    tableTopMode: Boolean
+    scrollLock: Boolean
+    width: number
+    height: number
 }

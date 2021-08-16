@@ -10,13 +10,11 @@ import { LightsLayer } from './layers/lights-layer';
 import { DataService } from 'src/app/shared/services/data.service';
 import { AppState } from 'src/app/shared/models/app-state';
 import { TokenView, ControlState } from './views/token-view';
-import { Tile } from 'src/app/shared/models/tile';
 import { TilesLayer } from './layers/tiles-layer';
 import { AreaEffectsLayer } from './layers/area-effects-layer';
 import { AreaEffectView } from './views/area-effect-view';
 import { TileView } from './views/tile-view';
 import { AurasLayer } from './layers/auras-layer';
-import { FogLayer } from './layers/fog-layer';
 import { EffectsLayer } from './layers/effects-layer';
 import { DrawingsLayer } from './layers/drawings-layer';
 import { MarkersLayer } from './layers/markers-layer';
@@ -30,30 +28,33 @@ import { SquareGrid } from './models/square-grid';
 import { HexGrid } from './models/hex-grid';
 import { ProgramManager } from 'src/app/shared/utils';
 import { VisionLayer } from './layers/vision-layer';
+import { MeasurementsLayer } from './layers/measurements-layer';
+import { MeasurementView } from './views/measurement-view';
 
 export class MapContainer extends Layer {
 
     mapLayer: Layer
     mapTexture: PIXI.RenderTexture
 
-    backgroundLayer: BackgroundLayer;
-    gridLayer: GridLayer;
-    canvasLayer: Layer;
-    areaEffectsLayer: AreaEffectsLayer;
-    monstersLayer: TokensLayer;
-    playersLayer: TokensLayer;
+    backgroundLayer: BackgroundLayer
+    gridLayer: GridLayer
+    canvasLayer: Layer
+    areaEffectsLayer: AreaEffectsLayer
+    monstersLayer: TokensLayer
+    playersLayer: TokensLayer
 
-    topLayer: TilesLayer;
-    middleLayer: TilesLayer;
-    bottomLayer: TilesLayer;
+    topLayer: TilesLayer
+    middleLayer: TilesLayer
+    bottomLayer: TilesLayer
 
-    aurasLayer: AurasLayer;
-    visionLayer: VisionLayer;
-    // fogLayer: FogLayer;
-    lightsLayer: LightsLayer;
-    effectsLayer: EffectsLayer;
-    drawingsLayer: DrawingsLayer;
-    markersLayer: MarkersLayer;
+    aurasLayer: AurasLayer
+    visionLayer: VisionLayer
+
+    lightsLayer: LightsLayer
+    effectsLayer: EffectsLayer
+    drawingsLayer: DrawingsLayer
+    markersLayer: MarkersLayer
+    measurementsLayer: MeasurementsLayer
 
     overlaySprite: PIXI.Sprite
 
@@ -83,36 +84,36 @@ export class MapContainer extends Layer {
         this.mapLayer = new Layer()
         this.addChild(this.mapLayer)
 
-        this.backgroundLayer = new BackgroundLayer(this.dataService);
-        this.mapLayer.addChild(this.backgroundLayer);
+        this.backgroundLayer = new BackgroundLayer(this.dataService)
+        this.mapLayer.addChild(this.backgroundLayer)
         this.bottomLayer = new TilesLayer(this.dataService)
-        this.mapLayer.addChild(this.bottomLayer);
-        this.gridLayer = new GridLayer();
-        this.mapLayer.addChild(this.gridLayer);
-        this.middleLayer = new TilesLayer(this.dataService);
-        this.mapLayer.addChild(this.middleLayer);
-        this.lightsLayer = new LightsLayer(this.dataService);
-        this.addChild(this.lightsLayer);
-        this.aurasLayer = new AurasLayer(this.dataService);
-        this.addChild(this.aurasLayer);
-        this.topLayer = new TilesLayer(this.dataService);
-        this.mapLayer.addChild(this.topLayer);
-        this.drawingsLayer = new DrawingsLayer(this.dataService);
-        this.mapLayer.addChild(this.drawingsLayer);
-        this.areaEffectsLayer = new AreaEffectsLayer(this.dataService);
-        this.addChild(this.areaEffectsLayer);
-        this.markersLayer = new MarkersLayer(this.dataService);
-        this.addChild(this.markersLayer);
-        this.monstersLayer = new TokensLayer(this.dataService);
-        this.addChild(this.monstersLayer);
-        this.visionLayer = new VisionLayer(this.dataService);
-        this.addChild(this.visionLayer);
-        // this.fogLayer = new FogLayer();
-        // this.addChild(this.fogLayer);
-        this.effectsLayer = new EffectsLayer(this.dataService);
-        this.addChild(this.effectsLayer);
+        this.mapLayer.addChild(this.bottomLayer)
+        this.gridLayer = new GridLayer()
+        this.mapLayer.addChild(this.gridLayer)
+        this.middleLayer = new TilesLayer(this.dataService)
+        this.mapLayer.addChild(this.middleLayer)
+        this.lightsLayer = new LightsLayer(this.dataService)
+        this.addChild(this.lightsLayer)
+        this.aurasLayer = new AurasLayer(this.dataService)
+        this.addChild(this.aurasLayer)
+        this.topLayer = new TilesLayer(this.dataService)
+        this.mapLayer.addChild(this.topLayer)
+        this.drawingsLayer = new DrawingsLayer(this.dataService)
+        this.mapLayer.addChild(this.drawingsLayer)
+        this.areaEffectsLayer = new AreaEffectsLayer(this.dataService)
+        this.addChild(this.areaEffectsLayer)
+        this.measurementsLayer = new MeasurementsLayer(this.dataService)
+        this.addChild(this.measurementsLayer)
+        this.markersLayer = new MarkersLayer(this.dataService)
+        this.addChild(this.markersLayer)
+        this.monstersLayer = new TokensLayer(this.dataService)
+        this.addChild(this.monstersLayer)
+        this.visionLayer = new VisionLayer(this.dataService)
+        this.addChild(this.visionLayer)
+        this.effectsLayer = new EffectsLayer(this.dataService)
+        this.addChild(this.effectsLayer)
         this.playersLayer = new TokensLayer(this.dataService)
-        this.addChild(this.playersLayer);
+        this.addChild(this.playersLayer)
 
         this.addChild(this.overlaySprite)
 
@@ -121,7 +122,7 @@ export class MapContainer extends Layer {
         this
             .on('pointerup', this.onPointerUp)
             .on('pointerdown', this.onPointerDown)
-            .on('pointermove', this.onPointerMove);
+            .on('pointermove', this.onPointerMove)
     }
 
     update(state: AppState) {
@@ -130,11 +131,12 @@ export class MapContainer extends Layer {
         console.debug("updating map")
         this.map = this.state.map
 
-        this.backgroundLayer.update(this.state.map)
-
         if (this.map == null) {
             return
         }
+
+        this.backgroundLayer.update(this.state.map)
+
 
         // if (this.map.video) {
         //     this.backgroundLayer.once('videoloaded', () => this.draw());
@@ -167,10 +169,13 @@ export class MapContainer extends Layer {
 
         this.drawingsLayer.update();
 
-        this.effectsLayer.grid = this.grid;
+        this.effectsLayer.grid = this.grid
 
         this.markersLayer.grid = this.grid;
         this.markersLayer.update();
+
+        this.measurementsLayer.grid = this.grid
+        this.measurementsLayer.update()
 
         this.updateTiles()
     }
@@ -236,12 +241,18 @@ export class MapContainer extends Layer {
     async draw() {
         console.debug("drawing map container")
 
+        // check for empty map
+        if (!this.map) {
+            this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h)
+            return this
+        }
+
         // preload shaders
         if (ProgramManager.cached.size == 0) {
             await ProgramManager.preload()
         }
 
-        // main background laayer
+        // main background layer
         await this.backgroundLayer.draw()
         // this.backgroundLayer.visible = false
 
@@ -276,11 +287,6 @@ export class MapContainer extends Layer {
         if (this.mapTexture == null || this.mapTexture.width != this.w || this.mapTexture.height != this.h) {
             this.mapTexture = PIXI.RenderTexture.create({width: this.w, height: this.h})
             this.visionLayer.mapTexture = this.mapTexture
-        }
-
-        if (this.map == null) {
-            this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h)
-            return this
         }
 
         // tiles
@@ -320,6 +326,9 @@ export class MapContainer extends Layer {
 
         this.markersLayer.size = this.size
         this.markersLayer.draw()
+
+        this.measurementsLayer.size = this.size
+        this.measurementsLayer.draw()
         
         this.effectsLayer.size = this.size
         this.effectsLayer.draw()
@@ -344,9 +353,34 @@ export class MapContainer extends Layer {
         return null
     }
 
+    tokenViewByTrackingId(id: number): TokenView {
+        for (let view of this.playersLayer.views) {
+            if (view.token.trackingId == id) {
+                return view
+            }
+        }
+
+        for (let view of this.monstersLayer.views) {
+            if (view.token.trackingId == id) {
+                return view
+            }
+        }
+
+        return null
+    }
+
     areaEffectViewById(id: string): AreaEffectView {
         for (let view of this.areaEffectsLayer.views) {
             if (view.areaEffect.id == id) {
+                return view
+            }
+        }
+        return null
+    }
+
+    measurementViewById(id: string): MeasurementView {
+        for (let view of this.measurementsLayer.views) {
+            if (view.measurement.id == id) {
                 return view
             }
         }

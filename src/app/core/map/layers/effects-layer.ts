@@ -9,18 +9,20 @@ import { Pointer } from 'src/app/shared/models/pointer';
 import { PointerView } from '../views/pointer-view';
 import { WeatherEffectView } from '../views/weather-effect-view';
 import { WeatherType } from 'src/app/shared/models/map';
+import { FocusView } from '../views/focus-view';
 
 export class EffectsLayer extends Layer {
     grid: Grid;
 
     constructor(private dataService:DataService) {
-        super();
+        super()
     }
 
-    ringTexture: PIXI.Texture;
-    snowTexture: PIXI.Texture;
-    rainTexture: PIXI.Texture;
-    fogTexture: PIXI.Texture;
+    ringTexture: PIXI.Texture
+    snowTexture: PIXI.Texture
+    rainTexture: PIXI.Texture
+    fogTexture: PIXI.Texture
+    circleTexture: PIXI.Texture
 
     views = {};
 
@@ -46,6 +48,10 @@ export class EffectsLayer extends Layer {
 
         if (!this.fogTexture) {
             this.fogTexture = await Loader.shared.loadTexture('/assets/img/smoke.png', true);
+        }
+
+        if (!this.circleTexture) {
+            this.circleTexture = await Loader.shared.loadTexture('/assets/img/circle.png', true);
         }
 
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
@@ -118,6 +124,18 @@ export class EffectsLayer extends Layer {
                 pointerView.destroy();
                 break;
         }
+    }
+
+    async drawFocus(x: number, y: number, color: string) {
+        
+         // console.log("creating new focus");
+        let focusView = new FocusView(color, this.grid, this, this.circleTexture);
+        focusView.updatePosition(x, y);
+        focusView.emitter.emit = true;
+        focusView.emitter.playOnceAndDestroy( () => {
+                // console.log('destroying pointer');
+        });
+        this.addChild(focusView);
     }
 
     clear() {

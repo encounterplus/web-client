@@ -12,5 +12,13 @@
   <app-root>
     <div>Loading...</div>
   </app-root>
+  <script type="text/javascript">
+    // external event handling in angular zone
+    function handleExternalEvent(data) {
+      window['componentRef'].zone.run(() => {
+        window['componentRef'].component.handleExternalEvent(data);
+      });
+   }
+  </script>
 </body>
 </html>

@@ -5,12 +5,14 @@ import { Map} from './map'
 import { Creature, CreatureType } from './creature'
 import { Message } from './message'
 import { SquareGrid } from 'src/app/core/map/models/square-grid'
+import { TrackedObject } from './tracked-object'
 
 export class AppState {
-    map: Map
+    map?: Map
     game: Game = new Game()
     screen: Screen = new Screen()
     messages: Array<Message> = []
+    trackedObjects: Array<TrackedObject> = []
     grid: Grid = new SquareGrid()
     isDirty: boolean = false
     version: string

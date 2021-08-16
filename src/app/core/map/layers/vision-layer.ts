@@ -666,7 +666,7 @@ export class VisionLayer extends Layer {
     getGeometry(x: number, y: number, polygon: Array<number>) {
         let origin = [x, y]
         var buffer = [];
-        for (let i = 0; i < polygon.length - 2; i = i + 2) {
+        for (let i = 0; i < polygon.length - 1; i = i + 2) {
             let cPoint = [polygon[i], polygon[i + 1]];
             let nPoint = [polygon[i + 2], polygon[i + 3]];
 

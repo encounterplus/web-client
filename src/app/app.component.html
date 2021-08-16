@@ -1,5 +1,5 @@
 <div id="app" class="h-100 d-flex flex-column" appDisableRightClick>
-  <app-map *ngIf="state.map" [state]="state" class="h-100"></app-map>
+  <app-map [state]="state" class="h-100"></app-map>
   <app-toolbar [state]="state" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)" id="toolbar"></app-toolbar>
 
   <div id="side-bar">

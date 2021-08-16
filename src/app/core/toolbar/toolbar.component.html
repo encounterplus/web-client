@@ -25,6 +25,18 @@
     </label>
   </div>
 
+  <div *ngIf="state.map" class="btn-group mr-2" role="group" aria-label="Zoom Controls">
+    <button ngbButton class="btn btn-dark" (click)="zoomIn()">
+        <i class="fa fa-plus"></i>
+    </button>
+    <button ngbButton class="btn btn-dark" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" (click)="zoomOut()">
+        <i class="fa fa-minus"></i>
+    </button>
+    <button ngbButton class="btn btn-dark" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" (click)="focusToken()">
+      <i class="fa fa-dot-circle-o"></i>
+  </button>
+  </div>
+
   <div *ngIf="state.map?.video" class="btn-group mr-2" role="group" aria-label="Video Controls">
       <button ngbButton class="btn btn-dark" (click)="videoPauseToggle()">
           <i class="fa fa-fw" [ngClass]="videoPaused ? 'fa-play' : 'fa-pause'"></i>

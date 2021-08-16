@@ -2,7 +2,7 @@ import { Sight } from "./sight"
 
 export enum VisionType {
     light = "light",
-    dark = " dark",
+    dark = "dark",
     combined = "combined",
 }
 
