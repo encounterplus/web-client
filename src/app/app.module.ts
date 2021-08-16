@@ -23,6 +23,7 @@ import { LightboxModule } from 'ngx-lightbox';
 import { MessageComponent } from './core/message/message.component';
 import { MessageListComponent } from './core/message-list/message-list.component';
 import { PausedComponent } from './core/paused/paused.component';
+import { ZoombarComponent } from './core/zoombar/zoombar.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { PausedComponent } from './core/paused/paused.component';
     ImageHandoutComponent,
     MessageComponent,
     MessageListComponent,
-    PausedComponent
+    PausedComponent,
+    ZoombarComponent
   ],
   imports: [
     BrowserModule,

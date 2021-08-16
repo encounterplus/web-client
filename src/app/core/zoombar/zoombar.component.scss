@@ -1,0 +1,11 @@
+:host {
+
+    position: absolute;
+    margin-top: auto;
+    bottom: 0px;
+    padding: 8px;
+
+    .btn-toolbar > .btn-group {
+        margin-bottom: 5px;
+    }
+}

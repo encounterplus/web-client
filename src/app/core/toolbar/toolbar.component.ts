@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, ElementRef, Output, EventEmitter } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
 import { DataService } from 'src/app/shared/services/data.service';
 
 export enum Tool {
@@ -69,18 +68,6 @@ export class ToolbarComponent implements OnInit {
   videoMuteToggle() {
     this.videoMuted = !this.videoMuted;
     this.dataService.updateVideoMuted(this.videoMuted);
-  }
-
-  zoomIn() {
-    this.action.emit("zoomIn");
-  }
-
-  zoomOut() {
-    this.action.emit("zoomOut");
-  }
-
-  focusToken() {
-    this.action.emit("focusToken");
   }
 
   ngOnInit() {

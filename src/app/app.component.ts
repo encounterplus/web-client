@@ -28,6 +28,7 @@ import { TrackedObject } from './shared/models/tracked-object';
 import { Measurement } from './shared/models/measurement';
 import { Point } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
+import { ZoombarComponent } from './core/zoombar/zoombar.component';
 
 interface WebAppInterface {
   showText(text: string): any;
@@ -61,6 +62,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   @ViewChild(ToolbarComponent)
   public toolbarComponent: ToolbarComponent;
+
+  @ViewChild(ZoombarComponent)
+  public zoombarComponent: ZoombarComponent;
 
   @ViewChild(ToastListComponent)
   public toastListComponent: ToastListComponent;
@@ -141,6 +145,27 @@ export class AppComponent implements OnInit, AfterViewInit {
         });
         break;
 
+      // case "zoomIn":
+      //   this.mapComponent.viewport.animate({ scale: this.mapComponent.viewport.scale.x + 0.1, time: 100 })
+      //   break;
+
+      // case "zoomOut":
+      //   this.mapComponent.viewport.animate({ scale: this.mapComponent.viewport.scale.x - 0.1, time: 100 })
+      //   break;
+
+      // case "focusToken":
+      //   let view = this.mapComponent.mapContainer.tokenViewById(localStorage.getItem("userTokenId"))
+      //   if (view) {
+      //     this.mapComponent.viewport.animate({ position: view.position, scale: 1.0, time: 2000, ease: "easeInOutSine", removeOnInterrupt: true })
+      //   }
+      //   break;
+    }
+  }
+
+  zoombarAction(type: string) {
+    console.log(type);
+    switch (type) {
+      
       case "zoomIn":
         this.mapComponent.viewport.animate({ scale: this.mapComponent.viewport.scale.x + 0.1, time: 100 })
         break;

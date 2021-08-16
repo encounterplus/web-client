@@ -1,6 +1,7 @@
 :host {
     float: left;
     clear: both;
+    pointer-events: all;
 
     .toast {
         margin-top: 8px;
