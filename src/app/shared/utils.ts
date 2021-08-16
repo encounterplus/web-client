@@ -1,8 +1,6 @@
 import * as PIXI from 'pixi.js'
 import type { ArrayFixed } from '@pixi/utils';
-// import ColorMatrix from PIXI.filters.ColorMatrixFilter
 import { Loader } from "../core/map/models/loader"
-import { ReturnStatement } from '@angular/compiler';
 
 export class ProgramManager {
     static cached = new Map<string, PIXI.Program>()
