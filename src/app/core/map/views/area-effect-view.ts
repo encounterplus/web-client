@@ -48,45 +48,45 @@ export class AreaEffectView extends View {
         return new PIXI.Point(this.start.x + (this.areaEffect.length * Math.cos(this.areaEffect.angle)), this.start.y + (this.areaEffect.length * Math.sin(this.areaEffect.angle)));
     }
 
-    calculateHitArea(): PIXI.IHitArea {
-        switch (this.areaEffect.shape) {
-            case AreaEffectShape.sphere:
-            case AreaEffectShape.cylinder:
-                return new PIXI.Circle(this.areaEffect.x, this.areaEffect.y, this.areaEffect.radius)
+    // calculateHitArea(): PIXI.IHitArea {
+    //     switch (this.areaEffect.shape) {
+    //         case AreaEffectShape.sphere:
+    //         case AreaEffectShape.cylinder:
+    //             return new PIXI.Circle(this.areaEffect.x, this.areaEffect.y, this.areaEffect.radius)
 
-            case AreaEffectShape.cube:
-                // graphics.drawRect(this.areaEffect.x, this.areaEffect.y - (this.areaEffect.length / 2), this.areaEffect.length, this.areaEffect.length);
-                // graphics.pivot.x = this.areaEffect.x;
-                // graphics.pivot.y = this.areaEffect.y;
-                // graphics.rotation = this.areaEffect.angle;
-                // graphics.position.set(this.areaEffect.x, this.areaEffect.y);
-                // break;
+    //         case AreaEffectShape.cube:
+    //             // graphics.drawRect(this.areaEffect.x, this.areaEffect.y - (this.areaEffect.length / 2), this.areaEffect.length, this.areaEffect.length);
+    //             // graphics.pivot.x = this.areaEffect.x;
+    //             // graphics.pivot.y = this.areaEffect.y;
+    //             // graphics.rotation = this.areaEffect.angle;
+    //             // graphics.position.set(this.areaEffect.x, this.areaEffect.y);
+    //             // break;
 
-            case AreaEffectShape.square:
-                // graphics.drawRect(this.areaEffect.x - this.areaEffect.length, this.areaEffect.y - this.areaEffect.length, this.areaEffect.length * 2, this.areaEffect.length * 2);
-                // graphics.pivot.x = this.areaEffect.x;
-                // graphics.pivot.y = this.areaEffect.y;
-                // graphics.rotation = this.areaEffect.angle;
-                // graphics.position.set(this.areaEffect.x, this.areaEffect.y);
-                // break;
+    //         case AreaEffectShape.square:
+    //             // graphics.drawRect(this.areaEffect.x - this.areaEffect.length, this.areaEffect.y - this.areaEffect.length, this.areaEffect.length * 2, this.areaEffect.length * 2);
+    //             // graphics.pivot.x = this.areaEffect.x;
+    //             // graphics.pivot.y = this.areaEffect.y;
+    //             // graphics.rotation = this.areaEffect.angle;
+    //             // graphics.position.set(this.areaEffect.x, this.areaEffect.y);
+    //             // break;
             
-            case AreaEffectShape.cone:
-                // graphics.moveTo(this.areaEffect.x, this.areaEffect.y);
-                // graphics.arc(this.areaEffect.x, this.areaEffect.y, this.areaEffect.length, this.areaEffect.angle - toRadians(26.5), this.areaEffect.angle + toRadians(26.5), false);
-                // graphics.lineTo(this.areaEffect.x, this.areaEffect.y);
-                // break;
+    //         case AreaEffectShape.cone:
+    //             // graphics.moveTo(this.areaEffect.x, this.areaEffect.y);
+    //             // graphics.arc(this.areaEffect.x, this.areaEffect.y, this.areaEffect.length, this.areaEffect.angle - toRadians(26.5), this.areaEffect.angle + toRadians(26.5), false);
+    //             // graphics.lineTo(this.areaEffect.x, this.areaEffect.y);
+    //             // break;
 
-            case AreaEffectShape.line:
-                // graphics.drawRect(this.areaEffect.x, this.areaEffect.y - (this.areaEffect.width / 2), this.areaEffect.length, this.areaEffect.width);
-                // graphics.pivot.x = this.areaEffect.x;
-                // graphics.pivot.y = this.areaEffect.y;
-                // graphics.rotation = this.areaEffect.angle;
-                // graphics.position.set(this.areaEffect.x, this.areaEffect.y);
-                // break;
-        }
+    //         case AreaEffectShape.line:
+    //             // graphics.drawRect(this.areaEffect.x, this.areaEffect.y - (this.areaEffect.width / 2), this.areaEffect.length, this.areaEffect.width);
+    //             // graphics.pivot.x = this.areaEffect.x;
+    //             // graphics.pivot.y = this.areaEffect.y;
+    //             // graphics.rotation = this.areaEffect.angle;
+    //             // graphics.position.set(this.areaEffect.x, this.areaEffect.y);
+    //             // break;
+    //     }
 
-        return null;
-    }
+    //     return null;
+    // }
 
     async draw() {
         this.clear()
@@ -401,7 +401,7 @@ export class AreaEffectView extends View {
         // this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
         this.zIndex = this.areaEffect.zIndex;
         this.alpha = this.areaEffect.opacity;
-        this.hitArea = this.calculateHitArea();
+        // this.hitArea = this.calculateHitArea();
 
         this.visible = !this.areaEffect.hidden;
     }
