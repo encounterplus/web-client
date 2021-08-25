@@ -144,21 +144,6 @@ export class AppComponent implements OnInit, AfterViewInit {
           console.debug(`About component dismissed ${reason}`)
         });
         break;
-
-      // case "zoomIn":
-      //   this.mapComponent.viewport.animate({ scale: this.mapComponent.viewport.scale.x + 0.1, time: 100 })
-      //   break;
-
-      // case "zoomOut":
-      //   this.mapComponent.viewport.animate({ scale: this.mapComponent.viewport.scale.x - 0.1, time: 100 })
-      //   break;
-
-      // case "focusToken":
-      //   let view = this.mapComponent.mapContainer.tokenViewById(localStorage.getItem("userTokenId"))
-      //   if (view) {
-      //     this.mapComponent.viewport.animate({ position: view.position, scale: 1.0, time: 2000, ease: "easeInOutSine", removeOnInterrupt: true })
-      //   }
-      //   break;
     }
   }
 
@@ -278,8 +263,8 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.mapComponent.viewport.setZoom(event.data.zoom)
 
           // fix center
-          const x = ((this.state.map.x / event.data.zoom) + (this.mapComponent.mapContainer.w / 2))
-          const y = ((this.state.map.y / event.data.zoom) + (this.mapComponent.mapContainer.h / 2))
+          const x = ((this.state.map.x ) + (this.mapComponent.mapContainer.w / 2))
+          const y = ((this.state.map.y ) + (this.mapComponent.mapContainer.h / 2))
           this.mapComponent.viewport.moveCenter(x, y)
           return
         }
@@ -288,13 +273,13 @@ export class AppComponent implements OnInit, AfterViewInit {
 
           if (this.state.screen.tableTopMode) {
             // set center
-            const x = ((event.data.x / this.state.map.zoom) + (this.mapComponent.mapContainer.w / 2))
-            const y = ((event.data.y / this.state.map.zoom) + (this.mapComponent.mapContainer.h / 2))
+            const x = ((event.data.x ) + (this.mapComponent.mapContainer.w / 2))
+            const y = ((event.data.y ) + (this.mapComponent.mapContainer.h / 2))
             this.mapComponent.viewport.moveCenter(x, y)
           } else {
             // set center
-            const x = ((event.data.x / this.mapComponent.viewport.scaled) + (this.mapComponent.mapContainer.w / 2))
-            const y = ((event.data.y / this.mapComponent.viewport.scaled) + (this.mapComponent.mapContainer.h / 2))
+            const x = ((event.data.x ) + (this.mapComponent.mapContainer.w / 2))
+            const y = ((event.data.y ) + (this.mapComponent.mapContainer.h / 2))
             this.mapComponent.viewport.moveCenter(x, y)
           }
 
@@ -315,7 +300,6 @@ export class AppComponent implements OnInit, AfterViewInit {
           const x = ((this.state.map.x / this.state.map.zoom) + (this.mapComponent.mapContainer.w / 2))
           const y = ((this.state.map.y / this.state.map.zoom) + (this.mapComponent.mapContainer.h / 2))
           this.mapComponent.viewport.moveCenter(x, y)
-
         } else {
           this.mapComponent.viewport.fitWorld(true)
           this.mapComponent.viewport.moveCenter(this.mapComponent.mapContainer.w / 2, this.mapComponent.mapContainer.h / 2);
@@ -389,7 +373,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (view != null) {
           view.blocked = event.data.state == ControlState.block;
 
-          if (!view.dragging && view.token.trackingId == null) {
+          if (!view.dragging && (view.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
             view.token.x = event.data.x;
             view.token.y = event.data.y;
             view.controlled = event.data.state != ControlState.end && !view.dragging ? true : false
@@ -662,7 +646,25 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.screenUpdated: {
+        let tableTopMode = this.state.screen.tableTopMode
         this.state.screen = event.data;
+
+        // fit scren for tabletop mode
+        if (tableTopMode != this.state.screen.tableTopMode && this.state.screen.tableTopMode) {
+          const mapGridSize = this.mapComponent.mapContainer.grid.adjustedSize.width
+          const screenGridSize = this.mapComponent.viewport.screenWidth / this.state.screen.width
+          let scale = screenGridSize / mapGridSize
+
+          // set zoom
+          this.mapComponent.viewport.setZoom(scale)
+
+          // set center
+          const x = ((this.state.map.x / this.state.map.zoom) + (this.mapComponent.mapContainer.w / 2))
+          const y = ((this.state.map.y / this.state.map.zoom) + (this.mapComponent.mapContainer.h / 2))
+          this.mapComponent.viewport.moveCenter(x, y)
+
+          this.mapComponent.notifyViewportUpdate()
+        }
 
         // render los & ligts
         this.mapComponent.mapContainer.visionLayer.draw()
@@ -776,8 +778,18 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         // update token view poisition
         if (view) {
+          if (view.blocked) {
+            break
+          }
+
+          // positioon
           view.token.x = center.x
           view.token.y = center.y
+
+          // angle
+          if (model.angle) {
+            view.token.rotation = model.angle
+          }
           view.update()
         }
 

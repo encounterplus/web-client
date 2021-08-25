@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { DataService } from 'src/app/shared/services/data.service';
+import { DataService, RunMode } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { Role, Token } from 'src/app/shared/models/token';
 import { AppState } from 'src/app/shared/models/app-state';
@@ -60,7 +60,11 @@ export class SettingsModalComponent implements OnInit {
 
     // temporary hack to reload when host changed
     if (this.remoteHost != this.dataService.remoteHost) {
-      document.location.search = `?remoteHost=${this.remoteHost}`
+      if (this.dataService.runMode == RunMode.normal) {
+        document.location.search = `?remoteHost=${this.remoteHost}`
+      } else {
+        document.location.search = `?remoteHost=${this.remoteHost}&runMode=${this.dataService.runMode}`
+      }
     }
   }
 

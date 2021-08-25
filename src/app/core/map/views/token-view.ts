@@ -4,7 +4,7 @@ import { View } from './view';
 import { Container, InteractionEvent } from 'pixi.js';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
-import { DataService } from 'src/app/shared/services/data.service';
+import { DataService, RunMode } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { AuraView } from './aura-view';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
@@ -105,6 +105,13 @@ export class TokenView extends View {
         return new PIXI.Point(this.token.asset?.offsetX || 0, this.token.asset?.offsetY || 0)
     }
 
+    get trackingLabel(): string {
+        if (!this.token.trackingId) {
+            return null
+        }
+        return this.token.trackingId < 999 ? this.token.trackingId.toString() : (this.token.trackingId % 4096).toString(16)
+    }
+
     constructor(token: Token, grid: Grid, private dataService: DataService) {
         super()
         this.token = token
@@ -155,9 +162,9 @@ export class TokenView extends View {
     }
 
     async drawToken() {
-        if (this.token.cachedImage != null && this.token.trackingId == null) {
+        if (this.token.cachedImage != null && (this.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
             this.tokenTexture = await Loader.shared.loadTexture(this.token.cachedImage)
-        } else if (this.token.asset != null && this.token.asset.resource != null && this.token.trackingId == null) {
+        } else if (this.token.asset != null && this.token.asset.resource != null && (this.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
             this.tokenTexture = await Loader.shared.loadTexture(this.token.asset.resource)
         } else {
             this.tokenTexture = null;
@@ -169,7 +176,7 @@ export class TokenView extends View {
         this.h = this.grid.sizeFromGridSize(this.gridSize).height
 
         // sprite
-        if (this.tokenTexture != null && this.token.trackingId == null) {
+        if (this.tokenTexture != null && (this.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
             let sprite = new PIXI.Sprite(this.tokenTexture)
             sprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
             this.addChild(sprite)
@@ -188,7 +195,7 @@ export class TokenView extends View {
         this.updateToken();
 
         // tracking shape
-        if (this.token.trackingId != null) {
+        if (this.token.trackingId != null && this.dataService.runMode != RunMode.normal) {
             let graphics = new PIXI.Graphics();
             graphics.lineStyle(2, 0x000000, 0.2)
             graphics.beginFill(0xffffff, 0.2).drawCircle(this.w / 2, this.h/2, this.w * 0.6).endFill();
@@ -259,14 +266,14 @@ export class TokenView extends View {
         }   
 
         // label
-        if (this.token.label != null) {
+        if (this.token.label != null || this.token.trackingId != null)  {
             // graphics
             this.labelGraphics = new PIXI.Graphics();
             this.labelGraphics.zIndex = 5
             this.addChild(this.labelGraphics);
 
             // text
-            let text = this.token.label || (this.token.name || "Unknown").toUpperCase().charAt(0)
+            let text = this.token.label || this.trackingLabel || (this.token.name || "Unknown").toUpperCase().charAt(0)
 
             this.labelText = new PIXI.Text(text, {fontFamily : 'Arial', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
             this.labelText.anchor.set(0.5, 0.5);
@@ -306,6 +313,12 @@ export class TokenView extends View {
         this.auraContainer.position.set(this.token.x, this.token.y);
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
+        // sprite
+        if (this.tokenTexture != null && (this.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
+            // rotation
+            this.tokenSprite.rotation = (this.token.rotation)? this.token.rotation * (Math.PI / 180) : 0;
+        }
+
         if (this.token.role == Role.friendly) {
 	        this.visible = true;
         } else {
@@ -342,7 +355,7 @@ export class TokenView extends View {
             return;
         }
 
-        if (this.tokenTexture != null || this.token.trackingId != null ) {
+        if (this.tokenTexture != null || (this.token.trackingId != null && this.dataService.runMode != RunMode.normal) ) {
             let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
             let labelSize = this.grid.adjustedSize.width * 0.4
 

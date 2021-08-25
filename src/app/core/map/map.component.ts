@@ -199,7 +199,7 @@ export class MapComponent implements OnInit, OnChanges {
 
   notifyViewportUpdate() {
     if (this.dataService.runMode != RunMode.normal) {
-      this.dataService.send({name: WSEventName.mapViewportUpdated, data: {id: this.state.map.id, x: Math.round((this.viewport.center.x - this.viewport.worldWidth/2) * this.viewport.scaled), y: Math.round((this.viewport.center.y - this.viewport.worldHeight/2) * this.viewport.scaled), zoom: this.viewport.scaled}})
+      this.dataService.send({name: WSEventName.mapViewportUpdated, data: {id: this.state.map.id, x: Math.round((this.viewport.center.x - this.viewport.worldWidth/2)), y: Math.round((this.viewport.center.y - this.viewport.worldHeight/2)), zoom: this.viewport.scaled}})
       this.dataService.send({name: WSEventName.trackedObjectsUpdated, data: this.state.trackedObjects})
     }
   }
