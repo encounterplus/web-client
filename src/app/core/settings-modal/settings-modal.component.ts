@@ -1,9 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { DataService, RunMode } from 'src/app/shared/services/data.service';
+import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { Role, Token } from 'src/app/shared/models/token';
-import { AppState } from 'src/app/shared/models/app-state';
+import { AppState, RunMode } from 'src/app/shared/models/app-state';
 
 @Component({
   selector: 'ngbd-modal-basic',
@@ -22,6 +22,8 @@ export class SettingsModalComponent implements OnInit {
   maxFPSOptions: Array<number> = [5, 15, 30, 60]
   maxFPS: number = 60
   
+  runModeOptions: Array<RunMode> = [RunMode.normal, RunMode.tv]
+  runMode: RunMode = RunMode.normal
   tokenId?: string
 
   get tokens(): Array<Token> {
@@ -51,6 +53,7 @@ export class SettingsModalComponent implements OnInit {
     }
     localStorage.setItem("maxVideoSize", `${this.maxVideoSize}`)
     localStorage.setItem("softEdges", `${this.softEdges}`)
+    localStorage.setItem("runMode", `${this.runMode}`)
 
     // update server
     this.dataService.send({name: WSEventName.clientUpdated, data: {name: this.name, color: this.color}})
@@ -60,11 +63,23 @@ export class SettingsModalComponent implements OnInit {
 
     // temporary hack to reload when host changed
     if (this.remoteHost != this.dataService.remoteHost) {
-      if (this.dataService.runMode == RunMode.normal) {
-        document.location.search = `?remoteHost=${this.remoteHost}`
-      } else {
-        document.location.search = `?remoteHost=${this.remoteHost}&runMode=${this.dataService.runMode}`
+      let search = `?remoteHost=${this.remoteHost}`
+
+      if (this.state.runMode != RunMode.normal) {
+        search += `&runMode=${this.state.runMode}`
       }
+
+      if (this.state.deviceType) {
+        search += `&deviceType=${this.state.deviceType}`
+      }
+
+      // reload
+      window.location.search = search
+    }
+
+    if (this.runMode != this.state.runMode) {
+      this.state.runMode = this.runMode
+      window.location.reload()
     }
   }
 
@@ -77,5 +92,6 @@ export class SettingsModalComponent implements OnInit {
     this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200")
     this.softEdges = (localStorage.getItem("softEdges") || "true") == "true"
     this.tokenId = localStorage.getItem("userTokenId")
+    this.runMode = this.state.runMode
   }
 }

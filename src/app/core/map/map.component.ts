@@ -3,8 +3,8 @@ import { CanvasContainerDirective } from './canvas-container.directive';
 import * as PIXI from 'pixi.js'
 import { Viewport } from 'pixi-viewport';
 import { MapContainer } from './map-container';
-import { AppState } from 'src/app/shared/models/app-state';
-import { DataService, RunMode } from 'src/app/shared/services/data.service';
+import { AppState, RunMode } from 'src/app/shared/models/app-state';
+import { DataService } from 'src/app/shared/services/data.service';
 import { ToastService } from 'src/app/shared/services/toast.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { TrackedObjectsContainer } from './tracked-objects-container';
@@ -91,7 +91,7 @@ export class MapComponent implements OnInit, OnChanges {
       //   })
 
       // configure viewport based on run model
-      if (this.dataService.runMode == RunMode.normal) {
+      if (this.state.runMode == RunMode.normal) {
         this.viewport
           .drag()
           .pinch()
@@ -198,7 +198,7 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   notifyViewportUpdate() {
-    if (this.dataService.runMode != RunMode.normal) {
+    if (this.state.runMode != RunMode.normal) {
       this.dataService.send({name: WSEventName.mapViewportUpdated, data: {id: this.state.map.id, x: Math.round((this.viewport.center.x - this.viewport.worldWidth/2)), y: Math.round((this.viewport.center.y - this.viewport.worldHeight/2)), zoom: this.viewport.scaled}})
       this.dataService.send({name: WSEventName.trackedObjectsUpdated, data: this.state.trackedObjects})
     }
@@ -210,7 +210,7 @@ export class MapComponent implements OnInit, OnChanges {
     let sideBarWidth = (document.getElementById("side-bar")?.getBoundingClientRect()?.width ?? 0) + 8.0;
     // this.viewport.resize(window.innerWidth - sideBarWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
     this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
-    this.dataService.send({name: WSEventName.clientUpdated, data: {runMode: this.dataService.runMode, screenWidth: innerWidth, screenHeight: innerHeight}});
+    this.dataService.send({name: WSEventName.clientUpdated, data: {runMode: this.state.runMode, screenWidth: innerWidth, screenHeight: innerHeight}});
 
     this.trackedObjectsContainer.w = window.innerWidth
     this.trackedObjectsContainer.h = window.innerHeight

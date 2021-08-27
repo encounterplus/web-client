@@ -28,6 +28,13 @@
     </div>
 
     <div class="form-group">
+        <label for="runMode">Run Mode</label>
+        <select [(ngModel)]="runMode" class="form-control" id="runMode">
+            <option *ngFor="let mode of runModeOptions; let i = index" [value]="mode">{{mode}}</option>
+        </select>
+    </div>
+
+    <div class="form-group">
         <label for="maxFPS">Max FPS</label>
         <select [(ngModel)]="maxFPS" class="form-control" id="maxFPS">
             <option *ngFor="let fps of maxFPSOptions; let i = index" [value]="maxFPSOptions[i]">{{fps}}</option>

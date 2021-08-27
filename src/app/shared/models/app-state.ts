@@ -7,6 +7,17 @@ import { Message } from './message'
 import { SquareGrid } from 'src/app/core/map/models/square-grid'
 import { TrackedObject } from './tracked-object'
 
+export enum ViewMode {
+    dm = "dm",
+    player = "player",
+    spectator = "spectator",
+  }
+  
+  export enum RunMode {
+    normal = "normal",
+    tv = "tv",
+  }
+
 export class AppState {
     map?: Map
     game: Game = new Game()
@@ -18,6 +29,11 @@ export class AppState {
     version: string
     build: number
     readCount: number
+
+    viewMode: ViewMode = ViewMode.player
+    runMode: RunMode = RunMode.normal
+    deviceType: string
+    allInteractions = false
 
     get activeCreatures(): Array<Creature> {
         return this.game.creatures.filter( creature => { return creature.initiative != -10 } ).sort((a, b) => (a.rank > b.rank) ? 1 : -1)

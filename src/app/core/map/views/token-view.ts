@@ -4,14 +4,14 @@ import { View } from './view';
 import { Container, InteractionEvent } from 'pixi.js';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
-import { DataService, RunMode } from 'src/app/shared/services/data.service';
+import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { AuraView } from './aura-view';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
 import { Role, Size, Token, TokenStyle } from 'src/app/shared/models/token';
 import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
-import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
+import { RunMode } from 'src/app/shared/models/app-state';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
@@ -162,9 +162,9 @@ export class TokenView extends View {
     }
 
     async drawToken() {
-        if (this.token.cachedImage != null && (this.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
+        if (this.token.cachedImage != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
             this.tokenTexture = await Loader.shared.loadTexture(this.token.cachedImage)
-        } else if (this.token.asset != null && this.token.asset.resource != null && (this.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
+        } else if (this.token.asset != null && this.token.asset.resource != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
             this.tokenTexture = await Loader.shared.loadTexture(this.token.asset.resource)
         } else {
             this.tokenTexture = null;
@@ -176,7 +176,7 @@ export class TokenView extends View {
         this.h = this.grid.sizeFromGridSize(this.gridSize).height
 
         // sprite
-        if (this.tokenTexture != null && (this.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
+        if (this.tokenTexture != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
             let sprite = new PIXI.Sprite(this.tokenTexture)
             sprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
             this.addChild(sprite)
@@ -195,7 +195,7 @@ export class TokenView extends View {
         this.updateToken();
 
         // tracking shape
-        if (this.token.trackingId != null && this.dataService.runMode != RunMode.normal) {
+        if (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal) {
             let graphics = new PIXI.Graphics();
             graphics.lineStyle(2, 0x000000, 0.2)
             graphics.beginFill(0xffffff, 0.2).drawCircle(this.w / 2, this.h/2, this.w * 0.6).endFill();
@@ -314,7 +314,7 @@ export class TokenView extends View {
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
         // sprite
-        if (this.tokenTexture != null && (this.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
+        if (this.tokenTexture != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
             // rotation
             this.tokenSprite.rotation = (this.token.rotation)? this.token.rotation * (Math.PI / 180) : 0;
         }
@@ -355,7 +355,7 @@ export class TokenView extends View {
             return;
         }
 
-        if (this.tokenTexture != null || (this.token.trackingId != null && this.dataService.runMode != RunMode.normal) ) {
+        if (this.tokenTexture != null || (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal) ) {
             let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
             let labelSize = this.grid.adjustedSize.width * 0.4
 
@@ -501,7 +501,7 @@ export class TokenView extends View {
         }
 
         // interactions override
-        if (this.dataService.allInteractions) {
+        if (this.dataService.state.allInteractions) {
             this.interactive = true
             return
         }

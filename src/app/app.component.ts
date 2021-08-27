@@ -3,9 +3,9 @@ import { MapComponent } from './core/map/map.component';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 import { ApiData } from './shared/models/api-data';
-import { DataService, RunMode, ViewMode } from './shared/services/data.service';
+import { DataService} from './shared/services/data.service';
 import { environment } from 'src/environments/environment';
-import { AppState } from './shared/models/app-state';
+import { AppState, RunMode, ViewMode } from './shared/models/app-state';
 import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState, TokenView } from './core/map/views/token-view';
 import { AreaEffect } from './shared/models/area-effect';
@@ -33,6 +33,7 @@ import { ZoombarComponent } from './core/zoombar/zoombar.component';
 interface WebAppInterface {
   showText(text: string): any;
   wsConnected(remoteHost: string): any;
+  exit(): any;
 }
 
 declare var appInterface: WebAppInterface;
@@ -144,6 +145,16 @@ export class AppComponent implements OnInit, AfterViewInit {
           console.debug(`About component dismissed ${reason}`)
         });
         break;
+      case "reload":
+        window.location.reload()
+        break
+      case "exit":
+        if (typeof appInterface !== "undefined") {
+          appInterface.exit()
+        } else {
+          window.close()
+        }
+        break
     }
   }
 
@@ -247,7 +258,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
 
         // skip this in normal mode
-        if (this.dataService.runMode == RunMode.normal) {
+        if (this.state.runMode == RunMode.normal) {
           return
         }
 
@@ -325,7 +336,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         let viewport = this.mapComponent.viewport
         let scale = !this.state.screen.tableTopMode && event.data.zoom ? 1.0 : viewport.scale.x
-        let remove = this.dataService.runMode != RunMode.tabletop
+        let remove = this.state.runMode == RunMode.normal
         let oldCenter = viewport.center
         let oldScale = viewport.scale.x
 
@@ -373,7 +384,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (view != null) {
           view.blocked = event.data.state == ControlState.block;
 
-          if (!view.dragging && (view.token.trackingId == null || this.dataService.runMode == RunMode.normal)) {
+          if (!view.dragging && (view.token.trackingId == null || this.state.runMode == RunMode.normal)) {
             view.token.x = event.data.x;
             view.token.y = event.data.y;
             view.controlled = event.data.state != ControlState.end && !view.dragging ? true : false
@@ -853,9 +864,14 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   configureParams() {
     let urlParams = new URLSearchParams(window.location.search);
-    this.dataService.viewMode = ViewMode[urlParams.get('viewMode') || "player"]
-    this.dataService.runMode = RunMode[urlParams.get('runMode') || "normal"]
-    this.dataService.allInteractions = urlParams.get('interactions') == "all"
+    this.state.deviceType = urlParams.get('deviceType')
+    this.state.viewMode = ViewMode[urlParams.get('viewMode') || "player"] || ViewMode.player
+    this.state.runMode = RunMode[urlParams.get('runMode') || localStorage.getItem("runMode") || ""] || (this.state.deviceType ? RunMode.tv : RunMode.normal)
+    this.state.allInteractions = urlParams.get('interactions') == "all"
+  }
+
+  get zoomControls(): boolean {
+    return this.state.map && this.state.runMode == RunMode.normal
   }
 
   ngOnInit() {
@@ -891,7 +907,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         // update color
         let name = localStorage.getItem("userName") || "Unknown";
         let color = localStorage.getItem("userColor");
-        this.dataService.send({ name: WSEventName.clientUpdated, data: { name: name, color: color, runMode: this.dataService.runMode, screenWidth: innerWidth, screenHeight: innerHeight } });
+        this.dataService.send({ name: WSEventName.clientUpdated, data: { name: name, color: color, runMode: this.state.runMode, screenWidth: innerWidth, screenHeight: innerHeight } });
 
         let readMessages = JSON.parse(localStorage.getItem("readMessages"));
         if (readMessages && readMessages.lastHost == this.dataService.remoteHost) {
@@ -934,6 +950,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     console.info(`Web Client Version: ${environment.version}`)
     console.info(`Remote Host: ${this.dataService.remoteHost}`)
-    console.info(`Run mode: ${this.dataService.runMode}, Interactions: ${this.dataService.allInteractions}`)
+    console.info(`Run mode: ${this.state.runMode}, Interactions: ${this.state.allInteractions}`)
   }
 }

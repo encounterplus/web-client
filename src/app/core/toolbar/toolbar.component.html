@@ -7,6 +7,10 @@
       <div aria-labelledby="dropdownBasic1" ngbDropdownMenu>
         <button ngbDropdownItem (click)="showSettings()">Settings</button>
         <button ngbDropdownItem (click)="showAbout()">About</button>
+        <div class="dropdown-divider"></div>
+        <button ngbDropdownItem (click)="reload()">Reload</button>
+        <div *ngIf="showExit" class="dropdown-divider"></div>
+        <button *ngIf="showExit" ngbDropdownItem (click)="exit()">Exit</button>
       </div>
     </div> 
     <div class="btn-group mr-2 btn-group-toggle" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" ngbRadioGroup name="radioTest" role="group" aria-label="Second group">

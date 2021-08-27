@@ -32,6 +32,10 @@ export class ToolbarComponent implements OnInit {
   @Output()
   public panel = new EventEmitter<Panel>();
 
+  get showExit(): boolean {
+    return this.state.deviceType != null
+  }
+
   constructor(private element: ElementRef, private modalService: NgbModal, private dataService: DataService) { }
 
   activeTool: Tool = Tool.move;
@@ -58,6 +62,14 @@ export class ToolbarComponent implements OnInit {
 
   showAbout() {
     this.action.emit("showAbout");
+  }
+
+  reload() {
+    this.action.emit("reload");
+  }
+
+  exit() {
+    this.action.emit("exit");
   }
 
   videoPauseToggle() {
