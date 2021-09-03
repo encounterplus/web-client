@@ -29,6 +29,11 @@ export class HexGrid extends Grid implements GridInterface {
         return (Math.sqrt(3) * this.size) / Math.max(this.scale, 0.1)
     }
 
+    position(x: number, y: number): PIXI.Point {
+        const h = this.hex(new PIXI.Point(x, y))
+        return new PIXI.Point(h.q, h.r)
+    }
+
     hex(point: PIXI.Point): Hex {
         var M:Orientation = this.orientation;
         var pt:PIXI.Point = new PIXI.Point((point.x - this.offsetX) / this.size, (point.y - this.offsetY) / this.size);
@@ -106,11 +111,7 @@ export class HexGrid extends Grid implements GridInterface {
         graphics.beginFill(color)
 
         for (let i = 0; i < path.length; i=i+2) {
-            let q = path[i]
-            let r = path[i + 1]
-
-            // wtf?
-            let hex = new Hex(q, r, null)
+            const hex = this.hex(new PIXI.Point(Math.abs(path[i]), Math.abs(path[i + 1])))
             let polygon = this.polygon(hex)
 
             graphics.moveTo(polygon[0].x, polygon[0].y)

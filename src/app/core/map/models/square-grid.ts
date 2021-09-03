@@ -15,6 +15,12 @@ export class SquareGrid extends Grid implements GridInterface {
     get pixelRatio(): number {
         return this.size / Math.max(this.scale, 0.1)
     }
+
+    position(x: number, y: number): PIXI.Point {
+        const px = Math.floor((Math.abs(x) - this.offsetX) / this.size)
+        const py = Math.floor((Math.abs(y) - this.offsetY) / this.size)
+        return new PIXI.Point(px, py)
+    }
     
     gridGraphics(width: number, height: number): PIXI.Graphics {
         let graphics = new PIXI.Graphics();
@@ -43,8 +49,10 @@ export class SquareGrid extends Grid implements GridInterface {
         graphics.beginFill(color)
 
         for (let i = 0; i < path.length; i=i+2) {
-            let x = (path[i] * this.size) + this.offsetX
-            let y = (path[i + 1] * this.size) + this.offsetY
+            const pos = this.position(path[i], path[i + 1])
+
+            let x = (pos.x * this.size) + this.offsetX
+            let y = (pos.y * this.size) + this.offsetY
 
             let width = gridSize.width * this.size
             let height = gridSize.height * this.size

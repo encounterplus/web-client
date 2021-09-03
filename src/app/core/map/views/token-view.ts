@@ -283,7 +283,7 @@ export class TokenView extends View {
         }
 
         // distance
-        this.distanceText = new PIXI.Text(this.distance, {fontFamily : 'Arial', fontSize: 30, fill : 0xffffff, align : 'center', dropShadow: true,
+        this.distanceText = new PIXI.Text(this.distance, {fontFamily : 'Arial', fontSize: 30, fontWeight: 'bold', fill : 0xffffff, align : 'center', dropShadow: true,
         dropShadowColor: '#000000', dropShadowBlur: 6, dropShadowDistance: 0});
         this.distanceText.anchor.set(0.5, 0.5);
         this.distanceText.resolution = 2;
