@@ -29,6 +29,7 @@ import { Measurement } from './shared/models/measurement';
 import { Point } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
+import { Meta } from '@angular/platform-browser';
 
 interface WebAppInterface {
   showText(text: string): any;
@@ -70,7 +71,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild(ToastListComponent)
   public toastListComponent: ToastListComponent;
 
-  constructor(private zone: NgZone, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal) {
+  constructor(private zone: NgZone, private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal) {
     this.state = new AppState();
 
     window['state'] = this.state
@@ -108,7 +109,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.mapComponent.viewport.pause = true
         }
 
-        let modal = this.modalService.open(SettingsModalComponent)
+        let modal = this.modalService.open(SettingsModalComponent, {centered: true})
         modal.componentInstance.state = this.state
         modal.result.then(result => {
           console.debug(`Settings component closed with: ${result}`);
@@ -139,7 +140,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         });
         break;
       case "showAbout":
-        this.modalService.open(AboutModalComponent).result.then(result => {
+        this.modalService.open(AboutModalComponent, {centered: true}).result.then(result => {
           console.debug(`About component closed with: ${result}`);
         }, reason => {
           console.debug(`About component dismissed ${reason}`)
@@ -873,6 +874,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.state.viewMode = ViewMode[urlParams.get('viewMode') || "player"] || ViewMode.player
     this.state.runMode = RunMode[urlParams.get('runMode') || localStorage.getItem("runMode") || ""] || (this.state.deviceType ? RunMode.tv : RunMode.normal)
     this.state.allInteractions = urlParams.get('interactions') == "all"
+
+    // device scale hack for gameboard
+    if (this.state.deviceType == "gameboard") {
+      this.metaService.updateTag({
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1.5, maximum-scale=1.5, user-scalable=no'
+      }, 'name=viewport');
+    }
+    
   }
 
   get zoomControls(): boolean {

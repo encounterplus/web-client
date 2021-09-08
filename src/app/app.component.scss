@@ -28,3 +28,21 @@
         top: 56px;
     }
 }
+
+.gameboard {
+    #side-bar {
+        top: 50px;
+        right: 50px;
+        bottom: 50px;
+    }
+
+    #bottom-bar {
+        bottom: 50px;
+        left: 50px;
+        right: 0;
+        margin: 0.5em;
+        z-index: 1200;
+        width: auto;
+        pointer-events: none;
+    }
+}

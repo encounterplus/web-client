@@ -1,5 +1,6 @@
 import { Directive, AfterViewInit, ElementRef, HostListener, NgZone, Input, OnDestroy } from '@angular/core';
 import * as PIXI from 'pixi.js'
+import { DataService } from 'src/app/shared/services/data.service';
 import { ToastService } from 'src/app/shared/services/toast.service';
 // for debugger
 window["PIXI"] = PIXI;
@@ -18,16 +19,14 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
 
   maxTextureSize: number;
 
-  @Input()
   // public devicePixelRatio = window.devicePixelRatio || 1;
   public devicePixelRatio = 1;
 
-  @Input()
   public applicationOptions = {
     backgroundColor: 0x00000,
     autoDensity: true,
     resolution: window.devicePixelRatio || 1,
-    // resolution: 1,
+    // resolution: 1.75,
     antialias: true,
     // transparent: false,
     // forceFXAA: true,
@@ -38,6 +37,14 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
 
   constructor(private el: ElementRef, private zone: NgZone, private toastService: ToastService) {
     this.element = el.nativeElement as HTMLDivElement;
+
+     // gameboard resolution hack
+    const urlParams = new URLSearchParams(window.location.search);
+    const deviceType = urlParams.get('deviceType')
+   
+    if (deviceType == "gameboard") {
+      this.applicationOptions.resolution = 1.5
+    }
 
     const options = Object.assign({ width: this.element.clientWidth, height: this.element.clientHeight },
       this.applicationOptions);

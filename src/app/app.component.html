@@ -1,8 +1,8 @@
-<div id="app" class="h-100 d-flex flex-column" appDisableRightClick>
+<div id="app" class="h-100 d-flex flex-column {{state.deviceType}}" appDisableRightClick>
   <app-map [state]="state" class="h-100"></app-map>
-  <app-toolbar [state]="state" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)" id="toolbar"></app-toolbar>
+  <app-toolbar id="toolbar" [state]="state" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)"></app-toolbar>
 
-  <app-zoombar class="d-flex align-items-baseline" *ngIf="zoomControls" (action)="zoombarAction($event)" [state]="state" id="zoombar"></app-zoombar>
+  <app-zoombar id="zoombar" class="d-flex align-items-baseline" *ngIf="zoomControls" (action)="zoombarAction($event)" [state]="state"></app-zoombar>
 
   <div id="side-bar">
     <app-initiative-list *ngIf="state.game.started" [state]="state" id="initiative-list"></app-initiative-list>

@@ -1,10 +1,14 @@
 :host {
     position: absolute;
-    top: 0;
-    left: 0;
-    margin: 8px;
+    top: 8px;
+    left: 8px;
 
     .btn-toolbar > .btn-group {
         margin-bottom: 5px;
     }
+}
+
+:host-context(.gameboard) {
+    top: 50px;
+    left: 50px;
 }

@@ -4,6 +4,9 @@
 @import "../node_modules/bootstrap/scss/functions";
 @import "../node_modules/bootstrap/scss/variables";
 
+$default-margin: 8px;
+$gameboard-margin: 75px;
+
 body {
     padding: 0;
     margin: 0;
@@ -35,3 +38,4 @@ code {
     display: block;
     color: #6e7ed7;
 }
+
