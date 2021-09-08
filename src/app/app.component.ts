@@ -783,8 +783,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         // check moving token view cache
         let view = this.movingTokenView
-        if (view?.token.trackingId != model.id) {
-          view = this.mapComponent.mapContainer.tokenViewByTrackingId(model.id)
+        if (view?.token.trackingId != model.trackingId) {
+          view = this.mapComponent.mapContainer.tokenViewByTrackingId(model.trackingId)
           // update moving token view cache
           this.movingTokenView = view
         }
