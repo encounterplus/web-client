@@ -203,23 +203,43 @@ export class AppComponent implements OnInit, AfterViewInit {
     switch (event.name) {
 
       case WSEventName.gameUpdated: {
-        this.state.game.turn = event.data.turn;
-        this.state.game.round = event.data.round;
-        this.state.game.started = event.data.started;
-        this.state.game.paused = event.data.paused;
-
+        // detect changes, very primitive
+        const turnChanged = this.state.game.turn != event.data.turn
+        const roundChanged = this.state.game.round != event.data.round
+        const startedChanged = this.state.game.started != event.data.started
+        const pausedChanged = this.state.game.paused != event.data.paused
+        
+        if (turnChanged) {
+          this.state.game.turn = event.data.turn
+        }
+        if (roundChanged) {
+          this.state.game.round = event.data.round
+        }
+        if (startedChanged) {
+          this.state.game.started = event.data.started
+        }
+        if (pausedChanged){
+          this.state.game.paused = event.data.paused
+        }
+        
         if (event.data.creatures) {
           this.state.game.creatures = event.data.creatures;
           this.mapComponent.mapContainer.update(this.state);
           this.mapComponent.mapContainer.draw();
         }
+
         if (this.initiativeListComponent) {
-          this.initiativeListComponent.scrollToTurned();
+          this.initiativeListComponent.scrollToTurned()
         }
 
         if (this.mapComponent) {
-          this.mapComponent.mapContainer.updateInteraction();
-          this.mapComponent.mapContainer.updateTurned(this.state.turned);
+          this.mapComponent.mapContainer.updateInteraction()
+          this.mapComponent.mapContainer.updateTurned(this.state.turned)
+
+          // sigh
+          if (!event.data.creatures && (turnChanged || roundChanged || startedChanged)) {
+            this.mapComponent.mapContainer.resetPaths()
+          }
         }
 
         // this could be more optimised
@@ -400,13 +420,11 @@ export class AppComponent implements OnInit, AfterViewInit {
           
 
           if (event.data.path != null) {
-            this.mapComponent.mapContainer.gridLayer.updateHighlight(event.data.path, view.gridSize, view.baseColor);
-            this.mapComponent.mapContainer.gridLayer.drawHighlight();
+            view.token.path = event.data.path
+            view.drawPath()
           }
 
           if (event.data.state == ControlState.end) {
-              // this.mapComponent.mapContainer.gridLayer.updateHighlight([], view.gridSize, view.color);
-              // this.mapComponent.mapContainer.gridLayer.drawHighlight();
               view.distance = null
               view.updateDistance()
           }
@@ -463,7 +481,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
 
         // changes
-        // console.debug(model)
+        console.debug(model)
         break
       }
 

@@ -12,6 +12,7 @@ import { Role, Size, Token, TokenStyle } from 'src/app/shared/models/token';
 import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
 import { RunMode } from 'src/app/shared/models/app-state';
+import { PathView } from './path-view';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
@@ -59,7 +60,8 @@ export class TokenView extends View {
 
     distance: string;
 
-    auraContainer: Container = new PIXI.Container();
+    auraContainer: Container = new PIXI.Container()
+    pathView: PathView
 
     get isPlayer(): boolean {
         return this.token.reference?.includes("/player/") || false
@@ -123,6 +125,8 @@ export class TokenView extends View {
         this.buttonMode = true;
         this.sortableChildren = true
 
+        this.pathView = new PathView(grid)
+
         this
             .on('pointerdown', this.onDragStart)
             .on('pointerup', this.onDragEnd)
@@ -135,7 +139,8 @@ export class TokenView extends View {
         this.update();
 
         await this.drawToken()
-        await this.drawAuras();
+        await this.drawAuras()
+        await this.drawPath()
 
         return this;
     }
@@ -159,6 +164,13 @@ export class TokenView extends View {
             view.position.set(view.w / 2, view.h / 2);
             this.auraContainer.addChild(view);
         }
+    }
+
+    async drawPath() {
+        this.pathView.gridSize = this.gridSize
+        this.pathView.color = this.baseColor
+        this.pathView.path = this.token.path
+        await this.pathView.draw()
     }
 
     async drawToken() {

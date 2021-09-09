@@ -30,6 +30,7 @@ import { ProgramManager } from 'src/app/shared/utils';
 import { VisionLayer } from './layers/vision-layer';
 import { MeasurementsLayer } from './layers/measurements-layer';
 import { MeasurementView } from './views/measurement-view';
+import { PathsLayer } from './layers/paths-layer';
 
 export class MapContainer extends Layer {
 
@@ -38,6 +39,7 @@ export class MapContainer extends Layer {
 
     backgroundLayer: BackgroundLayer
     gridLayer: GridLayer
+    pathsLayer: PathsLayer
     canvasLayer: Layer
     areaEffectsLayer: AreaEffectsLayer
     monstersLayer: TokensLayer
@@ -94,6 +96,8 @@ export class MapContainer extends Layer {
         this.mapLayer.addChild(this.middleLayer)
         this.lightsLayer = new LightsLayer(this.dataService)
         this.addChild(this.lightsLayer)
+        this.pathsLayer = new PathsLayer()
+        this.addChild(this.pathsLayer)
         this.aurasLayer = new AurasLayer(this.dataService)
         this.addChild(this.aurasLayer)
         this.topLayer = new TilesLayer(this.dataService)
@@ -151,6 +155,8 @@ export class MapContainer extends Layer {
 
         this.grid.update(this.state.map)
         this.gridLayer.update(this.grid)
+
+        this.pathsLayer.grid = this.grid
 
         this.visionLayer.grid = this.grid
         this.visionLayer.app = this.app
@@ -222,6 +228,18 @@ export class MapContainer extends Layer {
         }
     }
 
+    resetPaths() {
+        for (let view of this.playersLayer.views) {
+            view.token.path = null
+            view.pathView.clear()
+        }
+
+        for (let view of this.monstersLayer.views) {
+            view.token.path = null
+            view.pathView.clear()
+        }
+    }
+
     async drawTiles() {
         this.bottomLayer.size = this.size
         await this.bottomLayer.draw()
@@ -236,6 +254,10 @@ export class MapContainer extends Layer {
     async drawTokens() {
         await this.monstersLayer.draw()
         await this.playersLayer.draw()
+
+        // paths
+        this.pathsLayer.tokens = [...this.playersLayer.views,...this.monstersLayer.views]
+        this.pathsLayer.draw()
     }
 
     async draw() {
@@ -318,7 +340,7 @@ export class MapContainer extends Layer {
     
         // auras
         this.aurasLayer.size = this.size
-        this.aurasLayer.tokens = [...this.playersLayer.views,...this.monstersLayer.views];
+        this.aurasLayer.tokens = [...this.playersLayer.views,...this.monstersLayer.views]
         this.aurasLayer.draw()
         
         this.areaEffectsLayer.size = this.size

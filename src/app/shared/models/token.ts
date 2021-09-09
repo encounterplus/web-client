@@ -77,4 +77,5 @@ export class Token {
     vision?: Vision
     auras: Array<Aura> = []
     trackingId?: number
+    path?: Array<number>
 }
