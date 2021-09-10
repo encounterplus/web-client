@@ -13,6 +13,7 @@ import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
 import { RunMode } from 'src/app/shared/models/app-state';
 import { PathView } from './path-view';
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
@@ -332,10 +333,12 @@ export class TokenView extends View {
         }
 
         if (this.token.role == Role.friendly) {
-	        this.visible = true;
+	        this.visible = true
         } else {
-            this.visible = !this.token.hidden;
+            this.visible = !this.token.hidden
         }
+
+        this.pathView.visible = this.visible
 
         if (this.token.dead) {
             this.zIndex = 29;

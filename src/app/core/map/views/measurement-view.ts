@@ -31,6 +31,8 @@ export class MeasurementView extends View {
         this.addChild(this.shape)
         this.addChild(this.handles)
 
+        this.visible = !this.measurement.hidden
+
         let color = PIXI.utils.string2hex(this.measurement.color)
 
         this.shape.lineStyle(4, color)
@@ -45,7 +47,6 @@ export class MeasurementView extends View {
             this.handles.beginFill(color).drawCircle(this.measurement.data[i], this.measurement.data[i + 1], Math.round(this.grid.size / 12)).endFill()
         }
 
-        
         return this;
     }
 
