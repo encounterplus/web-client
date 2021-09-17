@@ -79,17 +79,6 @@ export class MapComponent implements OnInit, OnChanges {
       this.trackedObjectsContainer.x = 0
       this.trackedObjectsContainer.y = 0
 
-      // activate plugins
-      // this.viewport
-      //   .drag()
-      //   .pinch()
-      //   .wheel({
-      //     percent: 0.001
-      //   })
-      //   .clampZoom({
-      //     minScale: 0.2, maxScale: 5.0
-      //   })
-
       // configure viewport based on run model
       if (this.state.runMode == RunMode.normal) {
         this.viewport
@@ -156,17 +145,6 @@ export class MapComponent implements OnInit, OnChanges {
 
     // update viewport
     this.onResize();
-
-    // let mapData = sessionStorage.getItem(`map-${this.state.map.id}`)
-    // if (mapData) {
-    //   let mapObj = JSON.parse(mapData)
-    //   this.viewport.setZoom(mapObj.zoom)
-    //   this.viewport.moveCenter(mapObj.x, mapObj.y)
-    // } else {
-    //   // fit scale
-    //   this.viewport.setZoom(this.state.map.zoom)
-    //   this.viewport.moveCenter(this.state.map.x, this.state.map.y)
-    // }
 
     if (this.state.map == null) {
       return

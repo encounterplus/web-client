@@ -412,21 +412,12 @@ export class AppComponent implements OnInit, AfterViewInit {
             view.update();
             view.updateTint();
           }
-
-          if (event.data.distance != null) {
-            view.distance = event.data.distance;
-            view.updateDistance()
-          }
           
 
           if (event.data.path != null) {
             view.token.path = event.data.path
             view.drawPath()
-          }
-
-          if (event.data.state == ControlState.end) {
-              view.distance = null
-              view.updateDistance()
+            view.updateElevation()
           }
         }
 
@@ -983,6 +974,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     console.info(`Web Client Version: ${environment.version}`)
     console.info(`Remote Host: ${this.dataService.remoteHost}`)
-    console.info(`Run mode: ${this.state.runMode}, Interactions: ${this.state.allInteractions}`)
+    console.info(`Run mode: ${this.state.runMode}, Interactions: ${this.state.allInteractions}, Device Type: ${this.state.deviceType}`)
   }
 }

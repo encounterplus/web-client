@@ -232,11 +232,13 @@ export class MapContainer extends Layer {
         for (let view of this.playersLayer.views) {
             view.token.path = null
             view.pathView.clear()
+            view.updateElevation()
         }
 
         for (let view of this.monstersLayer.views) {
             view.token.path = null
             view.pathView.clear()
+            view.updateElevation()
         }
     }
 

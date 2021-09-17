@@ -13,7 +13,6 @@ import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
 import { RunMode } from 'src/app/shared/models/app-state';
 import { PathView } from './path-view';
-import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
@@ -58,8 +57,6 @@ export class TokenView extends View {
     turned: boolean = false
     controlled: boolean = false
     blocked: boolean = false
-
-    distance: string;
 
     auraContainer: Container = new PIXI.Container()
     pathView: PathView
@@ -113,6 +110,22 @@ export class TokenView extends View {
             return null
         }
         return this.token.trackingId < 999 ? this.token.trackingId.toString() : (this.token.trackingId % 4096).toString(16)
+    }
+
+    get distance(): string {
+        if (this.token.path && this.token?.path?.length > 2) {
+            return `${((this.token.path.length - 2) * 0.5) * this.grid.scale}`
+        } else {
+            return null
+        }
+    }
+
+    get elevation(): string {
+        if (this.token.elevation) {
+            return (this.token.elevation || 0) > 0 ? "↑" + Math.abs(this.token.elevation) : "↓" + Math.abs(this.token.elevation)
+        } else {
+            return null
+        }
     }
 
     constructor(token: Token, grid: Grid, private dataService: DataService) {
@@ -261,52 +274,34 @@ export class TokenView extends View {
 
         this.updateOverlay()
 
-        // elevation
-        if ((this.token.elevation || 0) != 0) {
-            // graphics
-            this.elevationGraphics = new PIXI.Graphics();
-            this.elevationGraphics.zIndex = 3
-            this.addChild(this.elevationGraphics);
+        // elevation graphics
+        this.elevationGraphics = new PIXI.Graphics();
+        this.elevationGraphics.zIndex = 3
+        this.addChild(this.elevationGraphics);
 
-            // text
-            let text = (this.token.elevation || 0) > 0 ? "↑" + Math.abs(this.token.elevation) : "↓" + Math.abs(this.token.elevation)
+        // elevation text
+        this.elevationText = new PIXI.Text("", {fontFamily : '-apple-system, Helvetica', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
+        this.elevationText.anchor.set(0.5, 0.5);
+        this.elevationText.resolution = 4;
+        this.elevationText.zIndex = 4
+        this.addChild(this.elevationText);
 
-            this.elevationText = new PIXI.Text(text, {fontFamily : '-apple-system, Helvetica', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
-            this.elevationText.anchor.set(0.5, 0.5);
-            this.elevationText.resolution = 4;
-            this.elevationText.zIndex = 4
-            this.addChild(this.elevationText);
-        }   
+        // label graphics
+        this.labelGraphics = new PIXI.Graphics();
+        this.labelGraphics.zIndex = 5
+        this.addChild(this.labelGraphics);
 
-        // label
-        if (this.token.label != null || this.token.trackingId != null)  {
-            // graphics
-            this.labelGraphics = new PIXI.Graphics();
-            this.labelGraphics.zIndex = 5
-            this.addChild(this.labelGraphics);
+        // label text
+        this.labelText = new PIXI.Text("", {fontFamily : 'Arial', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
+        this.labelText.anchor.set(0.5, 0.5);
+        this.labelText.resolution = 4;
+        this.labelText.zIndex = 6
+        this.addChild(this.labelText);
 
-            // text
-            let text = this.token.label || this.trackingLabel || (this.token.name || "Unknown").toUpperCase().charAt(0)
-
-            this.labelText = new PIXI.Text(text, {fontFamily : 'Arial', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
-            this.labelText.anchor.set(0.5, 0.5);
-            this.labelText.resolution = 4;
-            this.labelText.zIndex = 6
-            this.addChild(this.labelText);
-        }
-
-        // distance
-        this.distanceText = new PIXI.Text(this.distance, {fontFamily : 'Arial', fontSize: 30, fontWeight: 'bold', fill : 0xffffff, align : 'center', dropShadow: true,
-        dropShadowColor: '#000000', dropShadowBlur: 6, dropShadowDistance: 0});
-        this.distanceText.anchor.set(0.5, 0.5);
-        this.distanceText.resolution = 2;
-        this.distanceText.zIndex = 10
-        this.addChild(this.distanceText);
-
+        // updates
         this.updateLabel()
         this.updateElevation()
         this.updateTint();
-        this.updateDistance();
         this.updateInteraction();
 
         // debug frame
@@ -366,9 +361,18 @@ export class TokenView extends View {
     }
 
     updateLabel() {
-        if (!this.labelGraphics || !this.labelText) {
-            return;
+        // update visibility
+        if ((this.tokenTexture != null && this.token.label != null) || this.tokenTexture == null) {
+            this.labelGraphics.visible = true
+            this.labelText.visible = true
+        } else {
+            this.labelGraphics.visible = false
+            this.labelText.visible = false
+            return
         }
+
+        // get text
+        const text = this.token.label || this.trackingLabel || (this.token.name || "Unknown").toUpperCase().charAt(0)
 
         if (this.tokenTexture != null || (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal) ) {
             let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
@@ -399,6 +403,7 @@ export class TokenView extends View {
             this.labelGraphics.lineStyle(2, 0x000000, 0.2)
             this.labelGraphics.beginFill(this.color).drawCircle(x, y, labelSize / 2).endFill();
 
+            this.labelText.text = text
             this.labelText.position.set(x, y);
             this.labelText.style.fontSize = labelSize / 2.5;
             
@@ -407,14 +412,24 @@ export class TokenView extends View {
             this.labelGraphics.clear();
             this.labelGraphics.lineStyle(2, 0x000000, 0.2)
             this.labelGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, size / 2).endFill();
+            this.labelText.text = text
             this.labelText.position.set(this.w / 2, this.h / 2);
             this.labelText.style.fontSize = size / 2.5;
         }
     }
 
     updateElevation() {
-        if (!this.elevationGraphics || !this.elevationText) {
-            return;
+        // get text
+        const text = this.distance || this.elevation
+
+        // update visibility
+        if (text) {
+            this.elevationGraphics.visible = true
+            this.elevationText.visible = true
+        } else {
+            this.elevationGraphics.visible = false
+            this.elevationText.visible = false
+            return
         }
 
         if (this.token.label != null && this.tokenTexture != null) {
@@ -444,9 +459,10 @@ export class TokenView extends View {
 
             this.elevationGraphics.clear()
             this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
-            this.elevationGraphics.beginFill(0x333333, 0.9).drawRoundedRect(0, 0, labelSize * 2, labelSize, labelSize / 2).endFill();
+            this.elevationGraphics.beginFill(this.distance != null ? 0x444444 : 0x555555, 0.9).drawRoundedRect(0, 0, labelSize * 2, labelSize, labelSize / 2).endFill();
             this.elevationGraphics.position.set(x, y)
 
+            this.elevationText.text = text
             this.elevationText.position.set(x + labelSize * 0.7, y + labelSize / 2);
             this.elevationText.style.fontSize = labelSize / 2.5;
             
@@ -474,13 +490,13 @@ export class TokenView extends View {
                 x = clamp(x, 0, (this.w) - (labelSize * 1.3))
                 y = clamp(y, 0, (this.h) - (labelSize))
             }
-            
 
             this.elevationGraphics.clear()
             this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
-            this.elevationGraphics.beginFill(0x333333, 0.9).drawRoundedRect(0, 0, labelSize * 1.3, labelSize, labelSize / 2).endFill();
+            this.elevationGraphics.beginFill(this.distance != null ? 0x444444 : 0x555555, 0.9).drawRoundedRect(0, 0, labelSize * 1.3, labelSize, labelSize / 2).endFill();
             this.elevationGraphics.position.set(x, y)
 
+            this.elevationText.text = text
             this.elevationText.position.set(x + labelSize * 0.6, y + labelSize / 2);
             this.elevationText.style.fontSize = labelSize / 2.5;
         }
@@ -488,17 +504,6 @@ export class TokenView extends View {
         if (this.tokenTexture == null && this.token.trackingId == null) {
             this.elevationGraphics.zIndex = 10
             this.elevationText.zIndex = 11
-        }
-    }
-
-    updateDistance() {
-        if (this.distance == null && this.distance != "") {
-            this.distanceText.visible = false;
-        } else {
-            this.distanceText.visible = true;
-            this.distanceText.text = this.distance;
-            this.distanceText.position.set(this.w / 2, -this.grid.size / 2);
-            this.distanceText.style.fontSize = (this.grid.size / 4);
         }
     }
 
