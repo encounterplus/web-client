@@ -37,6 +37,9 @@ export class PathView extends View {
     }
 
     clear() {
-        this.removeChildren()
+        if (this.shape) {
+            this.shape.clear()
+            this.shape.visible = false
+        }
     }
 }
