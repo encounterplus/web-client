@@ -17,29 +17,22 @@ export class PathView extends View {
     }
 
     async draw() {
-        this.clear()
-        
-        if (this.shape) {
-            this.shape.removeChild()
-            this.shape.destroy()
+        // create new shape
+        if (!this.shape) {
+            this.shape = new PIXI.Graphics()
+            this.addChild(this.shape)
         }
 
+        // visibility
         if ((this.path?.length || 0) < 2) {
-            this.shape = null
+            this.shape.visible = false
             return this
+        } else {
+            this.shape.visible = true
         }
 
-        this.shape = this.grid.pathGraphics(this.path, this.gridSize, this.color)
-        // if (this.gridSize.width > 1.0 || this.gridSize.height > 0) {
-        //     this.gridSize.filters = [this.alphaFilter];
-        //     this.shape.alpha = 1.0
-        // } else {
-        //     this.highlightGraphics.filters = []
-        //     this.highlightGraphics.alpha = 0.3
-        // }
-
-        this.addChild(this.shape)
-
+        // path shape
+        this.shape = this.grid.pathGraphics(this.path, this.gridSize, this.color, this.shape)
         return this
     }
 
