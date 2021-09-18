@@ -140,7 +140,7 @@ export class LightsLayer extends Layer {
             // populate uniforms
             mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
             mesh.shader.uniforms.radiusMin = light.radiusMin * this.grid.pixelRatio / 2
-            mesh.shader.uniforms.radiusMax = light.radiusMax * this.grid.pixelRatio / 2
+            mesh.shader.uniforms.radiusMax = Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio / 2
             mesh.shader.uniforms.intensity = light.opacity
             mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(light.color))
             mesh.blendMode = PIXI.BLEND_MODES.ADD
@@ -188,7 +188,7 @@ export class LightsLayer extends Layer {
             // populate uniforms
             mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
             mesh.shader.uniforms.radiusMin = light.radiusMin * this.grid.pixelRatio / 2
-            mesh.shader.uniforms.radiusMax = light.radiusMax * this.grid.pixelRatio / 2
+            mesh.shader.uniforms.radiusMax = Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio / 2
             mesh.shader.uniforms.intensity = light.opacity
             mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(light.color))
             mesh.blendMode = PIXI.BLEND_MODES.ADD

@@ -117,7 +117,7 @@ export class VisionLayer extends Layer {
         this.fogExplore = this.dataService.state.map.fogExploration
         
         this.visionLimit = this.dataService.state.map.losVisionLimit || -1
-        this.intensity = this.visionLimit >= 0 ? 0.0 : this.dataService.state.map.losDaylight || 0.0
+        this.intensity = this.dataService.state.map.losDaylight || 0.0
 
         this.visible = this.lineOfSight || this.fogOfWar
 
@@ -422,17 +422,17 @@ export class VisionLayer extends Layer {
                 radiusMax = darkRadiusMax > lightRadiusMax ? darkRadiusMax : lightRadiusMax
         }
 
-        // vision limit
-        const limit = this.visionLimit * this.grid.pixelRatio
-        if (limit >= 0) {
-            radiusMin = Math.min(radiusMin, limit)
-            radiusMax = Math.min(radiusMax, limit)
-        }
+        // // vision limit
+        // const limit = this.visionLimit * this.grid.pixelRatio
+        // if (limit >= 0) {
+        //     radiusMin = Math.min(radiusMin, limit)
+        //     radiusMax = Math.min(radiusMax, limit)
+        // }
 
         // populate uniforms
         mesh.shader.uniforms.position = [vision.sight.x / 2, vision.sight.y / 2]
         mesh.shader.uniforms.radiusMin = radiusMin / 2
-        mesh.shader.uniforms.radiusMax = radiusMax / 2
+        mesh.shader.uniforms.radiusMax = Math.max(radiusMin, radiusMax) / 2
         mesh.shader.uniforms.intensity = this.intensity
         // mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
@@ -491,7 +491,7 @@ export class VisionLayer extends Layer {
         // populate uniforms
         mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
         mesh.shader.uniforms.radiusMin = ((light.radiusMin * this.grid.pixelRatio) + minSize) / 2;
-        mesh.shader.uniforms.radiusMax = ((light.radiusMax * this.grid.pixelRatio) + minSize) / 2;
+        mesh.shader.uniforms.radiusMax = ((Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio) + minSize) / 2;
         mesh.shader.uniforms.intensity = this.intensity;
         // mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
@@ -545,7 +545,7 @@ export class VisionLayer extends Layer {
         // populate uniforms
         mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
         mesh.shader.uniforms.radiusMin = light.radiusMin * this.grid.pixelRatio / 2;
-        mesh.shader.uniforms.radiusMax = light.radiusMax * this.grid.pixelRatio / 2;
+        mesh.shader.uniforms.radiusMax = Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio / 2;
         mesh.shader.uniforms.intensity = this.intensity;
         // mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
