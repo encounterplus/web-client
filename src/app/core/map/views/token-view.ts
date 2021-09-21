@@ -554,15 +554,13 @@ export class TokenView extends View {
         if (this.controlled) {
             return
         }
-
         // stop propagation
         event.stopPropagation()
         this.dragging = true
 
         // update pointerId
-        if (event.data.pointerId) {
+        if (event.data.pointerId != null) {
             this.pointerId = event.data.pointerId
-            console.log(event.data.pointerId)
         }
 
         this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}})
@@ -587,9 +585,11 @@ export class TokenView extends View {
         }
 
         if (this.dragging) {
+
+            // console.log(`${this.token.label}: ${event.data.pointerId}, ${event.data.global.x},${event.data.global.y}`)
             
             // check if pointerId match with event
-            if (this.pointerId && event.data.pointerId) {
+            if (this.pointerId != null && event.data.pointerId != null) {
                 if (this.pointerId == event.data.pointerId) {
                     // stop propagation
                     event.stopPropagation()
@@ -600,8 +600,6 @@ export class TokenView extends View {
                 // stop propagation
                 event.stopPropagation()
             }
-
-            // console.log(`${this.token.label}: ${event.data.global.x},${event.data.global.y}`)
 
             const newPosition = event.data.getLocalPosition(this.parent)
 
