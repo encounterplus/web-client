@@ -362,6 +362,10 @@ export class TokenView extends View {
     }
 
     updateLabel() {
+        if (this.labelGraphics == null) {
+            return
+        }
+        
         // update visibility
         if ((this.tokenTexture != null && this.token.label != null) || this.tokenTexture == null) {
             this.labelGraphics.visible = true
@@ -585,7 +589,6 @@ export class TokenView extends View {
         }
 
         if (this.dragging) {
-
             // console.log(`${this.token.label}: ${event.data.pointerId}, ${event.data.global.x},${event.data.global.y}`)
             
             // check if pointerId match with event

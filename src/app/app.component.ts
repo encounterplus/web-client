@@ -472,7 +472,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
 
         // changes
-        console.debug(model)
+        // console.debug(model)
         break
       }
 
