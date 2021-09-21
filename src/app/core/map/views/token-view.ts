@@ -60,6 +60,7 @@ export class TokenView extends View {
 
     auraContainer: Container = new PIXI.Container()
     pathView: PathView
+    pointerId?: number
 
     get isPlayer(): boolean {
         return this.token.reference?.includes("/player/") || false
@@ -145,7 +146,7 @@ export class TokenView extends View {
             .on('pointerdown', this.onDragStart)
             .on('pointerup', this.onDragEnd)
             .on('pointerupoutside', this.onDragEnd)
-            .on('pointermove', this.onDragMove);
+            .on('pointermove', this.onDragMove)
     }
 
     async draw() {
@@ -551,49 +552,65 @@ export class TokenView extends View {
 
     onDragStart(event: InteractionEvent) {
         if (this.controlled) {
-            return;
+            return
         }
 
         // stop propagation
-        event.stopPropagation();
+        event.stopPropagation()
+        this.dragging = true
 
-        this.data = event.data;
-        this.dragging = true;
+        // update pointerId
+        if (event.data.pointerId) {
+            this.pointerId = event.data.pointerId
+            console.log(event.data.pointerId)
+        }
 
-        this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}});
+        this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}})
     }
     
     onDragEnd(event: InteractionEvent) {
         if (this.controlled) {
-            return;
+            return
         }
 
         // stop propagation
-        event.stopPropagation();
+        event.stopPropagation()
+        this.dragging = false
+        this.pointerId = null
 
-        this.dragging = false;
-        this.data = null;
-
-        this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end}});
+        this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end}})
     }
     
     onDragMove(event: InteractionEvent) {
         if (this.controlled) {
-            return;
+            return
         }
 
         if (this.dragging) {
-            // stop propagation
-            event.stopPropagation();
+            
+            // check if pointerId match with event
+            if (this.pointerId && event.data.pointerId) {
+                if (this.pointerId == event.data.pointerId) {
+                    // stop propagation
+                    event.stopPropagation()
+                } else {
+                    return
+                }
+            } else {
+                // stop propagation
+                event.stopPropagation()
+            }
 
-            const newPosition = this.data.getLocalPosition(this.parent);
+            // console.log(`${this.token.label}: ${event.data.global.x},${event.data.global.y}`)
+
+            const newPosition = event.data.getLocalPosition(this.parent)
 
             if (!this.blocked) {
                 this.center = newPosition;
-                this.auraContainer.position.set(newPosition.x, newPosition.y);
+                this.auraContainer.position.set(newPosition.x, newPosition.y)
             }
         
-            this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: newPosition.x | 0, y: newPosition.y | 0, state: ControlState.control}});
+            this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: newPosition.x | 0, y: newPosition.y | 0, state: ControlState.control}})
         }
     }
 }
