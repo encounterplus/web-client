@@ -909,10 +909,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     // update messages based on local storage settings
     this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
 
+    // update settings
+    this.state.userTokenId = localStorage.getItem("userTokenId")
+
     this.configureRemoteHost()
     this.configureParams()
     this.wsConnect()
-
     this.showBanner()
 
     this.dataService.connectionStatus$.subscribe(status => {

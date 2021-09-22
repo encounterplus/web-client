@@ -55,6 +55,9 @@ export class SettingsModalComponent implements OnInit {
     localStorage.setItem("softEdges", `${this.softEdges}`)
     localStorage.setItem("runMode", `${this.runMode}`)
 
+    // update state
+    this.state.userTokenId = this.tokenId
+
     // update server
     this.dataService.send({name: WSEventName.clientUpdated, data: {name: this.name, color: this.color}})
 

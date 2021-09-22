@@ -34,6 +34,7 @@ export class AppState {
     runMode: RunMode = RunMode.normal
     deviceType: string
     allInteractions = false
+    userTokenId?: string
 
     get activeCreatures(): Array<Creature> {
         return this.game.creatures.filter( creature => { return creature.initiative != -10 } ).sort((a, b) => (a.rank > b.rank) ? 1 : -1)

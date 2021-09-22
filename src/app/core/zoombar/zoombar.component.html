@@ -5,7 +5,7 @@
   <button ngbButton class="btn btn-dark" style="border-top: 1px solid rgba(255, 255, 255, 0.1);" (click)="zoomOut()">
     <i class="fa fa-minus"></i>
   </button>
-  <button ngbButton class="btn btn-dark" style="border-top: 1px solid rgba(255, 255, 255, 0.1);"
+  <button ngbButton *ngIf="tokenFocusVisible" class="btn btn-dark" style="border-top: 1px solid rgba(255, 255, 255, 0.1);"
     (click)="focusToken()">
     <i class="fa fa-dot-circle-o"></i>
   </button>
