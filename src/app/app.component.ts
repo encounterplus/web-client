@@ -874,7 +874,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     let remoteHost = urlParams.get('remoteHost') || localStorage.getItem("lastSuccessfullHost") || window.location.host;
     this.dataService.remoteHost = remoteHost;
     this.dataService.protocol = window.location.protocol;
-    Loader.shared.remoteBaseURL = this.dataService.baseURL;
+
+    // set remote base path for client assets
+    const baseHref = (document.getElementsByTagName('base')[0] || {}).href
+    const basePath = baseHref?.substr(0, baseHref?.lastIndexOf("/"))
+    if (basePath != null && basePath != "") {
+      Loader.shared.localBaseURL = basePath
+    }
+    Loader.shared.remoteBaseURL = this.dataService.baseURL
   }
 
   configureParams() {

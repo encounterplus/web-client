@@ -22,6 +22,7 @@ export class Loader {
     };
 
     remoteBaseURL: string = "";
+    localBaseURL: string = "";
 
     cache: Map<string, PIXI.Texture> = new Map();
 
@@ -42,10 +43,13 @@ export class Loader {
     }
 
     async loadTexture(src: string, local: boolean = false): Promise<PIXI.Texture> {
-
-        if (local == false) {
-            src = this.remoteBaseURL + src;
+        // fix url base path
+        if (local) {
+            src = this.localBaseURL + src
+        } else {
+            src = this.remoteBaseURL + src
         }
+
         let tex = this.getTexture(src);
         if ( tex ) return tex;
 
@@ -246,6 +250,9 @@ export class Loader {
     async loadResource(src: string): Promise<PIXI.ILoaderResource> {
         let res = this.getResource(src);
         if ( res ) return res;
+
+        // update src
+        src = this.localBaseURL + src
 
         return new Promise((resolve, reject) => {
             const loader = PIXI.Loader.shared;
