@@ -1,4 +1,4 @@
-import version from 'src/app/version';
+import packageInfo from '../../package.json'
 
 export const environment = {
   production: true,
@@ -7,5 +7,5 @@ export const environment = {
       AUTO_RECONNECT: true
     }
   },
-  version: version
+  version: packageInfo.version
 };

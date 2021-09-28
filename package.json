@@ -1,6 +1,6 @@
 {
-  "name": "external-screen",
-  "version": "0.9.1",
+  "name": "web-client",
+  "version": "0.9.9",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
