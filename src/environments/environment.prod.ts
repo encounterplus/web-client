@@ -1,4 +1,4 @@
-import packageInfo from '../../package.json'
+import metaInfo from '../meta.json'
 
 export const environment = {
   production: true,
@@ -7,5 +7,5 @@ export const environment = {
       AUTO_RECONNECT: true
     }
   },
-  version: packageInfo.version
+  version: metaInfo.version
 };
