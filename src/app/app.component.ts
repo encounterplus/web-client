@@ -886,13 +886,13 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   configureParams() {
     let urlParams = new URLSearchParams(window.location.search);
-    this.state.deviceType = urlParams.get('deviceType')
+    this.state.device = urlParams.get('device')
     this.state.viewMode = ViewMode[urlParams.get('viewMode') || "player"] || ViewMode.player
-    this.state.runMode = RunMode[urlParams.get('runMode') || localStorage.getItem("runMode") || ""] || (this.state.deviceType ? RunMode.tv : RunMode.normal)
+    this.state.runMode = RunMode[urlParams.get('runMode') || localStorage.getItem("runMode") || ""] || (this.state.device ? RunMode.tv : RunMode.normal)
     this.state.allInteractions = urlParams.get('interactions') == "all"
 
     // device scale hack for gameboard
-    if (this.state.deviceType == "gameboard") {
+    if (this.state.device == "gameboard") {
       this.metaService.updateTag({
         name: 'viewport',
         content: 'width=device-width, initial-scale=1.5, maximum-scale=1.5, user-scalable=no'
@@ -940,7 +940,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         // update color
         let name = localStorage.getItem("userName") || "Unknown";
         let color = localStorage.getItem("userColor");
-        this.dataService.send({ name: WSEventName.clientUpdated, data: { name: name, color: color, runMode: this.state.runMode, screenWidth: innerWidth, screenHeight: innerHeight } });
+        this.dataService.send({ name: WSEventName.clientUpdated, data: { name: name, color: color, runMode: this.state.runMode, device: this.state.device, screenWidth: innerWidth, screenHeight: innerHeight } });
 
         let readMessages = JSON.parse(localStorage.getItem("readMessages"));
         if (readMessages && readMessages.lastHost == this.dataService.remoteHost) {
@@ -983,6 +983,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     console.info(`Web Client Version: ${environment.version}`)
     console.info(`Remote Host: ${this.dataService.remoteHost}`)
-    console.info(`Run mode: ${this.state.runMode}, Interactions: ${this.state.allInteractions}, Device Type: ${this.state.deviceType}`)
+    console.info(`Run mode: ${this.state.runMode}, Interactions: ${this.state.allInteractions}, Device: ${this.state.device}`)
   }
 }

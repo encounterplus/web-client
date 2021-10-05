@@ -32,7 +32,7 @@ export class AppState {
 
     viewMode: ViewMode = ViewMode.player
     runMode: RunMode = RunMode.normal
-    deviceType: string
+    device: string
     allInteractions = false
     userTokenId?: string
 

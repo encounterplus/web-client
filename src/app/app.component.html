@@ -1,4 +1,4 @@
-<div id="app" class="h-100 d-flex flex-column {{state.deviceType}}" appDisableRightClick>
+<div id="app" class="h-100 d-flex flex-column {{state.device}}" appDisableRightClick>
   <app-map [state]="state" class="h-100"></app-map>
   <app-toolbar id="toolbar" [state]="state" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)"></app-toolbar>
 

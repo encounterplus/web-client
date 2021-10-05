@@ -33,7 +33,7 @@ export class ToolbarComponent implements OnInit {
   public panel = new EventEmitter<Panel>();
 
   get showExit(): boolean {
-    return this.state.deviceType != null
+    return this.state.device != null
   }
 
   constructor(private element: ElementRef, private modalService: NgbModal, private dataService: DataService) { }

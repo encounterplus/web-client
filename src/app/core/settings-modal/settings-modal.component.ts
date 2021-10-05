@@ -72,8 +72,8 @@ export class SettingsModalComponent implements OnInit {
         search += `&runMode=${this.state.runMode}`
       }
 
-      if (this.state.deviceType) {
-        search += `&deviceType=${this.state.deviceType}`
+      if (this.state.device) {
+        search += `&device=${this.state.device}`
       }
 
       // reload
