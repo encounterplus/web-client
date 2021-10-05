@@ -320,6 +320,9 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.mapFitScreen: {
+        if (this.state.runMode != RunMode.tv) {
+          return
+        } 
         if (this.state.screen.tableTopMode) {
           const mapGridSize = this.mapComponent.mapContainer.grid.adjustedSize.width
           const screenGridSize = this.mapComponent.viewport.screenWidth / this.state.screen.width
@@ -676,7 +679,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.state.screen = event.data;
 
         // fit scren for tabletop mode
-        if (tableTopMode != this.state.screen.tableTopMode && this.state.screen.tableTopMode) {
+        if (tableTopMode != this.state.screen.tableTopMode && this.state.screen.tableTopMode && this.state.runMode == RunMode.tv) {
           const mapGridSize = this.mapComponent.mapContainer.grid.adjustedSize.width
           const screenGridSize = this.mapComponent.viewport.screenWidth / this.state.screen.width
           let scale = screenGridSize / mapGridSize
