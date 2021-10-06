@@ -13,7 +13,7 @@ export class CreatureComponent implements OnInit {
   public creature: Creature;
 
   get image(): string {
-    return this.creature.image ? `${this.dataService.protocol}//${this.dataService.remoteHost}${this.creature.image}` : "/assets/img/creature.png"
+    return this.creature.image ? `${this.dataService.protocol}//${this.dataService.remoteHost}${this.creature.image}` : "assets/img/creature.png"
   }
 
   get name(): string {
@@ -22,9 +22,9 @@ export class CreatureComponent implements OnInit {
 
   get overlayImage(): string {
     if (this.creature.dead) {
-      return "/assets/img/creature-dead.png";
+      return "assets/img/creature-dead.png";
     } else if (this.creature.bloodied) {
-      return "/assets/img/creature-bloodied.png";
+      return "assets/img/creature-bloodied.png";
     } else {
       return "";
     }
