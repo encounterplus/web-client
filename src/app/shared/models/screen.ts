@@ -13,7 +13,9 @@ export enum SharedVision {
 
 export class Screen {
     overlayImage: string
-    overlayType: string
+    overlayHandoutStyle: string
+    overlayHandountText: string
+    overlayHandoutText: string
     interaction: ScreenInteraction
     sharedVision: SharedVision
     tableTopMode: Boolean
