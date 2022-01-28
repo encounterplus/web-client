@@ -56,8 +56,10 @@ export class MessageComponent implements OnInit {
                   val = val.concat(details)
               }
           } else {
+              // convert markdown links to html
+              let detailTxt = detail.value.replaceAll(/\[(.+?)\]\((.+?)\)/g,"<a href=\"$2\">$1</a>")
               // strip internal links
-              const detailTxt = detail.value.replaceAll(/<a.*?href="\/.*".*?>(.*?)<\/a>/g,"$1")
+              detailTxt = detailTxt.replaceAll(/<a.*?href="(?:\/|monster|item|spell|page).*?".*?>(.*?)<\/a>/g,"$1")
               val.push(`${detailTxt}`)
           }
           return val
