@@ -14,5 +14,6 @@
     <app-image-handout *ngIf="state.screen.overlayImage" [screen]="state.screen"></app-image-handout>
     <app-toast-list aria-live="polite" aria-atomic="true"></app-toast-list>
   </div>
+  <app-overlay *ngIf="state.screen.overlayHandoutText||state.screen.overlayHandountText" [screen]="state.screen"></app-overlay>
 
 </div>
