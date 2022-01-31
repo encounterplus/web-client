@@ -38,10 +38,12 @@ export enum WSEventName {
     trackedObjectCreated = "trackedObjectCreated",
     trackedObjectUpdated = "trackedObjectUpdated",
     trackedObjectDeleted = "trackedObjectDeleted",
-    trackedObjectsUpdated = "trackedObjectsUpdated"
+    trackedObjectsUpdated = "trackedObjectsUpdated",
+    updateModel = "updateModel"
 }
 
 export interface WSEvent {
     name: WSEventName;
+    model?: string;
     data: any;
 }

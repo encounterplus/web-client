@@ -52,6 +52,7 @@ export class TokenView extends View {
 
     data: PIXI.InteractionData
     dragging: boolean = false
+    kbMovement: boolean = false
 
     selected: boolean = false
     turned: boolean = false
