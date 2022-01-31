@@ -2,6 +2,7 @@ export enum MessageType {
     chat = "chat",
     roll = "roll",
     command = "command",
+    tableRoll = "tableRoll"
 }
 
 export class Message {

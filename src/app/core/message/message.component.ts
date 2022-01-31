@@ -22,6 +22,10 @@ export class MessageComponent implements OnInit {
     return this.message.type == MessageType.chat;
   }
 
+  get isTableRoll(): boolean {
+    return this.message.type == MessageType.tableRoll;
+  }
+
   get roll(): DiceRoll {
     return this.message.content as DiceRoll;
   }
@@ -42,6 +46,32 @@ export class MessageComponent implements OnInit {
             return "yellow";
     }
 }
+
+  get tableRollText(): string {
+      let getRollValue = (detail) => {
+          let val = []
+          if (detail.rolls) {
+              for (let roll of detail.rolls) {
+                  const details = roll.details.map(getRollValue)
+                  val = val.concat(details)
+              }
+          } else {
+              // convert markdown links to html
+              let detailTxt = detail.value.replaceAll(/\[(.+?)\]\((.+?)\)/g,"<a href=\"$2\">$1</a>")
+              // strip internal links
+              detailTxt = detailTxt.replaceAll(/<a.*?href="(?:\/|monster|item|spell|page).*?".*?>(.*?)<\/a>/g,"$1")
+              val.push(`${detailTxt}`)
+          }
+          return val
+      }
+      const tableRoll = JSON.parse(this.message.content)
+      const rolls = [].concat(...tableRoll.details.map(getRollValue))
+      if (tableRoll.details.length == 1 && !tableRoll.details[0].rolls) {
+        return rolls[0]
+      }else {
+          return `<ul>${rolls.map(r=>`<li>${r}</li>`).join("")}</ul>`
+      }
+  }
 
   ngOnInit(): void {
   }
