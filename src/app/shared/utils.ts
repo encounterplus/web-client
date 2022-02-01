@@ -1,6 +1,8 @@
 import * as PIXI from 'pixi.js'
-import type { ArrayFixed } from '@pixi/utils';
 import { Loader } from "../core/map/models/loader"
+
+// from pixi.js source
+type ArrayFixed<T, L extends number> = [ T, ...Array<T> ] & { length: L }
 
 export class ProgramManager {
     static cached = new Map<string, PIXI.Program>()
