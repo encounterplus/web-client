@@ -24,6 +24,7 @@ import { MessageComponent } from './core/message/message.component';
 import { MessageListComponent } from './core/message-list/message-list.component';
 import { PausedComponent } from './core/paused/paused.component';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
+import { OverlayComponent } from './core/overlay/overlay.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { ZoombarComponent } from './core/zoombar/zoombar.component';
     MessageComponent,
     MessageListComponent,
     PausedComponent,
-    ZoombarComponent
+    ZoombarComponent,
+    OverlayComponent
   ],
   imports: [
     BrowserModule,

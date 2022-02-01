@@ -8,6 +8,7 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { ToastService } from 'src/app/shared/services/toast.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { TrackedObjectsContainer } from './tracked-objects-container';
+import { ControlState } from './views/token-view';
 
 // window.PIXI = PIXI;
 // import 'pixi.js';
@@ -40,6 +41,24 @@ export class MapComponent implements OnInit, OnChanges {
   // main map container
   mapContainer: MapContainer
   trackedObjectsContainer: TrackedObjectsContainer
+
+  // Keyboard tracked hotkeys
+  kb = {
+      kbDrag: false,
+      arrowUp: false,
+      arrowDown: false,
+      arrowLeft: false,
+      arrowRight: false,
+      keyShiftL: false,
+      keyShiftR: false,
+      keyEqual: false,
+      keyMinus: false,
+      keyT: false,
+      keyEsc: false
+  }
+  gpButtons?: GamepadButton[];
+  gpTS?: number;
+
 
   constructor(private dataService: DataService, private zone: NgZone, private toastService: ToastService) {
     
@@ -124,7 +143,125 @@ export class MapComponent implements OnInit, OnChanges {
 
       console.debug(`maximum texture size: ${this.canvas.maxTextureSize}`);
       console.debug("map component initialized");
+      let ticker = PIXI.Ticker.shared;
+      // Gamepad & KB Support
 
+      ticker.add(()=>{
+        let token = this.mapContainer.tokenViewById(localStorage.getItem("userTokenId"))
+        let x = token?.position.x
+        let y = token?.position.y
+        let pos = this.viewport.center
+
+        // Keyboard Controls
+          // Zoom In/Out
+        if (this.kb.keyMinus)
+              this.viewport.animate({ scale: this.viewport.scale.x - 0.1, time: 100 })
+        else if (this.kb.keyEqual)
+              this.viewport.animate({ scale: this.viewport.scale.x + 0.1, time: 100 })
+        if (token) {
+            //Move token
+            if (this.kb.arrowUp && !this.kb.keyShiftL && !this.kb.keyShiftR) {
+                y -= Math.ceil(token.grid.size*.1);
+            } else if (this.kb.arrowDown && !this.kb.keyShiftL && !this.kb.keyShiftR) {
+                y += Math.ceil(token.grid.size*.1);
+            }
+            if (this.kb.arrowLeft && !this.kb.keyShiftL && !this.kb.keyShiftR) {
+                x -= Math.ceil(token.grid.size*.1);
+            } else if (this.kb.arrowRight && !this.kb.keyShiftL && !this.kb.keyShiftR) {
+                x += Math.ceil(token.grid.size*.1);
+            }
+            // Token rotation
+            if (this.kb.arrowLeft && (this.kb.keyShiftL||this.kb.keyShiftR))
+                this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: token.token.rotation - 5}})
+            else if (this.kb.arrowRight && (this.kb.keyShiftL||this.kb.keyShiftR))
+                this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: token.token.rotation + 5}})
+            // Center on token
+            if (this.kb.keyT)
+                this.viewport.animate({ position: token.position, time: 1000, ease: "easeInOutSine", removeOnInterrupt: true })
+            // Reset path
+            if (this.kb.keyEsc)
+                this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, path: []}})
+        }
+        // Gamepad Controls
+        let gamePads = navigator.getGamepads();
+        if (gamePads&&gamePads[0]) {
+            let gp = gamePads[0];
+            if (this.gpTS === undefined) {
+                this.toastService.showSuccess(`Gamepad connected: ${gp.id}`)
+            }
+            // R1/L1 Zoom In/Out
+            if (gp.buttons[5].pressed)
+                this.viewport.animate({ scale: this.viewport.scale.x + 0.1, time: 100 })
+            else if (gp.buttons[4].pressed)
+                this.viewport.animate({ scale: this.viewport.scale.x - 0.1, time: 100 })
+            // R-Joystick Panning:
+            if (gp.axes[3] < -.5) {
+                pos.y -= 5;
+            } else if (gp.axes[3] > .5) {
+                pos.y += 5;
+            }
+            if (gp.axes[2] < -.5) {
+                pos.x -= 5;
+            } else if (gp.axes[2] > .5) {
+                pos.x += 5;
+            }
+            // Token movement:
+            if (token) {
+                // L-Joystick + DPad Movement
+                if (gp.axes[1] > .5 || gp.buttons[13].pressed) {
+                    y += Math.ceil(token.grid.size*.1);
+                } else if (gp.axes[1] < -.5 || gp.buttons[12].pressed) {
+                    y -= Math.ceil(token.grid.size*.1);
+                }
+                if (gp.axes[0] > .5 || gp.buttons[15].pressed) {
+                    x += Math.ceil(token.grid.size*.1);
+                } else if (gp.axes[0] < -.5 || gp.buttons[14].pressed) {
+                    x -= Math.ceil(token.grid.size*.1);
+                }
+                // Token rotation
+                if (gp.buttons[6].pressed)
+                    this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: token.token.rotation - 5}})
+                else if (gp.buttons[7].pressed)
+                    this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: token.token.rotation + 5}})
+                }
+                if (gp.timestamp != this.gpTS) {
+                    // Center token
+                    if (gp.buttons[2].pressed && !this.gpButtons?.[2]?.pressed) {
+                        this.viewport.animate({ position: token.position, time: 1000, ease: "easeInOutSine", removeOnInterrupt: true })
+                    }
+                    // Reset path
+                    if (gp.buttons[3].pressed && !this.gpButtons?.[3]?.pressed) {
+                        this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, path: []}})
+                    }
+            }
+            this.gpButtons = JSON.parse(JSON.stringify(gp.buttons));
+            this.gpTS = gp.timestamp;
+        }
+        this.viewport.center = pos;
+        if (token) {
+            if (token.position.x != x || token.position.y != y) {
+                if (!token.blocked) {
+                    token.position.set(x,y);
+                    this.viewport.moveCenter(x,y);
+                }
+                if (!token.kbMovement) {
+                    token.kbMovement = true
+                    token.dragging = true
+                    this.dataService.send({name: WSEventName.tokenMoved, data: {id: token.token.id, x: x + (token.w / 2.0) | 0, y: y + (token.h / 2.0) | 0, state: ControlState.start}})
+                } else {
+                    this.dataService.send({name: WSEventName.tokenMoved, data: {id: token.token.id, x: x + (token.w / 2.0) | 0, y: y + (token.h / 2.0) | 0, state: ControlState.control}})
+                }
+            } else if (token.kbMovement) {
+                token.kbMovement = false;
+                token.dragging = false;
+                if (!token.blocked) {
+                    token.position.set(x,y);
+                    this.viewport.moveCenter(x,y);
+                }
+                this.dataService.send({name: WSEventName.tokenMoved, data: {id: token.token.id, x: x + (token.w / 2.0) | 0, y: y + (token.h / 2.0) | 0, state: ControlState.end}})
+            }
+        }
+      })
       this.update();
       this.draw();
     }
@@ -195,6 +332,80 @@ export class MapComponent implements OnInit, OnChanges {
     this.trackedObjectsContainer.draw()
   }
 
+  @HostListener('window:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent) {
+    if (event.target instanceof HTMLInputElement) return
+      switch (event.code) {
+          case "ArrowUp":
+              this.kb.arrowUp = true;
+              break;
+          case "ArrowDown":
+              this.kb.arrowDown = true;
+              break;
+          case "ArrowLeft":
+              this.kb.arrowLeft = true;
+              break;
+          case "ArrowRight":
+              this.kb.arrowRight = true;
+              break;
+          case "ShiftLeft":
+              this.kb.keyShiftL = true;
+              break;
+          case "ShiftRight":
+              this.kb.keyShiftR = true;
+              break;
+          case "Minus":
+              this.kb.keyMinus = true;
+              break;
+          case "Equal":
+              this.kb.keyEqual = true;
+              break;
+          case "KeyT":
+              this.kb.keyT = true;
+              break;
+          case "Escape":
+              this.kb.keyEsc = true;
+              break;
+      }
+  }
+
+  @HostListener('window:keyup', ['$event'])
+  onKeyup(event: KeyboardEvent) {
+    if (event.target instanceof HTMLInputElement) return
+      switch (event.code) {
+          case "ArrowUp":
+              this.kb.arrowUp = false;
+              break;
+          case "ArrowDown":
+              this.kb.arrowDown = false;
+              break;
+          case "ArrowLeft":
+              this.kb.arrowLeft = false;
+              break;
+          case "ArrowRight":
+              this.kb.arrowRight = false;
+              break;
+          case "ShiftLeft":
+              this.kb.keyShiftL = false;
+              break;
+          case "ShiftRight":
+              this.kb.keyShiftR = false;
+              break;
+          case "Minus":
+              this.kb.keyMinus = false;
+              break;
+          case "Equal":
+              this.kb.keyEqual = false;
+              break;
+          case "KeyT":
+              this.kb.keyT = false;
+              break;
+          case "Escape":
+              this.kb.keyEsc = false;
+              break;
+          default:
+      }
+  }
   ngOnChanges() {
     console.debug("data changed");
 
