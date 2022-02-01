@@ -163,7 +163,7 @@ export class Loader {
                 console.log("Video size exceeds maximum, streaming instead.");
                 videosrcurl = src;
             } else {
-                const videosrc = await new Promise((resolve,reject) => {
+                const videosrc: Blob = await new Promise((resolve,reject) => {
                     const req = new XMLHttpRequest();
                     req.open('GET', src);
                     let pos = 0;
