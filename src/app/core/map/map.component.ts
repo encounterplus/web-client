@@ -143,9 +143,10 @@ export class MapComponent implements OnInit, OnChanges {
 
       console.debug(`maximum texture size: ${this.canvas.maxTextureSize}`);
       console.debug("map component initialized");
-      let ticker = PIXI.Ticker.shared;
+      let ticker = new PIXI.Ticker;
+      ticker.maxFPS = 20;
+      ticker.autoStart = true;
       // Gamepad & KB Support
-
       ticker.add(()=>{
         let token = this.mapContainer.tokenViewById(localStorage.getItem("userTokenId"))
         let x = token?.position.x
@@ -171,10 +172,17 @@ export class MapComponent implements OnInit, OnChanges {
                 x += Math.ceil(token.grid.size*.1);
             }
             // Token rotation
-            if (this.kb.arrowLeft && (this.kb.keyShiftL||this.kb.keyShiftR))
-                this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: token.token.rotation - 5}})
-            else if (this.kb.arrowRight && (this.kb.keyShiftL||this.kb.keyShiftR))
-                this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: token.token.rotation + 5}})
+            let tokenRotation = token.token.rotation
+            if (this.kb.arrowLeft && (this.kb.keyShiftL||this.kb.keyShiftR)) {
+                tokenRotation -= 5
+                if (tokenRotation<0) tokenRotation += 360
+            } else if (this.kb.arrowRight && (this.kb.keyShiftL||this.kb.keyShiftR)) {
+                tokenRotation += 5
+                if (tokenRotation>360) tokenRotation -= 360
+            }
+            if (tokenRotation != token.token.rotation) {
+                this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: tokenRotation}})
+            }
             // Center on token
             if (this.kb.keyT)
                 this.viewport.animate({ position: token.position, time: 1000, ease: "easeInOutSine", removeOnInterrupt: true })
@@ -219,10 +227,16 @@ export class MapComponent implements OnInit, OnChanges {
                     x -= Math.ceil(token.grid.size*.1);
                 }
                 // Token rotation
-                if (gp.buttons[6].pressed)
-                    this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: token.token.rotation - 5}})
-                else if (gp.buttons[7].pressed)
-                    this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: token.token.rotation + 5}})
+                let tokenRotation = token.token.rotation
+                if (gp.buttons[6].pressed) {
+                    tokenRotation -= 5
+                    if (tokenRotation<0) tokenRotation += 360
+                } else if (gp.buttons[7].pressed) {
+                    tokenRotation += 5
+                    if (tokenRotation>360) tokenRotation -= 360
+                }
+                if (tokenRotation != token.token.rotation) {
+                    this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, rotation: tokenRotation}})
                 }
                 if (gp.timestamp != this.gpTS) {
                     // Center token
@@ -233,6 +247,7 @@ export class MapComponent implements OnInit, OnChanges {
                     if (gp.buttons[3].pressed && !this.gpButtons?.[3]?.pressed) {
                         this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, path: []}})
                     }
+                }
             }
             this.gpButtons = JSON.parse(JSON.stringify(gp.buttons));
             this.gpTS = gp.timestamp;
