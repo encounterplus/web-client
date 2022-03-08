@@ -5,5 +5,4 @@ export class Game {
     round: number;
     started: boolean;
     creatures: Array<Creature> = [];
-    paused: boolean = false;
 }

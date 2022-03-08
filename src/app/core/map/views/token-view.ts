@@ -521,7 +521,7 @@ export class TokenView extends View {
 
     updateInteraction() {
         // disable interactions when game is paused
-        if (this.dataService.state.game.paused) {
+        if (this.dataService.state.paused) {
             this.interactive = false
             return
         }

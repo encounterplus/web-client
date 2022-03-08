@@ -202,12 +202,16 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     switch (event.name) {
 
+      case WSEventName.systemPaused: {
+        this.state.paused = event.data
+        break
+      }
+      
       case WSEventName.gameUpdated: {
         // detect changes, very primitive
         const turnChanged = this.state.game.turn != event.data.turn
         const roundChanged = this.state.game.round != event.data.round
         const startedChanged = this.state.game.started != event.data.started
-        const pausedChanged = this.state.game.paused != event.data.paused
         
         if (turnChanged) {
           this.state.game.turn = event.data.turn
@@ -217,9 +221,6 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
         if (startedChanged) {
           this.state.game.started = event.data.started
-        }
-        if (pausedChanged){
-          this.state.game.paused = event.data.paused
         }
         
         if (event.data.creatures) {
@@ -845,6 +846,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.state.screen = data.screen
       this.state.messages = data.messages
       this.state.trackedObjects = data.trackedObjects
+      this.state.paused = data.paused
       this.state.version = data.version
       this.state.build = data.build
 

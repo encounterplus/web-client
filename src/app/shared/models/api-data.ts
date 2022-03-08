@@ -12,4 +12,5 @@ export class ApiData {
     screen: Screen
     messages: Array<Message> = []
     trackedObjects: Array<TrackedObject> = []
+    paused: Boolean = false
 }

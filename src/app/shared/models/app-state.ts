@@ -25,7 +25,8 @@ export class AppState {
     messages: Array<Message> = []
     trackedObjects: Array<TrackedObject> = []
     grid: Grid = new SquareGrid()
-    isDirty: boolean = false
+    // isDirty: boolean = false
+    paused: Boolean = false
     version: string
     build: number
     readCount: number
