@@ -191,7 +191,7 @@ export class MapComponent implements OnInit, OnChanges {
                 this.dataService.send({name: WSEventName.updateModel, model: "token", data: {id: token.token.id, path: []}})
         }
         // Gamepad Controls
-        let gamePads = navigator.getGamepads();
+        let gamePads = (window.isSecureContext)? navigator.getGamepads():null;
         if (gamePads&&gamePads[0]) {
             let gp = gamePads[0];
             if (this.gpTS === undefined) {
