@@ -27,7 +27,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
     autoDensity: true,
     resolution: window.devicePixelRatio || 1,
     // resolution: 1.0,
-    // antialias: true,
+    antialias: true,
     // transparent: false,
     // forceFXAA: true,
     // autoResize: true,
