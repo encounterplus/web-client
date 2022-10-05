@@ -13,23 +13,21 @@
         <button *ngIf="showExit" ngbDropdownItem (click)="exit()">Exit</button>
       </div>
     </div> 
-    <div class="btn-group mr-2 btn-group-toggle" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" ngbRadioGroup name="radioTest" role="group" aria-label="Second group">
-      <label ngbButtonLabel class="btn btn-dark">
-	      <input ngbButton [(ngModel)]="messages" (ngModelChange)="messagesChanged($event)" type="checkbox" value="messages"> <i class="fa fa-comments-o">&nbsp;<span *ngIf="state.readCount<state.messages.length" class="badge badge-light">{{state.messages.length-state.readCount}}</span></i>
-      </label>
+    <div class="btn-group" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" name="radioTest" role="group" aria-label="Messages">
+      <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off" [(ngModel)]="messages" (ngModelChange)="messagesChanged($event)">
+      <label class="btn btn-dark" for="btncheck1"> <i class="fa fa-comments-o">&nbsp;<span *ngIf="state.readCount<state.messages.length" class="badge text-bg-light">{{state.messages.length-state.readCount}}</span></i></label>
     </div> 
   </div>
+
+  <div class="btn-group ms-2" role="group" name="activeTool" aria-label="Active Tool">
+    <input type="radio" value="move" class="btn-check" id="btnradio1" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
+    <label class="btn btn-dark" for="btnradio1"> <i class="fa fa-arrows"></i></label>
   
-  <div class="btn-group mr-2 btn-group-toggle" ngbRadioGroup name="radioBasic" role="group" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)" aria-label="Second group">
-    <label ngbButtonLabel class="btn btn-dark">
-      <input ngbButton type="radio" value="move"> <i class="fa fa-arrows"></i>
-    </label>
-    <label ngbButtonLabel class="btn btn-dark">
-      <input ngbButton type="radio" value="pointer"> <i class="fa fa-magic"></i>
-    </label>
+    <input type="radio" value="pointer" class="btn-check" id="btnradio2" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
+    <label class="btn btn-dark" for="btnradio2"> <i class="fa fa-magic"></i></label>
   </div>
 
-  <div *ngIf="state.map?.video" class="btn-group mr-2" role="group" aria-label="Video Controls">
+  <div *ngIf="state.map?.video" class="btn-group ms-2" role="group" aria-label="Video Controls">
       <button ngbButton class="btn btn-dark" (click)="videoPauseToggle()">
           <i class="fa fa-fw" [ngClass]="videoPaused ? 'fa-play' : 'fa-pause'"></i>
       </button>
