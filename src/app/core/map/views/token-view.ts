@@ -556,6 +556,8 @@ export class TokenView extends View {
     }
 
     onDragStart(event: InteractionEvent) {
+        // console.debug(`drag start, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+
         if (this.controlled) {
             return
         }
@@ -572,6 +574,8 @@ export class TokenView extends View {
     }
     
     onDragEnd(event: InteractionEvent) {
+        // console.debug(`drag end, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+
         if (this.controlled) {
             return
         }

@@ -398,7 +398,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
       case WSEventName.tokenMoved: {
         // console.debug(event.data)
-
+        // if (event.data.state != ControlState.control) {
+        //   console.debug(JSON.stringify(event.data))
+        // }
+      
         // check moving token view cache
         let view = this.movingTokenView
         if (view?.token.id != event.data.id) {
@@ -410,6 +413,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           view.blocked = event.data.state == ControlState.block;
 
           if (!view.dragging && (view.token.trackingId == null || this.state.runMode == RunMode.normal)) {
+            console.debug("tokenMoved: updating token position")
             view.token.x = event.data.x;
             view.token.y = event.data.y;
             view.controlled = event.data.state != ControlState.end && !view.dragging ? true : false
@@ -417,6 +421,10 @@ export class AppComponent implements OnInit, AfterViewInit {
             view.updateTint();
           }
           
+          // fix for stuck token when tokenMoved event is received after touch drag
+          if (event.data.ControlState == ControlState.end) {
+            view.controlled = false
+          }
 
           if (event.data.path != null) {
             view.token.path = event.data.path
@@ -812,7 +820,9 @@ export class AppComponent implements OnInit, AfterViewInit {
             break
           }
 
-          // positioon
+          // console.debug("trackedObjectUpdated: updating token position")
+
+          // position
           view.token.x = center.x
           view.token.y = center.y
 
