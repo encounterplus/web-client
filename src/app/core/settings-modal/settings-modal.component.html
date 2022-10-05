@@ -1,63 +1,62 @@
 <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Settings</h4>
-    <button type="button" class="close" aria-label="Close" (click)="modalInstance.dismiss('Cross click')">
-        <span aria-hidden="true">&times;</span>
-    </button>
+    <h5 class="modal-title" id="modal-basic-title">Settings</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modalInstance.dismiss('Cross click')"></button>
 </div>
 
 <div class="modal-body">
-    <div class="form-group">
-        <label>Remote Host</label>
+    <div class="mb-2">
+        <label for="remoteHost" class="form-label">Remote Host</label>
         <input [(ngModel)]="remoteHost" id="remoteHost" type="text" class="form-control" placeholder="Enter remote hostname" />
     </div>
 
-    <div class="form-group">
-        <label>Name</label>
+    <div class="mb-2">
+        <label for="name" class="form-label">Name</label>
         <div class="input-group">
             <input [(ngModel)]="name" id="name" type="text" class="form-control" placeholder="Enter your name" />
             <input class="form-control" [(colorPicker)]="color" [style.background]="color" [value]="color" [cpPosition]="'bottom'" />
         </div>
     </div>
 
-    <div class="form-group">
-        <label for="token">Token</label>
+    <div class="mb-2">
+        <label for="token" class="form-label">Token</label>
         <select [(ngModel)]="tokenId" class="form-control" id="token" >
             <option *ngFor="let token of tokens" [ngValue]="token.id">{{token.name || 'Unknown'}}</option>
             <option value=null>None</option>
         </select>
     </div>
 
-    <div class="form-group">
-        <label for="runMode">Run Mode</label>
+    <div class="mb-2">
+        <label for="runMode" class="form-label">Run Mode</label>
         <select [(ngModel)]="runMode" class="form-control" id="runMode">
             <option *ngFor="let mode of runModeOptions; let i = index" [value]="mode">{{mode}}</option>
         </select>
     </div>
 
-    <div class="form-group">
-        <label for="maxFPS">Max FPS</label>
+    <div class="mb-2">
+        <label for="maxFPS" class="form-label">Max FPS</label>
         <select [(ngModel)]="maxFPS" class="form-control" id="maxFPS">
             <option *ngFor="let fps of maxFPSOptions; let i = index" [value]="maxFPSOptions[i]">{{fps}}</option>
         </select>
     </div>
 
-    <div class="form-group">
+    <div class="mb-2">
         <div class="checkbox">
         <label for="allowVideo">
             <input [(ngModel)]="allowVideo" id="allowVideo" type="checkbox"/>
             Use video maps if available
         </label>
         </div>
-      </div>
-      <div class="form-group" *ngIf="this.allowVideo">
-        <label>Maximum video size to preload in MB</label>
+    </div>
+
+    <div class="mb-2" *ngIf="this.allowVideo">
+        <label for="maxVideoSize" class="form-label">Maximum video size to preload in MB</label>
         <div class="input-group">
             <input [(ngModel)]="maxVideoSize" id="maxVideoSize" type="number" min="0" class="form-control" placeholder="Maximum size in MB" />
         </div>
         <label><i>Preloaded videos use less bandwidth but more memory. Larger videos will be streamed, using more bandwidth</i></label>
     </div>
 
-    <div class="form-group">
+    <div class="mb-2">
         <div class="checkbox">
         <label for="softEdges">
             <input [(ngModel)]="softEdges" id="softEdges" type="checkbox"/>
