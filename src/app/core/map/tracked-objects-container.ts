@@ -18,16 +18,16 @@ export class TrackedObjectsContainer extends Layer {
     }
 
     async draw() {
-        this.clear();
+        // this.clear();
 
-        // objects
-        for (let model of this.trackedObjects) {
-            let view = new TrackedObjectView(model);
-            this.addChild(view);
-            view.draw();
+        // // objects
+        // for (let model of this.trackedObjects) {
+        //     let view = new TrackedObjectView(model);
+        //     this.addChild(view);
+        //     view.draw();
 
-            this.views.push(view);
-        }
+        //     this.views.push(view);
+        // }
 
         return this;
     }

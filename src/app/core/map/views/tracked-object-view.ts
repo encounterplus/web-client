@@ -2,7 +2,6 @@ import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
 import { TrackedObject, TrackedObjectType } from 'src/app/shared/models/tracked-object';
-import { Container } from '@angular/compiler/src/i18n/i18n_ast';
 import { Layer } from '../layers/layer';
 
 export class TrackedObjectView extends View {

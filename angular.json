@@ -128,5 +128,7 @@
       }
     }
   },
-  "defaultProject": "web-client"
+  "cli": {
+    "analytics": false
+  }
 }

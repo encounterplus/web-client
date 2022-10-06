@@ -30,7 +30,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
     antialias: true,
     // transparent: false,
     // forceFXAA: true,
-    autoResize: true,
+    // autoResize: true,
     // sharedTicker: true,
     // autoStart: false
   };
@@ -38,12 +38,15 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
   constructor(private el: ElementRef, private zone: NgZone, private toastService: ToastService) {
     this.element = el.nativeElement as HTMLDivElement;
 
-     // gameboard resolution hack
+     // gameboard resolution hack to fix devicePixelRatio not reported properly by browser
     const urlParams = new URLSearchParams(window.location.search);
-    const deviceType = urlParams.get('deviceType')
-   
+    const deviceType = urlParams.get('device') 
+
     if (deviceType == "gameboard") {
-      this.applicationOptions.resolution = 1.5
+      this.applicationOptions.resolution =  1.5
+
+        // webgl2 force
+        PIXI.settings.PREFER_ENV = PIXI.ENV.WEBGL2
     }
 
     const options = Object.assign({ width: this.element.clientWidth, height: this.element.clientHeight },
@@ -75,8 +78,8 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
     this.height = window.innerHeight;
 
     // const viewportScale = 1 / this.devicePixelRatio;
-    // this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
-    this.app.renderer.resize(this.width, this.height);
+    this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
+    // this.app.renderer.resize(this.width, this.height);
 
     // this.app.ticker.minFPS = 30;
     this.app.ticker.maxFPS = parseInt(localStorage.getItem('maxFPS') || '60', 10) || 60;
@@ -101,13 +104,23 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // debuging tools
     // window.PIXI = PIXI;
+
+    console.debug('pixel ratio: ' + window.devicePixelRatio)
+    console.debug('width: ' + this.width)
+    console.debug('height: ' + this.height)
   }
 
   @HostListener('window:resize', ['$event'])
   onResize(event) {
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
-    this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
+    this.width = window.innerWidth
+    this.height = window.innerHeight
+    this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio)
+    // this.app.renderer.resize(600, 600)
+
+    console.debug('---window resize---')
+    console.debug('pixel ratio: ' + window.devicePixelRatio)
+    console.debug('width: ' + this.width)
+    console.debug('height: ' + this.height)
   }
 
   // @HostListener('document:touchstart', ['$event'])
