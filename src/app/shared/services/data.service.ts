@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiData } from '../models/api-data';
 import { Observable, Subject, BehaviorSubject, timer, throwError } from 'rxjs';
-import { map, catchError, skip, filter, tap, distinctUntilChanged, switchMap, retryWhen, repeat, retry } from 'rxjs/operators';
+import { map, catchError, skip, filter, tap, distinctUntilChanged, switchMap, repeat, retry } from 'rxjs/operators';
 import { WSEvent } from '../models/wsevent';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { webSocket } from 'rxjs/webSocket';
@@ -87,10 +87,7 @@ export class DataService {
   }
 
   private create() {
-    if (this.ws) {
-      this.ws.unsubscribe();
-    }
-    const retryConnection = switchMap(() => {
+    const retryConnection = () => {
       this.status$.next(false);
       this.attemptNr = this.attemptNr + 1;
 
@@ -98,19 +95,20 @@ export class DataService {
 
       console.log(`Connection down (${this.wsBaseURL}), will attempt ${this.attemptNr} reconnection in ${delay}ms`);
       return timer(delay);
-    });
+    }
 
     const openObserver = new Subject<Event>();
     openObserver.pipe(map((_) => true)).subscribe(this.status$);
     const closeObserver = new Subject<CloseEvent>();
     closeObserver.pipe(map((_) => false)).subscribe(this.status$);
-    this.ws = webSocket<any>({
-      url: this.wsBaseURL,
-      openObserver,
-      closeObserver,
-    });
-
-    this.ws.pipe(retryWhen((errs) => errs.pipe(retryConnection, repeat()))).subscribe(this.events$);
+    if (!this.ws) {
+        this.ws = webSocket<any>({
+          url: this.wsBaseURL,
+          openObserver,
+          closeObserver,
+        });
+    }
+    this.ws.pipe(retry({delay: retryConnection})).subscribe(this.events$);
   }
 
   public send(event: WSEvent) {
