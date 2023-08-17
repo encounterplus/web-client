@@ -8,15 +8,10 @@ export enum Role {
     neutral = "neutral",
 }
 
-export enum CreatureType {
-    monster = "monster",
-    player = "player",
-}
-
 export class Creature {
     id: string
     uid: string
-    type: CreatureType
+    type: string
     name: string
     role: Role
     rank: number
@@ -28,4 +23,5 @@ export class Creature {
     hidden: boolean
     tokenId?: string
     image?: string
+    player: boolean
 }

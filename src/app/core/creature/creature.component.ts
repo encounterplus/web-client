@@ -17,7 +17,7 @@ export class CreatureComponent implements OnInit {
   }
 
   get name(): string {
-    return this.creature.type == "player" ? this.creature.name : this.creature.uid;
+    return this.creature.player ? this.creature.name : this.creature.uid;
   }
 
   get overlayImage(): string {

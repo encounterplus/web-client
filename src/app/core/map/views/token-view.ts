@@ -190,10 +190,11 @@ export class TokenView extends View {
     }
 
     async drawToken() {
-        if (this.token.cachedImage != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
-            this.tokenTexture = await Loader.shared.loadTexture(this.token.cachedImage)
-        } else if (this.token.asset != null && this.token.asset.resource != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
+        
+        if (this.token.asset != null && this.token.asset.resource != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
             this.tokenTexture = await Loader.shared.loadTexture(this.token.asset.resource)
+        } else if (this.token.image != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
+            this.tokenTexture = await Loader.shared.loadTexture(this.token.image)
         } else {
             this.tokenTexture = null;
         }

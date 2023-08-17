@@ -71,8 +71,7 @@ export class Token {
     elevation: number
     hidden: boolean
     reference?: string
-    cachedImage?: string
-    cachedImageToken?: boolean
+    image?: string
     asset?: Asset
     vision?: Vision
     auras: Array<Aura> = []

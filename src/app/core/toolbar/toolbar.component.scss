@@ -1,3 +1,5 @@
+$gameboard-margin: 100px;
+
 :host {
     position: absolute;
     top: 8px;
@@ -9,6 +11,6 @@
 }
 
 :host-context(.gameboard) {
-    top: 50px;
-    left: 50px;
+    top: $gameboard-margin;
+    left: $gameboard-margin;
 }
