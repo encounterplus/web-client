@@ -28,7 +28,7 @@ export class SettingsModalComponent implements OnInit {
 
   get tokens(): Array<Token> {
     if (this.state.map != null) {
-      return this.state.map.tokens.filter( token => { return token.role == Role.friendly && token.reference?.includes('/player/') } ).sort((a, b) => (a.name > b.name) ? 1 : -1)
+      return this.state.map.tokens.filter( token => { return token.role == Role.friendly } ).sort((a, b) => (a.name > b.name) ? 1 : -1)
     } else {
       return []
     }
