@@ -1,0 +1,8 @@
+<div class="modal-header" style="padding: 0.4rem 1rem;" appDraggable>
+    <h5 class="modal-title" id="modal-basic-title">Entity</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modalInstance.dismiss('Cross click')"></button>
+</div>
+
+<div class="modal-body" style="padding: 0px; margin: 0px; height: 400px;">
+    <iframe [src]="url|safe: 'resourceUrl'" width="100%" height="100%" title="description" style=""></iframe>
+</div>

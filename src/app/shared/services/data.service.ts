@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { ApiData } from '../models/api-data';
 import { Observable, Subject, BehaviorSubject, timer, throwError } from 'rxjs';
 import { map, catchError, skip, filter, tap, distinctUntilChanged, switchMap, retryWhen, repeat, retry } from 'rxjs/operators';
@@ -24,6 +24,8 @@ export class DataService {
 
   videoPaused = this.videoPaused$.asObservable();
   videoMuted = this.videoMuted$.asObservable();
+
+  public showEntityEmitter = new EventEmitter<string>();
 
   updateVideoPaused(value: boolean) {
     this.videoPaused$.next(value);
@@ -115,5 +117,9 @@ export class DataService {
 
   public send(event: WSEvent) {
     this.ws.next(event);
+  }
+
+  public showEntity(reference: string) {
+    this.showEntityEmitter.emit(reference)
   }
 }

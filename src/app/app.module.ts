@@ -25,6 +25,9 @@ import { MessageListComponent } from './core/message-list/message-list.component
 import { PausedComponent } from './core/paused/paused.component';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { OverlayComponent } from './core/overlay/overlay.component';
+import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
+import { DraggableDirective } from './draggable.directive';
+import { SafePipeModule } from 'safe-pipe';
 
 @NgModule({
   declarations: [
@@ -43,7 +46,9 @@ import { OverlayComponent } from './core/overlay/overlay.component';
     MessageListComponent,
     PausedComponent,
     ZoombarComponent,
-    OverlayComponent
+    OverlayComponent,
+    EntityModalComponent,
+    DraggableDirective
   ],
   imports: [
     BrowserModule,
@@ -52,6 +57,7 @@ import { OverlayComponent } from './core/overlay/overlay.component';
     FormsModule,
     ColorPickerModule,
     LightboxModule,
+    SafePipeModule,
     NgbModule
   ],
   providers: [ToastService, DataService],

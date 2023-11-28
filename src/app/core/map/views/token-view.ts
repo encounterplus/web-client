@@ -52,12 +52,14 @@ export class TokenView extends View {
 
     data: PIXI.InteractionData
     dragging: boolean = false
+    dragStart: number = Date.now()
     kbMovement: boolean = false
 
     selected: boolean = false
     turned: boolean = false
     controlled: boolean = false
     blocked: boolean = false
+
 
     auraContainer: Container = new PIXI.Container()
     pathView: PathView
@@ -144,10 +146,11 @@ export class TokenView extends View {
         this.pathView = new PathView(grid)
 
         this
+            // .on('pointertap', this.onTap)
             .on('pointerdown', this.onDragStart)
             .on('pointerup', this.onDragEnd)
             .on('pointerupoutside', this.onDragEnd)
-            .on('pointermove', this.onDragMove)
+            .on('pointercancel', this.onDragEnd)
     }
 
     async draw() {
@@ -556,8 +559,22 @@ export class TokenView extends View {
         this.removeChildren();
     }
 
+    onTap(event: InteractionEvent) {
+        console.debug(`tap, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+
+        if (this.controlled) {
+            return
+        }
+        // stop propagation
+        event.stopPropagation()
+
+        if (this.token.reference != null) {
+            this.dataService.showEntity(this.token.reference)
+        }
+    }
+
     onDragStart(event: InteractionEvent) {
-        // console.debug(`drag start, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+        console.debug(`drag start, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
 
         if (this.controlled) {
             return
@@ -565,17 +582,24 @@ export class TokenView extends View {
         // stop propagation
         event.stopPropagation()
         this.dragging = true
+        this.dragStart = Date.now()
 
         // update pointerId
         if (event.data.pointerId != null) {
             this.pointerId = event.data.pointerId
         }
 
+        // add pointer move event
+        this.on('pointermove', this.onDragMove)
+
         this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}})
     }
     
     onDragEnd(event: InteractionEvent) {
-        // console.debug(`drag end, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+        console.debug(`drag end, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+
+        // remove pointer move event
+        this.off('pointermove', this.onDragMove)
 
         if (this.controlled) {
             return
@@ -587,15 +611,24 @@ export class TokenView extends View {
         this.pointerId = null
 
         this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end}})
+
+        // click/tap event if time difference between start/end is less than 200ms
+        let time = Date.now() - this.dragStart
+
+        if (time <= 200) {
+           this.onTap(event)
+        }
     }
     
     onDragMove(event: InteractionEvent) {
+        console.debug(`drag move, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}, tokenId: ${this.token.id}`)
+        
         if (this.controlled) {
             return
         }
 
         if (this.dragging) {
-            // console.log(`${this.token.label}: ${event.data.pointerId}, ${event.data.global.x},${event.data.global.y}`)
+            console.log(`${this.token.label}: ${event.data.pointerId}, ${event.data.global.x},${event.data.global.y}`)
             
             // check if pointerId match with event
             if (this.pointerId != null && event.data.pointerId != null) {

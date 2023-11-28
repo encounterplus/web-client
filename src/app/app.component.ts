@@ -30,6 +30,7 @@ import { Point } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { Meta } from '@angular/platform-browser';
+import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
 
 interface WebAppInterface {
   showText(text: string): any;
@@ -193,6 +194,20 @@ export class AppComponent implements OnInit, AfterViewInit {
       localStorage.setItem("readMessages", JSON.stringify({ "lastHost": lastHost, seenCount: this.state.messages.length }));
       this.state.readCount = this.state.messages.length;
     }
+  }
+
+  showEntityAction(reference: string) {
+    console.debug(`showing entity modal: ${reference}`)
+
+    let modal = this.modalService.open(EntityModalComponent, {centered: true, modalDialogClass: 'dark-modal', scrollable: false})
+    modal.componentInstance.state = this.state
+    modal.componentInstance.reference = reference
+    
+    modal.result.then(result => {
+      console.debug(`Entity component closed with: ${result}`);
+    }, reason => {
+      console.debug(`Entity component dismissed ${reason}`)
+    });
   }
 
   // main websocket event handler
@@ -970,6 +985,10 @@ export class AppComponent implements OnInit, AfterViewInit {
         console.log("Websocket disconnected");
         this.toastService.showError("Websocket disconnected", false);
       }
+    });
+
+    this.dataService.showEntityEmitter.subscribe(reference => {
+      this.showEntityAction(reference)
     });
   }
 
