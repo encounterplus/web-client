@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Screen } from 'src/app/shared/models/screen';
 import { DataService } from 'src/app/shared/services/data.service';
-import { Lightbox } from 'ngx-lightbox';
+// import { Lightbox } from 'ngx-lightbox';
 
 @Component({
   selector: 'app-image-handout',
@@ -21,16 +21,16 @@ export class ImageHandoutComponent implements OnInit {
     }
   }
 
-  constructor(public dataService: DataService, private lightbox: Lightbox) { }
+  constructor(public dataService: DataService/*, private lightbox: Lightbox*/) { }
 
   open(): void {
     // open lightbox
-    this.lightbox.open([{src: this.image, caption: null, thumb: null}]);
+    // this.lightbox.open([{src: this.image, caption: null, thumb: null}]);
   }
 
   close(): void {
     // close lightbox programmatically
-    this.lightbox.close();
+    // this.lightbox.close();
   }
 
   ngOnInit(): void {

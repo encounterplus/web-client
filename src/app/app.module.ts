@@ -19,7 +19,7 @@ import { SettingsModalComponent } from './core/settings-modal/settings-modal.com
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { ImageHandoutComponent } from './core/image-handout/image-handout.component';
-import { LightboxModule } from 'ngx-lightbox';
+// import { LightboxModule } from 'ngx-lightbox';
 import { MessageComponent } from './core/message/message.component';
 import { MessageListComponent } from './core/message-list/message-list.component';
 import { PausedComponent } from './core/paused/paused.component';

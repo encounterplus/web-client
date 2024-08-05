@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, ElementRef, ViewChildren, QueryList, ViewChild } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
-import { Lightbox } from 'ngx-lightbox';
+// import { Lightbox } from 'ngx-lightbox';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Message, MessageType } from 'src/app/shared/models/message';
 import { WSEventName } from 'src/app/shared/models/wsevent';
@@ -28,7 +28,7 @@ export class MessageListComponent implements OnInit {
     return this.state.messages;
   }
 
-  constructor(private element: ElementRef, private lightbox: Lightbox, private dataService: DataService) {
+  constructor(private element: ElementRef/*, private lightbox: Lightbox*/, private dataService: DataService) {
   }
 
   onEnter() {
