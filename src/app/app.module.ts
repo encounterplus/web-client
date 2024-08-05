@@ -56,7 +56,6 @@ import { SafePipeModule } from 'safe-pipe';
     HttpClientModule,
     FormsModule,
     ColorPickerModule,
-    LightboxModule,
     SafePipeModule,
     NgbModule
   ],

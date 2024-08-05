@@ -147,8 +147,8 @@ export class Loader {
             // }
             // console.log("Loading blob...");
             // const videosrc = new Blob([arrayBuffer], { type: mime });
-            const maxVideoSize = (parseInt(localStorage.getItem("maxVideoSize") || "200"))*1024*1024;
-            const contentSize = await new Promise((resolve,reject) => {
+            const maxVideoSize: Number = (parseInt(localStorage.getItem("maxVideoSize") || "200"))*1024*1024;
+            const contentSize: Number = await new Promise((resolve,reject) => {
                 const req = new XMLHttpRequest();
                 req.open('HEAD', src);
                 req.onreadystatechange = () => {
