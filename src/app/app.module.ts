@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -29,37 +29,30 @@ import { EntityModalComponent } from './core/entity-modal/entity-modal.component
 import { DraggableDirective } from './draggable.directive';
 import { SafePipeModule } from 'safe-pipe';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    MapComponent,
-    ToolbarComponent,
-    InitiativeListComponent,
-    ToastListComponent,
-    SettingsModalComponent,
-    CanvasContainerDirective,
-    DisableRightClickDirective,
-    CreatureComponent,
-    AboutModalComponent,
-    ImageHandoutComponent,
-    MessageComponent,
-    MessageListComponent,
-    PausedComponent,
-    ZoombarComponent,
-    OverlayComponent,
-    EntityModalComponent,
-    DraggableDirective
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    FormsModule,
-    ColorPickerModule,
-    SafePipeModule,
-    NgbModule
-  ],
-  providers: [ToastService, DataService],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        MapComponent,
+        ToolbarComponent,
+        InitiativeListComponent,
+        ToastListComponent,
+        SettingsModalComponent,
+        CanvasContainerDirective,
+        DisableRightClickDirective,
+        CreatureComponent,
+        AboutModalComponent,
+        ImageHandoutComponent,
+        MessageComponent,
+        MessageListComponent,
+        PausedComponent,
+        ZoombarComponent,
+        OverlayComponent,
+        EntityModalComponent,
+        DraggableDirective
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        ColorPickerModule,
+        SafePipeModule,
+        NgbModule], providers: [ToastService, DataService, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }
