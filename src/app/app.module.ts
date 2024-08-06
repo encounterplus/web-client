@@ -27,7 +27,7 @@ import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { OverlayComponent } from './core/overlay/overlay.component';
 import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
 import { DraggableDirective } from './draggable.directive';
-import { SafePipeModule } from 'safe-pipe';
+import { SafePipe } from 'safe-pipe';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -53,6 +53,6 @@ import { SafePipeModule } from 'safe-pipe';
         AppRoutingModule,
         FormsModule,
         ColorPickerModule,
-        SafePipeModule,
+        SafePipe,
         NgbModule], providers: [ToastService, DataService, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }
