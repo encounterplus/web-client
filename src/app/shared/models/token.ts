@@ -65,7 +65,8 @@ export class Token {
     x: number
     y: number
     scale: number
-    size: string
+    width: number
+    height: number
     style?: TokenStyle
     rotation: number
     elevation: number
@@ -74,7 +75,7 @@ export class Token {
     image?: string
     asset?: Asset
     vision?: Vision
-    auras: Array<Aura> = []
+    auras?: Array<Aura>
     trackingId?: number
     path?: Array<number>
 }

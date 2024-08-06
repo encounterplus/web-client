@@ -84,7 +84,8 @@ export class LightsLayer extends Layer {
                 .addAttribute('aVertexPosition', geometryPolygon);
             let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
 
-            let size = this.grid.sizeFromGridSize(Size.toGridSize(token.size))
+            const gridSize = {width: token.width || 1, height: token.height || 1}
+            const size = this.grid.sizeFromGridSize(gridSize)
             let minSize = Math.max(size.width, size.height) / 2.0
             
             // populate uniforms

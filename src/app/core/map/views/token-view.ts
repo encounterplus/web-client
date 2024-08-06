@@ -98,7 +98,7 @@ export class TokenView extends View {
     }
 
     get gridSize(): GridSize {
-        return Size.toGridSize(this.token.size)
+        return {width: this.token.width || 1, height: this.token.height || 1}
     }
 
     get scaleFactor(): number {
@@ -170,7 +170,7 @@ export class TokenView extends View {
         const maxSize = Math.max(this.w, this.h)
         const pixelRatio = this.grid.pixelRatio
 
-        for (let aura of this.token.auras) {
+        for (let aura of this.token.auras || []) {
             if (!aura.enabled) {
                 continue;
             }

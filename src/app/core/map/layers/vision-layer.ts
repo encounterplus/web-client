@@ -394,8 +394,9 @@ export class VisionLayer extends Layer {
             .addAttribute('aVertexPosition', geometryPolygon);
 
         const mesh = new PIXI.Mesh((geometry as any) as PIXI.Geometry, <PIXI.MeshMaterial>shader)
- 
-        const size = this.grid.sizeFromGridSize(Size.toGridSize(token.size))
+
+        const gridSize = {width: token.width || 1, height: token.height || 1}
+        const size = this.grid.sizeFromGridSize(gridSize)
         const minSize = Math.max(size.width, size.height) / 2.0
 
         // temporary radius
