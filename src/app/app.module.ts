@@ -9,7 +9,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MapComponent } from './core/map/map.component';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 import { CanvasContainerDirective } from './core/map/canvas-container.directive';
-import { CreatureComponent } from './core/creature/creature.component';
+import { CombatantComponent } from './core/combatant/combatant.component';
 import { DataService } from './shared/services/data.service';
 import { ToolbarComponent } from './core/toolbar/toolbar.component';
 import { DisableRightClickDirective } from './core/disable-right-click.directive';
@@ -38,7 +38,7 @@ import { SafePipe } from 'safe-pipe';
         SettingsModalComponent,
         CanvasContainerDirective,
         DisableRightClickDirective,
-        CreatureComponent,
+        CombatantComponent,
         AboutModalComponent,
         ImageHandoutComponent,
         MessageComponent,

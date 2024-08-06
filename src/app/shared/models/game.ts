@@ -1,8 +1,8 @@
-import { Creature } from './creature';
+import { Combatant } from './combatant';
 
 export class Game {
     turn: number;
     round: number;
     started: boolean;
-    creatures: Array<Creature> = [];
+    creatures: Array<Combatant> = [];
 }

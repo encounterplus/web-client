@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Creature } from 'src/app/shared/models/creature';
+import { Combatant } from 'src/app/shared/models/combatant';
 import { GridType, Map } from 'src/app/shared/models/map';
 import { Layer } from './layers/layer';
 import { GridLayer } from './layers/grid-layer';
@@ -197,7 +197,7 @@ export class MapContainer extends Layer {
         this.playersLayer.tokens = this.state.map.tokens.filter(token => token.reference?.includes("player-") || token.role == Role.friendly && token.vision && token.vision?.enabled)
     }
 
-    updateTurned(creature: Creature) {
+    updateTurned(creature: Combatant) {
         if (this.turned != null) {
             this.turned.turned = false;
             this.turned.updateLabel();

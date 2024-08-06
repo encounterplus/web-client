@@ -1,4 +1,3 @@
-import { Creature } from 'src/app/shared/models/creature';
 import { Layer } from './layer';
 import { TokenView } from '../views/token-view';
 import { Grid, GridInterface } from '../models/grid';

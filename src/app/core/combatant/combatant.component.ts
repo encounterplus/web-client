@@ -1,16 +1,16 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Creature } from 'src/app/shared/models/creature';
+import { Combatant } from 'src/app/shared/models/combatant';
 import { DataService } from 'src/app/shared/services/data.service';
 
 @Component({
-  selector: 'app-creature',
-  templateUrl: './creature.component.html',
-  styleUrls: ['./creature.component.scss']
+  selector: 'app-combatant',
+  templateUrl: './combatant.component.html',
+  styleUrls: ['./combatant.component.scss']
 })
-export class CreatureComponent implements OnInit {
+export class CombatantComponent implements OnInit {
 
   @Input() 
-  public creature: Creature;
+  public creature: Combatant;
 
   get image(): string {
     return this.creature.image ? `${this.dataService.protocol}//${this.dataService.remoteHost}${this.creature.image}` : "assets/img/creature.png"

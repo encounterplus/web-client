@@ -8,7 +8,7 @@ export enum Role {
     neutral = "neutral",
 }
 
-export class Creature {
+export class Combatant {
     id: string
     uid: string
     type: string

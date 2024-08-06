@@ -2,7 +2,7 @@ import { Screen } from './screen'
 import { Grid } from 'src/app/core/map/models/grid'
 import { Game } from './game'
 import { Map} from './map'
-import { Creature } from './creature'
+import { Combatant } from './combatant'
 import { Message } from './message'
 import { SquareGrid } from 'src/app/core/map/models/square-grid'
 import { TrackedObject } from './tracked-object'
@@ -37,12 +37,12 @@ export class AppState {
     allInteractions = false
     userTokenId?: string
 
-    get activeCreatures(): Array<Creature> {
+    get activeCreatures(): Array<Combatant> {
         return []
         // return this.game.creatures.filter( creature => { return creature.initiative != -10 } ).sort((a, b) => (a.rank > b.rank) ? 1 : -1)
     }
     
-    get turned(): Creature {
+    get turned(): Combatant {
         return null
         // return (this.game.creatures.length > 0 && this.game.creatures.length >= this.game.turn ) ? this.activeCreatures[this.game.turn - 1] : null
     }
