@@ -58,11 +58,7 @@ export class Token {
     id: string
     name?: string
     label?: string
-    role: Role
-    health?: number
-    hitpoints?: number
-    bloodied: boolean
-    dead: boolean
+    role?: Role
     x: number
     y: number
     scale: number

@@ -67,7 +67,7 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
   scrollToTurned() {
     // scroll to turned element
     // console.debug(this.state.turnedId);
-    const selector = `[data-id="${this.state.turnedId}"]`;
+    const selector = `[data-id="${this.state.game.turn}"]`;
     const el = InitiativeListComponent.el.querySelector(selector);
     if (el) {
       const box = el.getBoundingClientRect();

@@ -197,18 +197,18 @@ export class MapContainer extends Layer {
         this.playersLayer.tokens = this.state.map.tokens.filter(token => token.reference?.includes("player-") || token.role == Role.friendly && token.vision && token.vision?.enabled)
     }
 
-    updateTurned(creature: Combatant) {
+    updateTurned(combatant: Combatant) {
         if (this.turned != null) {
             this.turned.turned = false;
             this.turned.updateLabel();
             this.turned.updateInteraction();
         }
 
-        if (creature == null || creature.tokenId == null) {
+        if (combatant == null || combatant.tokenId == null) {
             return
         }
 
-        this.turned = this.tokenViewById(creature.tokenId);
+        this.turned = this.tokenViewById(combatant.tokenId);
         if (this.turned != null) {
             this.turned.turned = true
             this.turned.updateLabel();

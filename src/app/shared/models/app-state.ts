@@ -38,12 +38,14 @@ export class AppState {
     userTokenId?: string
     
     get turned(): Combatant {
-        return null
-        // return (this.game.creatures.length > 0 && this.game.creatures.length >= this.game.turn ) ? this.activeCreatures[this.game.turn - 1] : null
-    }
-    
-    get turnedId(): string {
-        // return this.turned != null && this.turned.id != null ? this.turned.id : "";
+        for (let combatant of this.game.combatants || []) {
+            for (let initiative of combatant.initiative || []) {
+                if (initiative.order == this.game.turn) {
+                    return combatant
+                }
+            }
+        }
+
         return null
     }
 }

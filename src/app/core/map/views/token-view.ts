@@ -60,7 +60,6 @@ export class TokenView extends View {
     controlled: boolean = false
     blocked: boolean = false
 
-
     auraContainer: Container = new PIXI.Container()
     pathView: PathView
     pointerId?: number
@@ -84,9 +83,9 @@ export class TokenView extends View {
     get color(): number {
         if (this.turned) {
             return 0xff9500;
-        } else if (this.token.dead) {
+        } else if (this.defeated) {
             return 0x555555;
-        } else if (this.token.role == Role.hostile) {
+        } else if (this.token.role === undefined || this.token.role == Role.hostile) {
             return this.token.trackingId != null ? 0xff3b30 : 0x631515;
         } else if (this.token.role == Role.friendly) {
             return this.token.trackingId != null ? 0x007aff : 0x3F51B5;
@@ -95,6 +94,14 @@ export class TokenView extends View {
         } else {
             return 0xFFCCFF;
         }
+    }
+
+    get bloodied(): Boolean {
+        return this.token.combatant?.bloodied || false
+    }
+
+    get defeated(): Boolean {
+        return this.token.combatant?.defeated || false
     }
 
     get gridSize(): GridSize {
@@ -213,7 +220,7 @@ export class TokenView extends View {
             sprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
             this.addChild(sprite)
             this.tokenSprite = sprite
-            this.tokenSprite.visible = !this.token.dead
+            this.tokenSprite.visible = !this.defeated
             this.tokenSprite.zIndex = 0
 
             // rotation
@@ -236,7 +243,7 @@ export class TokenView extends View {
         }
 
         // overlay
-        if (this.token.dead) {
+        if (this.defeated) {
             this.overlayTexture = await Loader.shared.loadTexture('/assets/img/corpse.png', true);
             let sprite = new PIXI.Sprite(this.overlayTexture);
             sprite.anchor.set(0.5, 0.5);
@@ -250,7 +257,7 @@ export class TokenView extends View {
             }
         
             this.overlaySprite.zIndex = 1
-        } else if (this.token.bloodied) {
+        } else if (this.bloodied) {
             if ( this.token.asset != null || this.token.style == TokenStyle.topdown || this.token.trackingId) {
                 this.overlayTexture = await Loader.shared.loadTexture('/assets/img/bloodied.png', true)
                 let sprite = new PIXI.Sprite(this.overlayTexture)
@@ -341,7 +348,7 @@ export class TokenView extends View {
 
         this.pathView.visible = this.visible
 
-        if (this.token.dead) {
+        if (this.defeated) {
             this.zIndex = 29;
         }
     }
