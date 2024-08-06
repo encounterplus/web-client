@@ -1,6 +1,4 @@
-import { Vision } from './vision';
-import { Light } from './light';
-import { Aura } from './aura';
+import { Initiative } from "./initiative"
 
 export enum Role {
     friendly = "friendly",
@@ -10,18 +8,24 @@ export enum Role {
 
 export class Combatant {
     id: string
-    uid: string
-    type: string
-    name: string
-    role: Role
+    label?: string
+    name?: string
+    role?: Role
+    hidden?: boolean
+    reference?: string
+
+    data?: any
+    attributes?: any
+
     rank: number
-    initiative: number
-    health: number
-    hitpoints: number
-    bloodied: boolean
-    dead: boolean
-    hidden: boolean
-    tokenId?: string
+    initiative?: Array<Initiative>
+
+    bloodied?: boolean
+    defeated?: boolean
+
     image?: string
-    player: boolean
+    
+    tokenId?: string
+    entityId?: string
+    entityType?: string
 }

@@ -1,8 +1,14 @@
 import { Component, OnInit, Input, ElementRef, AfterViewChecked, AfterViewInit, OnDestroy } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
 import { Combatant, Role } from 'src/app/shared/models/combatant';
+import { Initiative } from 'src/app/shared/models/initiative';
 // import { Lightbox, IAlbum } from 'ngx-lightbox';
 import { DataService } from 'src/app/shared/services/data.service';
+
+interface ActiveCombatant {
+  initiative: Initiative,
+  combatant: Combatant
+}
 
 @Component({
   selector: 'app-initiative-list',
@@ -18,8 +24,18 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
   constructor(private element: ElementRef, /*private lightbox: Lightbox,*/ private dataService: DataService) {
   }
 
-  get activeCreatures(): Array<Combatant> {
-    return this.state.game.creatures.filter(creature => creature.initiative !== -10 && (creature.role != Role.hostile || !creature.hidden)).sort((a, b) => (a.rank > b.rank) ? 1 : -1);
+  get activeCombatants(): Array<ActiveCombatant> {
+    var array = Array<ActiveCombatant>()
+
+    for (let combatant of this.state.game.combatants.filter(combatant => combatant.initiative && (combatant.role != Role.hostile || !combatant.hidden))) {
+      for (let initiative of combatant.initiative ?? []) {
+        if (initiative.order) {
+          array.push({initiative: initiative, combatant: combatant})
+        }
+      }
+    }
+
+    return array.sort((a, b) => (a.initiative.order > b.initiative.order) ? 1 : -1);
   }
 
   // get images(): Array<IAlbum> {
@@ -68,9 +84,9 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
 
   open(index: number): void {
     // empty image check
-    if (this.activeCreatures[index].image == null) {
-      return;
-    }
+    // if (this.activeCombatants[index].image == null) {
+    //   return;
+    // }
     // open lightbox
     // this.lightbox.open(this.images, index);
   }

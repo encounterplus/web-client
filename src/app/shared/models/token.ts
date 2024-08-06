@@ -2,6 +2,7 @@ import { Vision } from './vision';
 import { Aura } from './aura';
 import { Asset } from './asset';
 import { GridSize } from 'src/app/core/map/views/token-view';
+import { Combatant } from './combatant';
 
 export enum Role {
     friendly = "friendly",
@@ -78,4 +79,5 @@ export class Token {
     auras?: Array<Aura>
     trackingId?: number
     path?: Array<number>
+    combatant?: Combatant
 }

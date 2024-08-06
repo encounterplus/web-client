@@ -1,7 +1,7 @@
 <div class="main-image">
     <img src="{{image}}" />
 </div>
-<div *ngIf="creature.dead || creature.bloodied" class="overlay-image">
+<div *ngIf="combatant.defeated || combatant.bloodied" class="overlay-image">
     <img src="{{overlayImage}}" />
 </div>
 <h4>{{name}}</h4>

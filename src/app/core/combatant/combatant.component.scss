@@ -66,18 +66,7 @@
     }
 }
 
-:host(.creature-player) {
-
-    .main-image {
-        border-color: #3F51B5;
-    }
-
-    h4 {
-        background-color: rgb(51, 65, 146);
-    }
-}
-
-:host(.creature-monster) {
+:host(.role-hostile) {
     .main-image {
         border-color: #631515;
     }
@@ -87,13 +76,11 @@
     }
 }
 
-:host(.role-hostile) {
-    h4 {
-        background-color: #581313;   
-    }
-}
-
 :host(.role-friendly) {
+    .main-image {
+        border-color: #3F51B5;
+    }
+
     h4 {
         width: auto;
         max-width: 80%;
@@ -102,12 +89,16 @@
 }
 
 :host(.role-neutral) {
+    .main-image {
+        border-color: #964B00;
+    }
+
     h4 {
         background-color:#964B00;   
     }
 }
 
-:host(.creature-turned) {
+:host(.combatant-turned) {
     .main-image {
         border-color: rgb(255, 149, 0);
     }

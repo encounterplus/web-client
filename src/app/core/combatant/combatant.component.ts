@@ -10,20 +10,20 @@ import { DataService } from 'src/app/shared/services/data.service';
 export class CombatantComponent implements OnInit {
 
   @Input() 
-  public creature: Combatant;
+  public combatant: Combatant;
 
   get image(): string {
-    return this.creature.image ? `${this.dataService.protocol}//${this.dataService.remoteHost}${this.creature.image}` : "assets/img/creature.png"
+    return this.combatant.image ? `${this.dataService.protocol}//${this.dataService.remoteHost}${this.combatant.image}` : "assets/img/creature.png"
   }
 
   get name(): string {
-    return this.creature.player ? this.creature.name : this.creature.uid;
+    return this.combatant.entityType == "Character" ? this.combatant.name : this.combatant.label;
   }
 
   get overlayImage(): string {
-    if (this.creature.dead) {
+    if (this.combatant.defeated || false) {
       return "assets/img/creature-dead.png";
-    } else if (this.creature.bloodied) {
+    } else if (this.combatant.bloodied || false) {
       return "assets/img/creature-bloodied.png";
     } else {
       return "";

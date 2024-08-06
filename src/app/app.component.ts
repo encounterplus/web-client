@@ -238,8 +238,8 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.state.game.started = event.data.started
         }
         
-        if (event.data.creatures) {
-          this.state.game.creatures = event.data.creatures;
+        if (event.data.combatants) {
+          this.state.game.combatants = event.data.combatants;
           this.mapComponent.mapContainer.update(this.state);
           this.mapComponent.mapContainer.draw();
         }
@@ -253,7 +253,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.mapComponent.mapContainer.updateTurned(this.state.turned)
 
           // sigh
-          if (!event.data.creatures && (turnChanged || roundChanged || startedChanged)) {
+          if (!event.data.combatant && (turnChanged || roundChanged || startedChanged)) {
             this.mapComponent.mapContainer.resetPaths()
           }
         }
@@ -397,13 +397,13 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
       }
 
-      case WSEventName.creatureUpdated: {
+      case WSEventName.combatantUpdated: {
         // udpdate state
-        let index = this.state.game.creatures.findIndex((obj => obj.id == event.data.id))
-        let creature = this.state.game.creatures[index]
+        let index = this.state.game.combatants.findIndex((obj => obj.id == event.data.id))
+        let combatant = this.state.game.combatants[index]
 
-        if (creature) {
-          Object.assign(creature, event.data)
+        if (combatant) {
+          Object.assign(combatant, event.data)
         }
 
         // changes
