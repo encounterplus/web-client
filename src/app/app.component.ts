@@ -428,7 +428,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           view.blocked = event.data.state == ControlState.block;
 
           if (!view.dragging && (view.token.trackingId == null || this.state.runMode == RunMode.normal)) {
-            console.debug("tokenMoved: updating token position")
+            // console.debug("tokenMoved: updating token position")
             view.token.x = event.data.x;
             view.token.y = event.data.y;
             view.controlled = event.data.state != ControlState.end && !view.dragging ? true : false
