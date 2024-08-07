@@ -69,7 +69,7 @@ export class TokenView extends View {
     }
 
     get baseColor(): number {
-        if (this.token.role == Role.hostile) {
+        if (this.token.role === undefined || this.token.role == Role.hostile) {
             return 0x631515;
         } else if (this.token.role == Role.friendly) {
             return 0x3F51B5;
@@ -628,14 +628,14 @@ export class TokenView extends View {
     }
     
     onDragMove(event: InteractionEvent) {
-        console.debug(`drag move, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}, tokenId: ${this.token.id}`)
+        // console.debug(`drag move, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}, tokenId: ${this.token.id}`)
         
         if (this.controlled) {
             return
         }
 
         if (this.dragging) {
-            console.log(`${this.token.label}: ${event.data.pointerId}, ${event.data.global.x},${event.data.global.y}`)
+            // console.log(`${this.token.label}: ${event.data.pointerId}, ${event.data.global.x},${event.data.global.y}`)
             
             // check if pointerId match with event
             if (this.pointerId != null && event.data.pointerId != null) {
