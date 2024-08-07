@@ -622,9 +622,9 @@ export class TokenView extends View {
         // click/tap event if time difference between start/end is less than 200ms
         let time = Date.now() - this.dragStart
 
-        if (time <= 200) {
-           this.onTap(event)
-        }
+        // if (time <= 200) {
+        //    this.onTap(event)
+        // }
     }
     
     onDragMove(event: InteractionEvent) {
