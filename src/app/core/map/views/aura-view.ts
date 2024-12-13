@@ -91,8 +91,10 @@ export class AuraView extends View {
                 sprite.play();
             }
             let ticker = PIXI.Ticker.shared;
-            for (let x = 0; x < this.aura.components.length; x++) {
-                let component = this.aura.components[x];
+            // get components from aura and asset
+            let components = this.aura.components.concat(this.aura.asset.components || Array())
+            for (let x = 0; x < components.length; x++) {
+                let component = components[x];
                 if (component.enabled) {
                     if (component.type.startsWith("filter.")) {
                         if (component.type == "filter.tint") {

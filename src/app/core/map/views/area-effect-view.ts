@@ -232,8 +232,10 @@ export class AreaEffectView extends View {
 	      sprite.play();
             }
             let ticker = PIXI.Ticker.shared;
-            for (let x=0; x < this.areaEffect.components.length; x++) {
-                let component = this.areaEffect.components[x];
+            // get components from areaEffect and asset
+            let components = this.areaEffect.components.concat(this.areaEffect.asset.components || Array())
+            for (let x=0; x < components.length; x++) {
+                let component = components[x];
                 if (component.enabled) {
                     if (component.type.startsWith("filter.")) {
                         if (component.type == "filter.tint") {

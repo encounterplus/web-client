@@ -1,3 +1,5 @@
+import { Component } from "@angular/core"
+
 export class Asset {
     id: string
     name: string
@@ -9,4 +11,5 @@ export class Asset {
     frameWidth: number
     frameHeight: number
     duration: number
+    components?: Array<Component>
 }
