@@ -183,13 +183,13 @@ export class AreaEffectView extends View {
             let frames = [ ];
             if (this.areaEffect.asset.type == "spriteSheet") {
                 for(let x=0,y=0,framecount=0; x < this.assetTexture.baseTexture.width && y < this.assetTexture.baseTexture.height;framecount++) {
-                    let rect = new PIXI.Rectangle(x,y,this.areaEffect.asset.frameWidth,this.areaEffect.asset.frameHeight);
+                    let rect = new PIXI.Rectangle(x,y,this.areaEffect.asset.parameters.frameWidth,this.areaEffect.asset.parameters.frameHeight);
                     let frame = new PIXI.Texture(this.assetTexture.baseTexture,rect);
                     frames.push ( frame );
-                    x += this.areaEffect.asset.frameWidth;
+                    x += this.areaEffect.asset.parameters.frameWidth;
                     if (x>=this.assetTexture.baseTexture.width) {
                         x = 0;
-                        y += this.areaEffect.asset.frameHeight;
+                        y += this.areaEffect.asset.parameters.frameHeight;
                     }
                 }
 	    } else {
@@ -225,10 +225,10 @@ export class AreaEffectView extends View {
                     break;
 	    }
 	    if (frames.length > 1) {
-              if (this.areaEffect.asset.duration === undefined) {
-                this.areaEffect.asset.duration = 1.0;
+              if (this.areaEffect.asset.parameters.duration === undefined) {
+                this.areaEffect.asset.parameters.duration = 1.0;
               }
-	      sprite.animationSpeed = frames.length/this.areaEffect.asset.duration/60.00;
+	      sprite.animationSpeed = frames.length/this.areaEffect.asset.parameters.duration/60.00;
 	      sprite.play();
             }
             let ticker = PIXI.Ticker.shared;

@@ -48,13 +48,13 @@ export class TileView extends View {
             let frames = [];
             if (this.tile.asset.type == "spriteSheet") {
                 for (let x = 0, y = 0, framecount = 0; x < this.assetTexture.baseTexture.width && y < this.assetTexture.baseTexture.height; framecount++) {
-                    let rect = new PIXI.Rectangle(x, y, this.tile.asset.frameWidth, this.tile.asset.frameHeight);
+                    let rect = new PIXI.Rectangle(x, y, this.tile.asset.parameters.frameWidth, this.tile.asset.parameters.frameHeight);
                     let frame = new PIXI.Texture(this.assetTexture.baseTexture, rect);
                     frames.push(frame);
-                    x += this.tile.asset.frameWidth;
+                    x += this.tile.asset.parameters.frameWidth;
                     if (x >= this.assetTexture.baseTexture.width) {
                         x = 0;
-                        y += this.tile.asset.frameHeight;
+                        y += this.tile.asset.parameters.frameHeight;
                     }
                 }
             } else {
@@ -69,10 +69,10 @@ export class TileView extends View {
             sprite.angle = this.tile.rotation;
             sprite.alpha = this.tile.opacity
             if (frames.length > 1) {
-                if (this.tile.asset.duration === undefined) {
-                    this.tile.asset.duration = 1.0;
+                if (this.tile.asset.parameters.duration === undefined) {
+                    this.tile.asset.parameters.duration = 1.0;
                 }
-                sprite.animationSpeed = frames.length / this.tile.asset.duration / 60.00;
+                sprite.animationSpeed = frames.length / this.tile.asset.parameters.duration / 60.00;
                 sprite.play();
             }
             this.addChild(sprite);

@@ -109,11 +109,11 @@ export class TokenView extends View {
     }
 
     get scaleFactor(): number {
-        return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0) * (this.token.asset?.scale || 1.0) * (this.token.trackingId != null ? 1.5 : 1.0)
+        return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0) * (this.token.asset?.parameters.scale || 1.0) * (this.token.trackingId != null ? 1.5 : 1.0)
     }
 
     get tokenOffset(): PIXI.Point {
-        return new PIXI.Point(this.token.asset?.offsetX || 0, this.token.asset?.offsetY || 0)
+        return new PIXI.Point(this.token.asset?.parameters.offsetX || 0, this.token.asset?.parameters.offsetY || 0)
     }
 
     get trackingLabel(): string {

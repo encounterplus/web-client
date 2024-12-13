@@ -64,13 +64,13 @@ export class AuraView extends View {
             let frames = [];
             if (this.aura.asset.type == "spriteSheet") {
                 for (let x = 0, y = 0, framecount = 0; x < this.assetTexture.baseTexture.width && y < this.assetTexture.baseTexture.height; framecount++) {
-                    let rect = new PIXI.Rectangle(x, y, this.aura.asset.frameWidth, this.aura.asset.frameHeight);
+                    let rect = new PIXI.Rectangle(x, y, this.aura.asset.parameters.frameWidth, this.aura.asset.parameters.frameHeight);
                     let frame = new PIXI.Texture(this.assetTexture.baseTexture, rect);
                     frames.push(frame);
-                    x += this.aura.asset.frameWidth;
+                    x += this.aura.asset.parameters.frameWidth;
                     if (x >= this.assetTexture.baseTexture.width) {
                         x = 0;
-                        y += this.aura.asset.frameHeight;
+                        y += this.aura.asset.parameters.frameHeight;
                     }
                 }
             } else {
@@ -84,10 +84,10 @@ export class AuraView extends View {
             sprite.width = this.w;
             sprite.height = this.h;
             if (frames.length > 1) {
-                if (this.aura.asset.duration === undefined) {
-                    this.aura.asset.duration = 1.0;
+                if (this.aura.asset.parameters.duration === undefined) {
+                    this.aura.asset.parameters.duration = 1.0;
                 }
-                sprite.animationSpeed = frames.length / this.aura.asset.duration / 60.00;
+                sprite.animationSpeed = frames.length / this.aura.asset.parameters.duration / 60.00;
                 sprite.play();
             }
             let ticker = PIXI.Ticker.shared;
