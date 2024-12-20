@@ -225,11 +225,19 @@ export class AppComponent implements OnInit, AfterViewInit {
       case WSEventName.gameUpdated: {
         // detect changes, very primitive
         const turnChanged = this.state.game.turn != event.data.turn
+        const initiativeChanged = this.state.game.initiativeId != event.data.initiativeId
+        const combatantChanged = this.state.game.combatantId != event.data.combatantId
         const roundChanged = this.state.game.round != event.data.round
         const startedChanged = this.state.game.started != event.data.started
         
         if (turnChanged) {
           this.state.game.turn = event.data.turn
+        }
+        if (initiativeChanged) {
+          this.state.game.initiativeId = event.data.initiativeId
+        }
+        if (combatantChanged) {
+          this.state.game.combatantId = event.data.combatantId
         }
         if (roundChanged) {
           this.state.game.round = event.data.round
@@ -253,7 +261,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.mapComponent.mapContainer.updateTurned(this.state.turned)
 
           // sigh
-          if (!event.data.combatant && (turnChanged || roundChanged || startedChanged)) {
+          if (!event.data.combatant && (turnChanged || roundChanged || startedChanged || initiativeChanged || combatantChanged)) {
             this.mapComponent.mapContainer.resetPaths()
           }
         }

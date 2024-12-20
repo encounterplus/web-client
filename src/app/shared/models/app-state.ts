@@ -39,10 +39,8 @@ export class AppState {
     
     get turned(): Combatant {
         for (let combatant of this.game.combatants || []) {
-            for (let initiative of combatant.initiative || []) {
-                if (initiative.order == this.game.turn) {
-                    return combatant
-                }
+            if (combatant.id == this.game.combatantId) {
+                return combatant
             }
         }
 
