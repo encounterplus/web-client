@@ -1,17 +1,23 @@
 <div class="message-source">
-    <span [style.color]="message.color || 'purple'">◉</span> <span [style.color]="'#ccc'" *ngIf="message.creature"> {{message.creature}} | </span> {{message.source || "Dungeon Master"}} <time>{{message.created | date:'short'}}</time>
+  <span [style.color]="message.color || 'purple'">◉</span> @if (message.creature) {
+  <span [style.color]="'#ccc'"> {{message.creature}} | </span>
+  } {{message.source || "Dungeon Master"}} <time>{{message.created | date:'short'}}</time>
 </div>
 
-<div *ngIf="isDiceRoll"  class="message-roll clearfix">
-
+@if (isDiceRoll) {
+  <div  class="message-roll clearfix">
     <div class="message-roll-result">{{roll.result}}</div>
     <div class="message-roll-detail">
-        <p class="roll-name">{{roll.name || 'Custom'}}: <span [style.color]="rollColor">{{roll.type || 'roll'}}</span></p>
-        <p class="roll-formula">{{roll.formula}}</p>
-        <p class="roll-detail">{{roll.detail}}</p>
+      <p class="roll-name">{{roll.name || 'Custom'}}: <span [style.color]="rollColor">{{roll.type || 'roll'}}</span></p>
+      <p class="roll-formula">{{roll.formula}}</p>
+      <p class="roll-detail">{{roll.detail}}</p>
     </div>
-    
-</div>
+  </div>
+}
 
-<div *ngIf="isChat" class="message-chat" [innerHTML]="message.content"></div>
-<div *ngIf="isTableRoll" class="message-tableroll" [innerHTML]="tableRollText"></div>
+@if (isChat) {
+  <div class="message-chat" [innerHTML]="message.content"></div>
+}
+@if (isTableRoll) {
+  <div class="message-tableroll" [innerHTML]="tableRollText"></div>
+}

@@ -2,18 +2,30 @@
   <app-map [state]="state" class="h-100"></app-map>
   <app-toolbar id="toolbar" [state]="state" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)"></app-toolbar>
 
-  <app-zoombar id="zoombar" class="d-flex align-items-baseline" *ngIf="zoomControls" (action)="zoombarAction($event)" [state]="state"></app-zoombar>
+  @if (zoomControls) {
+    <app-zoombar id="zoombar" class="d-flex align-items-baseline" (action)="zoombarAction($event)" [state]="state"></app-zoombar>
+  }
 
   <div id="side-bar">
-    <app-initiative-list *ngIf="state.game.started" [state]="state" id="initiative-list"></app-initiative-list>
-    <app-message-list *ngIf="messages" [state]="state" id="message-list"></app-message-list>
-  </div>  
+    @if (state.game.started) {
+      <app-initiative-list [state]="state" id="initiative-list"></app-initiative-list>
+    }
+    @if (messages) {
+      <app-message-list [state]="state" id="message-list"></app-message-list>
+    }
+  </div>
 
   <div id="bottom-bar">
-    <app-paused *ngIf="state.paused"></app-paused>
-    <app-image-handout *ngIf="state.screen.overlayImage" [screen]="state.screen"></app-image-handout>
+    @if (state.paused) {
+      <app-paused></app-paused>
+    }
+    @if (state.screen.overlayImage) {
+      <app-image-handout [screen]="state.screen"></app-image-handout>
+    }
     <app-toast-list aria-live="polite" aria-atomic="true"></app-toast-list>
   </div>
-  <app-overlay *ngIf="state.screen.overlayHandoutText||state.screen.overlayHandountText" [screen]="state.screen"></app-overlay>
+  @if (state.screen.overlayHandoutText||state.screen.overlayHandountText) {
+    <app-overlay [screen]="state.screen"></app-overlay>
+  }
 
 </div>

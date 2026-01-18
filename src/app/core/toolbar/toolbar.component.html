@@ -9,31 +9,39 @@
         <button ngbDropdownItem (click)="showAbout()">About</button>
         <div class="dropdown-divider"></div>
         <button ngbDropdownItem (click)="reload()">Reload</button>
-        <div *ngIf="showExit" class="dropdown-divider"></div>
-        <button *ngIf="showExit" ngbDropdownItem (click)="exit()">Exit</button>
+        @if (showExit) {
+          <div class="dropdown-divider"></div>
+        }
+        @if (showExit) {
+          <button ngbDropdownItem (click)="exit()">Exit</button>
+        }
       </div>
-    </div> 
+    </div>
     <div class="btn-group" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" name="radioTest" role="group" aria-label="Messages">
       <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off" [(ngModel)]="messages" (ngModelChange)="messagesChanged($event)">
-      <label class="btn btn-dark" for="btncheck1"> <i class="fa fa-comments-o">&nbsp;<span *ngIf="state.readCount<state.messages.length" class="badge text-bg-light">{{state.messages.length-state.readCount}}</span></i></label>
-    </div> 
+      <label class="btn btn-dark" for="btncheck1"> <i class="fa fa-comments-o">&nbsp;@if (state.readCount<state.messages.length) {
+        <span class="badge text-bg-light">{{state.messages.length-state.readCount}}</span>
+      }</i></label>
+    </div>
   </div>
 
   <div class="btn-group ms-2" role="group" name="activeTool" aria-label="Active Tool">
     <input type="radio" value="move" class="btn-check" id="btnradio1" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
     <label class="btn btn-dark" for="btnradio1"> <i class="fa fa-arrows"></i></label>
-  
+
     <input type="radio" value="pointer" class="btn-check" id="btnradio2" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
     <label class="btn btn-dark" for="btnradio2"> <i class="fa fa-magic"></i></label>
   </div>
 
-  <div *ngIf="state.map?.video" class="btn-group ms-2" role="group" aria-label="Video Controls">
+  @if (state.map?.video) {
+    <div class="btn-group ms-2" role="group" aria-label="Video Controls">
       <button ngbButton class="btn btn-dark" (click)="videoPauseToggle()">
-          <i class="fa fa-fw" [ngClass]="videoPaused ? 'fa-play' : 'fa-pause'"></i>
+        <i class="fa fa-fw" [ngClass]="videoPaused ? 'fa-play' : 'fa-pause'"></i>
       </button>
       <button ngbButton class="btn btn-dark" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" (click)="videoMuteToggle()">
-          <i class="fa fa-fw" [ngClass]="videoMuted ? 'fa-volume-off' : 'fa-volume-up'"></i>
+        <i class="fa fa-fw" [ngClass]="videoMuted ? 'fa-volume-off' : 'fa-volume-up'"></i>
       </button>
-  </div>
+    </div>
+  }
 </div>
 
