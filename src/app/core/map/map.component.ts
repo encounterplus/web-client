@@ -335,7 +335,7 @@ export class MapComponent implements OnInit, OnChanges {
     }
   }
 
-  @HostListener('window:resize', ['$event'])
+//   @HostListener('window:resize', ['$event'])
   onResize() {
     // update viewport
     let sideBarWidth = (document.getElementById("side-bar")?.getBoundingClientRect()?.width ?? 0) + 8.0;
@@ -348,7 +348,7 @@ export class MapComponent implements OnInit, OnChanges {
     this.trackedObjectsContainer.draw()
   }
 
-  @HostListener('window:keydown', ['$event'])
+//   @HostListener('window:keydown', ['$event'])
   onKeydown(event: KeyboardEvent) {
     if (event.target instanceof HTMLInputElement) return
       switch (event.code) {

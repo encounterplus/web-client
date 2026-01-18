@@ -23,10 +23,6 @@
     "types": [
       "offscreencanvas"
     ],
-    "lib": [
-      "es2018",
-      "dom"
-    ],
     "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
