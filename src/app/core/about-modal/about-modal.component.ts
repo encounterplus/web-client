@@ -4,9 +4,10 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'ngbd-modal-basic',
-  templateUrl: './about-modal.component.html',
-  styleUrls: ['./about-modal.component.scss']
+    selector: 'ngbd-modal-basic',
+    templateUrl: './about-modal.component.html',
+    styleUrls: ['./about-modal.component.scss'],
+    standalone: false
 })
 export class AboutModalComponent implements OnInit {
 

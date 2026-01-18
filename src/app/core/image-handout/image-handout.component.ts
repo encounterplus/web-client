@@ -4,9 +4,10 @@ import { DataService } from 'src/app/shared/services/data.service';
 // import { Lightbox } from 'ngx-lightbox';
 
 @Component({
-  selector: 'app-image-handout',
-  templateUrl: './image-handout.component.html',
-  styleUrls: ['./image-handout.component.scss']
+    selector: 'app-image-handout',
+    templateUrl: './image-handout.component.html',
+    styleUrls: ['./image-handout.component.scss'],
+    standalone: false
 })
 export class ImageHandoutComponent implements OnInit {
 

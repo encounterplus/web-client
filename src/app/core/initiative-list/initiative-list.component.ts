@@ -11,9 +11,10 @@ interface ActiveCombatant {
 }
 
 @Component({
-  selector: 'app-initiative-list',
-  templateUrl: './initiative-list.component.html',
-  styleUrls: ['./initiative-list.component.scss']
+    selector: 'app-initiative-list',
+    templateUrl: './initiative-list.component.html',
+    styleUrls: ['./initiative-list.component.scss'],
+    standalone: false
 })
 export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
   static el: HTMLElement;

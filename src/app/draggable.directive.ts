@@ -1,7 +1,8 @@
 import { Directive,ElementRef,HostListener,AfterViewInit } from "@angular/core";
 
 @Directive({
-  selector: "[appDraggable]",
+    selector: "[appDraggable]",
+    standalone: false
 })
 export class DraggableDirective implements AfterViewInit {
   private modalElement: HTMLElement;

@@ -6,9 +6,10 @@ import { Role, Token } from 'src/app/shared/models/token';
 import { AppState, RunMode } from 'src/app/shared/models/app-state';
 
 @Component({
-  selector: 'ngbd-modal-basic',
-  templateUrl: './settings-modal.component.html',
-  styleUrls: ['./settings-modal.component.scss']
+    selector: 'ngbd-modal-basic',
+    templateUrl: './settings-modal.component.html',
+    styleUrls: ['./settings-modal.component.scss'],
+    standalone: false
 })
 export class SettingsModalComponent implements OnInit {
 

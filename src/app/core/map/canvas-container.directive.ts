@@ -6,7 +6,8 @@ import { ToastService } from 'src/app/shared/services/toast.service';
 window["PIXI"] = PIXI;
 
 @Directive({
-  selector: '[appCanvasContainer]'
+    selector: '[appCanvasContainer]',
+    standalone: false
 })
 export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
 

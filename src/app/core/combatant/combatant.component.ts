@@ -3,9 +3,10 @@ import { Combatant } from 'src/app/shared/models/combatant';
 import { DataService } from 'src/app/shared/services/data.service';
 
 @Component({
-  selector: 'app-combatant',
-  templateUrl: './combatant.component.html',
-  styleUrls: ['./combatant.component.scss']
+    selector: 'app-combatant',
+    templateUrl: './combatant.component.html',
+    styleUrls: ['./combatant.component.scss'],
+    standalone: false
 })
 export class CombatantComponent implements OnInit {
 

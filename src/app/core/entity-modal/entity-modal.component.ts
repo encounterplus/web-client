@@ -4,9 +4,10 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-entity-modal',
-  templateUrl: './entity-modal.component.html',
-  styleUrls: ['./entity-modal.component.scss']
+    selector: 'app-entity-modal',
+    templateUrl: './entity-modal.component.html',
+    styleUrls: ['./entity-modal.component.scss'],
+    standalone: false
 })
 export class EntityModalComponent implements OnInit {
 

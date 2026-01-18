@@ -2,9 +2,10 @@ import { Component, OnInit, Input, ElementRef, Output, EventEmitter } from '@ang
 import { AppState } from 'src/app/shared/models/app-state';
 
 @Component({
-  selector: 'app-zoombar',
-  templateUrl: './zoombar.component.html',
-  styleUrls: ['./zoombar.component.scss']
+    selector: 'app-zoombar',
+    templateUrl: './zoombar.component.html',
+    styleUrls: ['./zoombar.component.scss'],
+    standalone: false
 })
 export class ZoombarComponent implements OnInit {
 

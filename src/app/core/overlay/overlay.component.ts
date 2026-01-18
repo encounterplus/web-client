@@ -3,9 +3,10 @@ import { Screen } from 'src/app/shared/models/screen';
 import { DataService } from 'src/app/shared/services/data.service';
 
 @Component({
-  selector: 'app-overlay',
-  templateUrl: './overlay.component.html',
-  styleUrls: ['./overlay.component.scss']
+    selector: 'app-overlay',
+    templateUrl: './overlay.component.html',
+    styleUrls: ['./overlay.component.scss'],
+    standalone: false
 })
 export class OverlayComponent implements OnInit {
 
