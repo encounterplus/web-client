@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Combatant } from 'src/app/shared/models/combatant';
 import { DataService } from 'src/app/shared/services/data.service';
 
@@ -6,6 +6,7 @@ import { DataService } from 'src/app/shared/services/data.service';
     selector: 'app-combatant',
     templateUrl: './combatant.component.html',
     styleUrls: ['./combatant.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class CombatantComponent implements OnInit {
