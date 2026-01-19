@@ -65,7 +65,6 @@ export class MapContainer extends Layer {
     state: AppState;
     grid: Grid = new SquareGrid()
 
-    data: PIXI.InteractionData
     dragging: boolean = false
     clicked: boolean = false
 
@@ -440,7 +439,7 @@ export class MapContainer extends Layer {
         return null
     }
 
-    onPointerUp(event: PIXI.InteractionEvent) {
+    onPointerUp(event: any) {
         this.dragging = false;
 
         if (this.activePointer) {
@@ -459,7 +458,7 @@ export class MapContainer extends Layer {
         }
     }
     
-    onPointerDown(event: PIXI.InteractionEvent) {
+    onPointerDown(event: any) {
         if (event.data.originalEvent.shiftKey || this.activeTool == Tool.pointer) {
             event.stopPropagation();
             this.dragging = true;
@@ -487,7 +486,7 @@ export class MapContainer extends Layer {
         }
     }
     
-    onPointerMove(event: PIXI.InteractionEvent) {
+    onPointerMove(event: any) {
         if (this.dragging && this.activePointer) {
             event.stopPropagation();
 

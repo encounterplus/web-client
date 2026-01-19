@@ -10,23 +10,23 @@ export class ProgramManager {
     static async preload() {
         console.debug("preloading shaders")
 
-        // vision
-        let visionVert = await Loader.shared.loadResource("/assets/shaders/vision.vert")
-        let visionFrag = await Loader.shared.loadResource("/assets/shaders/vision.frag")
-        ProgramManager.cached.set("vision", PIXI.Program.from(visionVert.data, visionFrag.data, "vision"))
+        // // vision
+        // let visionVert = await Loader.shared.loadResource("/assets/shaders/vision.vert")
+        // let visionFrag = await Loader.shared.loadResource("/assets/shaders/vision.frag")
+        // ProgramManager.cached.set("vision", PIXI.Program.from(visionVert.data, visionFrag.data, "vision"))
 
-        // light
-        let lightFrag = await Loader.shared.loadResource("/assets/shaders/light.frag")
-        ProgramManager.cached.set("light", PIXI.Program.from(visionVert.data, lightFrag.data, "light"))
+        // // light
+        // let lightFrag = await Loader.shared.loadResource("/assets/shaders/light.frag")
+        // ProgramManager.cached.set("light", PIXI.Program.from(visionVert.data, lightFrag.data, "light"))
 
-        // map
-        let mapVert = await Loader.shared.loadResource("/assets/shaders/map.vert")
-        let mapFrag = await Loader.shared.loadResource("/assets/shaders/map.frag")
-        ProgramManager.cached.set("map", PIXI.Program.from(mapVert.data, mapFrag.data, "map"))
+        // // map
+        // let mapVert = await Loader.shared.loadResource("/assets/shaders/map.vert")
+        // let mapFrag = await Loader.shared.loadResource("/assets/shaders/map.frag")
+        // ProgramManager.cached.set("map", PIXI.Program.from(mapVert.data, mapFrag.data, "map"))
         
-        // fog
-        let fogFrag = await Loader.shared.loadResource("/assets/shaders/fog.frag")
-        ProgramManager.cached.set("fog", PIXI.Program.from(mapVert.data, fogFrag.data, "fog"))
+        // // fog
+        // let fogFrag = await Loader.shared.loadResource("/assets/shaders/fog.frag")
+        // ProgramManager.cached.set("fog", PIXI.Program.from(mapVert.data, fogFrag.data, "fog"))
     }
 }
 

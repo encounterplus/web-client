@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "paths": {
       "mini-signals": [
         "node_modules/mini-signals/index.js"
@@ -19,9 +20,6 @@
     "target": "ES2022",
     "typeRoots": [
       "node_modules/@types"
-    ],
-    "types": [
-      "offscreencanvas"
     ],
     "useDefineForClassFields": false
   },

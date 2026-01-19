@@ -1,4 +1,4 @@
-import { Directive, AfterViewInit, ElementRef, HostListener, NgZone, Input, OnDestroy } from '@angular/core';
+import { Directive, AfterViewInit, ElementRef, HostListener, Input, OnDestroy } from '@angular/core';
 import * as PIXI from 'pixi.js'
 import { DataService } from 'src/app/shared/services/data.service';
 import { ToastService } from 'src/app/shared/services/toast.service';
@@ -14,7 +14,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
   element: HTMLDivElement;
 
   // PIXI app and stage references
-  app: PIXI.Application;
+  app: PIXI.Application<HTMLCanvasElement>;
   width: number;
   height: number;
 
@@ -36,7 +36,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
     // autoStart: false
   };
 
-  constructor(private el: ElementRef, private zone: NgZone, private toastService: ToastService) {
+  constructor(private el: ElementRef, private toastService: ToastService) {
     this.element = el.nativeElement as HTMLDivElement;
 
      // gameboard resolution hack to fix devicePixelRatio not reported properly by browser
@@ -53,25 +53,20 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
     const options = Object.assign({ width: this.element.clientWidth, height: this.element.clientHeight },
       this.applicationOptions);
 
-    this.zone.runOutsideAngular(() => {
-      // prevents pixi ticker to clash with zone
+    try {
+      this.app = new PIXI.Application<HTMLCanvasElement>(options);
+    } catch(err) {
+        // show error
+        this.toastService.showError(err.message, false);
+        throw err
+    }
 
-      try {
-        this.app = new PIXI.Application(options);
-      } catch(err) {
-          // show error
-          this.toastService.showError(err.message, false);
-          throw err
+    // prevents mouse zoom on document
+    this.element.addEventListener('wheel', e => {
+      if (!(e.currentTarget as HTMLElement)?.closest('app-initiative-list')) {
+        e.preventDefault();
       }
-
-      // prevents mouse zoom on document
-      this.element.addEventListener('wheel', e => {
-        if (!(e.currentTarget as HTMLElement)?.closest('app-initiative-list')) {
-          e.preventDefault();
-        }
-      }, { passive: false });
-
-    });
+    }, { passive: false });
 
     this.element.appendChild(this.app.view);
 
@@ -91,8 +86,8 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
       throw new Error('No WebGL Support!')
     }
 
-    const gl = (this.app.renderer as PIXI.Renderer).gl;
-    this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    // const gl = (this.app.renderer as PIXI.Renderer).gl;
+    // this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
     // console.debug(`maximum texture size: ${this.maxTextureSize}`);
 
     // let ticker = PIXI.Ticker.shared;

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, HostListener, OnChanges, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, HostListener, OnChanges } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
 import * as PIXI from 'pixi.js'
 import { Viewport } from 'pixi-viewport';
@@ -61,7 +61,7 @@ export class MapComponent implements OnInit, OnChanges {
   gpTS?: number;
 
 
-  constructor(private dataService: DataService, private zone: NgZone, private toastService: ToastService) {
+  constructor(private dataService: DataService, private toastService: ToastService) {
     
   }
 
@@ -71,20 +71,16 @@ export class MapComponent implements OnInit, OnChanges {
       this.width = this.canvas.width;
       this.height = this.canvas.height;
 
-      // sigh, we need to run this outside angular
-      // to prevent triggering changes
-      this.zone.runOutsideAngular(() => {
-        // create viewport
-        this.viewport = new Viewport({
-          screenWidth: window.innerWidth,
-          screenHeight: window.innerHeight,
-          worldWidth: 1000,
-          worldHeight: 1000,
+      this.viewport = new Viewport({
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+        worldWidth: 1000,
+        worldHeight: 1000,
+        events: this.app.renderer.events
 
-          // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
-          interaction: this.app.renderer.plugins.interaction
+        // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+        // interaction: this.app.renderer.plugins.interaction
         });
-      });
 
       // create map container
       this.mapContainer = new MapContainer(this.dataService);
@@ -92,6 +88,7 @@ export class MapComponent implements OnInit, OnChanges {
 
       // add the viewport to the stage
       this.app.stage.addChild(this.viewport)
+     // this.app.stage.addChild(this.mapContainer)
       this.mapContainer.x = 0
       this.mapContainer.y = 0
 
@@ -348,7 +345,7 @@ export class MapComponent implements OnInit, OnChanges {
     this.trackedObjectsContainer.draw()
   }
 
-//   @HostListener('window:keydown', ['$event'])
+  @HostListener('window:keydown', ['$event'])
   onKeydown(event: KeyboardEvent) {
     if (event.target instanceof HTMLInputElement) return
       switch (event.code) {
@@ -435,7 +432,7 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   ngAfterViewChecked() {
-    // console.log('Change detection triggered!');
+    console.log('Change detection triggered!');
   }
 
   protected _destroy(): void {

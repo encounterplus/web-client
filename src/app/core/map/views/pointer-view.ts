@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
-import * as particles from "pixi-particles";
+import * as particles from "@pixi/particle-emitter";
 import { Pointer } from 'src/app/shared/models/pointer';
 
 export class PointerView extends View {
@@ -65,9 +65,9 @@ export class PointerView extends View {
             spawnType: "point"
         };
 
-        this.emitter = new particles.Emitter(parent, texture, config);
-        this.emitter.autoUpdate = true;
-        this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD;
+        // this.emitter = new particles.Emitter(parent, texture, config);
+        // this.emitter.autoUpdate = true;
+        // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD;
 
         this.pointer = pointer;
         this.grid = grid;

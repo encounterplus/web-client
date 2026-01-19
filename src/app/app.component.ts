@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ɵɵtrustConstantResourceUrl, ComponentFactoryResolver, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ɵɵtrustConstantResourceUrl, ComponentFactoryResolver } from '@angular/core';
 import { MapComponent } from './core/map/map.component';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
@@ -73,12 +73,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild(ToastListComponent)
   public toastListComponent: ToastListComponent;
 
-  constructor(private zone: NgZone, private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal) {
+  constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal) {
     this.state = new AppState();
 
     window['state'] = this.state
     window['componentRef'] = {
-      zone: this.zone,
       componentFn: (value) => this.handleExternalEvent(value),
       component: this
     };

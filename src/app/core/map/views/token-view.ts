@@ -1,7 +1,7 @@
 
 import * as PIXI from 'pixi.js'
 import { View } from './view';
-import { Container, InteractionEvent } from 'pixi.js';
+import { Container } from 'pixi.js';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
 import { DataService } from 'src/app/shared/services/data.service';
@@ -50,7 +50,6 @@ export class TokenView extends View {
 
     distanceText: PIXI.Text
 
-    data: PIXI.InteractionData
     dragging: boolean = false
     dragStart: number = Date.now()
     kbMovement: boolean = false
@@ -147,7 +146,7 @@ export class TokenView extends View {
         this.interactiveChildren = false
         // TODO: add active token selection
         this.interactive = token.role == Role.friendly
-        this.buttonMode = true;
+        // this.buttonMode = true;
         this.sortableChildren = true
 
         this.pathView = new PathView(grid)
@@ -566,7 +565,7 @@ export class TokenView extends View {
         this.removeChildren();
     }
 
-    onTap(event: InteractionEvent) {
+    onTap(event: any) {
         console.debug(`tap, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
 
         if (this.controlled) {
@@ -580,7 +579,7 @@ export class TokenView extends View {
         }
     }
 
-    onDragStart(event: InteractionEvent) {
+    onDragStart(event: any) {
         console.debug(`drag start, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
 
         if (this.controlled) {
@@ -602,7 +601,7 @@ export class TokenView extends View {
         this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}})
     }
     
-    onDragEnd(event: InteractionEvent) {
+    onDragEnd(event: any) {
         console.debug(`drag end, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
 
         // remove pointer move event
@@ -627,7 +626,7 @@ export class TokenView extends View {
         // }
     }
     
-    onDragMove(event: InteractionEvent) {
+    onDragMove(event: any) {
         // console.debug(`drag move, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}, tokenId: ${this.token.id}`)
         
         if (this.controlled) {

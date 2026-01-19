@@ -34,7 +34,7 @@ export class AreaEffectView extends View {
         
         this.interactiveChildren = false
         this.interactive = false;
-        this.buttonMode = true;
+        // this.buttonMode = true;
 
         this
             .on('pointerup', this.onClick)
