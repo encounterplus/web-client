@@ -223,33 +223,31 @@ export class WeatherEffectView extends View {
         this.w = parentLayer.w
         this.h = parentLayer.h
         
-        // let config: particles.EmitterConfig | particles.OldEmitterConfig;
+        let config: particles.EmitterConfigV2 | particles.EmitterConfigV1;
 
-        // switch(type) {
-        //     case WeatherType.fog:
-        //         config = this.fogConfig()
-        //         break
-        //     case WeatherType.rain:
-        //         config = this.rainConfig()
-        //         break
-        //     case WeatherType.snow:
-        //         config = this.snowConfig()
-        //         break
-        // }
+        switch(type) {
+            case WeatherType.fog:
+                config = this.fogConfig()
+                break
+            case WeatherType.rain:
+                config = this.rainConfig()
+                break
+            case WeatherType.snow:
+                config = this.snowConfig()
+                break
+        }
         
-
-        // this.emitter = new particles.Emitter(parentLayer, texture, config)
+        let newConfig = particles.upgradeConfig(config, [texture])
+        this.emitter = new particles.Emitter(parentLayer, newConfig)
         // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD
         
-        // // // this.emitter.update((Date.now() + 1000));
-        // // this.emitter.autoUpdate = true;
-
-        // // advance for 10 seconds
-        // this.emitter.autoUpdate = false;
-        // this.emitter.update((10));
+        // // this.emitter.update((Date.now() + 1000));
         // this.emitter.autoUpdate = true;
 
-        
+        // advance for 10 seconds
+        this.emitter.autoUpdate = false;
+        this.emitter.update((10));
+        this.emitter.autoUpdate = true;
 
         // this.pointer = pointer
         this.grid = grid

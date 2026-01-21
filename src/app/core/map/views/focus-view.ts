@@ -62,8 +62,8 @@ export class FocusView extends View {
             spawnType: "point"
         };
 
-        // this.emitter = new particles.Emitter(parent, texture, config);
-        // this.emitter.autoUpdate = true;
+        this.emitter = new particles.Emitter(parent, particles.upgradeConfig(config, [texture]));
+        this.emitter.autoUpdate = true;
         // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD;
     }
 

@@ -243,6 +243,7 @@ export class Loader {
   }
 
   destroy(src: string) {
+    PIXI.Assets.unload(src)
     // const loader = PIXI.Loader.shared;
     // if (loader.resources[src]) {
     //     loader.resources[src].texture.destroy(true);
