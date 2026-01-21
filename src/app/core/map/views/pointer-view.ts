@@ -67,9 +67,6 @@ export class PointerView extends View {
         };
 
         let newConfig = particles.upgradeConfig(config, [texture])
-        console.log(newConfig)
-        // newConfig.behaviors.push(new BlendModeBehavior({blendMode: PIXI.BLEND_MODES.ADD}))
-
         this.emitter = new particles.Emitter(parent, newConfig);
         this.emitter.autoUpdate = true;
         // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD;
