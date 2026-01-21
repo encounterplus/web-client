@@ -5,6 +5,7 @@ import { Loader } from '../models/loader';
 import { Aura } from 'src/app/shared/models/aura';
 import { Utils } from 'src/app/shared/utils';
 
+
 export class AuraView extends View {
 
     aura: Aura;
@@ -35,8 +36,8 @@ export class AuraView extends View {
     }
 
     async drawShape() {
-        let graphics = new PIXI.Graphics().lineStyle(1, PIXI.utils.string2hex(this.aura.color));
-        graphics.beginFill(PIXI.utils.string2hex(this.aura.color), 0.15);
+        let graphics = new PIXI.Graphics().lineStyle(1, new PIXI.Color(this.aura.color));
+        graphics.beginFill(new PIXI.Color(this.aura.color), 0.15);
         graphics.drawCircle(-this.w / 2, -this.h / 2, this.w / 2);
         graphics.endFill();
         this.addChild(graphics);
@@ -98,7 +99,7 @@ export class AuraView extends View {
                 if (component.enabled) {
                     if (component.type.startsWith("filter.")) {
                         if (component.type == "filter.tint") {
-                            sprite.tint = PIXI.utils.string2hex(component.color)
+                            sprite.tint = new PIXI.Color(component.color)
                         }
                         if (component.type == "filter.hsb") {
                             let hfilter = new PIXI.filters.ColorMatrixFilter();

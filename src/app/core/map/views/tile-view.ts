@@ -83,7 +83,7 @@ export class TileView extends View {
                 if (component.enabled) {
                     if (component.type.startsWith("filter.")) {
                         if (component.type == "filter.tint") {
-                            sprite.tint = PIXI.utils.string2hex(component.color)
+                            sprite.tint = new PIXI.Color(component.color)
                         }
                         if (component.type == "filter.hsb") {
                             let hfilter = new PIXI.filters.ColorMatrixFilter();

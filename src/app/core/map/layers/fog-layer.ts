@@ -20,7 +20,7 @@ export class FogLayer extends Layer {
         this.bg = new PIXI.Sprite(PIXI.Texture.WHITE);
         this.bg.tint = 0x000000;
 
-        let filter = new PIXI.filters.AlphaFilter(1.0)
+        let filter = new PIXI.AlphaFilter(1.0)
         filter.blendMode = PIXI.BLEND_MODES.MULTIPLY;
         this.filters = [filter];
     }

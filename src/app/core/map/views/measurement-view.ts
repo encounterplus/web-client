@@ -33,7 +33,7 @@ export class MeasurementView extends View {
 
         this.visible = !this.measurement.hidden
 
-        let color = PIXI.utils.string2hex(this.measurement.color)
+        let color = new PIXI.Color(this.measurement.color)
 
         this.shape.lineStyle(4, color)
         

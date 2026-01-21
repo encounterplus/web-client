@@ -83,7 +83,7 @@ export class HexGrid extends Grid implements GridInterface {
         let offsetRows = Math.round(this.offsetY / this.size)
 
         let graphics = new PIXI.Graphics();
-        graphics.lineStyle(1.0, PIXI.utils.string2hex(this.color), this.opacity * 0.8, 0.5, false)
+        graphics.lineStyle(1.0, new PIXI.Color(this.color), this.opacity * 0.8, 0.5, false)
         // TODO: implement corners style with dashed line
 
         // this could be more effecient

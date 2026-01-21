@@ -92,7 +92,7 @@ export class LightsLayer extends Layer {
             mesh.shader.uniforms.position = [vision.sight.x / 2, vision.sight.y / 2]
             mesh.shader.uniforms.radiusMin = ((vision.lightRadiusMin * this.grid.pixelRatio) + minSize) / 2
             mesh.shader.uniforms.radiusMax = ((vision.lightRadiusMax * this.grid.pixelRatio) + minSize) / 2
-            mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(vision.lightColor));
+            mesh.shader.uniforms.color = new PIXI.Color(vision.lightColor)
             mesh.shader.uniforms.intensity = vision.lightOpacity
             mesh.blendMode = PIXI.BLEND_MODES.ADD;
 
@@ -143,7 +143,7 @@ export class LightsLayer extends Layer {
             mesh.shader.uniforms.radiusMin = light.radiusMin * this.grid.pixelRatio / 2
             mesh.shader.uniforms.radiusMax = Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio / 2
             mesh.shader.uniforms.intensity = light.opacity
-            mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(light.color))
+            mesh.shader.uniforms.color = new PIXI.Color(light.color)
             mesh.blendMode = PIXI.BLEND_MODES.ADD
 
             this.addChild(mesh)
@@ -191,7 +191,7 @@ export class LightsLayer extends Layer {
             mesh.shader.uniforms.radiusMin = light.radiusMin * this.grid.pixelRatio / 2
             mesh.shader.uniforms.radiusMax = Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio / 2
             mesh.shader.uniforms.intensity = light.opacity
-            mesh.shader.uniforms.color = PIXI.utils.hex2rgb(PIXI.utils.string2hex(light.color))
+            mesh.shader.uniforms.color = new PIXI.Color(light.color)
             mesh.blendMode = PIXI.BLEND_MODES.ADD
 
             this.addChild(mesh)

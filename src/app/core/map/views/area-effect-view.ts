@@ -103,8 +103,8 @@ export class AreaEffectView extends View {
     }
 
     async drawShape() {
-        let graphics = new PIXI.Graphics().lineStyle(1, PIXI.utils.string2hex(this.areaEffect.color));
-        graphics.beginFill(PIXI.utils.string2hex(this.areaEffect.color), 0.3);
+        let graphics = new PIXI.Graphics().lineStyle(1, new PIXI.Color(this.areaEffect.color));
+        graphics.beginFill(new PIXI.Color(this.areaEffect.color), 0.3);
 
         switch (this.areaEffect.shape) {
             case AreaEffectShape.sphere:
@@ -158,7 +158,7 @@ export class AreaEffectView extends View {
 
     async drawHandles() {
         let graphics = new PIXI.Graphics().lineStyle(1, 0xffffff);
-        graphics.beginFill(PIXI.utils.string2hex(this.areaEffect.color));
+        graphics.beginFill(new PIXI.Color(this.areaEffect.color));
         graphics.drawCircle(this.start.x, this.start.y, 5);
         graphics.drawCircle(this.end.x, this.end.y, 5);
         graphics.endFill();
@@ -239,7 +239,7 @@ export class AreaEffectView extends View {
                 if (component.enabled) {
                     if (component.type.startsWith("filter.")) {
                         if (component.type == "filter.tint") {
-                            sprite.tint = PIXI.utils.string2hex(component.color)
+                            sprite.tint = new PIXI.Color(component.color)
                         }
                         if (component.type == "filter.hsb") {
                             let hfilter = new PIXI.filters.ColorMatrixFilter();
