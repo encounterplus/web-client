@@ -100,7 +100,7 @@ export class VisionLayer extends Layer {
     constructor(private dataService: DataService) {
         super();
 
-        this.blurFilter = new PIXI.filters.BlurFilter(3, 1, 0.5, 5)
+        this.blurFilter = new PIXI.BlurFilter(3, 1, 0.5, 5)
 
         this.visionContainer = new PIXI.Container()
     }

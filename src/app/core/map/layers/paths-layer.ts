@@ -6,7 +6,7 @@ import { GridSize, TokenView } from '../views/token-view';
 export class PathsLayer extends Layer {
     grid: Grid;
 
-    alphaFilter = new PIXI.filters.AlphaFilter();
+    alphaFilter = new PIXI.AlphaFilter();
 
     tokens: Array<TokenView> = []
     views: Array<PIXI.Container> = []
