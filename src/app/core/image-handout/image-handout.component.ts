@@ -12,13 +12,13 @@ import { DataService } from 'src/app/shared/services/data.service';
 export class ImageHandoutComponent implements OnInit {
 
   @Input() 
-  public screen: Screen;
+  public overlayImage?: string;
 
   get image(): string {
-    if (this.screen.overlayImage && this.screen.overlayImage.startsWith("http")) {
-      return this.screen.overlayImage;
+    if (this.overlayImage && this.overlayImage.startsWith("http")) {
+      return this.overlayImage;
     } else {
-      return `${this.dataService.protocol}//${this.dataService.remoteHost}${this.screen.overlayImage}`;
+      return `${this.dataService.protocol}//${this.dataService.remoteHost}${this.overlayImage}`;
     }
   }
 

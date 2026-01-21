@@ -19,9 +19,11 @@
     </div>
     <div class="btn-group" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" name="radioTest" role="group" aria-label="Messages">
       <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off" [(ngModel)]="messages" (ngModelChange)="messagesChanged($event)">
-      <label class="btn btn-dark" for="btncheck1"> <i class="fa fa-comments-o">&nbsp;@if (state.readCount<state.messages.length) {
-        <span class="badge text-bg-light">{{state.messages.length-state.readCount}}</span>
-      }</i></label>
+      <label class="btn btn-dark" for="btncheck1"> 
+        <i class="fa fa-comments-o">&nbsp;
+        @if (unreadMessages > 0) { <span class="badge text-bg-light">{{unreadMessages}}</span> }
+        </i>
+    </label>
     </div>
   </div>
 

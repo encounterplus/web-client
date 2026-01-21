@@ -1,9 +1,9 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ɵɵtrustConstantResourceUrl, ComponentFactoryResolver } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, signal, computed } from '@angular/core';
 import { MapComponent } from './core/map/map.component';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 import { ApiData } from './shared/models/api-data';
-import { DataService} from './shared/services/data.service';
+import { DataService, deepMerge} from './shared/services/data.service';
 import { environment } from 'src/environments/environment';
 import { AppState, RunMode, ViewMode } from './shared/models/app-state';
 import { WSEventName, WSEvent } from './shared/models/wsevent';
@@ -31,6 +31,10 @@ import { Viewport } from 'pixi-viewport';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { Meta } from '@angular/platform-browser';
 import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
+import { Message } from './shared/models/message';
+import { Game } from './shared/models/game';
+import { Screen } from './shared/models/screen';
+import { ActiveCombatant, Role } from './shared/models/combatant';
 
 interface WebAppInterface {
   showText(text: string): any;
@@ -55,6 +59,57 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   destroy$: Subject<boolean> = new Subject<boolean>();
 
+  private readonly _messages = signal<Message[]>([])
+  readonly messages = this._messages.asReadonly()
+
+  updateMessages(messages: Message[]) {
+     this._messages.update((value) => messages);
+  }
+
+  private readonly _game = signal<Game>(new Game())
+  readonly game = this._game.asReadonly()
+
+  activeCombatants = computed(() => {
+    var array = Array<ActiveCombatant>()
+    
+    console.debug("updating active combatants")
+
+    let initiativeId = this._game().initiativeId
+
+    for (let combatant of this._game().combatants.filter(combatant => combatant.initiative && (combatant.role != Role.hostile || !combatant.hidden))) {
+      for (let initiative of combatant.initiative ?? []) {
+        if (initiative.order) {
+          array.push({id: initiative.id + combatant.id, turned: initiative.id == initiativeId, initiative: initiative, combatant: combatant})
+        }
+      }
+    }
+    
+    return array.sort((a, b) => (a.initiative.order > b.initiative.order) ? 1 : -1);
+  });
+
+  // // initiativeId = signal<string | null>(null);
+  initiativeId? = computed(() => {
+    return this._game().initiativeId
+  });
+
+  updateGame(game: Game) {
+    this._game.update(state => deepMerge(state, game));
+  }
+
+  // used in toolbar
+  unreadMessages = signal(0)
+
+  // to display game paused animation
+  paused = signal(false)
+
+  // for overlay images
+  screen = signal(new Screen())
+
+  updateScreen(screen: Screen) {
+    // this.screen.update(state => deepMerge(state, screen));
+    this.screen.set(screen)
+  }
+
   @ViewChild(MapComponent)
   public mapComponent: MapComponent;
 
@@ -73,7 +128,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild(ToastListComponent)
   public toastListComponent: ToastListComponent;
 
-  constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal) {
+  constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal, private cdr: ChangeDetectorRef) {
     this.state = new AppState();
 
     window['state'] = this.state
@@ -98,7 +153,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  messages: Boolean = false;
+  showMessages: Boolean = false;
   movingTokenView?: TokenView = null
 
   toolbarAction(type: string) {
@@ -188,11 +243,12 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   activePanelAction(panel: Panel) {
-    this.messages = panel == Panel.messages;
+    this.showMessages = panel == Panel.messages;
     if (panel) {
       let lastHost = localStorage.getItem("lastSuccessfullHost");
       localStorage.setItem("readMessages", JSON.stringify({ "lastHost": lastHost, seenCount: this.state.messages.length }));
       this.state.readCount = this.state.messages.length;
+      this.unreadMessages.set(this.state.messages.length - this.state.readCount)
     }
   }
 
@@ -213,12 +269,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   // main websocket event handler
   handleEvent(event: WSEvent) {
     // console.debug(`Event received: ${event.name}`)
-    // console.log(JSON.stringify(event));
+    console.log(JSON.stringify(event));
 
     switch (event.name) {
 
       case WSEventName.systemPaused: {
         this.state.paused = event.data
+        this.paused.set(this.state.paused)
         break
       }
       
@@ -251,9 +308,12 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.mapComponent.mapContainer.update(this.state);
           this.mapComponent.mapContainer.draw();
         }
+        
+        // update state
+        this.updateGame(this.state.game)
 
         if (this.initiativeListComponent) {
-          this.initiativeListComponent.scrollToTurned()
+          this.initiativeListComponent.scrollToTurned(this.state.game.initiativeId)
         }
 
         if (this.mapComponent) {
@@ -413,6 +473,9 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (combatant) {
           Object.assign(combatant, event.data)
         }
+
+        // update state
+        this.updateGame(this.state.game)
 
         // changes
         // console.debug(creature)
@@ -710,6 +773,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         let tableTopMode = this.state.screen.tableTopMode
         this.state.screen = event.data;
 
+        this.updateScreen(this.state.screen)
+
         // fit scren for tabletop mode
         if (tableTopMode != this.state.screen.tableTopMode && this.state.screen.tableTopMode && this.state.runMode == RunMode.tv) {
           const mapGridSize = this.mapComponent.mapContainer.grid.adjustedSize.width
@@ -774,13 +839,24 @@ export class AppComponent implements OnInit, AfterViewInit {
 
       case WSEventName.messageCreated: {
         this.state.messages.push(event.data);
-        if (this.messages) {
+        
+        if (this.showMessages) {
           let lastHost = localStorage.getItem("lastSuccessfullHost");
           localStorage.setItem("readMessages", JSON.stringify({ "lastHost": lastHost, seenCount: this.state.messages.length }));
           this.state.readCount = this.state.messages.length;
         }
+
+        this.updateMessages([...this.state.messages])
+        this.unreadMessages.set(this.state.messages.length - this.state.readCount)
+
+        // this.toolbarComponent.cdr.markForCheck()
+        // this.dataService.updateMessages([...this.state.messages])
+
+        // this.messageListComponent?.cdr.markForCheck()
+        // this.messageListComponent.cdr.markForCheck()
         // this.toastService.showMessage(event.data);
         // this.messageListComponent.scrollToBottom();
+        // this.cdr.markForCheck()
         break;
       }
 
@@ -896,6 +972,16 @@ export class AppComponent implements OnInit, AfterViewInit {
       if (data.build < 2280 && data.build != 1) {
         this.toastService.showError("Incompatible server version: " + data.version + " || Please use: http://legacy-client.encounter.plus/?remoteHost=" + this.dataService.remoteHost, false);
       }
+      
+      this.updateGame(this.state.game)
+      this.updateScreen(this.state.screen)
+      this.updateMessages([...this.state.messages])
+
+      this.unreadMessages.set(this.state.messages.length - this.state.readCount)
+      this.paused.set(this.state.paused)
+
+      // this.toolbarComponent.cdr.markForCheck()
+      // this.cdr.markForCheck()
 
     }, err => this.toastService.showError("API error: " + err));
   }
@@ -952,7 +1038,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     // update messages based on local storage settings
-    this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
+    this.showMessages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
 
     // update settings
     this.state.userTokenId = localStorage.getItem("userTokenId")
@@ -1001,7 +1087,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+  }
 
+  ngAfterViewChecked() {
+    console.debug('app component checked');
   }
 
   ngOnDestroy() {

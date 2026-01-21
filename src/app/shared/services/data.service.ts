@@ -123,3 +123,33 @@ export class DataService {
     this.showEntityEmitter.emit(reference)
   }
 }
+
+export function deepMerge<T>(target: T, patch: Partial<T>): T {
+  if (patch === null || patch === undefined) {
+    return target;
+  }
+
+  // If patch is not an object, replace entirely
+  if (typeof patch !== 'object' || Array.isArray(patch)) {
+    return patch as T;
+  }
+
+  // Merge objects deeply
+  const result: any = Array.isArray(target) ? [...target] : { ...target };
+
+  for (const key of Object.keys(patch)) {
+    const value = (patch as any)[key];
+
+    if (value !== null &&
+        typeof value === 'object' &&
+        !Array.isArray(value)) {
+      result[key] = deepMerge((target as any)[key], value);
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
+
+

@@ -1,5 +1,5 @@
 <div class="frame" (scroll)="scrolled($event)" #scrollframe>
-  @for (message of messages; track message; let i = $index) {
+  @for (message of messages; track message.id; let i = $index) {
     <app-message [message]="message" [attr.data-id]="message.id" class="message" #message></app-message>
   }
 </div>

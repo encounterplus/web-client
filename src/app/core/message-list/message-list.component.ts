@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ElementRef, ViewChildren, QueryList, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, ViewChildren, QueryList, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
 // import { Lightbox } from 'ngx-lightbox';
 import { DataService } from 'src/app/shared/services/data.service';
@@ -6,28 +6,24 @@ import { Message, MessageType } from 'src/app/shared/models/message';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 
 @Component({
-    selector: 'app-message-list',
-    templateUrl: './message-list.component.html',
-    styleUrls: ['./message-list.component.scss'],
-    standalone: false
+  selector: 'app-message-list',
+  templateUrl: './message-list.component.html',
+  styleUrls: ['./message-list.component.scss'],
+  standalone: false
 })
 export class MessageListComponent implements OnInit {
-
-  @Input()
-  public state: AppState;
 
   private scrollContainer: any;
   isNearBottom: boolean = true;
 
-  @ViewChild('scrollframe', {static: false}) scrollFrame: ElementRef;
-  @ViewChild('messageinputarea', {static: true}) messageInputArea: ElementRef;
+  @ViewChild('scrollframe', { static: true }) scrollFrame: ElementRef;
+  @ViewChild('messageinputarea', { static: true }) messageInputArea: ElementRef;
   @ViewChildren('message') itemElements: QueryList<any>;
 
-  messageInput: string = "";
+  @Input()
+  messages: Array<Message> = []
 
-  get messages(): Array<Message> {
-    return this.state.messages;
-  }
+  messageInput: string = "";
 
   constructor(private element: ElementRef/*, private lightbox: Lightbox*/, private dataService: DataService) {
   }
@@ -36,86 +32,86 @@ export class MessageListComponent implements OnInit {
     this.sendMessage();
   }
 
-    quickRoll(r) {
-        let rollStr = ""
-        const rollRE = /^(\/r(?:oll)? )?(([0-9]+)[dD]([0-9]+)|0)?(?:(kh|kl)1?)?((?:\+|\-)[0-9]+)? ?(.*)?/;
-        const m = rollRE.exec(this.messageInput);
-        if (this.messageInput != "" && m == null) {
-            return;
-        }
-        const [ cmd, roll, num, sides, keep, mods, text ] = m.slice(1);
-
-        rollStr = cmd || "/roll ";
-
-        let mod=0
-        if (mods) {
-            mod = Number(mods)
-        }
-        if (r == "-") {
-            mod -= 1;
-        } else if (r == "+") {
-            mod += 1;
-        }
-
-        if (roll) {
-            if (r == sides) {
-                rollStr += (Number(num)+1).toString() + "d" + sides;
-            } else if (!isNaN(r)) {
-                if (r == "adv" || r == "dis" || keep) {
-                    rollStr += "2d" + r;
-                } else {
-                    rollStr += "1d" + r;
-                }
-            } else {
-                if ((r == "adv" || r == "dis" || keep) && Number(num) == 1) {
-                    rollStr += "2d" + sides;
-                } else {
-                    rollStr += roll;
-                }
-            }
-        } else if (!isNaN(r)) {
-            rollStr += "1d" + r;
-        } else if (mod != 0||keep||r=="adv"||r=="dis") {
-            rollStr += "0"
-        }
-
-        if (keep) {
-            if (r == "adv" && keep != "kh") {
-                rollStr += "kh1";
-            } else if (r == "dis" && keep != "kl") {
-                rollStr += "kl1";
-            } else if (r != "adv" && r != "dis") {
-                rollStr += keep;
-            }
-        } else if (r == "adv") {
-            rollStr += "kh1";
-        } else if (r == "dis") {
-            rollStr += "kl1";
-        }
-
-        if (mod > 0) {
-            rollStr += "+" + mod.toString();
-        } else if (mod < 0) {
-            rollStr += mod.toString();
-        }
-
-        if (text) {
-            if (/\[.*\]/.exec(text)) {
-                rollStr += " " + text;
-            } else {
-                rollStr += " [" + text + "]";
-            }
-        }
-        this.messageInput = rollStr;
-
-        //this.sendMessage();
+  quickRoll(r) {
+    let rollStr = ""
+    const rollRE = /^(\/r(?:oll)? )?(([0-9]+)[dD]([0-9]+)|0)?(?:(kh|kl)1?)?((?:\+|\-)[0-9]+)? ?(.*)?/;
+    const m = rollRE.exec(this.messageInput);
+    if (this.messageInput != "" && m == null) {
+      return;
     }
+    const [cmd, roll, num, sides, keep, mods, text] = m.slice(1);
+
+    rollStr = cmd || "/roll ";
+
+    let mod = 0
+    if (mods) {
+      mod = Number(mods)
+    }
+    if (r == "-") {
+      mod -= 1;
+    } else if (r == "+") {
+      mod += 1;
+    }
+
+    if (roll) {
+      if (r == sides) {
+        rollStr += (Number(num) + 1).toString() + "d" + sides;
+      } else if (!isNaN(r)) {
+        if (r == "adv" || r == "dis" || keep) {
+          rollStr += "2d" + r;
+        } else {
+          rollStr += "1d" + r;
+        }
+      } else {
+        if ((r == "adv" || r == "dis" || keep) && Number(num) == 1) {
+          rollStr += "2d" + sides;
+        } else {
+          rollStr += roll;
+        }
+      }
+    } else if (!isNaN(r)) {
+      rollStr += "1d" + r;
+    } else if (mod != 0 || keep || r == "adv" || r == "dis") {
+      rollStr += "0"
+    }
+
+    if (keep) {
+      if (r == "adv" && keep != "kh") {
+        rollStr += "kh1";
+      } else if (r == "dis" && keep != "kl") {
+        rollStr += "kl1";
+      } else if (r != "adv" && r != "dis") {
+        rollStr += keep;
+      }
+    } else if (r == "adv") {
+      rollStr += "kh1";
+    } else if (r == "dis") {
+      rollStr += "kl1";
+    }
+
+    if (mod > 0) {
+      rollStr += "+" + mod.toString();
+    } else if (mod < 0) {
+      rollStr += mod.toString();
+    }
+
+    if (text) {
+      if (/\[.*\]/.exec(text)) {
+        rollStr += " " + text;
+      } else {
+        rollStr += " [" + text + "]";
+      }
+    }
+    this.messageInput = rollStr;
+
+    //this.sendMessage();
+  }
 
   sendMessage() {
     let text = this.messageInput || "";
     this.messageInput = "";
 
-    if(text.trim() == "") {
+    if (text.trim() == "") {
       return;
     }
 
@@ -125,19 +121,19 @@ export class MessageListComponent implements OnInit {
       message.source = "Help Command";
       message.color = "#6e7ed7";
       message.content = "Dice roll command:</br><code>/r[oll] &lt;dice notation&gt; [[title[:check|save|attack|damage]]]</code>" +
-      "Examples:<br>" +
-      "<code>" + 
-      "/r 2d20kh — advantage\n" +
-      "/r 2d20kl — disadvantage\n" +
-      "/r 4d6dl — drop lowest\n" +
-      "<br>" +
-      "/r 1d20+3 [initiative]\n" +
-      "/r 1d20+3 [cha:save]\n" +
-      "/r 1d20+3 [acrobatics:check]\n" +
-      "/r 1d20+3 [dagger:attack]\n" +
-      "/r 1d4+3 [dagger:damage]" +
-      "</code>";
-      this.dataService.state.messages.push(message);
+        "Examples:<br>" +
+        "<code>" +
+        "/r 2d20kh — advantage\n" +
+        "/r 2d20kl — disadvantage\n" +
+        "/r 4d6dl — drop lowest\n" +
+        "<br>" +
+        "/r 1d20+3 [initiative]\n" +
+        "/r 1d20+3 [cha:save]\n" +
+        "/r 1d20+3 [acrobatics:check]\n" +
+        "/r 1d20+3 [dagger:attack]\n" +
+        "/r 1d4+3 [dagger:damage]" +
+        "</code>";
+      // this.dataService.state.messages.push(message);
       return;
     }
 
@@ -157,7 +153,7 @@ export class MessageListComponent implements OnInit {
       message.type = MessageType.chat;
       message.content = text;
     }
-    this.dataService.send({name: WSEventName.createMessage, data: message});
+    this.dataService.send({ name: WSEventName.createMessage, data: message });
     this.scrollToBottom();
   }
 
@@ -198,6 +194,10 @@ export class MessageListComponent implements OnInit {
     this.scrollContainer = this.scrollFrame.nativeElement;
     this.itemElements.changes.subscribe(_ => this.onItemElementsChanged());
     this.scrollToBottomInstant();
+  }
+
+  ngAfterViewChecked() {
+    console.debug('message-list component checked');
   }
 
   ngOnInit(): void {

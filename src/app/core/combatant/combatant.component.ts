@@ -6,7 +6,6 @@ import { DataService } from 'src/app/shared/services/data.service';
     selector: 'app-combatant',
     templateUrl: './combatant.component.html',
     styleUrls: ['./combatant.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class CombatantComponent implements OnInit {

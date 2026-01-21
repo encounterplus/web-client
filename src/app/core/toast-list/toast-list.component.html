@@ -1,4 +1,4 @@
-@for (toast of toastService.toasts; track toast) {
+@for (toast of toastService.toasts(); track toast.id) {
   <ngb-toast
     [class]="toast.classname"
     [autohide]="toast.autohide"

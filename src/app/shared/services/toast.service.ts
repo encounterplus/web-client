@@ -1,12 +1,20 @@
-import { Injectable, TemplateRef } from '@angular/core';
+import { Injectable, signal, TemplateRef, WritableSignal } from '@angular/core';
 import { Message } from '../models/message';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  toasts: any[] = [];
+  private readonly _toasts = signal<any[]>([])
+  readonly toasts = this._toasts.asReadonly()
 
   show(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-    this.toasts.push({ textOrTpl, ...options });
+
+    // this._toasts.push({ textOrTpl, ...options });
+
+    this._toasts.update((value) => {
+      value.push({ textOrTpl, ...options })
+      return value
+    })
+    // this.toasts.push({ textOrTpl, ...options });
   }
 
   showSuccess(text: string, autohide: boolean = true) {
@@ -22,10 +30,12 @@ export class ToastService {
   }
 
   clear() {
-    this.toasts = [];
+    // this.toasts = [];
+    this._toasts.update((value) => [])
   }
 
   remove(toast) {
-    this.toasts = this.toasts.filter(t => t !== toast);
+    // this.toasts = this.toasts.filter(t => t !== toast);
+    this._toasts.update(toasts => toasts.filter(t => t != toast));
   }
 }

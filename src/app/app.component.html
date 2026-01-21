@@ -1,31 +1,31 @@
 <div id="app" class="h-100 d-flex flex-column {{state.device}}" appDisableRightClick>
   <app-map [state]="state" class="h-100"></app-map>
-  <app-toolbar id="toolbar" [state]="state" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)"></app-toolbar>
+  <app-toolbar id="toolbar" [state]="state" [unreadMessages]="this.unreadMessages()" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)"></app-toolbar>
 
   @if (zoomControls) {
     <app-zoombar id="zoombar" class="d-flex align-items-baseline" (action)="zoombarAction($event)" [state]="state"></app-zoombar>
   }
 
   <div id="side-bar">
-    @if (state.game.started) {
-      <app-initiative-list [state]="state" id="initiative-list"></app-initiative-list>
+    @if (this.game().started) {
+      <app-initiative-list [initiativeId]="this.initiativeId()" [activeCombatants]="this.activeCombatants()" id="initiative-list"></app-initiative-list>
     }
-    @if (messages) {
-      <app-message-list [state]="state" id="message-list"></app-message-list>
+    @if (showMessages) {
+      <app-message-list [messages]="messages()" id="message-list"></app-message-list>
     }
   </div>
 
   <div id="bottom-bar">
-    @if (state.paused) {
+    @if (paused()) {
       <app-paused></app-paused>
     }
-    @if (state.screen.overlayImage) {
-      <app-image-handout [screen]="state.screen"></app-image-handout>
+    @if (this.screen().overlayImage) {
+      <app-image-handout [overlayImage]="this.screen().overlayImage"></app-image-handout>
     }
     <app-toast-list aria-live="polite" aria-atomic="true"></app-toast-list>
   </div>
-  @if (state.screen.overlayHandoutText||state.screen.overlayHandountText) {
-    <app-overlay [screen]="state.screen"></app-overlay>
+  @if (this.screen().overlayHandoutText) {
+    <app-overlay [screen]="this.screen()"></app-overlay>
   }
 
 </div>

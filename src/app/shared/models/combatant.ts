@@ -29,3 +29,10 @@ export class Combatant {
     entityId?: string
     entityType?: string
 }
+
+export interface ActiveCombatant {
+  id: String,
+  turned: boolean,
+  initiative: Initiative,
+  combatant: Combatant
+}

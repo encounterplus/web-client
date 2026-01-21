@@ -332,11 +332,11 @@ export class MapComponent implements OnInit, OnChanges {
     }
   }
 
-//   @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     // update viewport
     let sideBarWidth = (document.getElementById("side-bar")?.getBoundingClientRect()?.width ?? 0) + 8.0;
-    // this.viewport.resize(window.innerWidth - sideBarWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
+    this.viewport.resize(window.innerWidth - sideBarWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
     this.viewport.resize(window.innerWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
     this.dataService.send({name: WSEventName.clientUpdated, data: {runMode: this.state.runMode, screenWidth: innerWidth, screenHeight: innerHeight}});
 
@@ -432,7 +432,7 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   ngAfterViewChecked() {
-    console.log('Change detection triggered!');
+    console.debug('map component checked');
   }
 
   protected _destroy(): void {

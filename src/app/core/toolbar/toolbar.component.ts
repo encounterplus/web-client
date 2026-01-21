@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ElementRef, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataService } from 'src/app/shared/services/data.service';
@@ -23,6 +23,9 @@ export class ToolbarComponent implements OnInit {
 
   @Input() 
   public state: AppState;
+
+  @Input() 
+  public unreadMessages = 0;
 
   @Output()
   public action = new EventEmitter<string>();
