@@ -120,7 +120,7 @@ export class MapContainer extends Layer {
 
     this.addChild(this.overlaySprite)
 
-    this.interactive = true;
+    this.eventMode = 'static'
 
     this
       .on('pointerup', this.onPointerUp)

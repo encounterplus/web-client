@@ -33,7 +33,7 @@ export class AreaEffectView extends View {
 
         
         this.interactiveChildren = false
-        this.interactive = false;
+        this.eventMode = 'none'
         // this.buttonMode = true;
 
         this

@@ -64,7 +64,7 @@ export class TokenView extends View {
     pointerId?: number
 
     get isPlayer(): boolean {
-        return this.token.reference?.includes("/player/") || false
+        return this.token.role == Role.friendly || false
     }
 
     get baseColor(): number {
@@ -145,7 +145,8 @@ export class TokenView extends View {
 
         this.interactiveChildren = false
         // TODO: add active token selection
-        this.interactive = token.role == Role.friendly
+        // this.interactive = token.role == Role.friendly
+        this.eventMode = token.role == Role.friendly ? "static" : "none"
         // this.buttonMode = true;
         this.sortableChildren = true
 
@@ -532,32 +533,39 @@ export class TokenView extends View {
     updateInteraction() {
         // disable interactions when game is paused
         if (this.dataService.state.paused) {
-            this.interactive = false
+            // this.interactive = false
+            this.eventMode = 'none'
             return
         }
 
         // interactions override
         if (this.dataService.state.allInteractions) {
-            this.interactive = true
+            // this.interactive = true
+            this.eventMode = 'static'
             return
         }
         
         // enable interactions based on screen settings
         switch (this.dataService.state.screen.interaction) {
             case ScreenInteraction.all: 
-                this.interactive = this.token.role == Role.friendly
+                // this.interactive = this.token.role == Role.friendly
+                this.eventMode = this.token.role == Role.friendly ? 'static' : 'none'
                 break;
 
             case ScreenInteraction.token: 
                 // this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.turned || !this.dataService.state.game.started) && this.token.id == localStorage.getItem("userTokenId");
-                this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.token.id == localStorage.getItem("userTokenId"));
+                // this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.token.id == localStorage.getItem("userTokenId"));
+                // this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.token.id == localStorage.getItem("userTokenId"));
+                this.eventMode = ((this.token.role == Role.friendly && !this.isPlayer) || (this.token.id == localStorage.getItem("userTokenId"))) ? 'static' : 'none'
                 break;
 
             case ScreenInteraction.none: 
-                this.interactive = false;
+                // this.interactive = false;
+                this.eventMode = 'none'
                 break;
             default:
-                this.interactive = false;
+                // this.interactive = false;
+                this.eventMode = 'none'
         }
     }
 
