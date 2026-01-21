@@ -269,7 +269,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   // main websocket event handler
   handleEvent(event: WSEvent) {
     // console.debug(`Event received: ${event.name}`)
-    console.log(JSON.stringify(event));
+    // console.log(JSON.stringify(event));
 
     switch (event.name) {
 
@@ -848,15 +848,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         this.updateMessages([...this.state.messages])
         this.unreadMessages.set(this.state.messages.length - this.state.readCount)
-
-        // this.toolbarComponent.cdr.markForCheck()
-        // this.dataService.updateMessages([...this.state.messages])
-
-        // this.messageListComponent?.cdr.markForCheck()
-        // this.messageListComponent.cdr.markForCheck()
-        // this.toastService.showMessage(event.data);
-        // this.messageListComponent.scrollToBottom();
-        // this.cdr.markForCheck()
         break;
       }
 

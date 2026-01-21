@@ -611,9 +611,11 @@ export class VisionLayer extends Layer {
         }
 
         // render offscreen
-        const fogTexture = await Loader.shared.loadTextureBase64(Utils.generateUniqueId(), fogData)
+        const fogTextureId = Utils.generateUniqueId()
+        const fogTexture = await Loader.shared.loadTextureBase64(fogTextureId, fogData)
 
         if(fogTexture == null) {
+            console.error("enpty fog texture")
             return this
         }
 
@@ -626,7 +628,9 @@ export class VisionLayer extends Layer {
         sprite.destroy()
         PIXI.BaseTexture.removeFromCache(fogTexture.baseTexture.textureCacheIds[1]);
         PIXI.Texture.removeFromCache(fogTexture.textureCacheIds[1]);
-        fogTexture.destroy(true);
+        // fogTexture.destroy(true);
+        // unload instead destroy?
+        PIXI.Assets.unload(fogTextureId)
 
         this.fogLoaded = true
 
