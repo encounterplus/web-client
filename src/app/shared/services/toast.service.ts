@@ -1,5 +1,6 @@
 import { Injectable, signal, TemplateRef, WritableSignal } from '@angular/core';
 import { Message } from '../models/message';
+import { Utils } from '../utils';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
@@ -11,10 +12,8 @@ export class ToastService {
     // this._toasts.push({ textOrTpl, ...options });
 
     this._toasts.update((value) => {
-      value.push({ textOrTpl, ...options })
-      return value
+      return [...value, { id: Utils.generateUniqueId(), textOrTpl, ...options }]
     })
-    // this.toasts.push({ textOrTpl, ...options });
   }
 
   showSuccess(text: string, autohide: boolean = true) {
