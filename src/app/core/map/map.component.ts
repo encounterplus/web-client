@@ -427,7 +427,7 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   ngAfterViewChecked() {
-    console.debug('map component checked');
+    // console.debug('map component checked');
   }
 
   protected _destroy(): void {

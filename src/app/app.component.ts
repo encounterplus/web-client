@@ -971,9 +971,6 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.unreadMessages.set(this.state.messages.length - this.state.readCount)
       this.paused.set(this.state.paused)
 
-      // this.toolbarComponent.cdr.markForCheck()
-      // this.cdr.markForCheck()
-
     }, err => this.toastService.showError("API error: " + err));
   }
 
@@ -1081,7 +1078,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewChecked() {
-    console.debug('app component checked');
+    // console.debug('app component checked');
   }
 
   ngOnDestroy() {

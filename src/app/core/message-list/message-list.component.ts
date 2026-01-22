@@ -197,7 +197,7 @@ export class MessageListComponent implements OnInit {
   }
 
   ngAfterViewChecked() {
-    console.debug('message-list component checked');
+    // console.debug('message-list component checked');
   }
 
   ngOnInit(): void {

@@ -31,7 +31,7 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
   }
 
   ngAfterViewChecked(): void {
-    console.debug("initiative-list component checked");
+    // console.debug("initiative-list component checked");
   }
 
   ngAfterViewInit(): void {
