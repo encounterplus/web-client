@@ -56,9 +56,6 @@ export class SettingsModalComponent implements OnInit {
     localStorage.setItem("softEdges", `${this.softEdges}`)
     localStorage.setItem("runMode", `${this.runMode}`)
 
-    // update state
-    this.state.userTokenId = this.tokenId
-
     // update server
     this.dataService.send({name: WSEventName.clientUpdated, data: {name: this.name, color: this.color}})
 
@@ -82,7 +79,6 @@ export class SettingsModalComponent implements OnInit {
     }
 
     if (this.runMode != this.state.runMode) {
-      this.state.runMode = this.runMode
       window.location.reload()
     }
   }
