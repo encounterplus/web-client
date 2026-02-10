@@ -69,7 +69,7 @@ export class MapContainer extends Layer {
   clicked: boolean = false
 
   activePointer: Pointer
-  activeTool: Tool
+  activeTool: Tool 
 
   turned: TokenView
   msk: PIXI.Graphics
@@ -120,12 +120,21 @@ export class MapContainer extends Layer {
 
     this.addChild(this.overlaySprite)
 
-    this.eventMode = 'static'
+    // set default event mode
+    this.eventMode = 'passive'
 
     this
       .on('pointerup', this.onPointerUp)
       .on('pointerdown', this.onPointerDown)
       .on('pointermove', this.onPointerMove)
+  }
+
+  setActiveTool(tool: Tool) {
+    console.debug(`changing active tool ${tool}`)
+
+    this.activeTool = tool
+    this.eventMode = this.activeTool == Tool.pointer ? "static" : "passive"
+    this.interactiveChildren = this.activeTool == Tool.move
   }
 
   update(state: AppState) {
@@ -192,8 +201,8 @@ export class MapContainer extends Layer {
   }
 
   updateTokens() {
-    this.monstersLayer.tokens = this.state.map.tokens.filter(token => !(token.reference?.includes("player-") || token.role == Role.friendly && token.vision && token.vision?.enabled))
-    this.playersLayer.tokens = this.state.map.tokens.filter(token => token.reference?.includes("player-") || token.role == Role.friendly && token.vision && token.vision?.enabled)
+    this.monstersLayer.tokens = this.state.map.tokens.filter(token => !(token.role == Role.friendly && token.vision && token.vision?.enabled))
+    this.playersLayer.tokens = this.state.map.tokens.filter(token => token.role == Role.friendly && token.vision && token.vision?.enabled)
   }
 
   updateTurned(combatant: Combatant) {

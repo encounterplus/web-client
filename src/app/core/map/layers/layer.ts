@@ -5,6 +5,13 @@ export class Layer extends PIXI.Container {
     w: number;
     h: number;
 
+    constructor() {
+        super()
+
+        // force `none` event mode to all layers by default to prevent issues in event handling
+        this.eventMode = "none"
+    }
+
     get size(): PIXI.ISize {
         return {width: this.w, height: this.h}
     }

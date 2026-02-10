@@ -238,7 +238,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   activeToolAction(tool: Tool) {
     if (this.mapComponent) {
-      this.mapComponent.mapContainer.activeTool = tool;
+      this.mapComponent.mapContainer.setActiveTool(tool)
     }
   }
 

@@ -145,9 +145,8 @@ export class TokenView extends View {
 
         this.interactiveChildren = false
         // TODO: add active token selection
-        // this.interactive = token.role == Role.friendly
         this.eventMode = token.role == Role.friendly ? "static" : "none"
-        // this.buttonMode = true;
+        this.cursor = "pointer"
         this.sortableChildren = true
 
         this.pathView = new PathView(grid)
@@ -319,7 +318,7 @@ export class TokenView extends View {
 
         // debug frame
         // let graphics = new PIXI.Graphics()
-        // graphics.lineStyle(1, 0xff00000, 1.0)
+        // graphics.lineStyle(2, 0xff0000, 1.0)
         // graphics.drawRect(0, 0, this.w, this.h)
         // this.addChild(graphics)
     }
@@ -531,16 +530,15 @@ export class TokenView extends View {
     }
 
     updateInteraction() {
+
         // disable interactions when game is paused
         if (this.dataService.state.paused) {
-            // this.interactive = false
             this.eventMode = 'none'
             return
         }
 
         // interactions override
         if (this.dataService.state.allInteractions) {
-            // this.interactive = true
             this.eventMode = 'static'
             return
         }
@@ -548,23 +546,17 @@ export class TokenView extends View {
         // enable interactions based on screen settings
         switch (this.dataService.state.screen.interaction) {
             case ScreenInteraction.all: 
-                // this.interactive = this.token.role == Role.friendly
                 this.eventMode = this.token.role == Role.friendly ? 'static' : 'none'
                 break;
 
             case ScreenInteraction.token: 
-                // this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.turned || !this.dataService.state.game.started) && this.token.id == localStorage.getItem("userTokenId");
-                // this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.token.id == localStorage.getItem("userTokenId"));
-                // this.interactive = (this.token.role == Role.friendly && !this.isPlayer) || (this.token.id == localStorage.getItem("userTokenId"));
                 this.eventMode = ((this.token.role == Role.friendly && !this.isPlayer) || (this.token.id == localStorage.getItem("userTokenId"))) ? 'static' : 'none'
                 break;
 
             case ScreenInteraction.none: 
-                // this.interactive = false;
                 this.eventMode = 'none'
                 break;
             default:
-                // this.interactive = false;
                 this.eventMode = 'none'
         }
     }
@@ -574,7 +566,7 @@ export class TokenView extends View {
     }
 
     onTap(event: any) {
-        console.debug(`tap, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+        // console.debug(`tap, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
 
         if (this.controlled) {
             return
@@ -588,7 +580,7 @@ export class TokenView extends View {
     }
 
     onDragStart(event: any) {
-        console.debug(`drag start, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+        // console.debug(`drag start, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
 
         if (this.controlled) {
             return
@@ -604,13 +596,15 @@ export class TokenView extends View {
         }
 
         // add pointer move event
+        // TODO: this shoulld be moved to the parent container, which should handle the whole drag for smoother experience
+        // example: https://pixijs.com/7.x/examples/events/dragging
         this.on('pointermove', this.onDragMove)
 
         this.dataService.send({name: WSEventName.tokenMoved, data: {id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start}})
     }
     
     onDragEnd(event: any) {
-        console.debug(`drag end, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+        // console.debug(`drag end, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
 
         // remove pointer move event
         this.off('pointermove', this.onDragMove)
