@@ -1,7 +1,7 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { ApiData } from '../models/api-data';
-import { Observable, Subject, BehaviorSubject, timer, throwError } from 'rxjs';
-import { map, catchError, skip, filter, tap, distinctUntilChanged, switchMap, retryWhen, repeat, retry } from 'rxjs/operators';
+import { Observable, Subject, BehaviorSubject, timer, throwError, Subscription } from 'rxjs';
+import { catchError, skip, filter, tap, distinctUntilChanged, switchMap, retryWhen, repeat, retry } from 'rxjs/operators';
 import { WSEvent } from '../models/wsevent';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { webSocket } from 'rxjs/webSocket';
@@ -73,6 +73,7 @@ export class DataService {
   private status$: Subject<boolean> = new BehaviorSubject<boolean>(false);
   public attemptNr: number = 0;
   private ws: any;
+  private wsSubscription: Subscription;
   public events$: Subject<WSEvent> = new Subject<WSEvent>();
 
   public get connectionStatus$(): Observable<boolean> {
@@ -89,6 +90,9 @@ export class DataService {
   }
 
   private create() {
+    if (this.wsSubscription) {
+      this.wsSubscription.unsubscribe();
+    }
     if (this.ws) {
       this.ws.unsubscribe();
     }
@@ -120,7 +124,7 @@ export class DataService {
       closeObserver,
     });
 
-    this.ws.pipe(retryWhen((errs) => errs.pipe(retryConnection, repeat()))).subscribe(this.events$);
+    this.wsSubscription = this.ws.pipe(retryWhen((errs) => errs.pipe(retryConnection, repeat()))).subscribe(this.events$);
   }
 
   public send(event: WSEvent) {
