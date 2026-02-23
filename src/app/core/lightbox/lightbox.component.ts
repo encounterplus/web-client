@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component } from '@angular/core';
+import { LightboxService } from './lightbox.service';
 
 @Component({
   selector: 'app-lightbox',
@@ -7,14 +8,12 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   standalone: false
 })
 export class LightboxComponent {
-  @Input() isOpen = false;
-  @Input() imageUrl: string = '';
-  @Input() imageAlt: string = 'Lightbox image';
+  public lightboxState$ = this.lightboxService.state$;
 
-  @Output() close = new EventEmitter<void>();
+  constructor(private lightboxService: LightboxService) {}
 
   onBackdropClick(): void {
-    this.close.emit();
+    this.lightboxService.close();
   }
 
   onImageClick(event: MouseEvent): void {
@@ -22,12 +21,12 @@ export class LightboxComponent {
   }
 
   onCloseButtonClick(): void {
-    this.close.emit();
+    this.lightboxService.close();
   }
 
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
-      this.close.emit();
+      this.lightboxService.close();
     }
   }
 }

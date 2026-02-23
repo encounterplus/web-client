@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Screen } from 'src/app/shared/models/screen';
 import { DataService } from 'src/app/shared/services/data.service';
+import { LightboxService } from '../lightbox/lightbox.service';
 
 @Component({
     selector: 'app-image-handout',
@@ -13,8 +14,6 @@ export class ImageHandoutComponent implements OnInit {
   @Input() 
   public overlayImage?: string;
 
-  public lightboxOpen = false;
-
   get image(): string {
     if (this.overlayImage && this.overlayImage.startsWith("http")) {
       return this.overlayImage;
@@ -23,17 +22,20 @@ export class ImageHandoutComponent implements OnInit {
     }
   }
 
-  constructor(public dataService: DataService) { }
+  constructor(
+    public dataService: DataService,
+    private lightboxService: LightboxService
+  ) { }
 
   open(): void {
-    this.lightboxOpen = true;
+    this.lightboxService.open(this.image);
+    this.lightboxService.open(this.image, this.overlayImage);
   }
 
   close(): void {
-    this.lightboxOpen = false;
+    this.lightboxService.close();
   }
 
   ngOnInit(): void {
   }
-
 }

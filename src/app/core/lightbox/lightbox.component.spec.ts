@@ -1,17 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LightboxComponent } from './lightbox.component';
+import { LightboxService } from './lightbox.service';
 
 describe('LightboxComponent', () => {
   let component: LightboxComponent;
   let fixture: ComponentFixture<LightboxComponent>;
+  let service: LightboxService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LightboxComponent]
+      declarations: [LightboxComponent],
+      providers: [LightboxService]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LightboxComponent);
     component = fixture.componentInstance;
+    service = TestBed.inject(LightboxService);
     fixture.detectChanges();
   });
 
@@ -19,30 +23,30 @@ describe('LightboxComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit close event when backdrop is clicked', () => {
-    spyOn(component.close, 'emit');
+  it('should close lightbox on backdrop click', () => {
+    spyOn(service, 'close');
     component.onBackdropClick();
-    expect(component.close.emit).toHaveBeenCalled();
+    expect(service.close).toHaveBeenCalled();
   });
 
-  it('should emit close event when close button is clicked', () => {
-    spyOn(component.close, 'emit');
+  it('should close lightbox on close button click', () => {
+    spyOn(service, 'close');
     component.onCloseButtonClick();
-    expect(component.close.emit).toHaveBeenCalled();
+    expect(service.close).toHaveBeenCalled();
   });
 
-  it('should emit close event on Escape key press', () => {
-    spyOn(component.close, 'emit');
+  it('should close lightbox on Escape key press', () => {
+    spyOn(service, 'close');
     const event = new KeyboardEvent('keydown', { key: 'Escape' });
     component.onKeyDown(event);
-    expect(component.close.emit).toHaveBeenCalled();
+    expect(service.close).toHaveBeenCalled();
   });
 
-  it('should not emit close event for other keys', () => {
-    spyOn(component.close, 'emit');
+  it('should not close lightbox for other keys', () => {
+    spyOn(service, 'close');
     const event = new KeyboardEvent('keydown', { key: 'Enter' });
     component.onKeyDown(event);
-    expect(component.close.emit).not.toHaveBeenCalled();
+    expect(service.close).not.toHaveBeenCalled();
   });
 
   it('should stop propagation when image is clicked', () => {
@@ -50,5 +54,14 @@ describe('LightboxComponent', () => {
     spyOn(event, 'stopPropagation');
     component.onImageClick(event as any);
     expect(event.stopPropagation).toHaveBeenCalled();
+  });
+
+  it('should subscribe to lightbox state', (done) => {
+    service.open('test-image.jpg', 'Test');
+    component.lightboxState$.subscribe(state => {
+      expect(state.isOpen).toBe(true);
+      expect(state.imageUrl).toBe('test-image.jpg');
+      done();
+    });
   });
 });

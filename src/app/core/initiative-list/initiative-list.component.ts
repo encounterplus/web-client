@@ -5,6 +5,7 @@ import { Game } from 'src/app/shared/models/game';
 import { Initiative } from 'src/app/shared/models/initiative';
 // import { Lightbox, IAlbum } from 'ngx-lightbox';
 import { DataService } from 'src/app/shared/services/data.service';
+import { LightboxService } from '../lightbox/lightbox.service';
 
 @Component({
     selector: 'app-initiative-list',
@@ -24,7 +25,7 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
   @Input()
   activeCombatants: Array<ActiveCombatant> = []
 
-  constructor(private element: ElementRef, /*private lightbox: Lightbox,*/ private dataService: DataService) {
+  constructor(private element: ElementRef, private lightboxService: LightboxService, private dataService: DataService) {
   }
 
   ngOnInit(): void {
@@ -64,17 +65,15 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
     }
   }
 
+  private getImage(index: number): string {
+    return this.activeCombatants[index].combatant.image ? `${this.dataService.protocol}//${this.dataService.remoteHost}${this.activeCombatants[index].combatant.image}` : "assets/img/creature.png"
+  }
+
   open(index: number): void {
-    // empty image check
-    // if (this.activeCombatants[index].image == null) {
-    //   return;
-    // }
-    // open lightbox
-    // this.lightbox.open(this.images, index);
+    this.lightboxService.open(this.getImage(index), this.activeCombatants[index].combatant.name);
   }
 
   close(): void {
-    // close lightbox programmatically
-    // this.lightbox.close();
+    this.lightboxService.close();
   }
 }
