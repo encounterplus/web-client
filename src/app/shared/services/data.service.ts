@@ -102,10 +102,18 @@ export class DataService {
       return timer(delay);
     });
 
-    const openObserver = new Subject<Event>();
-    openObserver.pipe(map((_) => true)).subscribe(this.status$);
-    const closeObserver = new Subject<CloseEvent>();
-    closeObserver.pipe(map((_) => false)).subscribe(this.status$);
+    const openObserver = {
+      next: () => this.status$.next(true),
+      error: (err: any) => console.error('WebSocket open error:', err),
+      complete: () => {}
+    };
+    
+    const closeObserver = {
+      next: () => this.status$.next(false),
+      error: (err: any) => console.error('WebSocket close error:', err),
+      complete: () => {}
+    };
+    
     this.ws = webSocket<any>({
       url: this.wsBaseURL,
       openObserver,
