@@ -28,6 +28,7 @@ import { OverlayComponent } from './core/overlay/overlay.component';
 import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
 import { DraggableDirective } from './draggable.directive';
 import { SafePipe } from 'safe-pipe';
+import { LightboxComponent } from './core/lightbox/lightbox.component';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -43,6 +44,7 @@ import { SafePipe } from 'safe-pipe';
         ImageHandoutComponent,
         MessageComponent,
         MessageListComponent,
+        LightboxComponent,
         PausedComponent,
         ZoombarComponent,
         OverlayComponent,

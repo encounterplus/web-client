@@ -1,0 +1,24 @@
+<div 
+  *ngIf="isOpen" 
+  class="lightbox-backdrop" 
+  (click)="onBackdropClick()"
+  (keydown)="onKeyDown($event)"
+  tabindex="0"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Image lightbox">
+  
+  <button 
+    class="lightbox-close" 
+    aria-label="Close lightbox"
+    (click)="onCloseButtonClick()">
+    ✕
+  </button>
+
+  <div class="lightbox-content" (click)="onImageClick($event)">
+    <img 
+      [src]="imageUrl" 
+      [alt]="imageAlt"
+      class="lightbox-image">
+  </div>
+</div>

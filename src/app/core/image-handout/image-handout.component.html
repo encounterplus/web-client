@@ -1,1 +1,7 @@
 <img id="image-handout" src="{{image}}" alt="image-handout" (click)="open()" />
+<app-lightbox 
+  [isOpen]="lightboxOpen"
+  [imageUrl]="image"
+  [imageAlt]="overlayImage"
+  (close)="close()">
+</app-lightbox>
