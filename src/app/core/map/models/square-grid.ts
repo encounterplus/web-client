@@ -4,11 +4,11 @@ import { Grid, GridInterface } from "./grid";
 
 export class SquareGrid extends Grid implements GridInterface {
 
-    get blockSize(): PIXI.ISize {
+    get blockSize(): PIXI.Size {
         return {width: this.size, height: this.size}
     }
 
-    get adjustedSize(): PIXI.ISize {
+    get adjustedSize(): PIXI.Size {
         return {width: this.size, height: this.size}
     }
 
@@ -24,7 +24,6 @@ export class SquareGrid extends Grid implements GridInterface {
     
     gridGraphics(width: number, height: number): PIXI.Graphics {
         let graphics = new PIXI.Graphics();
-        graphics.lineStyle(1.0, new PIXI.Color(this.color), this.opacity * 0.8, 0.5, false)
         // TODO: implement corners style with dashed line
 
         // columns
@@ -41,6 +40,7 @@ export class SquareGrid extends Grid implements GridInterface {
             if (y<=height) graphics.moveTo(0, y).lineTo(width, y)
         }
 
+        graphics.stroke({ width: 1.0, color: new PIXI.Color(this.color), alpha: this.opacity * 0.8 })
         return graphics
     }
 
@@ -64,7 +64,7 @@ export class SquareGrid extends Grid implements GridInterface {
         return graphics
     }
 
-    sizeFromGridSize(gridSize: GridSize): PIXI.ISize {
+    sizeFromGridSize(gridSize: GridSize): PIXI.Size {
         return {width: gridSize.width * this.size, height: gridSize.height * this.size }
     }
 

@@ -54,8 +54,12 @@ export class TrackedObjectView extends View {
 
         let color = this.trackedObject.type == TrackedObjectType.pointer ? 0x00FFFF : 0x9a12b3
 
-        this.graphics.lineStyle(2, 0xffffff, 0.8)
-        this.graphics.beginFill(color, 0.5).drawPolygon(this.getPolygon(this.trackedObject.contour || [])).endFill().beginHole().drawCircle(this.center.x, this.center.y, 3).endHole()
+        this.graphics
+            .poly(this.getPolygon(this.trackedObject.contour || []))
+            .fill({ color: color, alpha: 0.5 })
+            .stroke({ width: 2, color: 0xffffff, alpha: 0.8 })
+            .circle(this.center.x, this.center.y, 3)
+            .cut();
 
         
         return this;

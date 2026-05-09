@@ -23,8 +23,7 @@ export class MarkerView extends View {
         
         // name
         if (this.marker.name && this.marker.name != "") {
-            this.nameText = new PIXI.Text(this.marker.name, {fontFamily : 'Arial', fontSize: 30, fill : new PIXI.Color(this.marker.color).toNumber(), align : 'center', dropShadow: false,
-            dropShadowColor: '#000000', dropShadowBlur: 6, dropShadowDistance: 0, stroke: 0xffffff, strokeThickness: this.grid.size / 15});
+            this.nameText = new PIXI.Text(this.marker.name, {fontFamily : 'Arial', fontSize: 30, fill : new PIXI.Color(this.marker.color).toNumber(), align : 'center', dropShadow: { color: '#000000', blur: 6, distance: 0, alpha: 0, angle: 0 }, stroke: { color: 0xffffff, width: this.grid.size / 15 }});
             this.nameText.anchor.set(0.5, 0.5);
             this.nameText.resolution = 4;
             this.addChild(this.nameText);

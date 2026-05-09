@@ -235,8 +235,9 @@ export class TokenView extends View {
         // tracking shape
         if (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal) {
             let graphics = new PIXI.Graphics();
-            graphics.lineStyle(2, 0x000000, 0.2)
-            graphics.beginFill(0xffffff, 0.2).drawCircle(this.w / 2, this.h/2, this.w * 0.6).endFill();
+            graphics.circle(this.w / 2, this.h/2, this.w * 0.6)
+                .fill({ color: 0xffffff, alpha: 0.2 })
+                .stroke({ width: 2, color: 0x000000, alpha: 0.2 });
 
             this.addChild(graphics);
         }
@@ -416,8 +417,9 @@ export class TokenView extends View {
             }
 
             this.labelGraphics.clear();
-            this.labelGraphics.lineStyle(2, 0x000000, 0.2)
-            this.labelGraphics.beginFill(this.color).drawCircle(x, y, labelSize / 2).endFill();
+            this.labelGraphics.circle(x, y, labelSize / 2)
+                .fill(this.color)
+                .stroke({ width: 2, color: 0x000000, alpha: 0.2 });
 
             this.labelText.text = text
             this.labelText.position.set(x, y);
@@ -426,8 +428,9 @@ export class TokenView extends View {
         } else {
             let size = Math.min(this.w, this.h) * this.scaleFactor
             this.labelGraphics.clear();
-            this.labelGraphics.lineStyle(2, 0x000000, 0.2)
-            this.labelGraphics.beginFill(this.color).drawCircle(this.w / 2, this.h / 2, size / 2).endFill();
+            this.labelGraphics.circle(this.w / 2, this.h / 2, size / 2)
+                .fill(this.color)
+                .stroke({ width: 2, color: 0x000000, alpha: 0.2 });
             this.labelText.text = text
             this.labelText.position.set(this.w / 2, this.h / 2);
             this.labelText.style.fontSize = size / 2.5;
@@ -474,8 +477,9 @@ export class TokenView extends View {
             }
 
             this.elevationGraphics.clear()
-            this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
-            this.elevationGraphics.beginFill(this.distance != null ? 0x444444 : 0x555555, 0.9).drawRoundedRect(0, 0, labelSize * 2, labelSize, labelSize / 2).endFill();
+            this.elevationGraphics.roundRect(0, 0, labelSize * 2, labelSize, labelSize / 2)
+                .fill({ color: this.distance != null ? 0x444444 : 0x555555, alpha: 0.9 })
+                .stroke({ width: 2, color: 0x000000, alpha: 0.2 });
             this.elevationGraphics.position.set(x, y)
 
             this.elevationText.text = text
@@ -508,8 +512,9 @@ export class TokenView extends View {
             }
 
             this.elevationGraphics.clear()
-            this.elevationGraphics.lineStyle(2, 0x000000, 0.2)
-            this.elevationGraphics.beginFill(this.distance != null ? 0x444444 : 0x555555, 0.9).drawRoundedRect(0, 0, labelSize * 1.3, labelSize, labelSize / 2).endFill();
+            this.elevationGraphics.roundRect(0, 0, labelSize * 1.3, labelSize, labelSize / 2)
+                .fill({ color: this.distance != null ? 0x444444 : 0x555555, alpha: 0.9 })
+                .stroke({ width: 2, color: 0x000000, alpha: 0.2 });
             this.elevationGraphics.position.set(x, y)
 
             this.elevationText.text = text

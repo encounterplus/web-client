@@ -47,12 +47,12 @@ export class TileView extends View {
         if (this.assetTexture != null) {
             let frames = [];
             if (this.tile.asset.type == "spriteSheet") {
-                for (let x = 0, y = 0, framecount = 0; x < this.assetTexture.baseTexture.width && y < this.assetTexture.baseTexture.height; framecount++) {
+                for (let x = 0, y = 0, framecount = 0; x < this.assetTexture.source.width && y < this.assetTexture.source.height; framecount++) {
                     let rect = new PIXI.Rectangle(x, y, this.tile.asset.parameters.frameWidth, this.tile.asset.parameters.frameHeight);
-                    let frame = new PIXI.Texture(this.assetTexture.baseTexture, rect);
+                    let frame = new PIXI.Texture({ source: this.assetTexture.source, frame: rect });
                     frames.push(frame);
                     x += this.tile.asset.parameters.frameWidth;
-                    if (x >= this.assetTexture.baseTexture.width) {
+                    if (x >= this.assetTexture.source.width) {
                         x = 0;
                         y += this.tile.asset.parameters.frameHeight;
                     }
@@ -86,9 +86,9 @@ export class TileView extends View {
                             sprite.tint = new PIXI.Color(component.color)
                         }
                         if (component.type == "filter.hsb") {
-                            let hfilter = new PIXI.filters.ColorMatrixFilter();
-                            let sfilter = new PIXI.filters.ColorMatrixFilter();
-                            let bfilter = new PIXI.filters.ColorMatrixFilter();
+                            let hfilter = new PIXI.ColorMatrixFilter();
+                            let sfilter = new PIXI.ColorMatrixFilter();
+                            let bfilter = new PIXI.ColorMatrixFilter();
 
                             hfilter.hue(component.hue, false);
                             sfilter.saturate(component.saturation / 100, false)

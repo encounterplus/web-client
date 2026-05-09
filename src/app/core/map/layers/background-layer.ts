@@ -12,8 +12,8 @@ export class BackgroundLayer extends Layer {
     videoTexture: PIXI.Texture;
     videoSprite: PIXI.Sprite;
 
-    loadingText = new PIXI.Text("Loading map resources...", {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'});
-    vidloadingText = new PIXI.Text("Loading video map...", {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'});
+    loadingText = new PIXI.Text({ text: "Loading map resources...", style: {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'} });
+    vidloadingText = new PIXI.Text({ text: "Loading video map...", style: {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'} });
 
     image: string;
     video: string;
@@ -32,8 +32,8 @@ export class BackgroundLayer extends Layer {
             this.videoMuted = value;
 
             if (this.videoTexture) {
-                const videoResource = this.videoTexture.baseTexture.resource as PIXI.VideoResource;
-                const video = videoResource.source as HTMLVideoElement;
+                const videoSource = this.videoTexture.source as PIXI.VideoSource;
+                const video = videoSource.resource as HTMLVideoElement;
                 video.muted = value;
             }  
         })
@@ -42,8 +42,8 @@ export class BackgroundLayer extends Layer {
             this.videoPaused = value;
 
             if (this.videoTexture) {
-                const videoResource = this.videoTexture.baseTexture.resource as PIXI.VideoResource;
-                const video = videoResource.source as HTMLVideoElement;
+                const videoSource = this.videoTexture.source as PIXI.VideoSource;
+                const video = videoSource.resource as HTMLVideoElement;
                 
                 if (value) {
                     video.pause();
@@ -156,8 +156,8 @@ export class BackgroundLayer extends Layer {
         this.addChild(sprite);
         this.videoSprite = sprite;
 
-        const videoResource = this.videoTexture.baseTexture.resource as PIXI.VideoResource;
-        const video = videoResource.source as HTMLVideoElement;
+        const videoSource = this.videoTexture.source as PIXI.VideoSource;
+        const video = videoSource.resource as HTMLVideoElement;
 
         this.loadedVideoSrc = this.video;
         this.loadedVideoUrl = video.src;
@@ -182,8 +182,8 @@ export class BackgroundLayer extends Layer {
 
         // if (this.imageTexture) this.imageTexture.destroy();
         if (this.videoTexture) {
-            const videoResource = this.videoTexture.baseTexture.resource as PIXI.VideoResource;
-            const video = videoResource.source as HTMLVideoElement;
+            const videoSource = this.videoTexture.source as PIXI.VideoSource;
+            const video = videoSource.resource as HTMLVideoElement;
             video.onpause = video.onplay = video.onvolumechange = null;
             video.pause();
             video.muted = true;

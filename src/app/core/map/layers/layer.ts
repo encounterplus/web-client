@@ -12,10 +12,10 @@ export class Layer extends PIXI.Container {
         this.eventMode = "none"
     }
 
-    get size(): PIXI.ISize {
+    get size(): PIXI.Size {
         return {width: this.w, height: this.h}
     }
-    set size(value: PIXI.ISize) {
+    set size(value: PIXI.Size) {
         this.w = value.width
         this.h = value.height
     }

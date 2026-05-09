@@ -5,7 +5,7 @@ import { Loader } from "../core/map/models/loader"
 type ArrayFixed<T, L extends number> = [ T, ...Array<T> ] & { length: L }
 
 export class ProgramManager {
-    static cached = new Map<string, PIXI.Program>()
+    static cached = new Map<string, { vertex: string, fragment: string }>()
 
     static async preload() {
         console.debug("preloading shaders")
@@ -13,20 +13,20 @@ export class ProgramManager {
         // vision
         let visionVert = await Loader.shared.loadResource("/assets/shaders/vision.vert")
         let visionFrag = await Loader.shared.loadResource("/assets/shaders/vision.frag")
-        ProgramManager.cached.set("vision", PIXI.Program.from(visionVert, visionFrag, "vision"))
+        ProgramManager.cached.set("vision", { vertex: visionVert, fragment: visionFrag })
 
         // light
         let lightFrag = await Loader.shared.loadResource("/assets/shaders/light.frag")
-        ProgramManager.cached.set("light", PIXI.Program.from(visionVert, lightFrag, "light"))
+        ProgramManager.cached.set("light", { vertex: visionVert, fragment: lightFrag })
 
         // map
         let mapVert = await Loader.shared.loadResource("/assets/shaders/map.vert")
         let mapFrag = await Loader.shared.loadResource("/assets/shaders/map.frag")
-        ProgramManager.cached.set("map", PIXI.Program.from(mapVert, mapFrag, "map"))
+        ProgramManager.cached.set("map", { vertex: mapVert, fragment: mapFrag })
         
         // fog
         let fogFrag = await Loader.shared.loadResource("/assets/shaders/fog.frag")
-        ProgramManager.cached.set("fog", PIXI.Program.from(mapVert, fogFrag, "fog"))
+        ProgramManager.cached.set("fog", { vertex: mapVert, fragment: fogFrag })
     }
 }
 

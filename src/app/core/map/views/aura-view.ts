@@ -36,10 +36,10 @@ export class AuraView extends View {
     }
 
     async drawShape() {
-        let graphics = new PIXI.Graphics().lineStyle(1, new PIXI.Color(this.aura.color));
-        graphics.beginFill(new PIXI.Color(this.aura.color), 0.15);
-        graphics.drawCircle(-this.w / 2, -this.h / 2, this.w / 2);
-        graphics.endFill();
+        let graphics = new PIXI.Graphics();
+        graphics.circle(-this.w / 2, -this.h / 2, this.w / 2)
+            .fill({ color: new PIXI.Color(this.aura.color), alpha: 0.15 })
+            .stroke({ width: 1, color: new PIXI.Color(this.aura.color) });
         this.addChild(graphics);
         this.shapeGraphics = graphics;
 
@@ -64,12 +64,12 @@ export class AuraView extends View {
         if (this.assetTexture != null) {
             let frames = [];
             if (this.aura.asset.type == "spriteSheet") {
-                for (let x = 0, y = 0, framecount = 0; x < this.assetTexture.baseTexture.width && y < this.assetTexture.baseTexture.height; framecount++) {
+                for (let x = 0, y = 0, framecount = 0; x < this.assetTexture.source.width && y < this.assetTexture.source.height; framecount++) {
                     let rect = new PIXI.Rectangle(x, y, this.aura.asset.parameters.frameWidth, this.aura.asset.parameters.frameHeight);
-                    let frame = new PIXI.Texture(this.assetTexture.baseTexture, rect);
+                    let frame = new PIXI.Texture({ source: this.assetTexture.source, frame: rect });
                     frames.push(frame);
                     x += this.aura.asset.parameters.frameWidth;
-                    if (x >= this.assetTexture.baseTexture.width) {
+                    if (x >= this.assetTexture.source.width) {
                         x = 0;
                         y += this.aura.asset.parameters.frameHeight;
                     }
@@ -102,9 +102,9 @@ export class AuraView extends View {
                             sprite.tint = new PIXI.Color(component.color)
                         }
                         if (component.type == "filter.hsb") {
-                            let hfilter = new PIXI.filters.ColorMatrixFilter();
-                            let sfilter = new PIXI.filters.ColorMatrixFilter();
-                            let bfilter = new PIXI.filters.ColorMatrixFilter();
+                            let hfilter = new PIXI.ColorMatrixFilter();
+                            let sfilter = new PIXI.ColorMatrixFilter();
+                            let bfilter = new PIXI.ColorMatrixFilter();
 
                             hfilter.hue(component.hue, false);
                             sfilter.saturate(component.saturation / 100, false)

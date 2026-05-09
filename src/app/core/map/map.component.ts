@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, HostListener, OnChanges } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, Input, HostListener, OnChanges } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
 import * as PIXI from 'pixi.js'
 import { Viewport } from 'pixi-viewport';
@@ -19,7 +19,7 @@ import { ControlState } from './views/token-view';
   styleUrls: ['./map.component.scss'],
   standalone: false
 })
-export class MapComponent implements OnInit, OnChanges {
+export class MapComponent implements OnInit, AfterViewInit, OnChanges {
 
   @ViewChild(CanvasContainerDirective, { static: true })
   canvas: CanvasContainerDirective;
@@ -64,7 +64,11 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
+  }
+
+  async ngAfterViewInit(): Promise<void> {
     if (this.canvas !== undefined) {
+      await this.canvas.readyPromise;
       this.app = this.canvas.app;
       this.width = this.canvas.width;
       this.height = this.canvas.height;
@@ -270,17 +274,22 @@ export class MapComponent implements OnInit, OnChanges {
           }
         }
       })
+
+      console.debug("map component update after view init");
+      this.isReady = true;
       this.update();
       this.draw();
     }
   }
 
   update() {
+    if (!this.mapContainer) return;
     this.mapContainer.update(this.state)
     this.trackedObjectsContainer.update()
   }
 
   async draw() {
+    if (!this.mapContainer) return;
     await this.mapContainer.draw();
 
     if (this.mapContainer.w > this.canvas.maxTextureSize || this.mapContainer.h > this.canvas.maxTextureSize) {
@@ -329,6 +338,11 @@ export class MapComponent implements OnInit, OnChanges {
 
   @HostListener('window:resize')
   onResize() {
+
+    if (!this.isReady) {
+      return;
+    }
+
     // update viewport
     let sideBarWidth = (document.getElementById("side-bar")?.getBoundingClientRect()?.width ?? 0) + 8.0;
     this.viewport.resize(window.innerWidth - sideBarWidth, window.innerHeight, this.mapContainer.w, this.mapContainer.h);
@@ -418,6 +432,7 @@ export class MapComponent implements OnInit, OnChanges {
     console.debug("data changed");
 
     if (!this.isReady) {
+      console.debug("not ready, skipping update in ngOnChanges")
       return;
     }
 

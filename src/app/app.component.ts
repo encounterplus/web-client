@@ -952,8 +952,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
       this.dataService.state = this.state
 
-      if (this.state.map != undefined) {
-        this.mapComponent.isReady = true
+      if (this.state.map != undefined && this.mapComponent.isReady) {
+        console.debug("initial map data received, rendering map")
         this.mapComponent.update()
         this.mapComponent.draw()
       }

@@ -329,7 +329,7 @@ export class MapContainer extends Layer {
     this.gridLayer.draw()
 
     // render to texture
-    this.app.renderer.render(this.mapLayer, { renderTexture: this.mapTexture, clear: true })
+    this.app.renderer.render({ container: this.mapLayer, target: this.mapTexture, clear: true })
 
     // vision
     this.visionLayer.size = this.size

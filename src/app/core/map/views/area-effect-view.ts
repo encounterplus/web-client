@@ -103,17 +103,19 @@ export class AreaEffectView extends View {
     }
 
     async drawShape() {
-        let graphics = new PIXI.Graphics().lineStyle(1, new PIXI.Color(this.areaEffect.color));
-        graphics.beginFill(new PIXI.Color(this.areaEffect.color), 0.3);
+        const color = new PIXI.Color(this.areaEffect.color);
+        let graphics = new PIXI.Graphics();
 
         switch (this.areaEffect.shape) {
             case AreaEffectShape.sphere:
             case AreaEffectShape.cylinder:
-                graphics.drawCircle(this.areaEffect.x, this.areaEffect.y, this.areaEffect.radius);
+                graphics.circle(this.areaEffect.x, this.areaEffect.y, this.areaEffect.radius)
+                    .fill({ color, alpha: 0.3 }).stroke({ width: 1, color });
                 break;
 
             case AreaEffectShape.cube:
-                graphics.drawRect(this.areaEffect.x, this.areaEffect.y - (this.areaEffect.length / 2), this.areaEffect.length, this.areaEffect.length);
+                graphics.rect(this.areaEffect.x, this.areaEffect.y - (this.areaEffect.length / 2), this.areaEffect.length, this.areaEffect.length)
+                    .fill({ color, alpha: 0.3 }).stroke({ width: 1, color });
                 graphics.pivot.x = this.areaEffect.x;
                 graphics.pivot.y = this.areaEffect.y;
                 graphics.rotation = this.areaEffect.angle;
@@ -121,7 +123,8 @@ export class AreaEffectView extends View {
                 break;
 
             case AreaEffectShape.square:
-                graphics.drawRect(this.areaEffect.x - this.areaEffect.length, this.areaEffect.y - this.areaEffect.length, this.areaEffect.length * 2, this.areaEffect.length * 2);
+                graphics.rect(this.areaEffect.x - this.areaEffect.length, this.areaEffect.y - this.areaEffect.length, this.areaEffect.length * 2, this.areaEffect.length * 2)
+                    .fill({ color, alpha: 0.3 }).stroke({ width: 1, color });
                 graphics.pivot.x = this.areaEffect.x;
                 graphics.pivot.y = this.areaEffect.y;
                 graphics.rotation = this.areaEffect.angle;
@@ -132,18 +135,18 @@ export class AreaEffectView extends View {
                 graphics.moveTo(this.areaEffect.x, this.areaEffect.y);
                 graphics.arc(this.areaEffect.x, this.areaEffect.y, this.areaEffect.length, this.areaEffect.angle - toRadians(26.5), this.areaEffect.angle + toRadians(26.5), false);
                 graphics.lineTo(this.areaEffect.x, this.areaEffect.y);
+                graphics.fill({ color, alpha: 0.3 }).stroke({ width: 1, color });
                 break;
 
             case AreaEffectShape.line:
-                graphics.drawRect(this.areaEffect.x, this.areaEffect.y - (this.areaEffect.width / 2), this.areaEffect.length, this.areaEffect.width);
+                graphics.rect(this.areaEffect.x, this.areaEffect.y - (this.areaEffect.width / 2), this.areaEffect.length, this.areaEffect.width)
+                    .fill({ color, alpha: 0.3 }).stroke({ width: 1, color });
                 graphics.pivot.x = this.areaEffect.x;
                 graphics.pivot.y = this.areaEffect.y;
                 graphics.rotation = this.areaEffect.angle;
                 graphics.position.set(this.areaEffect.x, this.areaEffect.y);
                 break;
         }
-
-        graphics.endFill();
         this.addChild(graphics);
         this.shapeGraphics = graphics;
 
@@ -157,11 +160,12 @@ export class AreaEffectView extends View {
     }
 
     async drawHandles() {
-        let graphics = new PIXI.Graphics().lineStyle(1, 0xffffff);
-        graphics.beginFill(new PIXI.Color(this.areaEffect.color));
-        graphics.drawCircle(this.start.x, this.start.y, 5);
-        graphics.drawCircle(this.end.x, this.end.y, 5);
-        graphics.endFill();
+        let graphics = new PIXI.Graphics();
+        graphics
+            .circle(this.start.x, this.start.y, 5)
+            .circle(this.end.x, this.end.y, 5)
+            .fill(new PIXI.Color(this.areaEffect.color))
+            .stroke({ width: 1, color: 0xffffff });
         this.addChild(graphics);
 
         graphics.visible = this.selected;
@@ -182,12 +186,12 @@ export class AreaEffectView extends View {
 	if (this.assetTexture != null) {
             let frames = [ ];
             if (this.areaEffect.asset.type == "spriteSheet") {
-                for(let x=0,y=0,framecount=0; x < this.assetTexture.baseTexture.width && y < this.assetTexture.baseTexture.height;framecount++) {
+                for(let x=0,y=0,framecount=0; x < this.assetTexture.source.width && y < this.assetTexture.source.height;framecount++) {
                     let rect = new PIXI.Rectangle(x,y,this.areaEffect.asset.parameters.frameWidth,this.areaEffect.asset.parameters.frameHeight);
-                    let frame = new PIXI.Texture(this.assetTexture.baseTexture,rect);
+                    let frame = new PIXI.Texture({ source: this.assetTexture.source, frame: rect });
                     frames.push ( frame );
                     x += this.areaEffect.asset.parameters.frameWidth;
-                    if (x>=this.assetTexture.baseTexture.width) {
+                    if (x>=this.assetTexture.source.width) {
                         x = 0;
                         y += this.areaEffect.asset.parameters.frameHeight;
                     }
@@ -242,9 +246,9 @@ export class AreaEffectView extends View {
                             sprite.tint = new PIXI.Color(component.color)
                         }
                         if (component.type == "filter.hsb") {
-                            let hfilter = new PIXI.filters.ColorMatrixFilter();
-                            let sfilter = new PIXI.filters.ColorMatrixFilter();
-                            let bfilter = new PIXI.filters.ColorMatrixFilter();
+                            let hfilter = new PIXI.ColorMatrixFilter();
+                            let sfilter = new PIXI.ColorMatrixFilter();
+                            let bfilter = new PIXI.ColorMatrixFilter();
 
                             hfilter.hue(component.hue, false);
                             sfilter.saturate(component.saturation / 100, false)

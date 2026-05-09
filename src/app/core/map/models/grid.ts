@@ -41,12 +41,12 @@ export abstract class Grid implements GridInterface {
         this.type = map.gridType
     }
     
-    abstract get blockSize(): PIXI.ISize
-    abstract get adjustedSize(): PIXI.ISize
+    abstract get blockSize(): PIXI.Size
+    abstract get adjustedSize(): PIXI.Size
     abstract get pixelRatio(): number
     abstract position(x: number, y: number): PIXI.Point
     abstract gridGraphics(width: number, height: number): PIXI.Graphics
     abstract pathGraphics(path: Array<number>, gridSize: GridSize, color: number, graphics: PIXI.Graphics): PIXI.Graphics
-    abstract sizeFromGridSize(gridSize: GridSize): PIXI.ISize
+    abstract sizeFromGridSize(gridSize: GridSize): PIXI.Size
    
 }

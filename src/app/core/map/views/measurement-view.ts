@@ -35,8 +35,6 @@ export class MeasurementView extends View {
 
         let color = new PIXI.Color(this.measurement.color)
 
-        this.shape.lineStyle(4, color)
-        
         for(let i = 0; i < this.measurement.data.length; i = i + 2) {
             if (i == 0) {
                 this.shape.moveTo(this.measurement.data[i], this.measurement.data[i + 1])
@@ -44,8 +42,9 @@ export class MeasurementView extends View {
                 this.shape.lineTo(this.measurement.data[i], this.measurement.data[i + 1])
             }
 
-            this.handles.beginFill(color).drawCircle(this.measurement.data[i], this.measurement.data[i + 1], Math.round(this.grid.size / 12)).endFill()
+            this.handles.circle(this.measurement.data[i], this.measurement.data[i + 1], Math.round(this.grid.size / 12)).fill(color)
         }
+        this.shape.stroke({ width: 4, color })
 
         return this;
     }

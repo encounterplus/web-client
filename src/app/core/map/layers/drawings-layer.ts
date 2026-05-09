@@ -31,14 +31,13 @@ export class DrawingsLayer extends Layer {
 
             switch (drawing.shape) {
                 case DrawingShape.ellipse:
-                    graphics.lineStyle(drawing.strokeWidth, new PIXI.Color(drawing.strokeColor));
-                    graphics.drawEllipse(drawing.data[0], drawing.data[1], drawing.data[2], drawing.data[3])
+                    graphics
+                        .ellipse(drawing.data[0], drawing.data[1], drawing.data[2], drawing.data[3])
+                        .stroke({ width: drawing.strokeWidth, color: new PIXI.Color(drawing.strokeColor) });
                     
                     break;
 
                 default:
-                    graphics.lineStyle({width: drawing.strokeWidth, color: new PIXI.Color(drawing.strokeColor), cap: PIXI.LINE_CAP.ROUND, join: PIXI.LINE_JOIN.ROUND})
-
                     for(let i = 0; i < (drawing.data.length); i = i + 2) {
                         if (i == 0) {
                             graphics.moveTo(drawing.data[0], drawing.data[1])
@@ -46,11 +45,12 @@ export class DrawingsLayer extends Layer {
                             graphics.lineTo(drawing.data[i], drawing.data[i + 1])
                         }
                     }
+                    graphics.stroke({ width: drawing.strokeWidth, color: new PIXI.Color(drawing.strokeColor), cap: 'round', join: 'round' });
                     
                     break;
             }
 
-            graphics.cacheAsBitmap = true;
+            graphics.cacheAsTexture(true);
 
             if (drawing.opacity < 1.0) {
                 let container = new PIXI.Container();

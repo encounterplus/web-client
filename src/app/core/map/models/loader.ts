@@ -50,7 +50,7 @@ export class Loader {
     }
 
     const tex = this.cache.get(src)
-    if (tex && tex.baseTexture && tex.baseTexture.valid) {
+    if (tex && tex.source && tex.source.pixelWidth > 0) {
       console.log("video cache hit");
       return tex;
     }
@@ -151,9 +151,8 @@ export class Loader {
         video.muted = true;
         video.loop = true;
         video.play();
-        const bt = PIXI.BaseTexture.from(video);
-        const tex = new PIXI.Texture(bt);
-        // console.log(tex);
+        const videoSource = new PIXI.VideoSource({ resource: video, autoPlay: false });
+        const tex = new PIXI.Texture({ source: videoSource });
         // this.cache.set(src, tex);
 
         video.oncanplaythrough = null;

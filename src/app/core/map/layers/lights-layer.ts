@@ -9,12 +9,12 @@ import { CacheManager, ProgramManager } from 'src/app/shared/utils';
 
 export class LightsLayer extends Layer {
 
-    app: PIXI.Application;
+    app!: PIXI.Application;
     tokens: Array<Token> = [];
     tiles: Array<Tile> = [];
     lights: Array<Light> = [];
 
-    meshes: Array<PIXI.Mesh> = [];
+    meshes: Array<PIXI.Mesh<PIXI.Geometry, PIXI.Shader>> = [];
 
     constructor(private dataService: DataService) {
         super();
@@ -26,13 +26,13 @@ export class LightsLayer extends Layer {
 
     isDirty: boolean = true;
 
-    grid: Grid
+    grid!: Grid
 
     update() {
-        this.tokens = this.dataService.state.map.tokens
-        this.tiles = this.dataService.state.map.tiles
-        this.lights = this.dataService.state.map.lights
-        this.visible = this.dataService.state.map.lineOfSight
+        this.tokens = this.dataService.state.map?.tokens ?? []
+        this.tiles = this.dataService.state.map?.tiles ?? []
+        this.lights = this.dataService.state.map?.lights ?? []
+        this.visible = this.dataService.state.map?.lineOfSight ?? false
     }
 
     async draw() {
@@ -41,7 +41,7 @@ export class LightsLayer extends Layer {
         // return
         
         if (!this.visible) {
-            return;
+            return this;
         }
 
         this.width = this.w / 2
@@ -77,24 +77,38 @@ export class LightsLayer extends Layer {
             }
 
             // init shaders
-            let shader = new PIXI.Shader(ProgramManager.cached.get("light"))
+            const sources = ProgramManager.cached.get("light")!
+            const glProgram = new PIXI.GlProgram({ vertex: sources.vertex, fragment: sources.fragment })
+            const uniforms = new PIXI.UniformGroup({
+                position:  { value: new Float32Array(2), type: 'vec2<f32>' },
+                radiusMin: { value: 0, type: 'f32' },
+                radiusMax: { value: 0, type: 'f32' },
+                color:     { value: new Float32Array(4), type: 'vec4<f32>' },
+                intensity: { value: 1, type: 'f32' },
+            })
+            const shader = new PIXI.Shader({ glProgram, resources: { uniforms } })
 
             // create custom mesh from geometry
-            let geometry = new PIXI.Geometry()
-                .addAttribute('aVertexPosition', geometryPolygon);
-            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+            const geo = new PIXI.Geometry({
+                attributes: {
+                    aVertexPosition: new Float32Array(geometryPolygon),
+                },
+                topology: 'triangle-list',
+            })
+            let mesh = new PIXI.Mesh<PIXI.Geometry, PIXI.Shader>({ geometry: geo, shader })
 
             const gridSize = {width: token.width || 1, height: token.height || 1}
             const size = this.grid.sizeFromGridSize(gridSize)
             let minSize = Math.max(size.width, size.height) / 2.0
             
             // populate uniforms
-            mesh.shader.uniforms.position = [vision.sight.x / 2, vision.sight.y / 2]
-            mesh.shader.uniforms.radiusMin = ((vision.lightRadiusMin * this.grid.pixelRatio) + minSize) / 2
-            mesh.shader.uniforms.radiusMax = ((vision.lightRadiusMax * this.grid.pixelRatio) + minSize) / 2
-            mesh.shader.uniforms.color = new PIXI.Color(vision.lightColor)
-            mesh.shader.uniforms.intensity = vision.lightOpacity
-            mesh.blendMode = PIXI.BLEND_MODES.ADD;
+            const u = mesh.shader!.resources.uniforms.uniforms
+            u.position = new Float32Array([vision.sight.x / 2, vision.sight.y / 2])
+            u.radiusMin = ((vision.lightRadiusMin * this.grid.pixelRatio) + minSize) / 2
+            u.radiusMax = ((vision.lightRadiusMax * this.grid.pixelRatio) + minSize) / 2
+            u.color = new Float32Array(new PIXI.Color(vision.lightColor).toArray())
+            u.intensity = vision.lightOpacity
+            mesh.blendMode = 'add';
 
             this.addChild(mesh)
             this.meshes.push(mesh)
@@ -131,20 +145,34 @@ export class LightsLayer extends Layer {
             }
 
             // init shaders
-            let shader = new PIXI.Shader(ProgramManager.cached.get("light"))
+            const sources = ProgramManager.cached.get("light")!
+            const glProgram = new PIXI.GlProgram({ vertex: sources.vertex, fragment: sources.fragment })
+            const uniforms = new PIXI.UniformGroup({
+                position:  { value: new Float32Array(2), type: 'vec2<f32>' },
+                radiusMin: { value: 0, type: 'f32' },
+                radiusMax: { value: 0, type: 'f32' },
+                color:     { value: new Float32Array(4), type: 'vec4<f32>' },
+                intensity: { value: 1, type: 'f32' },
+            })
+            const shader = new PIXI.Shader({ glProgram, resources: { uniforms } })
 
             // create custom mesh from geometry
-            let geometry = new PIXI.Geometry()
-                .addAttribute('aVertexPosition', geometryPolygon);
-            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+            const geo = new PIXI.Geometry({
+                attributes: {
+                    aVertexPosition: new Float32Array(geometryPolygon),
+                },
+                topology: 'triangle-list',
+            })
+            let mesh = new PIXI.Mesh<PIXI.Geometry, PIXI.Shader>({ geometry: geo, shader })
             
             // populate uniforms
-            mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
-            mesh.shader.uniforms.radiusMin = light.radiusMin * this.grid.pixelRatio / 2
-            mesh.shader.uniforms.radiusMax = Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio / 2
-            mesh.shader.uniforms.intensity = light.opacity
-            mesh.shader.uniforms.color = new PIXI.Color(light.color)
-            mesh.blendMode = PIXI.BLEND_MODES.ADD
+            const u = mesh.shader!.resources.uniforms.uniforms
+            u.position = new Float32Array([light.sight.x / 2, light.sight.y / 2])
+            u.radiusMin = light.radiusMin * this.grid.pixelRatio / 2
+            u.radiusMax = Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio / 2
+            u.intensity = light.opacity
+            u.color = new Float32Array(new PIXI.Color(light.color).toArray())
+            mesh.blendMode = 'add';
 
             this.addChild(mesh)
             this.meshes.push(mesh)
@@ -179,20 +207,34 @@ export class LightsLayer extends Layer {
             }
 
             // init shaders
-            let shader = new PIXI.Shader(ProgramManager.cached.get("light"))
+            const sources = ProgramManager.cached.get("light")!
+            const glProgram = new PIXI.GlProgram({ vertex: sources.vertex, fragment: sources.fragment })
+            const uniforms = new PIXI.UniformGroup({
+                position:  { value: new Float32Array(2), type: 'vec2<f32>' },
+                radiusMin: { value: 0, type: 'f32' },
+                radiusMax: { value: 0, type: 'f32' },
+                color:     { value: new Float32Array(4), type: 'vec4<f32>' },
+                intensity: { value: 1, type: 'f32' },
+            })
+            const shader = new PIXI.Shader({ glProgram, resources: { uniforms } })
 
             // create custom mesh from geometry
-            let geometry = new PIXI.Geometry()
-                .addAttribute('aVertexPosition', geometryPolygon);
-            let mesh = new PIXI.Mesh(geometry, <PIXI.MeshMaterial>shader)
+            const geo = new PIXI.Geometry({
+                attributes: {
+                    aVertexPosition: new Float32Array(geometryPolygon),
+                },
+                topology: 'triangle-list',
+            })
+            let mesh = new PIXI.Mesh<PIXI.Geometry, PIXI.Shader>({ geometry: geo, shader })
             
             // populate uniforms
-            mesh.shader.uniforms.position = [light.sight.x / 2, light.sight.y / 2]
-            mesh.shader.uniforms.radiusMin = light.radiusMin * this.grid.pixelRatio / 2
-            mesh.shader.uniforms.radiusMax = Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio / 2
-            mesh.shader.uniforms.intensity = light.opacity
-            mesh.shader.uniforms.color = new PIXI.Color(light.color)
-            mesh.blendMode = PIXI.BLEND_MODES.ADD
+            const u = mesh.shader!.resources.uniforms.uniforms
+            u.position = new Float32Array([light.sight.x / 2, light.sight.y / 2])
+            u.radiusMin = light.radiusMin * this.grid.pixelRatio / 2
+            u.radiusMax = Math.max(light.radiusMin, light.radiusMax) * this.grid.pixelRatio / 2
+            u.intensity = light.opacity
+            u.color = new Float32Array(new PIXI.Color(light.color).toArray())
+            mesh.blendMode = 'add';
 
             this.addChild(mesh)
             this.meshes.push(mesh)

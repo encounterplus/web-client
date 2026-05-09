@@ -14,51 +14,37 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
   element: HTMLDivElement;
 
   // PIXI app and stage references
-  app: PIXI.Application<HTMLCanvasElement>;
+  app: PIXI.Application;
   width: number;
   height: number;
 
+  readyPromise!: Promise<void>;
+
   maxTextureSize: number;
+
+  isReady = false;
 
   // public devicePixelRatio = window.devicePixelRatio || 1;
   public devicePixelRatio = 1;
 
   public applicationOptions = {
-    backgroundColor: 0x00000,
+    background: 0x00000,
     autoDensity: true,
     resolution: window.devicePixelRatio || 1,
     // resolution: 1.0,
     antialias: true,
-    // transparent: false,
-    // forceFXAA: true,
-    // autoResize: true,
-    // sharedTicker: true,
-    // autoStart: false
+    preference: 'webgl' as 'webgl' | 'webgpu',
   };
 
   constructor(private el: ElementRef, private toastService: ToastService) {
     this.element = el.nativeElement as HTMLDivElement;
 
-     // gameboard resolution hack to fix devicePixelRatio not reported properly by browser
+    // gameboard resolution hack to fix devicePixelRatio not reported properly by browser
     const urlParams = new URLSearchParams(window.location.search);
-    const deviceType = urlParams.get('device') 
+    const deviceType = urlParams.get('device');
 
-    if (deviceType == "gameboard") {
-      this.applicationOptions.resolution =  1.5
-
-        // webgl2 force
-        PIXI.settings.PREFER_ENV = PIXI.ENV.WEBGL2
-    }
-
-    const options = Object.assign({ width: this.element.clientWidth, height: this.element.clientHeight },
-      this.applicationOptions);
-
-    try {
-      this.app = new PIXI.Application<HTMLCanvasElement>(options);
-    } catch(err) {
-        // show error
-        this.toastService.showError(err.message, false);
-        throw err
+    if (deviceType == 'gameboard') {
+      this.applicationOptions.resolution = 1.5;
     }
 
     // prevents mouse zoom on document
@@ -67,39 +53,42 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
         e.preventDefault();
       }
     }, { passive: false });
+  }
 
-    this.element.appendChild(this.app.view);
+  protected async initApp(): Promise<void> {
+    const options = Object.assign({ width: this.element.clientWidth, height: this.element.clientHeight },
+      this.applicationOptions);
+
+    this.app = new PIXI.Application();
+
+    try {
+      await this.app.init(options);
+      this.isReady = true;
+    } catch (err) {
+      this.toastService.showError(err.message, false);
+      throw err;
+    }
+
+    this.element.appendChild(this.app.canvas);
 
     this.width = window.innerWidth;
     this.height = window.innerHeight;
 
-    // const viewportScale = 1 / this.devicePixelRatio;
     this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio);
-    // this.app.renderer.resize(this.width, this.height);
 
     // this.app.ticker.minFPS = 30;
     this.app.ticker.maxFPS = parseInt(localStorage.getItem('maxFPS') || '60', 10) || 60;
 
     // Confirm that WebGL is available
-    if (this.app.renderer.type !== PIXI.RENDERER_TYPE.WEBGL) {
-      this.toastService.showError('No WebGL Support!', false);
-      throw new Error('No WebGL Support!')
-    }
-
-    // const gl = (this.app.renderer as PIXI.Renderer).gl;
-    // this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-    // console.debug(`maximum texture size: ${this.maxTextureSize}`);
-
-    // let ticker = PIXI.Ticker.shared;
-    // ticker.autoStart = false;
-    // ticker.stop();
-
-    // console.debug(`canvas container initialized`);
+    // if (this.app.renderer.type !== 'webgl') {
+    //   this.toastService.showError('No WebGL Support!', false);
+    //   throw new Error('No WebGL Support!');
+    // }
   }
 
-  ngAfterViewInit(): void {
-    // debuging tools
-    // window.PIXI = PIXI;
+  async ngAfterViewInit(): Promise<void> {
+    this.readyPromise = this.initApp();
+    await this.readyPromise;
 
     console.debug('pixel ratio: ' + window.devicePixelRatio)
     console.debug('width: ' + this.width)
@@ -108,8 +97,14 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
 
   @HostListener('window:resize', ['$event'])
   onResize(event) {
+
+    if (!this.isReady) {
+      return;
+    }
+
     this.width = window.innerWidth
     this.height = window.innerHeight
+
     this.app.renderer.resize(this.width * this.devicePixelRatio, this.height * this.devicePixelRatio)
     // this.app.renderer.resize(600, 600)
 

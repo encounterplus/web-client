@@ -13,7 +13,7 @@ export class HexGrid extends Grid implements GridInterface {
         this.orientation = (map.gridType == GridType.hexFlat) ? Orientation.flat : Orientation.pointy
     }
 
-    get blockSize(): PIXI.ISize {
+    get blockSize(): PIXI.Size {
         if (this.orientation == Orientation.flat) {
             return {width: 2.0 * this.size, height: Math.sqrt(3) * this.size}
         } else {
@@ -21,7 +21,7 @@ export class HexGrid extends Grid implements GridInterface {
         }
     }
 
-    get adjustedSize(): PIXI.ISize {
+    get adjustedSize(): PIXI.Size {
         return {width: Math.sqrt(3) * this.size * 0.8, height: Math.sqrt(3) * this.size * 0.8}
     }
 
@@ -83,7 +83,6 @@ export class HexGrid extends Grid implements GridInterface {
         let offsetRows = Math.round(this.offsetY / this.size)
 
         let graphics = new PIXI.Graphics();
-        graphics.lineStyle(1.0, new PIXI.Color(this.color), this.opacity * 0.8, 0.5, false)
         // TODO: implement corners style with dashed line
 
         // this could be more effecient
@@ -101,6 +100,7 @@ export class HexGrid extends Grid implements GridInterface {
             }
         }
 
+        graphics.stroke({ width: 1.0, color: new PIXI.Color(this.color), alpha: this.opacity * 0.8 })
         console.debug("rendering hex grid")
 
         return graphics
@@ -127,7 +127,7 @@ export class HexGrid extends Grid implements GridInterface {
         return graphics
     }
 
-    sizeFromGridSize(gridSize: GridSize): PIXI.ISize {
+    sizeFromGridSize(gridSize: GridSize): PIXI.Size {
         if (this.orientation == Orientation.flat) {
             return {width: (2.0 * this.size * 3/4 * gridSize.width) + (this.size / 2.0), height: Math.sqrt(3) * this.size * gridSize.height }
         } else {
