@@ -1,9 +1,7 @@
 import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
-import * as particles from "@pixi/particle-emitter";
 import { Pointer } from 'src/app/shared/models/pointer';
-import { BlendModeBehavior } from '@pixi/particle-emitter/lib/behaviors';
 
 export class PointerView extends View {
 
@@ -13,7 +11,7 @@ export class PointerView extends View {
 
     sourceText: PIXI.Text;
 
-    emitter: particles.Emitter;
+    // emitter: particles.Emitter;
 
     constructor(pointer: Pointer, grid: Grid, parent: PIXI.Container, texture: PIXI.Texture) {
         super();
@@ -66,9 +64,9 @@ export class PointerView extends View {
             spawnType: "point"
         };
 
-        let newConfig = particles.upgradeConfig(config, [texture])
-        this.emitter = new particles.Emitter(parent, newConfig);
-        this.emitter.autoUpdate = true;
+        // let newConfig = particles.upgradeConfig(config, [texture])
+        // this.emitter = new particles.Emitter(parent, newConfig);
+        // this.emitter.autoUpdate = true;
         // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD;
 
         this.pointer = pointer;
@@ -89,7 +87,7 @@ export class PointerView extends View {
     }
 
     updatePosition(x: number, y: number) {
-        this.emitter.updateOwnerPos(x, y);
+        // this.emitter.updateOwnerPos(x, y);
         this.sourceText.position.set(x, y - this.grid.size / 1.5);
     }
 }

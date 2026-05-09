@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
-import * as particles from "@pixi/particle-emitter";
 
 export class FocusView extends View {
 
@@ -9,7 +8,7 @@ export class FocusView extends View {
     particleTexture: PIXI.Texture;
     sourceText: PIXI.Text;
 
-    emitter: particles.Emitter;
+    // emitter: particles.Emitter;
 
     constructor(private color: string, grid: Grid, parent: PIXI.Container, texture: PIXI.Texture) {
         super();
@@ -62,12 +61,12 @@ export class FocusView extends View {
             spawnType: "point"
         };
 
-        this.emitter = new particles.Emitter(parent, particles.upgradeConfig(config, [texture]));
-        this.emitter.autoUpdate = true;
+        // this.emitter = new particles.Emitter(parent, particles.upgradeConfig(config, [texture]));
+        // this.emitter.autoUpdate = true;
         // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD;
     }
 
     updatePosition(x: number, y: number) {
-        this.emitter.updateOwnerPos(x, y);
+        // this.emitter.updateOwnerPos(x, y);
     }
 }

@@ -1,6 +1,5 @@
 import { View } from './view';
 import { Grid } from '../models/grid';
-import * as particles from "@pixi/particle-emitter";
 import * as PIXI from 'pixi.js'
 import { Layer } from '../layers/layer';
 import { WeatherType } from 'src/app/shared/models/map';
@@ -10,7 +9,7 @@ export class WeatherEffectView extends View {
     weatherEffect: String;
     particleTexture: PIXI.Texture;
 
-    emitter: particles.Emitter;
+    // emitter: particles.Emitter;
 
     snowConfig() : any {
         const scale = (this.grid.size / 64.0) * 0.15;
@@ -223,37 +222,37 @@ export class WeatherEffectView extends View {
         this.w = parentLayer.w
         this.h = parentLayer.h
         
-        let config: particles.EmitterConfigV2 | particles.EmitterConfigV1;
+        // let config: particles.EmitterConfigV2 | particles.EmitterConfigV1;
 
-        switch(type) {
-            case WeatherType.fog:
-                config = this.fogConfig()
-                break
-            case WeatherType.rain:
-                config = this.rainConfig()
-                break
-            case WeatherType.snow:
-                config = this.snowConfig()
-                break
-        }
+        // switch(type) {
+        //     case WeatherType.fog:
+        //         config = this.fogConfig()
+        //         break
+        //     case WeatherType.rain:
+        //         config = this.rainConfig()
+        //         break
+        //     case WeatherType.snow:
+        //         config = this.snowConfig()
+        //         break
+        // }
         
-        let newConfig = particles.upgradeConfig(config, [texture])
-        this.emitter = new particles.Emitter(parentLayer, newConfig)
-        // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD
+        // let newConfig = particles.upgradeConfig(config, [texture])
+        // this.emitter = new particles.Emitter(parentLayer, newConfig)
+        // // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD
         
-        // // this.emitter.update((Date.now() + 1000));
+        // // // this.emitter.update((Date.now() + 1000));
+        // // this.emitter.autoUpdate = true;
+
+        // // advance for 10 seconds
+        // this.emitter.autoUpdate = false;
+        // this.emitter.update((10));
         // this.emitter.autoUpdate = true;
-
-        // advance for 10 seconds
-        this.emitter.autoUpdate = false;
-        this.emitter.update((10));
-        this.emitter.autoUpdate = true;
 
         // this.pointer = pointer
         this.grid = grid
     }
 
     updatePosition(x: number, y: number) {
-        this.emitter.updateOwnerPos(x, y);
+        // this.emitter.updateOwnerPos(x, y);
     }
 }
