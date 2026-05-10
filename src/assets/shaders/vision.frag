@@ -1,5 +1,6 @@
 precision highp float;
-varying vec2 vTextureCoord;
+in vec2 vTextureCoord;
+
 uniform vec2 position;
 uniform float radiusMin;
 uniform float radiusMax;

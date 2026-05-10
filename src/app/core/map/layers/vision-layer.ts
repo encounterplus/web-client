@@ -287,7 +287,7 @@ export class VisionLayer extends Layer {
 
     // render to texture
     if (this.lineOfSight || (this.fogOfWar && this.fogExplore)) {
-      this.app.renderer.render(this.visionContainer, { renderTexture: this.visionTexture })
+      this.app.renderer.render({container: this.visionContainer, target: this.visionTexture, clear: true})
     }
 
     // load texture if necessary
@@ -304,10 +304,8 @@ export class VisionLayer extends Layer {
     if (this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore) {
       let sprite = new PIXI.Sprite(this.fogTexture)
       sprite.filters = [this.blurFilter]
-      this.app.renderer.render(sprite, { renderTexture: this.fogBlurTexture })
+      this.app.renderer.render({container: sprite, target: this.fogBlurTexture, clear: true})
     }
-
-   
 
     // bleh
     let texVision: PIXI.Texture
@@ -445,7 +443,7 @@ export class VisionLayer extends Layer {
     const geometry = new PIXI.Geometry();
     geometry.addAttribute('aVertexPosition', geometryPolygon);
 
-    const mesh = new PIXI.Mesh(geometry as any, shader as any)
+    const mesh = new PIXI.Mesh({geometry: geometry, shader: shader})
 
     // // populate uniforms
     // mesh.shader.uniforms.position = [vision.sight.x / 2, vision.sight.y / 2]
@@ -453,6 +451,7 @@ export class VisionLayer extends Layer {
     // mesh.shader.uniforms.radiusMax = Math.max(radiusMin, radiusMax) / 2
     // mesh.shader.uniforms.intensity = this.intensity
     // mesh.blendMode = PIXI.BLEND_MODES.ADD;
+    // mesh.blendMode = 'add'
 
     this.visionContainer.addChild(mesh);
     this.meshes.push(mesh);

@@ -66,6 +66,7 @@ export class FogLayer extends Layer {
     }
 
     async drawPartialFog() {
+        return
         if (this.fog != null || this.fogBase64 != null) {
             // start loading map image
             let oldTexture = this.imageTexture;

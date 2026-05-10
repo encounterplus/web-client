@@ -38,7 +38,7 @@ export class LightsLayer extends Layer {
     async draw() {
         this.clear();
 
-        // return
+        return
         
         if (!this.visible) {
             return this;

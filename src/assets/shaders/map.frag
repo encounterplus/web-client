@@ -1,18 +1,11 @@
 // precision highp float;
-varying vec2 vTextureCoord;
-
-uniform sampler2D uSampler;
-
-uniform vec4 inputSize;
-uniform vec4 outputFrame;
-uniform float time;
+in vec2 vTextureCoord;
 
 uniform sampler2D texVision;
 uniform sampler2D texMap;
-// uniform sampler2D texFog;
+
 uniform bool fog;
 uniform bool los;
-uniform vec2 offs_blur;
 
 void main(void)
 {
