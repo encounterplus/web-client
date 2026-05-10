@@ -5,10 +5,6 @@ uniform float radiusMin;
 uniform float radiusMax;
 uniform vec4 color;
 uniform float intensity;
-uniform vec3 falloff;
-
-varying mat3 projection;
-varying mat3 translation;
 
 void main(void)
 {
@@ -18,8 +14,6 @@ void main(void)
    float dist = length(center - uv);
    vec4 intensityColor = vec4(0, 0, 0, intensity);
    vec4 color = vec4(0, 0, 0, 1);
-   
-   vec4 finalColor = color * intensityColor;
 
    if (radiusMin <= 0.0 && radiusMax <= 0.0) {
       if (intensity > 0.0) {
