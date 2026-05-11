@@ -567,7 +567,7 @@ export class VisionLayer extends Layer {
       CacheManager.geometryPolygon.set(light.id, geometryPolygon)
     }
 
-   // init shaders
+    // init shaders
     const shader = PIXI.Shader.from({ 
       gl: ProgramManager.cached.get("vision")!,
       resources: {
@@ -606,44 +606,51 @@ export class VisionLayer extends Layer {
 
   updateFog() {
 
-    return
+    // init shaders
+    const shader = PIXI.Shader.from({ 
+      gl: ProgramManager.cached.get("fog")!,
+      resources: {
+        fogUniforms: {
+          exploration: {value: 0, type: 'f32'},
+        },
+        texFog: this.fogTexture.source,
+        texVision: this.visionTexture.source,
+      }
+    })
 
-    // // init shaders
-    // const shader = new PIXI.Shader(ProgramManager.cached.get("fog"))
+    let geometry = new PIXI.Geometry();
+    geometry.addAttribute(
+      'aVertexPosition',
+      [0, 0, // x, y
+        Math.ceil(this.w / 2), 0, // x, y
+        Math.ceil(this.w / 2), Math.ceil(this.h / 2),
+        0, Math.ceil(this.h / 2)]); // x, y
+    geometry.addAttribute('aTextureCoord', [0, 0, 1, 0, 1, 1, 0, 1]);
+    geometry.addIndex([0, 1, 2, 0, 2, 3]);
 
-    // let geometry = new PIXI.Geometry();
-    // geometry.addAttribute(
-    //   'aVertexPosition',
-    //   [0, 0, // x, y
-    //     Math.ceil(this.w / 2), 0, // x, y
-    //     Math.ceil(this.w / 2), Math.ceil(this.h / 2),
-    //     0, Math.ceil(this.h / 2)]); // x, y
-    // geometry.addAttribute('aTextureCoord', [0, 0, 1, 0, 1, 1, 0, 1]);
-    // geometry.addIndex([0, 1, 2, 0, 2, 3]);
+    let mesh = new PIXI.Mesh({geometry, shader})
 
-    // let mesh = new PIXI.Mesh(geometry as any, shader as any)
+    // populate uniforms
+    mesh.shader!.resources.texFog = this.fogTexture.source
+    mesh.shader!.resources.texVision = this.visionTexture.source
+    mesh.shader!.resources.fogUniforms.uniforms.exploration = this.fogExplore
 
-    // // // populate uniforms
-    // mesh.shader.uniforms.texFog = this.fogTexture
-    // mesh.shader.uniforms.texVision = this.visionTexture
-    // mesh.shader.uniforms.exploration = this.fogExplore
+    this.app.renderer.render({container: mesh, target: this.tmpTexture, clear: false})
 
-    // this.app.renderer.render(mesh, { renderTexture: this.tmpTexture })
+    // gpu texture copy function?
+    // texture swap
+    let tmp = this.fogTexture
+    this.fogTexture = this.tmpTexture
+    this.tmpTexture = tmp
 
-    // // gpu texture copy function?
-    // // texture swap
-    // let tmp = this.fogTexture
-    // this.fogTexture = this.tmpTexture
-    // this.tmpTexture = tmp
+    // debug
+    // let sprite = new PIXI.Sprite(this.fogTexture)
+    // sprite.width = this.w
+    // sprite.height = this.h
+    // this.addChild(sprite)
 
-    // // debug
-    // // let sprite = new PIXI.Sprite(this.fogTexture)
-    // // sprite.width = this.w
-    // // sprite.height = this.h
-    // // this.addChild(sprite)
-
-    // // let sprite = new PIXI.Sprite(this.visionTexture)
-    // // this.app.renderer.render(sprite, this.fogTexture, false)
+    // let sprite = new PIXI.Sprite(this.visionTexture)
+    // this.app.renderer.render(sprite, this.fogTexture, false)
   }
 
   async updateFogFromData(fogData: string) {
