@@ -41,7 +41,6 @@ export class ProgramManager {
 export class CacheManager {
     static sightPolygon = new Map<string, number[]>()
     static geometryPolygon = new Map<string, number[]>()
-    static shaders = new Map<string, PIXI.Shader>()
 }
 
 export class Utils {

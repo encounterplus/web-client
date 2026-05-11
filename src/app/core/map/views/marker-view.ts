@@ -23,7 +23,7 @@ export class MarkerView extends View {
         
         // name
         if (this.marker.name && this.marker.name != "") {
-            this.nameText = new PIXI.Text(this.marker.name, {fontFamily : 'Arial', fontSize: 30, fill : new PIXI.Color(this.marker.color).toNumber(), align : 'center', dropShadow: { color: '#000000', blur: 6, distance: 0, alpha: 0, angle: 0 }, stroke: { color: 0xffffff, width: this.grid.size / 15 }});
+            this.nameText = new PIXI.Text({ text: this.marker.name, style: {fontFamily : 'Arial', fontSize: 30, fill : new PIXI.Color(this.marker.color).toNumber(), align : 'center', dropShadow: { color: '#000000', blur: 6, distance: 0, alpha: 0, angle: 0 }, stroke: { color: 0xffffff, width: this.grid.size / 15 }} });
             this.nameText.anchor.set(0.5, 0.5);
             this.nameText.resolution = 4;
             this.addChild(this.nameText);
@@ -51,7 +51,7 @@ export class MarkerView extends View {
         if (!this.marker.label) {
             this.markerGraphics.beginFill(color).drawCircle(25, 18, 12).endFill();
         } else {
-            let text = new PIXI.Text(this.marker.label, {fontFamily : 'Arial', fontSize: 30, fill : 0x000000, align : 'center'});
+            let text = new PIXI.Text({ text: this.marker.label, style: {fontFamily : 'Arial', fontSize: 30, fill : 0x000000, align : 'center'} });
             text.anchor.set(0.5, 0.5);
             text.resolution = 4;
             this.addChild(text);

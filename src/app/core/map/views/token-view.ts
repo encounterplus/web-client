@@ -293,7 +293,7 @@ export class TokenView extends View {
         this.addChild(this.elevationGraphics);
 
         // elevation text
-        this.elevationText = new PIXI.Text("", {fontFamily : '-apple-system, Helvetica', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
+        this.elevationText = new PIXI.Text({ text: "", style: {fontFamily : '-apple-system, Helvetica', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'} });
         this.elevationText.anchor.set(0.5, 0.5);
         this.elevationText.resolution = 4;
         this.elevationText.zIndex = 4
@@ -305,7 +305,7 @@ export class TokenView extends View {
         this.addChild(this.labelGraphics);
 
         // label text
-        this.labelText = new PIXI.Text("", {fontFamily : 'Arial', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'});
+        this.labelText = new PIXI.Text({ text: "", style: {fontFamily : 'Arial', fontSize: 24, fontWeight: 'bold', fill: 0xffffff, align : 'center'} });
         this.labelText.anchor.set(0.5, 0.5);
         this.labelText.resolution = 4;
         this.labelText.zIndex = 6
