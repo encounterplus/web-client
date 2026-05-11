@@ -46,6 +46,10 @@ export class VisionLayer extends Layer {
   blurFilter: PIXI.Filter
   blur: boolean = false
 
+  // shaders
+  mapShader: PIXI.Shader
+  visionShader: PIXI.Shader
+
   get activeToken(): Token {
     // no active token shared vision is always
     if (this.dataService.state.screen.sharedVision == SharedVision.always) {
@@ -308,6 +312,8 @@ export class VisionLayer extends Layer {
       let sprite = new PIXI.Sprite(this.fogTexture)
       sprite.filters = [this.blurFilter]
       this.app.renderer.render({container: sprite, target: this.fogBlurTexture, clear: true})
+      sprite.filters = null
+      sprite.destroy()
     }
 
     // bleh
@@ -322,25 +328,6 @@ export class VisionLayer extends Layer {
       texVision = PIXI.Texture.WHITE
     }
 
-    // // populate uniforms
-    // mesh.shader.uniforms.texMap = this.mapTexture
-    // mesh.shader.uniforms.texVision = texVision
-    // mesh.shader.uniforms.fog = this.fogOfWar
-    // mesh.shader.uniforms.los = this.lineOfSight
-    
-     // init shader
-    const shader = PIXI.Shader.from({ 
-      gl: ProgramManager.cached.get("map")!,
-      resources: {
-        visionMapUniforms: {
-          fog: {value: this.fogOfWar ? 1 : 0, type: 'i32'},
-          los: {value: this.lineOfSight ? 1 : 0, type: 'i32'}
-        },
-        texMap: this.mapTexture.source,
-        texVision: texVision.source,
-      }
-    })
-
     let geometry = new PIXI.Geometry();
     geometry.addAttribute(
       'aVertexPosition',
@@ -351,7 +338,25 @@ export class VisionLayer extends Layer {
     geometry.addAttribute('aTextureCoord', [0, 0, 1, 0, 1, 1, 0, 1]);
     geometry.addIndex([0, 1, 2, 0, 2, 3]);
 
+    const shader = new PIXI.Shader({ 
+      glProgram: ProgramManager.cached.get("map")!,
+      resources: {
+        mapUniforms: {
+          fog: {value: 0, type: 'i32'},
+          los: {value: 0, type: 'i32'}
+        },
+        texMap: PIXI.Texture.EMPTY.source,
+        texVision: PIXI.Texture.EMPTY.source,
+      }
+    })
+
     let mesh = new PIXI.Mesh({geometry: geometry, shader: shader})
+
+     // populate uniforms
+    mesh.shader!.resources.mapUniforms.uniforms.fog = this.fogOfWar ? 1 : 0
+    mesh.shader!.resources.mapUniforms.uniforms.los = this.lineOfSight ? 1 : 0
+    mesh.shader!.resources.texMap = this.mapTexture.source
+    mesh.shader!.resources.texVision = texVision.source
 
     // workaround to fix bleading edges in exploration mode
     // mesh.filters = this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore ? [this.blurFilter] : null
@@ -426,9 +431,8 @@ export class VisionLayer extends Layer {
         radiusMax = darkRadiusMax > lightRadiusMax ? darkRadiusMax : lightRadiusMax
     }
 
-    // init shaders
-    const shader = PIXI.Shader.from({ 
-      gl: ProgramManager.cached.get("vision")!,
+    const shader = new PIXI.Shader({ 
+      glProgram: ProgramManager.cached.get("vision")!,
       resources: {
         visionUniforms: {
           position: {value: new Float32Array(2), type: 'vec2<f32>'},
@@ -496,8 +500,8 @@ export class VisionLayer extends Layer {
     }
 
     // init shaders
-    const shader = PIXI.Shader.from({ 
-      gl: ProgramManager.cached.get("vision")!,
+    const shader = new PIXI.Shader({ 
+      glProgram: ProgramManager.cached.get("vision")!,
       resources: {
         visionUniforms: {
           position: {value: new Float32Array(2), type: 'vec2<f32>'},
@@ -562,8 +566,8 @@ export class VisionLayer extends Layer {
     }
 
     // init shaders
-    const shader = PIXI.Shader.from({ 
-      gl: ProgramManager.cached.get("vision")!,
+    const shader = new PIXI.Shader({ 
+      glProgram: ProgramManager.cached.get("vision")!,
       resources: {
         visionUniforms: {
           position: {value: new Float32Array(2), type: 'vec2<f32>'},
@@ -601,8 +605,8 @@ export class VisionLayer extends Layer {
   updateFog() {
 
     // init shaders
-    const shader = PIXI.Shader.from({ 
-      gl: ProgramManager.cached.get("fog")!,
+    const shader = new PIXI.Shader({ 
+      glProgram: ProgramManager.cached.get("fog")!,
       resources: {
         fogUniforms: {
           exploration: {value: 0, type: 'f32'},

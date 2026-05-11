@@ -5,7 +5,7 @@ import { Loader } from "../core/map/models/loader"
 type ArrayFixed<T, L extends number> = [ T, ...Array<T> ] & { length: L }
 
 export class ProgramManager {
-    static cached = new Map<string, { vertex: string, fragment: string }>()
+    static cached = new Map<string, PIXI.GlProgram>()
 
     static async preload() {
         console.debug("preloading shaders")
@@ -13,26 +13,35 @@ export class ProgramManager {
         // vision
         let visionVert = await Loader.shared.loadResource("/assets/shaders/vision.vert")
         let visionFrag = await Loader.shared.loadResource("/assets/shaders/vision.frag")
-        ProgramManager.cached.set("vision", { vertex: visionVert, fragment: visionFrag })
+
+        let visionProgram = PIXI.GlProgram.from({vertex: visionVert, fragment: visionFrag})
+        ProgramManager.cached.set("vision", visionProgram)
 
         // light
         let lightFrag = await Loader.shared.loadResource("/assets/shaders/light.frag")
-        ProgramManager.cached.set("light", { vertex: visionVert, fragment: lightFrag })
+
+         let lightProgram = PIXI.GlProgram.from({vertex: visionVert, fragment: lightFrag})
+        ProgramManager.cached.set("light", lightProgram)
 
         // map
         let mapVert = await Loader.shared.loadResource("/assets/shaders/map.vert")
         let mapFrag = await Loader.shared.loadResource("/assets/shaders/map.frag")
-        ProgramManager.cached.set("map", { vertex: mapVert, fragment: mapFrag })
-        
+
+        let mapProgram = PIXI.GlProgram.from({vertex: mapVert, fragment: mapFrag})
+        ProgramManager.cached.set("map", mapProgram)
+
         // fog
         let fogFrag = await Loader.shared.loadResource("/assets/shaders/fog.frag")
-        ProgramManager.cached.set("fog", { vertex: mapVert, fragment: fogFrag })
+
+        let fogProgram = PIXI.GlProgram.from({vertex: mapVert, fragment: fogFrag})
+        ProgramManager.cached.set("fog", fogProgram)
     }
 }
 
 export class CacheManager {
     static sightPolygon = new Map<string, number[]>()
     static geometryPolygon = new Map<string, number[]>()
+    static shaders = new Map<string, PIXI.Shader>()
 }
 
 export class Utils {
