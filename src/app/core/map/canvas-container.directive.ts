@@ -33,7 +33,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
     resolution: window.devicePixelRatio || 1,
     // resolution: 1.0,
     antialias: true,
-    preference: 'webgl' as 'webgl' | 'webgpu',
+    preference: 'webgl' as 'webgl',
   };
 
   constructor(private el: ElementRef, private toastService: ToastService) {
