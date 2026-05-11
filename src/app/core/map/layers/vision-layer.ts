@@ -187,7 +187,6 @@ export class VisionLayer extends Layer {
     // create new mask
     // TODO: create custom renderer using stencil buffer
     this.msk = new PIXI.Graphics();
-    this.msk.beginFill(0xffffff);
 
     // active token
     let activeToken = this.activeToken
@@ -241,8 +240,6 @@ export class VisionLayer extends Layer {
 
       this.drawLight(light, false)
     }
-
-    this.msk.endFill();
 
     let maskRequired = false;
 
@@ -330,8 +327,7 @@ export class VisionLayer extends Layer {
     // mesh.shader.uniforms.texVision = texVision
     // mesh.shader.uniforms.fog = this.fogOfWar
     // mesh.shader.uniforms.los = this.lineOfSight
-
-
+    
      // init shader
     const shader = PIXI.Shader.from({ 
       gl: ProgramManager.cached.get("map")!,
@@ -361,8 +357,6 @@ export class VisionLayer extends Layer {
     // mesh.filters = this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore ? [this.blurFilter] : null
 
     this.addChild(mesh);
-
-    // console.timeEnd('visionDraw')
 
     if (this.bg != null) {
       this.bg.visible = false
@@ -467,7 +461,7 @@ export class VisionLayer extends Layer {
       mesh.mask = this.msk;
     } else {
       // performance hog
-      this.msk.drawPolygon(sightPolygon)
+      this.msk.poly(sightPolygon).fill({color: 0xffffff})
     }
   }
 
@@ -536,7 +530,7 @@ export class VisionLayer extends Layer {
       mesh.mask = this.msk;
     } else {
       // performance hog
-      this.msk.drawPolygon(sightPolygon)
+      this.msk.poly(sightPolygon).fill({color: 0xffffff})
     }
   }
 
@@ -600,7 +594,7 @@ export class VisionLayer extends Layer {
       mesh.mask = this.msk;
     } else {
       // performance hog
-      this.msk.drawPolygon(sightPolygon)
+      this.msk.poly(sightPolygon).fill({color: 0xffffff})
     }
   }
 

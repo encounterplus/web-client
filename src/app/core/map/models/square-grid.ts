@@ -46,7 +46,6 @@ export class SquareGrid extends Grid implements GridInterface {
 
     pathGraphics(path: Array<number>, gridSize: GridSize, color: number, graphics: PIXI.Graphics): PIXI.Graphics {
         graphics.clear()
-        graphics.beginFill(color)
 
         for (let i = 0; i < path.length; i=i+2) {
             const pos = this.position(path[i], path[i + 1])
@@ -57,10 +56,9 @@ export class SquareGrid extends Grid implements GridInterface {
             let width = gridSize.width * this.size
             let height = gridSize.height * this.size
 
-            graphics.drawRect(x, y, width, height)
+            graphics.rect(x, y, width, height).fill(color)
         }
 
-        graphics.endFill()
         return graphics
     }
 

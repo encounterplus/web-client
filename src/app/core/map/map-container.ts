@@ -305,9 +305,7 @@ export class MapContainer extends Layer {
 
     // create new mask
     this.msk = new PIXI.Graphics();
-    this.msk.beginFill(0xffffff);
-    this.msk.drawRect(0, 0, this.w, this.h)
-    this.msk.endFill()
+    this.msk.rect(0, 0, this.w, this.h).fill(0xffffff)
 
     // apply mask
     this.addChild(this.msk)
