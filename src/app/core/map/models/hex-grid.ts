@@ -108,7 +108,6 @@ export class HexGrid extends Grid implements GridInterface {
 
     pathGraphics(path: Array<number>, gridSize: GridSize, color: number, graphics: PIXI.Graphics): PIXI.Graphics {
         graphics.clear()
-        graphics.beginFill(color)
 
         for (let i = 0; i < path.length; i=i+2) {
             const hex = this.hex(new PIXI.Point(Math.abs(path[i]), Math.abs(path[i + 1])))
@@ -123,7 +122,7 @@ export class HexGrid extends Grid implements GridInterface {
             graphics.closePath()
         }
 
-        graphics.endFill()
+        graphics.fill(color)
         return graphics
     }
 

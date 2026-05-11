@@ -39,17 +39,18 @@ export class MarkerView extends View {
         let scale = this.grid.size / 50
         let color = new PIXI.Color(this.marker.color);
 
-        this.markerGraphics.beginFill(color)
+        this.markerGraphics
             .moveTo(25, 0)
             .bezierCurveTo(15.08, 0, 7, 8.13, 7, 18.11)
             .bezierCurveTo(7, 30.5, 23.11, 48.7, 23.11, 48.7)
             .bezierCurveTo(24.44, 50.18, 24.44, 50.18, 25.56, 50.18)
             .bezierCurveTo(26.89, 48.69, 43, 30.5, 43, 18.11)
             .bezierCurveTo(43, 8.13, 34.92, 0, 25, 0)
-            .closePath().endFill;
-        this.markerGraphics.beginFill(0xffffff).drawCircle(25, 18, 15).endFill();
+            .closePath()
+            .fill(color);
+        this.markerGraphics.circle(25, 18, 15).fill(0xffffff)
         if (!this.marker.label) {
-            this.markerGraphics.beginFill(color).drawCircle(25, 18, 12).endFill();
+            this.markerGraphics.circle(25, 18, 12).fill(color);
         } else {
             let text = new PIXI.Text({ text: this.marker.label, style: {fontFamily : 'Arial', fontSize: 30, fill : 0x000000, align : 'center'} });
             text.anchor.set(0.5, 0.5);
