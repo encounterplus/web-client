@@ -57,8 +57,7 @@ export class EffectsLayer extends Layer {
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
         if (this.weatherEffectView != null) {
-            // this.weatherEffectView.emitter.emit = false;
-            // this.weatherEffectView.emitter.destroy()
+            this.weatherEffectView.stop()
             this.weatherEffectView.destroy()
             this.removeChild(this.weatherEffectView)
             this.weatherEffectView = null
@@ -83,9 +82,12 @@ export class EffectsLayer extends Layer {
                     break
             }
 
+            console.debug(this.w, this.h, weatherType, weatherIntensity)
+
             this.weatherEffectView = new WeatherEffectView(weatherType, weatherIntensity, this.grid, this, particleTexture);
-            this.weatherEffectView.updatePosition(0, 0);
-            // this.weatherEffectView.emitter.emit = true;
+            this.weatherEffectView.setSize(this.size);
+            this.weatherEffectView.updatePosition(this.w / 2, this.h / 2);
+            this.weatherEffectView.play();
             this.addChild(this.weatherEffectView);
         }
         
@@ -104,10 +106,7 @@ export class EffectsLayer extends Layer {
             // console.log("creating new pointer");
             pointerView = new PointerView(pointer, this.grid, this, this.ringTexture);
             pointerView.updatePosition(pointer.x, pointer.y);
-            // pointerView.emitter.emit = true;
-            // pointerView.emitter.playOnceAndDestroy( () => {
-            //     // console.log('destroying pointer');
-            // });
+            pointerView.play();
             this.addChild(pointerView);
             this.views[pointer.id] = pointerView;
         }
@@ -121,6 +120,7 @@ export class EffectsLayer extends Layer {
             case ControlState.cancel:
                 // pointerView.emitter.emit = false;
                 delete this.views[pointer.id];
+                pointerView.stop();
                 pointerView.destroy();
                 break;
         }
@@ -131,10 +131,7 @@ export class EffectsLayer extends Layer {
          // console.log("creating new focus");
         let focusView = new FocusView(color, this.grid, this, this.circleTexture);
         focusView.updatePosition(x, y);
-        // focusView.emitter.emit = true;
-        // focusView.emitter.playOnceAndDestroy( () => {
-        //         // console.log('destroying pointer');
-        // });
+        focusView.play();
         this.addChild(focusView);
     }
 

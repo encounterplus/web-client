@@ -1,72 +1,131 @@
 import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
+import { Emitter, EmitterConfig } from 'pixi-particle-system';
+import { Layer } from '../layers/layer';
 
 export class FocusView extends View {
 
-    grid: Grid;
-    particleTexture: PIXI.Texture;
-    sourceText: PIXI.Text;
+  grid: Grid;
+  particleTexture: PIXI.Texture;
+  sourceText: PIXI.Text;
 
-    // emitter: particles.Emitter;
+  particleContainer: PIXI.ParticleContainer;
+  emitter: Emitter;
 
-    constructor(private color: string, grid: Grid, parent: PIXI.Container, texture: PIXI.Texture) {
-        super();
+  constructor(private color: string, grid: Grid, private parentLayer: Layer, texture: PIXI.Texture) {
+    super();
 
-        let particleScale = (grid.size / 480.0) * 6;
+    let particleScale = (grid.size / 480.0) * 6;
 
-        let config = {
-            alpha: {
-                start: 1,
-                end: 0,
+    let config: EmitterConfig = {
+      "emitterVersion": "0.0.0",
+      "minParticleLifetime": 2,
+      "maxParticleLifetime": 2,
+      "spawnInterval": 0.75,
+      "spawnChance": 1,
+      "maxParticles": 500,
+      "addAtBack": true,
+      "particlesPerWave": 1,
+      "alphaBehavior": {
+        "mode": "list",
+        "listData": {
+          "list": [
+            {
+              "value": 1,
+              "time": 0
             },
-            scale: {
-                start: 0,
-                end: 1.0 * particleScale
+            {
+              "value": 0,
+              "time": 1
+            }
+          ]
+        }
+      },
+      "colorBehavior": {
+        "mode": "random",
+        "listData": {
+          "list": [
+            {
+              "value": color,
+              "time": 0
             },
-            color: {
-                start: this.color,
-                end: this.color
-            },
-            speed: {
-                start: 0,
-                end: 0
-            },
-            acceleration: {
-                x: 0,
-                y: 0
-            },
-            maxSpeed: 100,
-            startRotation: {
-                min: 0,
-                max: 360
-            },
-            noRotation: true,
-            rotationSpeed: {
-                min: 100,
-                max: 100
-            },
-            lifetime: {
-                min: 2,
-                max: 2
-            },
-            frequency: 0.75,
-            emitterLifetime: 3,
-            maxParticles: 500,
-            pos: {
-                x: 0,
-                y: 0
-            },
-            addAtBack: true,
-            spawnType: "point"
-        };
-
-        // this.emitter = new particles.Emitter(parent, particles.upgradeConfig(config, [texture]));
-        // this.emitter.autoUpdate = true;
-        // this.emitter.particleBlendMode = PIXI.BLEND_MODES.ADD;
+            {
+              "value": color,
+              "time": 1
+            }
+          ]
+        }
+      },
+      "rotationBehavior": {
+        "listData": {
+          "list": [
+            { "time": 0.0, "value": 0 },
+            { "time": 1.0, "value": Math.PI * 2 },
+          ]
+        },
+        "mode": "list",
+      },
+      "scaleBehavior": {
+        "xListData": {
+          "list": [
+            { "value": 0, "time": 0 },
+            { "value": 1.0 * particleScale, "time": 1 }
+          ]
+        },
+        "yListData": {
+          "list": [
+            { "value": 0, "time": 0 },
+            { "value": 1.0 * particleScale, "time": 1 }
+          ]
+        },
+        "mode": "list"
+      },
+      "spawnBehavior": {
+        "origin": {
+          "x": 0,
+          "y": 0
+        },
+        "shape": "point",
+        "direction": {
+          "x": 0,
+          "y": -1
+        }
+      },
+      "textureBehavior": {
+        "mode": "static",
+        "textureConfigs": [
+          {
+            "textures": [texture]
+          }
+        ]
+      },
     }
 
-    updatePosition(x: number, y: number) {
-        // this.emitter.updateOwnerPos(x, y);
-    }
+    // create container
+    this.particleContainer = new PIXI.ParticleContainer()
+    this.addChild(this.particleContainer)
+
+    // create emitter
+    this.emitter = new Emitter(this.particleContainer, config);
+  }
+
+  play() {
+    this.emitter.play()
+    setTimeout(() => this.stop(), 2000)
+  }
+
+  stop() {
+    this.emitter.stop()
+    this.destroy()
+  }
+
+  destroy(options?: PIXI.DestroyOptions): void {
+    super.destroy(options);
+  }
+
+  updatePosition(x: number, y: number) {
+    this.emitter.spawnBehavior.origin.x = x;
+    this.emitter.spawnBehavior.origin.y = y;
+  }
 }
