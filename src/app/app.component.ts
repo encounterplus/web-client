@@ -429,7 +429,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.mapFocus: {
-        console.debug(event.data)
+        // console.debug(event.data)
 
         // focus effect
         if (event.data.effect) {

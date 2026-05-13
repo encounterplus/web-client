@@ -117,11 +117,15 @@ export class FocusView extends View {
 
   stop() {
     this.emitter.stop()
-    this.destroy()
+
+    setTimeout(() => this.destroy(), 2000)
   }
 
   destroy(options?: PIXI.DestroyOptions): void {
     super.destroy(options);
+
+    console.debug("destroying focus view")
+    this.removeChildren();
   }
 
   updatePosition(x: number, y: number) {
