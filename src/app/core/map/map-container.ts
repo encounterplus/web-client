@@ -31,6 +31,7 @@ import { VisionLayer } from './layers/vision-layer';
 import { MeasurementsLayer } from './layers/measurements-layer';
 import { MeasurementView } from './views/measurement-view';
 import { PathsLayer } from './layers/paths-layer';
+import { View } from './views/view';
 
 export class MapContainer extends Layer {
 
@@ -67,13 +68,14 @@ export class MapContainer extends Layer {
 
   dragging: boolean = false
   clicked: boolean = false
+  dragTarget?: View
 
-  activePointer: Pointer
-  activeTool: Tool 
+  activePointer: Pointer | null = null
+  activeTool: Tool | null = null
 
-  turned: TokenView
-  msk: PIXI.Graphics
-  app: PIXI.Application
+  turned: TokenView | null = null
+  msk: PIXI.Graphics | null = null
+  app: PIXI.Application | null = null
 
   constructor(private dataService: DataService) {
     super();
@@ -126,7 +128,7 @@ export class MapContainer extends Layer {
     this
       .on('pointerup', this.onPointerUp)
       .on('pointerdown', this.onPointerDown)
-      .on('pointermove', this.onPointerMove)
+      // .on('pointermove', this.onPointerMove)
   }
 
   setActiveTool(tool: Tool) {
@@ -344,6 +346,8 @@ export class MapContainer extends Layer {
     this.overlaySprite.visible = false
 
     // tokens
+    this.monstersLayer.size = this.size
+    this.playersLayer.size = this.size
     await this.drawTokens()
 
     // auras
@@ -448,6 +452,7 @@ export class MapContainer extends Layer {
 
   onPointerUp(event: any) {
     this.dragging = false;
+    this.off('pointermove', this.onPointerMove)
 
     if (this.activePointer) {
       event.stopPropagation();
@@ -466,9 +471,11 @@ export class MapContainer extends Layer {
   }
 
   onPointerDown(event: any) {
+    // notice: shift key no longer works, as the container event mode is passive by default
     if (event.data.originalEvent.shiftKey || this.activeTool == Tool.pointer) {
       event.stopPropagation();
       this.dragging = true;
+      this.on('pointermove', this.onPointerMove)
 
       const newPosition = event.data.getLocalPosition(this.parent);
 
@@ -516,4 +523,8 @@ export class MapContainer extends Layer {
       this.dataService.send({ name: WSEventName.pointerUpdated, data: this.activePointer });
     }
   }
+
+  // onTokenMove(event: any) {
+  //    console.debug(`token move`)
+  // }
 }

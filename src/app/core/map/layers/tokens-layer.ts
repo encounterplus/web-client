@@ -13,7 +13,7 @@ export class TokensLayer extends Layer {
     constructor(private dataService: DataService) {
         super();
 
-        this.eventMode = "passive"
+        this.eventMode = "passive";
     }
 
     async draw() {
