@@ -119,6 +119,7 @@ export class PointerView extends View {
 
     // create container
     this.particleContainer = new PIXI.ParticleContainer()
+    // this.particleContainer.blendMode = 'add';
     this.addChild(this.particleContainer)
 
     // create emitter
