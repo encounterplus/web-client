@@ -29,7 +29,7 @@
     "ngx-color-picker": "^17.0.0",
     "pixi-particle-system": "^1.2.0",
     "pixi-viewport": "^6.0.0",
-    "pixi.js": "^8.2.0",
+    "pixi.js": "^8.18.0",
     "rxjs": "^7.8.2",
     "safe-pipe": "^3.0.4",
     "tslib": "^2.4.0",

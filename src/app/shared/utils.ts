@@ -1,5 +1,11 @@
 import * as PIXI from 'pixi.js'
 import { Loader } from "../core/map/models/loader"
+import visionVert from '../../assets/shaders/vision.vert'
+import visionFrag from '../../assets/shaders/vision.frag'
+import lightFrag from '../../assets/shaders/light.frag'
+import mapVert from '../../assets/shaders/map.vert'
+import mapFrag from '../../assets/shaders/map.frag'
+import fogFrag from '../../assets/shaders/fog.frag'
 
 // from pixi.js source
 type ArrayFixed<T, L extends number> = [ T, ...Array<T> ] & { length: L }
@@ -11,28 +17,18 @@ export class ProgramManager {
         console.debug("preloading shaders")
 
         // vision
-        let visionVert = await Loader.shared.loadResource("/assets/shaders/vision.vert")
-        let visionFrag = await Loader.shared.loadResource("/assets/shaders/vision.frag")
-
         let visionProgram = PIXI.GlProgram.from({vertex: visionVert, fragment: visionFrag})
         ProgramManager.cached.set("vision", visionProgram)
 
         // light
-        let lightFrag = await Loader.shared.loadResource("/assets/shaders/light.frag")
-
          let lightProgram = PIXI.GlProgram.from({vertex: visionVert, fragment: lightFrag})
         ProgramManager.cached.set("light", lightProgram)
 
         // map
-        let mapVert = await Loader.shared.loadResource("/assets/shaders/map.vert")
-        let mapFrag = await Loader.shared.loadResource("/assets/shaders/map.frag")
-
         let mapProgram = PIXI.GlProgram.from({vertex: mapVert, fragment: mapFrag})
         ProgramManager.cached.set("map", mapProgram)
 
         // fog
-        let fogFrag = await Loader.shared.loadResource("/assets/shaders/fog.frag")
-
         let fogProgram = PIXI.GlProgram.from({vertex: mapVert, fragment: fogFrag})
         ProgramManager.cached.set("fog", fogProgram)
     }
