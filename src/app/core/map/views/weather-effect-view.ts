@@ -4,7 +4,7 @@ import * as PIXI from 'pixi.js'
 import { WeatherType } from 'src/app/shared/models/map';
 import { Emitter, EmitterConfig } from 'pixi-particle-system';
 import { Layer } from '../layers/layer';
-import { CenterAttractionBehavior } from './center-attraction-behavior';
+import { CenterMovementBehavior } from '../center-movement-behavior';
 
 export class WeatherEffectView extends View {
 
@@ -300,7 +300,7 @@ export class WeatherEffectView extends View {
 
     // additional configuration for snow
     if (type == WeatherType.snow) {
-      const attractBehavior = new CenterAttractionBehavior(this.emitter);
+      const attractBehavior = new CenterMovementBehavior(this.emitter);
       const distance = 0.15 * (intensity <= 1.0 ? 1.0 : intensity**2.4)
       attractBehavior.applyConfig({ center: { x: this.w / 2, y: this.h / 2 }, startSpeed: 2, endSpeed: 0.0, distance: distance, directionJitter: 0.2 });
       this.emitter.addToActiveInitBehaviors(attractBehavior);

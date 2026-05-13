@@ -1,6 +1,6 @@
 import { Emitter, EmitterBehavior, InitBehavior, UpdateBehavior, BaseParticleData, IEmitterParticle, BehaviorOrder } from 'pixi-particle-system';
 
-export type CenterAttractionConfig = {
+export type CenterMovementConfig = {
     /** Target center point in container-local space. Defaults to {x: 0, y: 0}. */
     center?: { x: number; y: number };
     /**
@@ -40,10 +40,10 @@ export type CenterAttractionConfig = {
  * to store the displacement toward the center, so this behavior should not be
  * combined with MovementBehavior.
  */
-export class CenterAttractionBehavior<
+export class CenterMovementBehavior<
     DataType extends BaseParticleData = BaseParticleData,
     ParticleType extends IEmitterParticle<DataType> = IEmitterParticle<DataType>
-> extends EmitterBehavior<CenterAttractionConfig, DataType, ParticleType>
+> extends EmitterBehavior<CenterMovementConfig, DataType, ParticleType>
     implements InitBehavior<DataType, ParticleType>, UpdateBehavior<DataType, ParticleType> {
 
     private _centerX = 0;
@@ -62,7 +62,7 @@ export class CenterAttractionBehavior<
         return 'late';
     }
 
-    override applyConfig(config: CenterAttractionConfig): void {
+    override applyConfig(config: CenterMovementConfig): void {
         this._centerX = config.center?.x ?? 0;
         this._centerY = config.center?.y ?? 0;
         this._startSpeed = config.startSpeed ?? 1;
@@ -72,7 +72,7 @@ export class CenterAttractionBehavior<
         this._active = true;
     }
 
-    getConfig(): CenterAttractionConfig | undefined {
+    getConfig(): CenterMovementConfig | undefined {
         if (!this._active) return undefined;
         return { center: { x: this._centerX, y: this._centerY }, startSpeed: this._startSpeed, endSpeed: this._endSpeed, distance: this._distance, directionJitter: this._directionJitter };
     }
