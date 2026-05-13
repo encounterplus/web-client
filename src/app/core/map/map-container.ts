@@ -371,7 +371,7 @@ export class MapContainer extends Layer {
     return this;
   }
 
-  tokenViewById(id: string): TokenView {
+  tokenViewById(id: string): TokenView | null {
     for (let view of this.playersLayer.views) {
       if (view.token.id == id) {
         return view
@@ -387,7 +387,7 @@ export class MapContainer extends Layer {
     return null
   }
 
-  tokenViewByTrackingId(id: number): TokenView {
+  tokenViewByTrackingId(id: number): TokenView | null {
     for (let view of this.playersLayer.views) {
       if (view.token.trackingId == id) {
         return view
@@ -403,7 +403,7 @@ export class MapContainer extends Layer {
     return null
   }
 
-  areaEffectViewById(id: string): AreaEffectView {
+  areaEffectViewById(id: string): AreaEffectView | null {
     for (let view of this.areaEffectsLayer.views) {
       if (view.areaEffect.id == id) {
         return view
@@ -412,7 +412,7 @@ export class MapContainer extends Layer {
     return null
   }
 
-  measurementViewById(id: string): MeasurementView {
+  measurementViewById(id: string): MeasurementView | null {
     for (let view of this.measurementsLayer.views) {
       if (view.measurement.id == id) {
         return view
@@ -421,7 +421,7 @@ export class MapContainer extends Layer {
     return null
   }
 
-  tileViewById(id: string): TileView {
+  tileViewById(id: string): TileView | null {
     for (let view of this.topLayer.views) {
       if (view.tile.id == id) {
         return view
@@ -441,7 +441,7 @@ export class MapContainer extends Layer {
     return null
   }
 
-  markerViewById(id: string): MarkerView {
+  markerViewById(id: string): MarkerView | null {
     for (let view of this.markersLayer.views) {
       if (view.marker.id == id) {
         return view

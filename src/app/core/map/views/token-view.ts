@@ -64,7 +64,8 @@ export class TokenView extends View {
   pointerId?: number | null
 
   get isPlayer(): boolean {
-    return this.token.role == Role.friendly || false
+    return this.token.player || false
+    // return this.token.player == true || this.token.role == Role.friendly || false
   }
 
   get baseColor(): number {

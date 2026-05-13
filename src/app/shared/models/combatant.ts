@@ -1,33 +1,35 @@
 import { Initiative } from "./initiative"
 
 export enum Role {
-    friendly = "friendly",
-    hostile = "hostile",
-    neutral = "neutral",
+  friendly = "friendly",
+  hostile = "hostile",
+  neutral = "neutral",
 }
 
 export class Combatant {
-    id: string
-    label?: string
-    name?: string
-    role?: Role
-    hidden?: boolean
-    reference?: string
+  id: string
+  label?: string
+  name?: string
+  role?: Role
+  hidden?: boolean
+  reference?: string
 
-    data?: any
-    attributes?: any
+  data?: any
+  attributes?: any
 
-    rank: number
-    initiative?: Array<Initiative>
+  rank: number
+  initiative?: Array<Initiative>
 
-    bloodied?: boolean
-    defeated?: boolean
+  bloodied?: boolean
+  defeated?: boolean
 
-    image?: string
-    
-    tokenId?: string
-    entityId?: string
-    entityType?: string
+  image?: string
+
+  tokenId?: string
+  entityId?: string
+  entityType?: string
+
+  player?: boolean
 }
 
 export interface ActiveCombatant {
