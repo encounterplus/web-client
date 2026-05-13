@@ -50,7 +50,7 @@ export class VisionLayer extends Layer {
   mapShader: PIXI.Shader
   visionShader: PIXI.Shader
 
-  get activeToken(): Token {
+  get activeToken(): Token | null {
     // no active token shared vision is always
     if (this.dataService.state.screen.sharedVision == SharedVision.always) {
       return null

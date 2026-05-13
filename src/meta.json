@@ -1,6 +1,6 @@
 {
     "name": "Web Client",
-    "version": "0.9.15",
+    "version": "0.9.16-beta",
     "description": "Web client for Encounter+ VTT app",
     "author": "Encounter+ Dev Team",
     "url": "https://github.com/encounterplus/web-client"
