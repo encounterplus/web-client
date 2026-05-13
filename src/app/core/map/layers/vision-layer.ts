@@ -671,7 +671,7 @@ export class VisionLayer extends Layer {
     sprite.filters = this.blur ? [this.blurFilter] : null
 
     // render offscreen
-    this.app.renderer.render(sprite, { renderTexture: this.fogTexture })
+    this.app.renderer.render({container: sprite, target: this.fogTexture })
 
     sprite.destroy()
     // remove cached textures
@@ -703,7 +703,7 @@ export class VisionLayer extends Layer {
     sprite.filters = this.blur ? [this.blurFilter] : null
 
     // render offscreen
-    this.app.renderer.render(sprite, { renderTexture: this.fogTexture })
+    this.app.renderer.render({container: sprite, target: this.fogTexture })
 
     sprite.destroy()
     // PIXI.BaseTexture.removeFromCache(fogTexture.baseTexture.textureCacheIds[1]);
