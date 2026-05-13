@@ -17,6 +17,7 @@ export class ProgramManager {
         console.debug("preloading shaders")
 
         // vision
+        // let visionFrag = await Loader.shared.loadResource("/assets/shaders/vision.frag")
         let visionProgram = PIXI.GlProgram.from({vertex: visionVert, fragment: visionFrag})
         ProgramManager.cached.set("vision", visionProgram)
 
