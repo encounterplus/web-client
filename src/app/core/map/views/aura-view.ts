@@ -3,7 +3,7 @@ import { View } from './view';
 import { Grid } from '../models/grid';
 import { Loader } from '../models/loader';
 import { Aura } from 'src/app/shared/models/aura';
-import { Utils } from 'src/app/shared/utils';
+import { ProgramManager, Utils } from 'src/app/shared/utils';
 
 
 export class AuraView extends View {
@@ -15,6 +15,7 @@ export class AuraView extends View {
     assetSprite: PIXI.AnimatedSprite;
 
     shapeGraphics: PIXI.Graphics;
+    videoSprite: PIXI.Sprite;
 
     constructor(aura: Aura, grid: Grid) {
         super();
@@ -27,6 +28,7 @@ export class AuraView extends View {
         this.update();
 
         await this.drawShape();
+        // await this.drawVideo();
 
         if (this.aura.asset != null) {
             await this.drawAsset();
@@ -48,7 +50,31 @@ export class AuraView extends View {
         } else {
             this.shapeGraphics.visible = true;
         }
+        return this;
+    }
 
+    async drawVideo() {
+        const texture = await PIXI.Assets.load('/assets/bless.mp4');
+        // const texture = await PIXI.Assets.load('/assets/bless.webm');
+        const sprite = new PIXI.Sprite(texture);
+        sprite.anchor.set(0.5, 0.5);
+        sprite.position.set(-this.w / 2, -this.h / 2);
+        sprite.width = this.w;
+        sprite.height = this.h;
+        (texture.source as PIXI.VideoSource).resource.loop = true;
+        (texture.source as PIXI.VideoSource).resource.play();
+
+        const videoFilter = new PIXI.Filter({
+            glProgram: ProgramManager.cached.get("splitVideo")!,
+            resources: {
+                uVideoTexture: texture.source,
+                uVideoSampler: texture.source.style,
+            },
+        });
+        sprite.filters = [videoFilter];
+
+        this.addChild(sprite);
+        this.videoSprite = sprite;
         return this;
     }
 

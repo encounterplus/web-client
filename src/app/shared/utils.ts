@@ -6,6 +6,8 @@ import lightFrag from '../../assets/shaders/light.frag'
 import mapVert from '../../assets/shaders/map.vert'
 import mapFrag from '../../assets/shaders/map.frag'
 import fogFrag from '../../assets/shaders/fog.frag'
+import videoVert from '../../assets/shaders/video.vert'
+import videoFrag from '../../assets/shaders/video.frag'
 
 // from pixi.js source
 type ArrayFixed<T, L extends number> = [ T, ...Array<T> ] & { length: L }
@@ -32,6 +34,10 @@ export class ProgramManager {
         // fog
         let fogProgram = PIXI.GlProgram.from({vertex: mapVert, fragment: fogFrag})
         ProgramManager.cached.set("fog", fogProgram)
+
+        // split video
+        let splitVideoProgram = PIXI.GlProgram.from({vertex: videoVert, fragment: videoFrag})
+        ProgramManager.cached.set("splitVideo", splitVideoProgram)
     }
 }
 
