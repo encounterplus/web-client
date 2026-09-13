@@ -25,7 +25,7 @@ export class SettingsModalComponent implements OnInit {
   
   runModeOptions: Array<RunMode> = [RunMode.normal, RunMode.tv]
   runMode: RunMode = RunMode.normal
-  tokenId?: string
+  tokenId?: string | null
 
   get tokens(): Array<Token> {
     if (this.state.map != null) {
@@ -45,7 +45,13 @@ export class SettingsModalComponent implements OnInit {
   save() {
     localStorage.setItem("userName", this.name)
     localStorage.setItem("userColor", this.color)
-    localStorage.setItem("userTokenId", this.tokenId)
+    if (this.tokenId) {
+      localStorage.setItem("userTokenId", this.tokenId)
+      this.state.userTokenId = this.tokenId
+    } else {
+      localStorage.removeItem("userTokenId")
+      this.state.userTokenId = undefined
+    }
 
     localStorage.setItem("maxFPS", `${this.maxFPS}`)
     localStorage.setItem("allowVideo", `${this.allowVideo}`)
@@ -91,7 +97,8 @@ export class SettingsModalComponent implements OnInit {
     this.allowVideo = (localStorage.getItem("allowVideo") || "true") == "true"
     this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200")
     this.softEdges = (localStorage.getItem("softEdges") || "true") == "true"
-    this.tokenId = localStorage.getItem("userTokenId")
+    const storedToken = localStorage.getItem("userTokenId")
+    this.tokenId = storedToken && storedToken !== "null" && storedToken !== "undefined" ? storedToken : null
     this.runMode = this.state.runMode
   }
 }

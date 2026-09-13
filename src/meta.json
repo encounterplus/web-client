@@ -1,7 +1,7 @@
 {
-    "name": "Web Client",
-    "version": "0.9.16-beta",
-    "description": "Web client for Encounter+ VTT app",
-    "author": "Encounter+ Dev Team",
-    "url": "https://github.com/encounterplus/web-client"
+    "name": "PF2E Remaster Web Client",
+    "version": "0.9.16-pf2e.2",
+    "description": "Encounter+ web client fork for the PF2E Remaster community system",
+    "author": "Encounter+ Dev Team; PF2E Remaster fork maintained by Saharory and contributors",
+    "url": "https://github.com/Saharory/web-client"
 }

@@ -15,7 +15,7 @@ export class EntityModalComponent implements OnInit {
   reference: string;
 
   get url() {
-    return `http://localhost:8080${this.reference}`
+    return `${this.dataService.baseURL}${this.reference}`
   }
 
   constructor(public modalInstance: NgbActiveModal, private dataService: DataService) { 

@@ -10,7 +10,7 @@ import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState, TokenView } from './core/map/views/token-view';
 import { AreaEffect } from './shared/models/area-effect';
 import { Tile } from './shared/models/tile';
-import { ToolbarComponent, Tool, Panel } from './core/toolbar/toolbar.component';
+import { ToolbarComponent, Tool, Panel, PanelChange, savedPanelState, savePanelState } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/services/toast.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -154,6 +154,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   showMessages: Boolean = false;
+  showPlayerPanel: Boolean = false;
   movingTokenView?: TokenView = null
 
   toolbarAction(type: string) {
@@ -242,14 +243,25 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  activePanelAction(panel: Panel) {
-    this.showMessages = panel == Panel.messages;
-    if (panel) {
+  activePanelAction(change: PanelChange) {
+    if (change.panel == Panel.messages) {
+      this.showMessages = change.open;
+    } else if (change.panel == Panel.player) {
+      this.showPlayerPanel = change.open;
+    }
+
+    if (change.panel == Panel.messages && change.open) {
       let lastHost = localStorage.getItem("lastSuccessfullHost");
       localStorage.setItem("readMessages", JSON.stringify({ "lastHost": lastHost, seenCount: this.state.messages.length }));
       this.state.readCount = this.state.messages.length;
       this.unreadMessages.set(this.state.messages.length - this.state.readCount)
     }
+  }
+
+  closePlayerPanel() {
+    this.showPlayerPanel = false;
+    savePanelState(Panel.player, false);
+    if (this.toolbarComponent) this.toolbarComponent.player = false;
   }
 
   showEntityAction(reference: string) {
@@ -1026,7 +1038,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     // update messages based on local storage settings
-    this.showMessages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
+    this.showMessages = savedPanelState(Panel.messages);
+    this.showPlayerPanel = savedPanelState(Panel.player);
 
     // update settings
     this.state.userTokenId = localStorage.getItem("userTokenId")

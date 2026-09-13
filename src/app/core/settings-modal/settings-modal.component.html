@@ -18,13 +18,14 @@
   </div>
 
   <div class="mb-2">
-    <label for="token" class="form-label">Token</label>
+    <label for="token" class="form-label">Your character token</label>
     <select [(ngModel)]="tokenId" class="form-control" id="token" >
       @for (token of tokens; track token) {
         <option [ngValue]="token.id">{{token.name || 'Unknown'}}</option>
       }
-      <option value=null>None</option>
+      <option [ngValue]="null">None</option>
     </select>
+    <div class="form-text">This controls which friendly token you can move and which character tools you see.</div>
   </div>
 
   <div class="mb-2">

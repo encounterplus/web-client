@@ -7,6 +7,7 @@ export enum WSEventName {
     mapFitScreen = "mapFitScreen",
     mapFocus = "mapFocus",
     combatantUpdated = "combatantUpdated",
+    updateCombatant = "updateCombatant",
     tileUpdated = "tileUpdated",
     tilesUpdated = "tilesUpdated",
     lightUpdated = "lightUpdated",

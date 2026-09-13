@@ -25,6 +25,12 @@
         </i>
     </label>
     </div>
+    <div class="btn-group" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" role="group" aria-label="My character">
+      <input type="checkbox" class="btn-check" id="playerPanelToggle" autocomplete="off" [(ngModel)]="player" (ngModelChange)="playerChanged($event)">
+      <label class="btn btn-dark" for="playerPanelToggle" title="My character">
+        <i class="fa fa-user-circle-o"></i>
+      </label>
+    </div>
   </div>
 
   <div class="btn-group ms-2" role="group" name="activeTool" aria-label="Active Tool">
@@ -46,4 +52,3 @@
     </div>
   }
 </div>
-

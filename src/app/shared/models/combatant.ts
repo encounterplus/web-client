@@ -16,6 +16,8 @@ export class Combatant {
 
   data?: any
   attributes?: any
+  effects?: Array<any>
+  modifiers?: Array<any>
 
   rank: number
   initiative?: Array<Initiative>

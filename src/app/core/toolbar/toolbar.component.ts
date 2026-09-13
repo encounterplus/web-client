@@ -11,6 +11,29 @@ export enum Tool {
 export enum Panel {
   none = "none",
   messages = "messages",
+  player = "player",
+}
+
+export interface PanelChange {
+  panel: Panel;
+  open: boolean;
+}
+
+const panelStorageKeys: Record<Panel.messages | Panel.player, string> = {
+  [Panel.messages]: "messagesPanelOpen",
+  [Panel.player]: "playerPanelOpen",
+};
+
+export function savedPanelState(panel: Panel.messages | Panel.player): boolean {
+  const value = localStorage.getItem(panelStorageKeys[panel]);
+  if (value !== null) return value === "true";
+
+  // Migrate the older single-panel preference without breaking existing users.
+  return localStorage.getItem("activePanel") === panel;
+}
+
+export function savePanelState(panel: Panel.messages | Panel.player, open: boolean): void {
+  localStorage.setItem(panelStorageKeys[panel], String(open));
 }
 
 @Component({
@@ -34,7 +57,7 @@ export class ToolbarComponent implements OnInit {
   public tool = new EventEmitter<Tool>();
 
   @Output()
-  public panel = new EventEmitter<Panel>();
+  public panel = new EventEmitter<PanelChange>();
 
   get showExit(): boolean {
     return this.state.device != null
@@ -45,6 +68,7 @@ export class ToolbarComponent implements OnInit {
   activeTool: Tool = Tool.move;
 
   messages: Boolean = false;
+  player: Boolean = false;
   videoControlsVisible: Boolean = false;
   videoPaused: boolean = false;
   videoMuted: boolean = true;
@@ -53,11 +77,14 @@ export class ToolbarComponent implements OnInit {
     this.tool.emit(newTool);
   }
 
-  messagesChanged(newValue) {
-    let activePanel =  newValue ? Panel.messages : Panel.none;
-    localStorage.setItem("activePanel", activePanel);
+  messagesChanged(newValue: boolean) {
+    savePanelState(Panel.messages, newValue);
+    this.panel.emit({ panel: Panel.messages, open: newValue });
+  }
 
-    this.panel.emit(activePanel);
+  playerChanged(newValue: boolean) {
+    savePanelState(Panel.player, newValue);
+    this.panel.emit({ panel: Panel.player, open: newValue });
   }
 
   showSettings() {
@@ -87,7 +114,8 @@ export class ToolbarComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
+    this.messages = savedPanelState(Panel.messages);
+    this.player = savedPanelState(Panel.player);
 
     this.dataService.videoMuted.subscribe(value => this.videoMuted);
     this.dataService.videoPaused.subscribe(value => this.videoPaused);

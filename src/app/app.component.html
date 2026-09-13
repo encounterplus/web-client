@@ -2,6 +2,10 @@
   <app-map [state]="state" class="h-100"></app-map>
   <app-toolbar id="toolbar" [state]="state" [unreadMessages]="this.unreadMessages()" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)"></app-toolbar>
 
+  @if (showPlayerPanel) {
+    <app-player-panel [state]="state" (closePanel)="closePlayerPanel()" (showSheet)="showEntityAction($event)"></app-player-panel>
+  }
+
   @if (zoomControls) {
     <app-zoombar id="zoombar" class="d-flex align-items-baseline" (action)="zoombarAction($event)" [state]="state"></app-zoombar>
   }

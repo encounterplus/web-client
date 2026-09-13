@@ -1,4 +1,12 @@
-# Web Client for Encounter+ App
+# PF2E Remaster Web Client for Encounter+
+
+This is the PF2E Remaster community fork of the
+[Encounter+ web client](https://github.com/encounterplus/web-client). The
+original client and architecture are the work of the Encounter+ development
+team; this branch contains Pathfinder-specific player features maintained by
+Saharory and contributors.
+
+The fork is currently based on upstream `0.9.16-beta`.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.1.
 
