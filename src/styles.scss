@@ -3,12 +3,168 @@
 $default-margin: 8px;
 $gameboard-margin: 75px;
 
+:root,
+:root[data-theme="light"] {
+    color-scheme: light;
+    --ui-page: #f1f3f5;
+    --ui-surface: rgba(255, 255, 255, 0.96);
+    --ui-surface-solid: #ffffff;
+    --ui-surface-muted: #f1f3f5;
+    --ui-surface-hover: #e9ecef;
+    --ui-text: #212529;
+    --ui-text-muted: #5c636a;
+    --ui-border: #ced4da;
+    --ui-border-strong: #adb5bd;
+    --ui-control: #ffffff;
+    --ui-control-hover: #e9ecef;
+    --ui-accent: #276da8;
+    --ui-accent-hover: #1f5a8c;
+    --ui-accent-text: #ffffff;
+    --ui-shadow: rgba(0, 0, 0, 0.22);
+    --ui-backdrop: rgba(0, 0, 0, 0.72);
+    --ui-close-filter: none;
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --ui-page: #111416;
+    --ui-surface: rgba(29, 33, 36, 0.96);
+    --ui-surface-solid: #1d2124;
+    --ui-surface-muted: #292e32;
+    --ui-surface-hover: #343a40;
+    --ui-text: #f1f3f5;
+    --ui-text-muted: #adb5bd;
+    --ui-border: #495057;
+    --ui-border-strong: #6c757d;
+    --ui-control: #292e32;
+    --ui-control-hover: #3a4147;
+    --ui-accent: #4b8fca;
+    --ui-accent-hover: #62a0d5;
+    --ui-accent-text: #ffffff;
+    --ui-shadow: rgba(0, 0, 0, 0.55);
+    --ui-backdrop: rgba(0, 0, 0, 0.82);
+    --ui-close-filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+        color-scheme: dark;
+        --ui-page: #111416;
+        --ui-surface: rgba(29, 33, 36, 0.96);
+        --ui-surface-solid: #1d2124;
+        --ui-surface-muted: #292e32;
+        --ui-surface-hover: #343a40;
+        --ui-text: #f1f3f5;
+        --ui-text-muted: #adb5bd;
+        --ui-border: #495057;
+        --ui-border-strong: #6c757d;
+        --ui-control: #292e32;
+        --ui-control-hover: #3a4147;
+        --ui-accent: #4b8fca;
+        --ui-accent-hover: #62a0d5;
+        --ui-accent-text: #ffffff;
+        --ui-shadow: rgba(0, 0, 0, 0.55);
+        --ui-backdrop: rgba(0, 0, 0, 0.82);
+        --ui-close-filter: invert(1) grayscale(100%) brightness(200%);
+    }
+}
+
 body {
     padding: 0;
     margin: 0;
-    background-color: #333;
+    color: var(--ui-text);
+    background-color: var(--ui-page);
     overflow: hidden;
     position: relative;
+}
+
+.btn-client {
+    color: var(--ui-text);
+    background: var(--ui-control);
+    border-color: var(--ui-border);
+
+    &:hover,
+    &:focus-visible,
+    &:active,
+    &.active,
+    &.show,
+    .btn-check:checked + & {
+        color: var(--ui-text);
+        background: var(--ui-control-hover);
+        border-color: var(--ui-border-strong);
+    }
+}
+
+.client-divider-start {
+    border-left: 1px solid var(--ui-border);
+}
+
+.client-divider-top {
+    border-top: 1px solid var(--ui-border);
+}
+
+.modal-content,
+.dropdown-menu {
+    color: var(--ui-text);
+    background: var(--ui-surface-solid);
+    border-color: var(--ui-border);
+    box-shadow: 0 0.75rem 2rem var(--ui-shadow);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--ui-border);
+}
+
+.dropdown-item {
+    color: var(--ui-text);
+
+    &:hover,
+    &:focus {
+        color: var(--ui-text);
+        background: var(--ui-surface-hover);
+    }
+}
+
+.dropdown-divider {
+    border-color: var(--ui-border);
+}
+
+.form-control,
+.form-select {
+    color: var(--ui-text);
+    background-color: var(--ui-control);
+    border-color: var(--ui-border);
+
+    &:focus {
+        color: var(--ui-text);
+        background-color: var(--ui-control);
+        border-color: var(--ui-accent);
+        box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--ui-accent) 25%, transparent);
+    }
+}
+
+.form-text {
+    color: var(--ui-text-muted);
+}
+
+.btn-close {
+    filter: var(--ui-close-filter);
+}
+
+.btn-primary,
+.btn-success {
+    color: var(--ui-accent-text);
+    background-color: var(--ui-accent);
+    border-color: var(--ui-accent);
+
+    &:hover,
+    &:focus-visible,
+    &:active {
+        color: var(--ui-accent-text);
+        background-color: var(--ui-accent-hover);
+        border-color: var(--ui-accent-hover);
+    }
 }
 
 button[aria-label="Close"]:focus {
@@ -27,15 +183,14 @@ button[aria-label="Close"]:focus {
 
 code {
     padding: 2px 4px;
-    border: 1px solid #000;
+    border: 1px solid var(--ui-border);
     border-radius: 4px;
-    background-color: #131414;
+    background-color: var(--ui-surface-muted);
     margin: 4px 0px;
     display: block;
-    color: #6e7ed7;
+    color: var(--ui-accent);
 }
 
 .dark-modal {
     width: 400px;
 }
-

@@ -29,6 +29,16 @@
   </div>
 
   <div class="mb-2">
+    <label for="appearance" class="form-label">Appearance</label>
+    <select [(ngModel)]="appearance" class="form-control" id="appearance">
+      @for (option of appearanceOptions; track option.value) {
+        <option [value]="option.value">{{option.label}}</option>
+      }
+    </select>
+    <div class="form-text">Automatic follows this device's light or dark appearance.</div>
+  </div>
+
+  <div class="mb-2">
     <label for="runMode" class="form-label">Run Mode</label>
     <select [(ngModel)]="runMode" class="form-control" id="runMode">
       @for (mode of runModeOptions; track mode; let i = $index) {

@@ -4,7 +4,7 @@
       <span class="eyebrow">My character</span>
       <h2>{{combatant?.name || token?.name || 'No character selected'}}</h2>
     </div>
-    <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closePanel.emit()"></button>
+    <button type="button" class="btn-close" aria-label="Close" (click)="closePanel.emit()"></button>
   </header>
 
   @if (!token) {
@@ -37,22 +37,21 @@
         </div>
       }
 
-      <div class="tool-section">
-        <div class="section-title"><i class="fa fa-flag" aria-hidden="true"></i> Initiative</div>
-        @if (canSetInitiative) {
-          <div class="initiative-row">
-            <input [ngModel]="initiativeValue" (ngModelChange)="initiativeValue = $event; initiativeDirty = true" type="number" inputmode="numeric" aria-label="Initiative result" />
-            <button type="button" class="btn btn-sm btn-primary" [disabled]="!initiativeInputValid" (click)="saveInitiative()">Set result</button>
-          </div>
-          <small>Enter the total you rolled. The GM starts and sorts combat.</small>
-        } @else if (state.game.started) {
-          <div class="initiative-result">{{currentInitiative ?? '—'}}</div>
-          <small>Initiative is locked here while combat is running.</small>
-        } @else {
-          <div class="initiative-result">—</div>
-          <small>The GM needs to add this character to the encounter before initiative can be entered.</small>
-        }
-      </div>
+      @if (hasInitiative) {
+        <div class="tool-section">
+          <div class="section-title"><i class="fa fa-flag" aria-hidden="true"></i> Initiative</div>
+          @if (canSetInitiative) {
+            <div class="initiative-row">
+              <input [ngModel]="initiativeValue" (ngModelChange)="initiativeValue = $event; initiativeDirty = true" type="number" inputmode="numeric" aria-label="Initiative result" />
+              <button type="button" class="btn btn-sm btn-primary" [disabled]="!initiativeInputValid" (click)="saveInitiative()">Set result</button>
+            </div>
+            <small>Enter the total you rolled. The host starts and sorts combat.</small>
+          } @else {
+            <div class="initiative-result">{{currentInitiative ?? '—'}}</div>
+            <small>Initiative is locked here while combat is running.</small>
+          }
+        </div>
+      }
     }
 
     <button type="button" class="sheet-button" [disabled]="!sheetReference" (click)="openSheet()">

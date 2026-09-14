@@ -1,5 +1,6 @@
 :host {
-    background-color: rgba($color: #ffffff, $alpha: 0.2);
+    color: var(--ui-text);
+    background-color: var(--ui-surface);
     overflow-x: hidden;
     overflow-y: scroll;
 

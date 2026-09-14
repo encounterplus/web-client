@@ -123,8 +123,8 @@ export class MessageListComponent implements OnInit {
       message.content = "Dice roll command:</br><code>/r[oll] &lt;dice notation&gt; [[title[:check|save|attack|damage]]]</code>" +
         "Examples:<br>" +
         "<code>" +
-        "/r 2d20kh — advantage\n" +
-        "/r 2d20kl — disadvantage\n" +
+        "/r 2d20kh — keep highest\n" +
+        "/r 2d20kl — keep lowest\n" +
         "/r 4d6dl — drop lowest\n" +
         "<br>" +
         "/r 1d20+3 [initiative]\n" +

@@ -1,10 +1,10 @@
-# PF2E Remaster Web Client for Encounter+
+# Encounter+ Community Web Client
 
-This is the PF2E Remaster community fork of the
+This is a community fork of the
 [Encounter+ web client](https://github.com/encounterplus/web-client). The
 original client and architecture are the work of the Encounter+ development
-team; this branch contains Pathfinder-specific player features maintained by
-Saharory and contributors.
+team. This branch adds system-neutral player tools and accessibility-focused
+interface improvements maintained by Saharory and contributors.
 
 The fork is currently based on upstream `0.9.16-beta`.
 

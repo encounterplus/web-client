@@ -1,7 +1,7 @@
 <div class="btn-toolbar" role="toolbar">
   <div class="btn-group mr-2" role="group" aria-label="Button group with nested dropdown">
     <div class="btn-group" ngbDropdown role="group">
-      <button id="dropdownBasic1" type="button" class="btn btn-dark" ngbDropdownToggle>
+      <button id="dropdownBasic1" type="button" class="btn btn-client" ngbDropdownToggle>
         Menu
       </button>
       <div aria-labelledby="dropdownBasic1" ngbDropdownMenu>
@@ -17,17 +17,17 @@
         }
       </div>
     </div>
-    <div class="btn-group" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" name="radioTest" role="group" aria-label="Messages">
+    <div class="btn-group client-divider-start" name="radioTest" role="group" aria-label="Messages">
       <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off" [(ngModel)]="messages" (ngModelChange)="messagesChanged($event)">
-      <label class="btn btn-dark" for="btncheck1"> 
+      <label class="btn btn-client" for="btncheck1">
         <i class="fa fa-comments-o">&nbsp;
         @if (unreadMessages > 0) { <span class="badge text-bg-light">{{unreadMessages}}</span> }
         </i>
     </label>
     </div>
-    <div class="btn-group" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" role="group" aria-label="My character">
+    <div class="btn-group client-divider-start" role="group" aria-label="My character">
       <input type="checkbox" class="btn-check" id="playerPanelToggle" autocomplete="off" [(ngModel)]="player" (ngModelChange)="playerChanged($event)">
-      <label class="btn btn-dark" for="playerPanelToggle" title="My character">
+      <label class="btn btn-client" for="playerPanelToggle" title="My character">
         <i class="fa fa-user-circle-o"></i>
       </label>
     </div>
@@ -35,18 +35,18 @@
 
   <div class="btn-group ms-2" role="group" name="activeTool" aria-label="Active Tool">
     <input type="radio" value="move" class="btn-check" id="btnradio1" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
-    <label class="btn btn-dark" for="btnradio1"> <i class="fa fa-arrows"></i></label>
+    <label class="btn btn-client" for="btnradio1"> <i class="fa fa-arrows"></i></label>
 
     <input type="radio" value="pointer" class="btn-check" id="btnradio2" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
-    <label class="btn btn-dark" for="btnradio2"> <i class="fa fa-magic"></i></label>
+    <label class="btn btn-client" for="btnradio2"> <i class="fa fa-magic"></i></label>
   </div>
 
   @if (state.map?.video) {
     <div class="btn-group ms-2" role="group" aria-label="Video Controls">
-      <button ngbButton class="btn btn-dark" (click)="videoPauseToggle()">
+      <button ngbButton class="btn btn-client" (click)="videoPauseToggle()">
         <i class="fa fa-fw" [ngClass]="videoPaused ? 'fa-play' : 'fa-pause'"></i>
       </button>
-      <button ngbButton class="btn btn-dark" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" (click)="videoMuteToggle()">
+      <button ngbButton class="btn btn-client client-divider-start" (click)="videoMuteToggle()">
         <i class="fa fa-fw" [ngClass]="videoMuted ? 'fa-volume-off' : 'fa-volume-up'"></i>
       </button>
     </div>
