@@ -83,6 +83,10 @@ body {
     background: var(--ui-control);
     border-color: var(--ui-border);
 
+    .badge {
+        color: inherit;
+    }
+
     &:hover,
     &:focus-visible,
     &:active,
