@@ -1,5 +1,4 @@
 import { Asset } from './asset';
-import { Component } from './component';
 
 export class Aura {
     id: string;
@@ -9,5 +8,4 @@ export class Aura {
     opacity: number;
     radius: number;
     asset: Asset;
-    components: Array<Component> = [];
 }
