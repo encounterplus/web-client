@@ -13,7 +13,7 @@ import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
 import { RunMode } from 'src/app/shared/models/app-state';
 import { PathView } from './path-view';
-import { AssetVideo } from 'src/app/shared/models/asset';
+import { AssetLayout, AssetVideo } from 'src/app/shared/models/asset';
 import { SplitAlphaVideo } from './split-alpha-video';
 
 function clamp(num: number, min: number, max: number) {
@@ -117,11 +117,12 @@ export class TokenView extends View {
   }
 
   get scaleFactor(): number {
-    return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0) * (this.token.asset?.parameters?.scale || 1.0) * (this.token.trackingId != null ? 1.5 : 1.0)
+    return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0) * AssetLayout.scale(this.token.asset) * (this.token.trackingId != null ? 1.5 : 1.0)
   }
 
   get tokenOffset(): PIXI.Point {
-    return new PIXI.Point(this.token.asset?.parameters?.offsetX || 0, this.token.asset?.parameters?.offsetY || 0)
+    const offset = AssetLayout.offset(this.token.asset)
+    return new PIXI.Point(offset.x, offset.y)
   }
 
   get trackingLabel(): string | null {

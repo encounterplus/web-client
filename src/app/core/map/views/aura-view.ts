@@ -1,11 +1,8 @@
 import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
-import { Loader } from '../models/loader';
 import { Aura } from 'src/app/shared/models/aura';
-import { AssetVideo } from 'src/app/shared/models/asset';
-import { Utils } from 'src/app/shared/utils';
-import { SplitAlphaVideo } from './split-alpha-video';
+import { AssetArtwork } from './asset-artwork';
 
 
 export class AuraView extends View {
@@ -13,17 +10,10 @@ export class AuraView extends View {
     aura: Aura;
     grid: Grid;
 
-    assetTexture: PIXI.Texture;
-    assetSprite: PIXI.Container;
+    /** The aura's asset, with its placement parameters and components; `null` without one. */
+    artwork: AssetArtwork | null = null;
 
     shapeGraphics: PIXI.Graphics;
-    videoSprite: SplitAlphaVideo;
-
-    /** Component animations running on the shared ticker, removed by `clear()`. */
-    private tickers: Array<PIXI.TickerCallback<any>> = [];
-
-    /** Bumped by `clear()`, so a draw still loading can tell it has been superseded. */
-    private generation = 0;
 
     constructor(aura: Aura, grid: Grid) {
         super();
@@ -52,279 +42,41 @@ export class AuraView extends View {
         this.addChild(graphics);
         this.shapeGraphics = graphics;
 
-        if (this.aura.asset != null) {
-            this.shapeGraphics.visible = false;
-        } else {
-            this.shapeGraphics.visible = true;
-        }
-        return this;
-    }
-
-    async drawVideo() {
-        const generation = this.generation;
-
-        let video: SplitAlphaVideo;
-        try {
-            video = await SplitAlphaVideo.create(this.aura.asset);
-        } catch (error) {
-            console.warn(`failed to load aura video: ${this.aura.asset.resource}`, error);
-            if (generation == this.generation && this.shapeGraphics) {
-                this.shapeGraphics.visible = true;
-            }
-            return this;
-        }
-
-        // cleared or disposed while loading; a newer draw shows its own
-        if (generation != this.generation || this.destroyed) {
-            video.destroy();
-            return this;
-        }
-
-        video.anchor.set(0.5, 0.5);
-        video.position.set(-this.w / 2, -this.h / 2);
-        video.width = this.w;
-        video.height = this.h;
-
-        this.addChild(video);
-        this.videoSprite = video;
-        this.assetSprite = video;
-        this.applyComponents(video);
+        // hidden while artwork loads; drawAsset brings it back if there is none
+        this.shapeGraphics.visible = this.aura.asset == null;
         return this;
     }
 
     async drawAsset() {
-        if (AssetVideo.isVideo(this.aura.asset)) {
-            return this.drawVideo();
-        }
+        const artwork = new AssetArtwork(this.aura.asset);
+        artwork.position.set(-this.w / 2, -this.h / 2);
+        artwork.layout({ width: this.w, height: this.h });
+        this.addChild(artwork);
+        this.artwork = artwork;
 
-        // texture
-        if (this.aura.asset.resource != null) {
-            this.assetTexture = await Loader.shared.loadTexture(this.aura.asset.resource);
-        } else {
-            return this;
-        }
-
-        // sprite
-        if (this.assetTexture != null) {
-            let frames = [];
-            if (this.aura.asset.type == "spriteSheet") {
-                for (let x = 0, y = 0, framecount = 0; x < this.assetTexture.source.width && y < this.assetTexture.source.height; framecount++) {
-                    let rect = new PIXI.Rectangle(x, y, this.aura.asset.parameters.frameWidth, this.aura.asset.parameters.frameHeight);
-                    let frame = new PIXI.Texture({ source: this.assetTexture.source, frame: rect });
-                    frames.push(frame);
-                    x += this.aura.asset.parameters.frameWidth;
-                    if (x >= this.assetTexture.source.width) {
-                        x = 0;
-                        y += this.aura.asset.parameters.frameHeight;
-                    }
-                }
-            } else {
-                frames.push(this.assetTexture);
-            }
-            let sprite = new PIXI.AnimatedSprite(frames);
-            this.addChild(sprite);
-            this.assetSprite = sprite;
-            sprite.anchor.set(0.5, 0.5);
-            sprite.position.set(-this.w / 2, -this.h / 2)
-            sprite.width = this.w;
-            sprite.height = this.h;
-            if (frames.length > 1) {
-                if (this.aura.asset.parameters.duration === undefined) {
-                    this.aura.asset.parameters.duration = 1.0;
-                }
-                sprite.animationSpeed = frames.length / this.aura.asset.parameters.duration / 60.00;
-                sprite.play();
-            }
-            this.applyComponents(sprite);
+        // a clear() meanwhile destroys the artwork, which discards the load
+        const drawn = await artwork.loaded;
+        if (!drawn && this.artwork === artwork) {
+            // nothing to show; the plain circle stands in
+            this.removeChild(artwork);
+            artwork.destroy();
+            this.artwork = null;
+            this.shapeGraphics.visible = true;
         }
 
         return this;
-    }
-
-    /** Applies the aura's and the asset's filter and animation components to the drawn artwork. */
-    applyComponents(sprite: PIXI.Container) {
-        // the scale that fits the artwork to the aura, which animation.scale multiplies
-        const baseScale = sprite.scale.x;
-        let ticker = PIXI.Ticker.shared;
-        // get components from aura and asset
-        let components = this.aura.components.concat(this.aura.asset.components || Array())
-        for (let x = 0; x < components.length; x++) {
-            let component = components[x];
-            if (component.enabled) {
-                if (component.type.startsWith("filter.")) {
-                    if (component.type == "filter.tint") {
-                        sprite.tint = new PIXI.Color(component.color)
-                    }
-                    if (component.type == "filter.hsb") {
-                        let hfilter = new PIXI.ColorMatrixFilter();
-                        let sfilter = new PIXI.ColorMatrixFilter();
-                        let bfilter = new PIXI.ColorMatrixFilter();
-
-                        hfilter.hue(component.hue, false);
-                        sfilter.saturate(component.saturation / 100, false)
-                        bfilter.matrix = Utils.brightnessMatrix(component.brightness / 100)
-                        sprite.filters = [hfilter, sfilter, bfilter];
-                    }
-                }
-                if (component.type.startsWith("animation.")) {
-                    let isrev = false;
-                    let loopcount = 0;
-                    let duration = component.duration || 1;
-                    let cfrom = component.from || 0;
-                    let cto = component.to || 0;
-                    if (component.type == "animation.rotation") {
-                        sprite.rotation = cfrom;
-                        this.addTicker(() => {
-                            if (component.repeat && loopcount >= component.repeat) {
-                                return
-                            }
-                            let step = (cto - cfrom) / ((1000 / ticker.deltaMS) * duration);
-                            if (sprite.rotation + step <= cto && !isrev) {
-                                sprite.rotation += step;
-                                if (component.autoreverse && sprite.rotation + step >= cto) {
-                                    isrev = true;
-                                } else if (component.repeat && sprite.rotation + step >= cto) {
-                                    loopcount += 1;
-                                }
-                            } else if (sprite.rotation - step >= cfrom && isrev) {
-                                sprite.rotation -= step;
-                                if (component.autoreverse && sprite.rotation - step <= cfrom) {
-                                    isrev = false;
-                                    if (component.repeat) {
-                                        loopcount += 1;
-                                    }
-                                }
-                            } else if (cto < cfrom && sprite.rotation + step >= cto && !isrev) {
-                                sprite.rotation += step;
-                                if (component.autoreverse && sprite.rotation + step <= cto) {
-                                    isrev = true;
-                                } else if (component.repeat && sprite.rotation + step <= cto) {
-                                    loopcount += 1;
-                                }
-                            } else if (cto < cfrom && sprite.rotation - step <= cfrom && isrev) {
-                                sprite.rotation -= step;
-                                if (component.autoreverse && sprite.rotation - step >= cfrom) {
-                                    isrev = false;
-                                    if (component.repeat) {
-                                        loopcount += 1;
-                                    }
-                                }
-                            } else {
-                                sprite.rotation = cfrom;
-                            }
-                        });
-                    }
-                    if (component.type == "animation.scale") {
-                        sprite.scale.set(cfrom * baseScale);
-                        this.addTicker(() => {
-                            if (component.repeat && loopcount >= component.repeat) {
-                                return
-                            }
-                            let sf = baseScale;
-                            let step = ((cto * sf) - (cfrom * sf)) / ((1000 / ticker.deltaMS) * duration);
-                            if (sprite.scale.x + step <= cto * sf && !isrev) {
-                                sprite.scale.set(sprite.scale.x + step);
-                                if (component.autoreverse && sprite.scale.x + step >= cto * sf) {
-                                    isrev = true;
-                                } else if (component.repeat && sprite.scale.x + step >= cto * sf) {
-                                    loopcount += 1;
-                                }
-                            } else if (sprite.scale.x - step >= cfrom * sf && isrev) {
-                                sprite.scale.set(sprite.scale.x - step);
-                                if (component.autoreverse && sprite.scale.x - step <= cfrom * sf) {
-                                    isrev = false;
-                                    if (component.repeat) {
-                                        loopcount += 1;
-                                    }
-                                }
-                            } else if (cto < cfrom && sprite.scale.x + step >= cto * sf && !isrev) {
-                                sprite.scale.set(sprite.scale.x + step);
-                                if (component.autoreverse && sprite.scale.x + step <= cto * sf) {
-                                    isrev = true;
-                                } else if (component.repeat && sprite.scale.x + step <= cto * sf) {
-                                    loopcount += 1;
-                                }
-                            } else if (cto < cfrom && sprite.scale.x - step <= cfrom * sf && isrev) {
-                                sprite.scale.set(sprite.scale.x - step)
-                                if (component.autoreverse && sprite.scale.x - step >= cfrom * sf) {
-                                    isrev = false;
-                                    if (component.repeat) {
-                                        loopcount += 1;
-                                    }
-                                }
-                            } else {
-                                sprite.scale.set(cfrom * sf);
-                            }
-                        });
-                    }
-                    if (component.type == "animation.opacity") {
-                        sprite.alpha = cfrom;
-                        this.addTicker(() => {
-                            if (component.repeat && loopcount >= component.repeat) {
-                                return
-                            }
-                            let step = (cto - cfrom) / ((1000 / ticker.deltaMS) * duration);
-                            if (sprite.alpha + step <= cto && !isrev) {
-                                sprite.alpha += step;
-                                if (component.autoreverse && sprite.alpha + step >= cto) {
-                                    isrev = true;
-                                } else if (component.repeat && sprite.alpha + step >= cto) {
-                                    loopcount += 1;
-                                }
-                            } else if (sprite.alpha - step >= cfrom && isrev) {
-                                sprite.alpha -= step;
-                                if (component.autoreverse && sprite.alpha - step <= cfrom) {
-                                    isrev = false;
-                                    if (component.repeat) {
-                                        loopcount += 1;
-                                    }
-                                }
-                            } else if (cto < cfrom && sprite.alpha + step >= cto && !isrev) {
-                                sprite.alpha += step;
-                                if (component.autoreverse && sprite.alpha + step <= cto) {
-                                    isrev = true;
-                                } else if (component.repeat && sprite.alpha + step <= cto) {
-                                    loopcount += 1;
-                                }
-                            } else if (cto < cfrom && sprite.alpha - step <= cfrom && isrev) {
-                                sprite.alpha -= step;
-                                if (component.autoreverse && sprite.alpha - step >= cfrom) {
-                                    isrev = false;
-                                    if (component.repeat) {
-                                        loopcount += 1;
-                                    }
-                                }
-                            } else {
-                                sprite.alpha = cfrom
-                            }
-                        });
-                    }
-                }
-            }
-        }
     }
 
     update() {
         this.alpha = this.aura.opacity;
     }
 
-    private addTicker(fn: PIXI.TickerCallback<any>) {
-        PIXI.Ticker.shared.add(fn);
-        this.tickers.push(fn);
-    }
-
     clear() {
-        this.generation += 1;
-
-        this.tickers.forEach(fn => PIXI.Ticker.shared.remove(fn));
-        this.tickers = [];
-
         this.removeChildren();
 
-        // stops a sprite sheet's ticker, and gives a video's shared decoder back
-        this.assetSprite?.destroy();
-        this.videoSprite = null;
-        this.assetSprite = null;
+        // stops its animations, and gives a video's shared decoder back
+        this.artwork?.destroy();
+        this.artwork = null;
     }
 
     /** Stops everything this view runs. Call before dropping it. */

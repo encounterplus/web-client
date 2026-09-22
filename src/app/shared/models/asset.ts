@@ -40,6 +40,38 @@ export interface AssetParameters {
 }
 
 /**
+ * Reads the placement parameters of an asset — how its artwork sits in the frame of the object
+ * showing it — with the same defaults as the app's `AssetForm`.
+ *
+ * Shared by every map object that draws an asset, so tokens, tiles, auras and area effects agree.
+ */
+export class AssetLayout {
+
+    /** The multiplier on the artwork's fitted size; 1 when unset or not a positive number. */
+    static scale(asset: Asset | null | undefined): number {
+        const scale = asset?.parameters?.scale
+        if (typeof scale != "number" || !isFinite(scale) || scale <= 0) {
+            return 1
+        }
+        return scale
+    }
+
+    /**
+     * How far the artwork is shifted, in percent of its own drawn size.
+     *
+     * Added to the artwork's anchor as `offset / 100`, so a positive `x` moves the artwork left of
+     * the object's point.
+     */
+    static offset(asset: Asset | null | undefined): { x: number, y: number } {
+        const value = (key: "offsetX" | "offsetY") => {
+            const offset = asset?.parameters?.[key]
+            return typeof offset == "number" && isFinite(offset) ? offset : 0
+        }
+        return { x: value("offsetX"), y: value("offsetY") }
+    }
+}
+
+/**
  * Reads the video parameters of an asset, with the same defaults as the app's `Asset` model.
  *
  * A split-alpha video carries its alpha channel in half of every frame: colour first (left or
