@@ -10,11 +10,10 @@ import { AuraView } from './aura-view';
 import { ScreenInteraction } from 'src/app/shared/models/screen';
 import { Role, Size, Token, TokenStyle } from 'src/app/shared/models/token';
 import { HexGrid } from '../models/hex-grid';
-import { Utils } from 'src/app/shared/utils';
 import { RunMode } from 'src/app/shared/models/app-state';
 import { PathView } from './path-view';
-import { AssetLayout, AssetVideo } from 'src/app/shared/models/asset';
-import { SplitAlphaVideo } from './split-alpha-video';
+import { Asset, AssetLayout } from 'src/app/shared/models/asset';
+import { AssetArtwork } from './asset-artwork';
 
 function clamp(num: number, min: number, max: number) {
   return num <= min ? min : num >= max ? max : num
@@ -41,12 +40,8 @@ export class TokenView extends View {
   overlayTexture: PIXI.Texture | null
   overlaySprite: PIXI.Sprite | null
 
-  /** The artwork's size at scale 1, or `null` when the token is drawn without artwork. */
-  tokenSize: { width: number, height: number } | null
-  tokenSprite: PIXI.Sprite | SplitAlphaVideo | null
-
-  /** Bumped by `clear()`, so a draw still loading can tell it has been superseded. */
-  private tokenGeneration = 0
+  /** The token's asset or image, with the asset's placement parameters and components; `null` when drawn as a disc. */
+  artwork: AssetArtwork | null = null
 
   labelGraphics: PIXI.Graphics | null
   labelText: PIXI.Text | null
@@ -116,13 +111,18 @@ export class TokenView extends View {
     return { width: this.token.width || 1, height: this.token.height || 1 }
   }
 
-  get scaleFactor(): number {
-    return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0) * AssetLayout.scale(this.token.asset) * (this.token.trackingId != null ? 1.5 : 1.0)
+  /** The token's own scale, without the asset's; `resolveLayout` adds that to the artwork. */
+  get objectScale(): number {
+    return this.token.scale * (this.grid instanceof HexGrid ? 0.8 : 1.0) * (this.token.trackingId != null ? 1.5 : 1.0)
   }
 
-  get tokenOffset(): PIXI.Point {
-    const offset = AssetLayout.offset(this.token.asset)
-    return new PIXI.Point(offset.x, offset.y)
+  /** The drawn size of the artwork against the token's cell, for the overlays and labels around it. */
+  get scaleFactor(): number {
+    return this.objectScale * AssetLayout.scale(this.token.asset)
+  }
+
+  get hasArtwork(): boolean {
+    return this.artwork != null
   }
 
   get trackingLabel(): string | null {
@@ -224,68 +224,53 @@ export class TokenView extends View {
   }
 
   /**
-   * Loads the token's artwork: its asset, else its image. A video asset gives a `SplitAlphaVideo`,
-   * anything else a plain sprite. `null` when there is no artwork, or a video fails to load — the
-   * token then draws as a labelled disc.
+   * What the token shows: its asset, else its image as a bare asset with no parameters or
+   * components. `null` when there is neither, or while tracking — the token then draws as a
+   * labelled disc.
    */
-  async loadTokenSprite(): Promise<PIXI.Sprite | SplitAlphaVideo | null> {
+  artworkAsset(): Asset | null {
     if (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal) {
       return null
     }
-
-    if (AssetVideo.isVideo(this.token.asset)) {
-      try {
-        return await SplitAlphaVideo.create(this.token.asset)
-      } catch (error) {
-        console.warn(`failed to load token video: ${this.token.asset.resource}`, error)
-        return null
-      }
+    if (this.token.asset?.resource != null) {
+      return this.token.asset
     }
-
-    const src = this.token.asset?.resource ?? this.token.image
-    if (src == null) {
-      return null
+    if (this.token.image != null) {
+      return { resource: this.token.image } as Asset
     }
-    const texture = await Loader.shared.loadTexture(src)
-    return texture != null ? new PIXI.Sprite(texture) : null
+    return null
   }
 
   async drawToken() {
-    const generation = this.tokenGeneration
-    const tokenSprite = await this.loadTokenSprite()
+    const asset = this.artworkAsset()
+    if (asset != null) {
+      const artwork = new AssetArtwork(asset)
+      this.artwork = artwork
+      const drawn = await artwork.loaded
 
-    // cleared while loading; the draw that cleared it shows its own
-    if (generation != this.tokenGeneration || this.destroyed) {
-      if (tokenSprite instanceof SplitAlphaVideo) {
-        tokenSprite.destroy()
+      // cleared while loading, which destroyed this artwork; the draw that cleared it shows its own
+      if (this.artwork !== artwork) {
+        return
       }
-      return
+      if (!drawn || this.destroyed) {
+        // nothing to show, or nowhere to show it; a failed load draws the disc instead
+        artwork.destroy()
+        this.artwork = null
+        if (this.destroyed) {
+          return
+        }
+      }
     }
-
-    this.tokenSprite = null
-    this.tokenSize = null
-    if (tokenSprite instanceof SplitAlphaVideo) {
-      this.tokenSize = { width: tokenSprite.naturalWidth, height: tokenSprite.naturalHeight }
-    } else if (tokenSprite != null) {
-      this.tokenSize = { width: tokenSprite.texture.width, height: tokenSprite.texture.height }
-    }
-
-    // console.debug(this.token)
 
     this.w = this.grid.sizeFromGridSize(this.gridSize).width
     this.h = this.grid.sizeFromGridSize(this.gridSize).height
 
-    // sprite
-    if (tokenSprite != null) {
-      let sprite = tokenSprite
-      sprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
-      this.addChild(sprite)
-      this.tokenSprite = sprite
-      this.tokenSprite.visible = !this.defeated
-      this.tokenSprite.zIndex = 0
-
-      // rotation
-      this.tokenSprite.rotation = (this.token.rotation) ? this.token.rotation * (Math.PI / 180) : 0;
+    // artwork
+    if (this.artwork != null) {
+      this.artwork.visible = !this.defeated
+      this.artwork.zIndex = 0
+      this.artwork.angle = this.token.rotation || 0
+      this.addChild(this.artwork)
     }
 
     // alpha
@@ -312,10 +297,10 @@ export class TokenView extends View {
       this.addChild(sprite);
       this.overlaySprite = sprite;
 
-      if (this.tokenSprite) {
-        this.tokenSprite.visible = false
+      if (this.artwork) {
+        this.artwork.visible = false
         // change z order
-        this.tokenSprite.zIndex = 0
+        this.artwork.zIndex = 0
       }
 
       this.overlaySprite.zIndex = 1
@@ -328,8 +313,8 @@ export class TokenView extends View {
         this.overlaySprite = sprite
 
         // change z order
-        if (this.tokenSprite) {
-          this.tokenSprite.zIndex = 1
+        if (this.artwork) {
+          this.artwork.zIndex = 1
         }
         this.overlaySprite.zIndex = 0
       } else {
@@ -340,8 +325,8 @@ export class TokenView extends View {
         this.overlaySprite = sprite
 
         // change z order
-        if (this.tokenSprite) {
-          this.tokenSprite.zIndex = 0
+        if (this.artwork) {
+          this.artwork.zIndex = 0
         }
         this.overlaySprite.zIndex = 1
       }
@@ -396,10 +381,9 @@ export class TokenView extends View {
     this.auraContainer.position.set(this.token.x, this.token.y);
     this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
-    // sprite
-    if (this.tokenSprite != null) {
-      // rotation
-      this.tokenSprite.rotation = (this.token.rotation) ? this.token.rotation * (Math.PI / 180) : 0;
+    // rotation, in degrees; a rotation animation adds to it
+    if (this.artwork != null) {
+      this.artwork.angle = this.token.rotation || 0
     }
 
     if (this.token.role == Role.friendly) {
@@ -416,13 +400,9 @@ export class TokenView extends View {
   }
 
   updateToken() {
-    if (this.tokenSize != null) {
-      var scale = Utils.fitScaleFactor(this.tokenSize.width, this.tokenSize.height, this.w, this.h) * this.scaleFactor
-      this.tokenSprite.width = this.tokenSize.width * scale
-      this.tokenSprite.height = this.tokenSize.height * scale
-
-      this.tokenSprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
-      this.tokenSprite.position.set(this.w / 2, this.h / 2);
+    if (this.artwork != null) {
+      this.artwork.position.set(this.w / 2, this.h / 2)
+      this.artwork.layout({ width: this.w, height: this.h, fit: "aspectFit", scale: this.objectScale })
     }
   }
 
@@ -441,7 +421,7 @@ export class TokenView extends View {
     }
 
     // update visibility
-    if ((this.tokenSize != null && this.token.label != null) || this.tokenSize == null) {
+    if ((this.hasArtwork && this.token.label != null) || !this.hasArtwork) {
       this.labelGraphics.visible = true
       this.labelText.visible = true
     } else {
@@ -453,7 +433,7 @@ export class TokenView extends View {
     // get text
     const text = this.token.label || this.trackingLabel || (this.token.name || "Unknown").toUpperCase().charAt(0)
 
-    if (this.tokenSize != null || (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal)) {
+    if (this.hasArtwork || (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal)) {
       let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
       let labelSize = this.grid.adjustedSize.width * 0.4
 
@@ -513,7 +493,7 @@ export class TokenView extends View {
       return
     }
 
-    if (this.token.label != null && this.tokenSize != null) {
+    if (this.token.label != null && this.hasArtwork) {
       let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
       let labelSize = this.grid.adjustedSize.width * 0.4
 
@@ -584,15 +564,16 @@ export class TokenView extends View {
       this.elevationText.style.fontSize = labelSize / 2.5;
     }
 
-    if (this.tokenSize == null && this.token.trackingId == null) {
+    if (!this.hasArtwork && this.token.trackingId == null) {
       this.elevationGraphics.zIndex = 10
       this.elevationText.zIndex = 11
     }
   }
 
   updateTint() {
-    if (this.tokenSprite) {
-      this.tokenSprite.tint = this.controlled ? 0xFFCCCC : 0xFFFFFF;
+    // on the container, so it multiplies with a tint component on the sprite instead of replacing it
+    if (this.artwork) {
+      this.artwork.tint = this.controlled ? 0xFFCCCC : 0xFFFFFF;
     }
   }
 
@@ -629,15 +610,11 @@ export class TokenView extends View {
   }
 
   clear() {
-    this.tokenGeneration += 1
     this.removeChildren();
 
-    // an image sprite holds nothing of its own; a video holds a decoder, shared with other views
-    if (this.tokenSprite instanceof SplitAlphaVideo) {
-      this.tokenSprite.destroy()
-    }
-    this.tokenSprite = null
-    this.tokenSize = null
+    // stops its animations, gives a video's shared decoder back, and discards a load in flight
+    this.artwork?.destroy()
+    this.artwork = null
   }
 
   /** Stops everything this view runs, auras included. Call before dropping it. */
