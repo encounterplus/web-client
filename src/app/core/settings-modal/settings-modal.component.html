@@ -66,6 +66,16 @@
 
   <div class="mb-2">
     <div class="checkbox">
+      <label for="playVideoAssets">
+        <input [(ngModel)]="playVideoAssets" id="playVideoAssets" type="checkbox"/>
+        Play video effects
+      </label>
+    </div>
+    <label><i>Animated tokens, tiles, auras and area effects. When off, each shows its first frame, which saves battery on phones and tablets</i></label>
+  </div>
+
+  <div class="mb-2">
+    <div class="checkbox">
       <label for="softEdges">
         <input [(ngModel)]="softEdges" id="softEdges" type="checkbox"/>
         Soft Edges (Line of Sight)

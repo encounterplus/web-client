@@ -13,6 +13,8 @@ import { HexGrid } from '../models/hex-grid';
 import { Utils } from 'src/app/shared/utils';
 import { RunMode } from 'src/app/shared/models/app-state';
 import { PathView } from './path-view';
+import { AssetVideo } from 'src/app/shared/models/asset';
+import { SplitAlphaVideo } from './split-alpha-video';
 
 function clamp(num: number, min: number, max: number) {
   return num <= min ? min : num >= max ? max : num
@@ -39,8 +41,12 @@ export class TokenView extends View {
   overlayTexture: PIXI.Texture | null
   overlaySprite: PIXI.Sprite | null
 
-  tokenTexture: PIXI.Texture | null
-  tokenSprite: PIXI.Sprite | null
+  /** The artwork's size at scale 1, or `null` when the token is drawn without artwork. */
+  tokenSize: { width: number, height: number } | null
+  tokenSprite: PIXI.Sprite | SplitAlphaVideo | null
+
+  /** Bumped by `clear()`, so a draw still loading can tell it has been superseded. */
+  private tokenGeneration = 0
 
   labelGraphics: PIXI.Graphics | null
   labelText: PIXI.Text | null
@@ -60,6 +66,8 @@ export class TokenView extends View {
   blocked: boolean = false
 
   auraContainer: Container = new PIXI.Container()
+  auraViews: Array<AuraView> = []
+  private auraGeneration = 0
   pathView: PathView
   pointerId?: number | null
 
@@ -172,7 +180,9 @@ export class TokenView extends View {
   }
 
   async drawAuras() {
-    this.auraContainer.removeChildren();
+    this.disposeAuras();
+    // draw() runs more than once per map update, so an older pass may still be loading
+    const generation = this.auraGeneration
 
     const maxSize = Math.max(this.w, this.h)
     const pixelRatio = this.grid.pixelRatio
@@ -187,9 +197,22 @@ export class TokenView extends View {
       view.h = (aura.radius * pixelRatio * 2) + maxSize;
 
       await view.draw();
+      if (generation != this.auraGeneration) {
+        view.dispose();
+        return;
+      }
       view.position.set(view.w / 2, view.h / 2);
       this.auraContainer.addChild(view);
+      this.auraViews.push(view);
     }
+  }
+
+  /** Removes the auras and stops what they run — animations, and any video they play. */
+  disposeAuras() {
+    this.auraGeneration += 1
+    this.auraViews.forEach(view => view.dispose())
+    this.auraViews = []
+    this.auraContainer.removeChildren();
   }
 
   async drawPath() {
@@ -199,14 +222,51 @@ export class TokenView extends View {
     await this.pathView.draw()
   }
 
-  async drawToken() {
+  /**
+   * Loads the token's artwork: its asset, else its image. A video asset gives a `SplitAlphaVideo`,
+   * anything else a plain sprite. `null` when there is no artwork, or a video fails to load — the
+   * token then draws as a labelled disc.
+   */
+  async loadTokenSprite(): Promise<PIXI.Sprite | SplitAlphaVideo | null> {
+    if (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal) {
+      return null
+    }
 
-    if (this.token.asset != null && this.token.asset.resource != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
-      this.tokenTexture = await Loader.shared.loadTexture(this.token.asset.resource)
-    } else if (this.token.image != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
-      this.tokenTexture = await Loader.shared.loadTexture(this.token.image)
-    } else {
-      this.tokenTexture = null;
+    if (AssetVideo.isVideo(this.token.asset)) {
+      try {
+        return await SplitAlphaVideo.create(this.token.asset)
+      } catch (error) {
+        console.warn(`failed to load token video: ${this.token.asset.resource}`, error)
+        return null
+      }
+    }
+
+    const src = this.token.asset?.resource ?? this.token.image
+    if (src == null) {
+      return null
+    }
+    const texture = await Loader.shared.loadTexture(src)
+    return texture != null ? new PIXI.Sprite(texture) : null
+  }
+
+  async drawToken() {
+    const generation = this.tokenGeneration
+    const tokenSprite = await this.loadTokenSprite()
+
+    // cleared while loading; the draw that cleared it shows its own
+    if (generation != this.tokenGeneration || this.destroyed) {
+      if (tokenSprite instanceof SplitAlphaVideo) {
+        tokenSprite.destroy()
+      }
+      return
+    }
+
+    this.tokenSprite = null
+    this.tokenSize = null
+    if (tokenSprite instanceof SplitAlphaVideo) {
+      this.tokenSize = { width: tokenSprite.naturalWidth, height: tokenSprite.naturalHeight }
+    } else if (tokenSprite != null) {
+      this.tokenSize = { width: tokenSprite.texture.width, height: tokenSprite.texture.height }
     }
 
     // console.debug(this.token)
@@ -215,8 +275,8 @@ export class TokenView extends View {
     this.h = this.grid.sizeFromGridSize(this.gridSize).height
 
     // sprite
-    if (this.tokenTexture != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
-      let sprite = new PIXI.Sprite(this.tokenTexture)
+    if (tokenSprite != null) {
+      let sprite = tokenSprite
       sprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
       this.addChild(sprite)
       this.tokenSprite = sprite
@@ -336,7 +396,7 @@ export class TokenView extends View {
     this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
 
     // sprite
-    if (this.tokenTexture != null && (this.token.trackingId == null || this.dataService.state.runMode == RunMode.normal)) {
+    if (this.tokenSprite != null) {
       // rotation
       this.tokenSprite.rotation = (this.token.rotation) ? this.token.rotation * (Math.PI / 180) : 0;
     }
@@ -355,10 +415,10 @@ export class TokenView extends View {
   }
 
   updateToken() {
-    if (this.tokenTexture != null) {
-      var scale = Utils.fitScaleFactor(this.tokenTexture.width, this.tokenTexture.height, this.w, this.h) * this.scaleFactor
-      this.tokenSprite.width = this.tokenTexture.width * scale
-      this.tokenSprite.height = this.tokenTexture.height * scale
+    if (this.tokenSize != null) {
+      var scale = Utils.fitScaleFactor(this.tokenSize.width, this.tokenSize.height, this.w, this.h) * this.scaleFactor
+      this.tokenSprite.width = this.tokenSize.width * scale
+      this.tokenSprite.height = this.tokenSize.height * scale
 
       this.tokenSprite.anchor.set(0.5 + (this.tokenOffset.x / 100), 0.5 + (this.tokenOffset.y / 100))
       this.tokenSprite.position.set(this.w / 2, this.h / 2);
@@ -380,7 +440,7 @@ export class TokenView extends View {
     }
 
     // update visibility
-    if ((this.tokenTexture != null && this.token.label != null) || this.tokenTexture == null) {
+    if ((this.tokenSize != null && this.token.label != null) || this.tokenSize == null) {
       this.labelGraphics.visible = true
       this.labelText.visible = true
     } else {
@@ -392,7 +452,7 @@ export class TokenView extends View {
     // get text
     const text = this.token.label || this.trackingLabel || (this.token.name || "Unknown").toUpperCase().charAt(0)
 
-    if (this.tokenTexture != null || (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal)) {
+    if (this.tokenSize != null || (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal)) {
       let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
       let labelSize = this.grid.adjustedSize.width * 0.4
 
@@ -452,7 +512,7 @@ export class TokenView extends View {
       return
     }
 
-    if (this.token.label != null && this.tokenTexture != null) {
+    if (this.token.label != null && this.tokenSize != null) {
       let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
       let labelSize = this.grid.adjustedSize.width * 0.4
 
@@ -523,7 +583,7 @@ export class TokenView extends View {
       this.elevationText.style.fontSize = labelSize / 2.5;
     }
 
-    if (this.tokenTexture == null && this.token.trackingId == null) {
+    if (this.tokenSize == null && this.token.trackingId == null) {
       this.elevationGraphics.zIndex = 10
       this.elevationText.zIndex = 11
     }
@@ -568,7 +628,21 @@ export class TokenView extends View {
   }
 
   clear() {
+    this.tokenGeneration += 1
     this.removeChildren();
+
+    // an image sprite holds nothing of its own; a video holds a decoder, shared with other views
+    if (this.tokenSprite instanceof SplitAlphaVideo) {
+      this.tokenSprite.destroy()
+    }
+    this.tokenSprite = null
+    this.tokenSize = null
+  }
+
+  /** Stops everything this view runs, auras included. Call before dropping it. */
+  dispose() {
+    this.disposeAuras()
+    this.clear()
   }
 
   onTap(event: any) {

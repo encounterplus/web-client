@@ -32,6 +32,7 @@ export class TokensLayer extends Layer {
     }
 
     clear() {
+        this.views.forEach(view => view.dispose())
         this.views = []
         this.removeChildren()
     }

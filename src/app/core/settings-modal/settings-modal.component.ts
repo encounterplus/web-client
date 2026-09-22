@@ -4,6 +4,7 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { Role, Token } from 'src/app/shared/models/token';
 import { AppState, RunMode } from 'src/app/shared/models/app-state';
+import { Loader } from '../map/models/loader';
 
 @Component({
     selector: 'ngbd-modal-basic',
@@ -37,6 +38,7 @@ export class SettingsModalComponent implements OnInit {
 
   allowVideo: boolean = true
   maxVideoSize: number = 200
+  playVideoAssets: boolean = true
   softEdges: boolean = true
 
   constructor(public modalInstance: NgbActiveModal, private dataService: DataService) { 
@@ -53,6 +55,7 @@ export class SettingsModalComponent implements OnInit {
         this.maxVideoSize = 0
     }
     localStorage.setItem("maxVideoSize", `${this.maxVideoSize}`)
+    localStorage.setItem("playVideoAssets", `${this.playVideoAssets}`)
     localStorage.setItem("softEdges", `${this.softEdges}`)
     localStorage.setItem("runMode", `${this.runMode}`)
 
@@ -90,6 +93,7 @@ export class SettingsModalComponent implements OnInit {
     this.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60
     this.allowVideo = (localStorage.getItem("allowVideo") || "true") == "true"
     this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200")
+    this.playVideoAssets = Loader.playsVideoAssets
     this.softEdges = (localStorage.getItem("softEdges") || "true") == "true"
     this.tokenId = localStorage.getItem("userTokenId")
     this.runMode = this.state.runMode

@@ -1,6 +1,30 @@
 import * as PIXI from 'pixi.js'
 import { Asset } from 'src/app/shared/models/asset';
 
+export interface VideoPlayback {
+  loop: boolean
+  muted: boolean
+  speed: number
+  /** Show the first frame and never play — see `Loader.playsVideoAssets`. */
+  still: boolean
+}
+
+/**
+ * One consumer's hold on a shared video. Call `release()` when the view using it goes away; once
+ * the last lease is released and nothing reacquires the video for a moment, it is unloaded.
+ */
+export interface VideoLease {
+  source: PIXI.VideoSource
+  release(): void
+}
+
+interface SharedVideo {
+  source: PIXI.VideoSource
+  ready: Promise<PIXI.VideoSource>
+  count: number
+  unloadTimer?: ReturnType<typeof setTimeout>
+}
+
 export class Loader {
 
   private static instance: Loader;
@@ -26,6 +50,15 @@ export class Loader {
   localBaseURL: string = "";
 
   cache: Map<string, PIXI.Texture> = new Map();
+
+  private videos: Map<string, SharedVideo> = new Map();
+  private blockedVideos: Set<HTMLVideoElement> = new Set();
+
+  /**
+   * How long an unused video stays loaded. A view redraws by clearing and loading again — a token
+   * does on every move — and without this the video would be fetched anew and restart each time.
+   */
+  videoUnloadDelayMS = 5000;
 
   async loadTexture(src: string, local: boolean = false): Promise<PIXI.Texture> {
     // fix url base path
@@ -195,6 +228,143 @@ export class Loader {
     // });
 
     return null
+  }
+
+  /**
+   * Loads a video for an asset, shared by every view that shows the same file the same way.
+   *
+   * Unlike `loadVideoTexture`, which is built around the one map background (it downloads to a
+   * blob and revokes the previous one), this streams from the server — relying on its byte-range
+   * support — and keeps one decoder per file, however many tokens show it. Shared copies play in
+   * step, which suits ambient effects.
+   *
+   * Playback settings are part of the key, so the same file at two speeds gets two elements.
+   */
+  async acquireVideo(src: string, playback: VideoPlayback, local: boolean = false): Promise<VideoLease> {
+    const url = local ? this.localBaseURL + src : this.remoteBaseURL + src
+    const key = `${url}|${playback.loop}|${playback.muted}|${playback.speed}|${playback.still}`
+
+    let entry = this.videos.get(key)
+    if (entry == null) {
+      entry = this.createSharedVideo(url, playback)
+      this.videos.set(key, entry)
+
+      const created = entry
+      created.ready.catch(() => {
+        // drop a failed load, so the next acquire tries again rather than reusing the failure
+        if (this.videos.get(key) === created) {
+          this.videos.delete(key)
+          created.source.destroy()
+        }
+      })
+    }
+    entry.count += 1
+    if (entry.unloadTimer != null) {
+      clearTimeout(entry.unloadTimer)
+      entry.unloadTimer = undefined
+    }
+
+    const shared = entry
+    let released = false
+    const release = () => {
+      if (released) {
+        return
+      }
+      released = true
+      shared.count -= 1
+      if (shared.count > 0 || this.videos.get(key) !== shared) {
+        return
+      }
+      shared.unloadTimer = setTimeout(() => {
+        shared.unloadTimer = undefined
+        if (shared.count <= 0 && this.videos.get(key) === shared) {
+          this.videos.delete(key)
+          this.blockedVideos.delete(shared.source.resource as HTMLVideoElement)
+          shared.source.destroy()
+        }
+      }, this.videoUnloadDelayMS)
+    }
+
+    try {
+      const source = await shared.ready
+      return { source, release }
+    } catch (error) {
+      release()
+      throw error
+    }
+  }
+
+  private createSharedVideo(url: string, playback: VideoPlayback): SharedVideo {
+    const video = document.createElement("video")
+    video.crossOrigin = "anonymous"
+    video.preload = "auto"
+    video.playsInline = true
+    video.setAttribute("playsinline", "")
+    video.setAttribute("webkit-playsinline", "")
+    video.muted = playback.muted
+    video.defaultMuted = playback.muted
+    video.loop = playback.loop
+    video.src = url
+
+    // autoPlay off: pixi's own play() swallows the rejection an autoplay policy produces
+    const source = new PIXI.VideoSource({ resource: video, autoPlay: false, autoLoad: false })
+
+    const ready = source.load().then(() => {
+      if (playback.still) {
+        // a nudge off zero: some browsers, iOS Safari among them, paint nothing for a video that
+        // has never played or seeked, and the seek makes pixi upload the frame (`_onSeeked`)
+        video.currentTime = 0.001
+        return source
+      }
+
+      video.defaultPlaybackRate = playback.speed
+      video.playbackRate = playback.speed
+      this.playVideo(video)
+      return source
+    })
+
+    return { source, ready, count: 0 }
+  }
+
+  /**
+   * Whether asset videos play, from the "Play video effects" setting. Off, each shows its first
+   * frame instead — the same as the app's Low Power Mode, and a paused element costs no decoding.
+   *
+   * Separate from `allowVideo`, which is about the map background: that one is a single, often
+   * large download, while effects are many small ones that each keep a decoder busy.
+   */
+  static get playsVideoAssets(): boolean {
+    return (localStorage.getItem("playVideoAssets") || "true") == "true"
+  }
+
+  /**
+   * Starts a video, and if the browser's autoplay policy refuses, tries again on the next click or
+   * key press. A muted inline video is normally allowed, but iOS Safari refuses in Low Power Mode,
+   * and an unmuted one always needs a gesture.
+   */
+  private playVideo(video: HTMLVideoElement) {
+    video.play().catch(error => {
+      if (error?.name != "NotAllowedError") {
+        console.warn(`video playback failed: ${video.src}`, error)
+        return
+      }
+
+      const waiting = this.blockedVideos.size > 0
+      this.blockedVideos.add(video)
+      if (waiting) {
+        return
+      }
+
+      const resume = () => {
+        document.removeEventListener("pointerdown", resume, true)
+        document.removeEventListener("keydown", resume, true)
+        const blocked = [...this.blockedVideos]
+        this.blockedVideos.clear()
+        blocked.forEach(v => this.playVideo(v))
+      }
+      document.addEventListener("pointerdown", resume, true)
+      document.addEventListener("keydown", resume, true)
+    })
   }
 
   async loadResource(src: string): Promise<string> {

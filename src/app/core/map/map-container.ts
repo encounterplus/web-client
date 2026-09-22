@@ -32,6 +32,7 @@ import { MeasurementsLayer } from './layers/measurements-layer';
 import { MeasurementView } from './views/measurement-view';
 import { PathsLayer } from './layers/paths-layer';
 import { View } from './views/view';
+import { AssetVideo } from 'src/app/shared/models/asset';
 
 export class MapContainer extends Layer {
 
@@ -270,6 +271,33 @@ export class MapContainer extends Layer {
     // paths
     this.pathsLayer.tokens = [...this.playersLayer.views, ...this.monstersLayer.views]
     this.pathsLayer.draw()
+  }
+
+  /**
+   * Redraws every view showing a video asset, so a change to `Loader.playsVideoAssets` takes
+   * effect without reloading the map. Everything else is left alone.
+   */
+  redrawVideoAssets() {
+    for (let layer of [this.bottomLayer, this.middleLayer, this.topLayer]) {
+      for (let view of layer.views) {
+        if (AssetVideo.isVideo(view.tile.asset)) {
+          view.draw()
+        }
+      }
+    }
+
+    for (let view of [...this.playersLayer.views, ...this.monstersLayer.views]) {
+      const auraVideo = (view.token.auras || []).some(aura => aura.enabled && AssetVideo.isVideo(aura.asset))
+      if (AssetVideo.isVideo(view.token.asset) || auraVideo) {
+        view.draw()
+      }
+    }
+
+    for (let view of this.areaEffectsLayer.views) {
+      if (AssetVideo.isVideo(view.areaEffect.asset)) {
+        view.draw()
+      }
+    }
   }
 
   async draw() {

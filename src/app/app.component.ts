@@ -167,12 +167,17 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         let modal = this.modalService.open(SettingsModalComponent, {centered: true})
         modal.componentInstance.state = this.state
+        const playedVideoAssets = Loader.playsVideoAssets
         modal.result.then(result => {
           console.debug(`Settings component closed with: ${result}`);
 
           if (this.mapComponent) {
             // update maxFPS
             this.mapComponent.app.ticker.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60;
+            // switch video assets between playing and a still frame
+            if (Loader.playsVideoAssets != playedVideoAssets) {
+              this.mapComponent.mapContainer.redrawVideoAssets()
+            }
             this.mapComponent.mapContainer.visionLayer.update()
             this.mapComponent.mapContainer.lightsLayer.update()
             this.mapComponent.mapContainer.visionLayer.draw()

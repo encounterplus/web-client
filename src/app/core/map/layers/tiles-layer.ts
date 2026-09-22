@@ -10,6 +10,9 @@ export class TilesLayer extends Layer {
     views: Array<TileView> = [];
     grid: Grid;
 
+    /** Bumped by `clear()`, so a draw still loading tiles stops once it has been superseded. */
+    private generation = 0;
+
     constructor(private dataService: DataService) {
         super();
         this.sortableChildren = true
@@ -17,23 +20,30 @@ export class TilesLayer extends Layer {
 
     async draw() {
         this.clear();
+        const generation = this.generation;
 
         // tiles
         for (let tile of this.tiles) {
             if (tile.layer == MapLayer.dm) {
-                return;
+                continue;
             }
             let tileView = new TileView(tile, this.grid);
             this.addChild(tileView);
+            // tracked before it loads, so a clear() meanwhile disposes it too
+            this.views.push(tileView);
             await tileView.draw();
 
-            this.views.push(tileView);
+            if (generation != this.generation) {
+                return this;
+            }
         }
 
         return this;
     }
 
     clear() {
+        this.generation += 1;
+        this.views.forEach(view => view.dispose())
         this.views = []
         this.removeChildren();
     }

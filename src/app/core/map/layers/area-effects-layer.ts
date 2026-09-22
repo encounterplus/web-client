@@ -34,6 +34,7 @@ export class AreaEffectsLayer extends Layer {
     }
 
     clear() {
+        this.views.forEach(view => view.dispose())
         this.views = []
         this.removeChildren();
     }
