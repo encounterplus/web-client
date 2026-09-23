@@ -48,6 +48,37 @@ export class CacheManager {
 
 export class Utils {
 
+    /**
+     * The colour this client marks its pointers and messages with, generating and storing one on
+     * first use.
+     *
+     * The app has no notion of a default colour, so any client that has never been through the
+     * settings modal picks its own and keeps it.
+     */
+    static userColor(): string {
+        let color = localStorage.getItem("userColor")
+        if (!color) {
+            color = '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
+            localStorage.setItem("userColor", color)
+        }
+        return color
+    }
+
+    /**
+     * Replaces the entry carrying the same id, or appends the model when there is none.
+     *
+     * The app has no `created` event for the objects on a map — a `tokenUpdated` for an id the
+     * client has not seen is how a new token arrives — so an update has to cover both.
+     */
+    static upsertById<T extends { id: string }>(collection: Array<T>, model: T) {
+        const index = collection.findIndex(entry => entry.id == model.id)
+        if (index > -1) {
+            collection[index] = model
+        } else {
+            collection.push(model)
+        }
+    }
+
     static generateUniqueId(parts: number = 2): string {
         const stringArr = [];
         for(let i = 0; i< parts; i++){

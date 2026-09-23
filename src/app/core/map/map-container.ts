@@ -26,7 +26,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Role } from 'src/app/shared/models/token';
 import { SquareGrid } from './models/square-grid';
 import { HexGrid } from './models/hex-grid';
-import { ProgramManager } from 'src/app/shared/utils';
+import { ProgramManager, Utils } from 'src/app/shared/utils';
 import { VisionLayer } from './layers/vision-layer';
 import { MeasurementsLayer } from './layers/measurements-layer';
 import { MeasurementView } from './views/measurement-view';
@@ -526,7 +526,7 @@ export class MapContainer extends Layer {
 
       this.activePointer = new Pointer();
       this.activePointer.id = uuidv4();
-      this.activePointer.color = localStorage.getItem("userColor") ?? "";
+      this.activePointer.color = Utils.userColor();
       this.activePointer.source = localStorage.getItem("userName") ?? "";
       this.activePointer.x = newPosition.x | 0;
       this.activePointer.y = newPosition.y | 0;

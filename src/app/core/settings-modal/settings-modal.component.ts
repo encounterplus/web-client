@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataService } from 'src/app/shared/services/data.service';
+import { Utils } from 'src/app/shared/utils';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { Role, Token } from 'src/app/shared/models/token';
 import { AppState, RunMode } from 'src/app/shared/models/app-state';
@@ -90,7 +91,7 @@ export class SettingsModalComponent implements OnInit {
   ngOnInit() {
     this.remoteHost = this.dataService.remoteHost
     this.name = localStorage.getItem("userName") || "Unknown"
-    this.color = this.color = localStorage.getItem("userColor") || '#'+(Math.random()*0xFFFFFF<<0).toString(16)
+    this.color = Utils.userColor()
     this.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60
     this.allowVideo = (localStorage.getItem("allowVideo") || "true") == "true"
     this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200")

@@ -2,6 +2,7 @@ import { Component, OnInit, Input, ElementRef, ViewChildren, QueryList, ViewChil
 import { AppState } from 'src/app/shared/models/app-state';
 // import { Lightbox } from 'ngx-lightbox';
 import { DataService } from 'src/app/shared/services/data.service';
+import { Utils } from 'src/app/shared/utils';
 import { Message, MessageType } from 'src/app/shared/models/message';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 
@@ -141,7 +142,7 @@ export class MessageListComponent implements OnInit {
     console.log("sending message: " + text);
 
     let name = localStorage.getItem("userName") || "Unknown";
-    let color = localStorage.getItem("userColor") ?? "";
+    let color = Utils.userColor();
 
     let message = new Message();
     message.source = name;

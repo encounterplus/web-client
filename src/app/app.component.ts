@@ -22,7 +22,7 @@ import { MessageListComponent } from './core/message-list/message-list.component
 import { Token } from './shared/models/token';
 import { Light } from './shared/models/light';
 import { Sight } from './shared/models/sight';
-import { CacheManager } from './shared/utils';
+import { CacheManager, Utils } from './shared/utils';
 import { SharedVision } from './shared/models/screen';
 import { TrackedObject } from './shared/models/tracked-object';
 import { Measurement, measurementDefaults } from './shared/models/measurement';
@@ -533,10 +533,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
 
         if (event.data.polygon != null) {
-          const map = this.state.map
-          if (map) {
-            let index = map.tokens.findIndex((obj => obj.id == event.data.id));
-            const token = map.tokens[index]
+          const token = this.state.map?.tokens.find(obj => obj.id == event.data.id);
+          if (token) {
             token.x = event.data.x;
             token.y = event.data.y;
             const vision = token.vision
@@ -564,8 +562,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         const map = this.state.map
         if (!map) break
 
-        let index = map.tokens.findIndex((obj => obj.id == model.id))
-        map.tokens[index] = model
+        Utils.upsertById(map.tokens, model)
 
         let view = this.mapComponent.mapContainer.tokenViewById(model.id)
         if (view != null) {
@@ -601,8 +598,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         const map = this.state.map
         if (!map) break
 
-        let index = map.areaEffects.findIndex((obj => obj.id == model.id));
-        map.areaEffects[index] = model;
+        Utils.upsertById(map.areaEffects, model)
 
         let view = this.mapComponent.mapContainer.areaEffectViewById(model.id)
         if (view != null) {
@@ -620,8 +616,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         const map = this.state.map
         if (!map) break
 
-        let index = map.measurements.findIndex((obj => obj.id == model.id));
-        map.measurements[index] = model;
+        Utils.upsertById(map.measurements, model)
 
         let view = this.mapComponent.mapContainer.measurementViewById(model.id)
         if (view != null) {
@@ -639,8 +634,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         const map = this.state.map
         if (!map) break
 
-        let index = map.tiles.findIndex((obj => obj.id == model.id));
-        map.tiles[index] = model;
+        Utils.upsertById(map.tiles, model)
 
         let view = this.mapComponent.mapContainer.tileViewById(model.id)
         if (view != null && view.mapLayer == model.layer) {
@@ -671,8 +665,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         const map = this.state.map
         if (!map) break
 
-        let index = map.lights.findIndex((obj => obj.id == model.id))
-        map.lights[index] = model
+        Utils.upsertById(map.lights, model)
 
         this.mapComponent.mapContainer.lightsLayer.update()
         this.mapComponent.mapContainer.visionLayer.update()
@@ -734,8 +727,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         const map = this.state.map
         if (!map) break
 
-        let index = map.markers.findIndex((obj => obj.id == model.id));
-        map.markers[index] = model;
+        Utils.upsertById(map.markers, model)
 
         let view = this.mapComponent.mapContainer.markerViewById(model.id)
         if (view != null) {
@@ -1084,12 +1076,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
 
-    // init user color
-    let color = localStorage.getItem("userColor");
-    if (!color) {
-      localStorage.setItem("userColor", '#' + (Math.random() * 0xFFFFFF << 0).toString(16));
-    }
-
     // update messages based on local storage settings
     this.showMessages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
 
@@ -1116,7 +1102,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         // update color
         let name = localStorage.getItem("userName") || "Unknown";
-        let color = localStorage.getItem("userColor");
+        let color = Utils.userColor();
         this.dataService.send({ name: WSEventName.clientUpdated, data: { name: name, color: color, runMode: this.state.runMode, device: this.state.device, screenWidth: innerWidth, screenHeight: innerHeight } });
 
         const storedReadMessages = localStorage.getItem("readMessages");
