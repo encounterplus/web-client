@@ -48,16 +48,16 @@ export interface Map {
     gridType: GridType
     gridStyle: GridStyle
     gridOpacity: number
-    image: string
-    video: string
+    image?: string
+    video?: string
     scale: number
     lineOfSight: boolean
     losDaylight: number
     losVisionLimit: number
     fogOfWar: boolean
     fogExploration: boolean
-    fog: string
-    weatherType: WeatherType
+    fog?: string
+    weatherType?: WeatherType
     weatherIntensity: number
     x: number
     y: number
@@ -68,8 +68,8 @@ export interface Map {
     tokens: Array<Token>
     areaEffects: Array<AreaEffect>
     markers: Array<Marker>
-    drawings: Array<Drawing>
-    walls: Array<Wall>
+    drawings?: Array<Drawing>
+    walls?: Array<Wall>
     lights: Array<Light>
     measurements: Array<Measurement>
 }

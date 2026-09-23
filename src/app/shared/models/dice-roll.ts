@@ -7,9 +7,9 @@ export enum DiceRollType {
 }
 
 export interface DiceRoll {
-    name: string;
-    type: DiceRollType;
+    name?: string;
+    type?: DiceRollType;
     formula: string;
-    result: number;
-    detail: string;
+    result?: number;
+    detail?: string;
 }

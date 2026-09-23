@@ -3,7 +3,7 @@ import { AppState } from 'src/app/shared/models/app-state';
 // import { Lightbox } from 'ngx-lightbox';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Utils } from 'src/app/shared/utils';
-import { Message, MessageType, emptyMessage } from 'src/app/shared/models/message';
+import { Message, MessageType } from 'src/app/shared/models/message';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 
 @Component({
@@ -118,23 +118,26 @@ export class MessageListComponent implements OnInit {
     }
 
     if (text == "/help" || text == "/h") {
-      let message = emptyMessage();
-      message.type = MessageType.chat;
-      message.source = "Help Command";
-      message.color = "#6e7ed7";
-      message.content = "Dice roll command:</br><code>/r[oll] &lt;dice notation&gt; [[title[:check|save|attack|damage]]]</code>" +
-        "Examples:<br>" +
-        "<code>" +
-        "/r 2d20kh — advantage\n" +
-        "/r 2d20kl — disadvantage\n" +
-        "/r 4d6dl — drop lowest\n" +
-        "<br>" +
-        "/r 1d20+3 [initiative]\n" +
-        "/r 1d20+3 [cha:save]\n" +
-        "/r 1d20+3 [acrobatics:check]\n" +
-        "/r 1d20+3 [dagger:attack]\n" +
-        "/r 1d4+3 [dagger:damage]" +
-        "</code>";
+      let message: Message = {
+        id: "",
+        type: MessageType.chat,
+        source: "Help Command",
+        color: "#6e7ed7",
+        created: new Date(),
+        content: "Dice roll command:</br><code>/r[oll] &lt;dice notation&gt; [[title[:check|save|attack|damage]]]</code>" +
+          "Examples:<br>" +
+          "<code>" +
+          "/r 2d20kh — advantage\n" +
+          "/r 2d20kl — disadvantage\n" +
+          "/r 4d6dl — drop lowest\n" +
+          "<br>" +
+          "/r 1d20+3 [initiative]\n" +
+          "/r 1d20+3 [cha:save]\n" +
+          "/r 1d20+3 [acrobatics:check]\n" +
+          "/r 1d20+3 [dagger:attack]\n" +
+          "/r 1d4+3 [dagger:damage]" +
+          "</code>",
+      };
       // this.dataService.state.messages.push(message);
       return;
     }
@@ -144,17 +147,14 @@ export class MessageListComponent implements OnInit {
     let name = localStorage.getItem("userName") || "Unknown";
     let color = Utils.userColor();
 
-    let message = emptyMessage();
-    message.source = name;
-    message.color = color;
-
-    if (text.startsWith("/")) {
-      message.type = MessageType.command;
-      message.content = text
-    } else {
-      message.type = MessageType.chat;
-      message.content = text;
-    }
+    let message: Message = {
+      id: "",
+      type: text.startsWith("/") ? MessageType.command : MessageType.chat,
+      source: name,
+      color: color,
+      content: text,
+      created: new Date(),
+    };
     this.dataService.send({ name: WSEventName.createMessage, data: message });
     this.scrollToBottom();
   }

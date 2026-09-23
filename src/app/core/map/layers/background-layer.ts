@@ -60,8 +60,8 @@ export class BackgroundLayer extends Layer {
             this.video = null;
             return;
         }
-        this.image = map.image;
-        this.video = map.video;
+        this.image = map.image ?? null;
+        this.video = map.video ?? null;
         this.allowVideo = (localStorage.getItem("allowVideo") || "true") == "true";
 
         this.w = (map.width || 2048) * map.scale;

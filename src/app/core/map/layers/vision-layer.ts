@@ -124,7 +124,7 @@ export class VisionLayer extends Layer {
     this.lineOfSight = map.lineOfSight
     this.fogOfWar = map.fogOfWar
 
-    this.fog = map.fog
+    this.fog = map.fog ?? ""
     this.fogExplore = map.fogExploration
 
     this.visionLimit = map.losVisionLimit || -1
