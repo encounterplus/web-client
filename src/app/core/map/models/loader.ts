@@ -309,21 +309,67 @@ export class Loader {
     // autoPlay off: pixi's own play() swallows the rejection an autoplay policy produces
     const source = new PIXI.VideoSource({ resource: video, autoPlay: false, autoLoad: false })
 
-    const ready = source.load().then(() => {
+    const ready = source.load().then(async () => {
       if (playback.still) {
         // a nudge off zero: some browsers, iOS Safari among them, paint nothing for a video that
         // has never played or seeked, and the seek makes pixi upload the frame (`_onSeeked`)
         video.currentTime = 0.001
-        return source
+      } else {
+        video.defaultPlaybackRate = playback.speed
+        video.playbackRate = playback.speed
+        this.playVideo(video)
       }
 
-      video.defaultPlaybackRate = playback.speed
-      video.playbackRate = playback.speed
-      this.playVideo(video)
+      // only now is the source safe to draw — see `decodedFrame`
+      await this.decodedFrame(video)
       return source
     })
 
     return { source, ready, count: 0 }
+  }
+
+  /**
+   * Resolves once the element holds a frame that WebGL can read, and not merely its metadata.
+   *
+   * Pixi calls a video source valid as soon as `videoWidth` is known, which is at `loadedmetadata`,
+   * before any frame is decoded. Uploading then is a silent no-op in Chrome — it leaves the
+   * texture's level 0 undefined — but pixi records the size it meant to allocate all the same. Every
+   * later frame therefore takes its `texSubImage2D` path, which Chrome answers with
+   *
+   *     GL_INVALID_OPERATION: glCopySubTextureCHROMIUM: The destination level of the destination
+   *     texture must be defined.
+   *
+   * and the video is blank from then on: nothing resizes the source again, so the allocation is
+   * never retried. Holding the lease back until a frame exists keeps pixi's first upload — which
+   * does allocate — from landing in that window. Split-alpha files, twice the size of the picture
+   * they draw, are the ones slow enough to lose the race regularly.
+   */
+  private decodedFrame(video: HTMLVideoElement): Promise<void> {
+    if (video.readyState >= video.HAVE_CURRENT_DATA) {
+      return Promise.resolve()
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const done = (settle: () => void) => {
+        video.removeEventListener("loadeddata", onData)
+        video.removeEventListener("seeked", onData)
+        video.removeEventListener("error", onError)
+        settle()
+      }
+      const onData = () => {
+        if (video.readyState >= video.HAVE_CURRENT_DATA) {
+          done(resolve)
+        }
+      }
+      const onError = () => {
+        done(() => reject(video.error ?? new Error(`video failed to decode: ${video.src}`)))
+      }
+
+      video.addEventListener("loadeddata", onData)
+      video.addEventListener("seeked", onData)
+      video.addEventListener("error", onError)
+      onData()
+    })
   }
 
   /**
