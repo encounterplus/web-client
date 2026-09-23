@@ -57,7 +57,7 @@ export class DraggableDirective implements AfterViewInit {
     this.isDraggable = false;
   }
 
-  private searchParentNode(element: Node, tag: Node): Node {
+  private searchParentNode(element: Node, tag: Node): Node | null {
     while (element.parentNode) {
         element = element.parentNode;
         if (element === tag) {

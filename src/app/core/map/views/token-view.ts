@@ -219,7 +219,7 @@ export class TokenView extends View {
   async drawPath() {
     this.pathView.gridSize = this.gridSize
     this.pathView.color = this.baseColor
-    this.pathView.path = this.token.path
+    this.pathView.path = this.token.path ?? []
     await this.pathView.draw()
   }
 
@@ -407,26 +407,29 @@ export class TokenView extends View {
   }
 
   updateOverlay() {
-    if (this.overlayTexture != null) {
+    const overlaySprite = this.overlaySprite
+    if (this.overlayTexture != null && overlaySprite != null) {
       let size = Math.min(this.w, this.h) * this.scaleFactor
-      this.overlaySprite.width = Math.min(size, this.w)
-      this.overlaySprite.height = Math.min(size, this.h)
-      this.overlaySprite.position.set(this.w / 2, this.h / 2)
+      overlaySprite.width = Math.min(size, this.w)
+      overlaySprite.height = Math.min(size, this.h)
+      overlaySprite.position.set(this.w / 2, this.h / 2)
     }
   }
 
   updateLabel() {
-    if (this.labelGraphics == null) {
+    const labelGraphics = this.labelGraphics
+    const labelText = this.labelText
+    if (labelGraphics == null || labelText == null) {
       return
     }
 
     // update visibility
     if ((this.hasArtwork && this.token.label != null) || !this.hasArtwork) {
-      this.labelGraphics.visible = true
-      this.labelText.visible = true
+      labelGraphics.visible = true
+      labelText.visible = true
     } else {
-      this.labelGraphics.visible = false
-      this.labelText.visible = false
+      labelGraphics.visible = false
+      labelText.visible = false
       return
     }
 
@@ -458,38 +461,44 @@ export class TokenView extends View {
         y = clamp(y, 0, (this.h) - (labelSize / 2))
       }
 
-      this.labelGraphics.clear();
-      this.labelGraphics.circle(x, y, labelSize / 2)
+      labelGraphics.clear();
+      labelGraphics.circle(x, y, labelSize / 2)
         .fill(this.color)
         .stroke({ width: 2, color: 0x000000, alpha: 0.2 });
 
-      this.labelText.text = text
-      this.labelText.position.set(x, y);
-      this.labelText.style.fontSize = labelSize / 2.5;
+      labelText.text = text
+      labelText.position.set(x, y);
+      labelText.style.fontSize = labelSize / 2.5;
 
     } else {
       let size = Math.min(this.w, this.h) * this.scaleFactor
-      this.labelGraphics.clear();
-      this.labelGraphics.circle(this.w / 2, this.h / 2, size / 2)
+      labelGraphics.clear();
+      labelGraphics.circle(this.w / 2, this.h / 2, size / 2)
         .fill(this.color)
         .stroke({ width: 2, color: 0x000000, alpha: 0.2 });
-      this.labelText.text = text
-      this.labelText.position.set(this.w / 2, this.h / 2);
-      this.labelText.style.fontSize = size / 2.5;
+      labelText.text = text
+      labelText.position.set(this.w / 2, this.h / 2);
+      labelText.style.fontSize = size / 2.5;
     }
   }
 
   updateElevation() {
+    const elevationGraphics = this.elevationGraphics
+    const elevationText = this.elevationText
+    if (elevationGraphics == null || elevationText == null) {
+      return
+    }
+
     // get text
     const text = this.distance || this.elevation
 
     // update visibility
     if (text) {
-      this.elevationGraphics.visible = true
-      this.elevationText.visible = true
+      elevationGraphics.visible = true
+      elevationText.visible = true
     } else {
-      this.elevationGraphics.visible = false
-      this.elevationText.visible = false
+      elevationGraphics.visible = false
+      elevationText.visible = false
       return
     }
 
@@ -518,15 +527,15 @@ export class TokenView extends View {
         y = clamp(y, 0, (this.h) - (labelSize))
       }
 
-      this.elevationGraphics.clear()
-      this.elevationGraphics.roundRect(0, 0, labelSize * 2, labelSize, labelSize / 2)
+      elevationGraphics.clear()
+      elevationGraphics.roundRect(0, 0, labelSize * 2, labelSize, labelSize / 2)
         .fill({ color: this.distance != null ? 0x444444 : 0x555555, alpha: 0.9 })
         .stroke({ width: 2, color: 0x000000, alpha: 0.2 });
-      this.elevationGraphics.position.set(x, y)
+      elevationGraphics.position.set(x, y)
 
-      this.elevationText.text = text
-      this.elevationText.position.set(x + labelSize * 0.7, y + labelSize / 2);
-      this.elevationText.style.fontSize = labelSize / 2.5;
+      elevationText.text = text
+      elevationText.position.set(x + labelSize * 0.7, y + labelSize / 2);
+      elevationText.style.fontSize = labelSize / 2.5;
 
     } else {
       let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
@@ -553,20 +562,20 @@ export class TokenView extends View {
         y = clamp(y, 0, (this.h) - (labelSize))
       }
 
-      this.elevationGraphics.clear()
-      this.elevationGraphics.roundRect(0, 0, labelSize * 1.3, labelSize, labelSize / 2)
+      elevationGraphics.clear()
+      elevationGraphics.roundRect(0, 0, labelSize * 1.3, labelSize, labelSize / 2)
         .fill({ color: this.distance != null ? 0x444444 : 0x555555, alpha: 0.9 })
         .stroke({ width: 2, color: 0x000000, alpha: 0.2 });
-      this.elevationGraphics.position.set(x, y)
+      elevationGraphics.position.set(x, y)
 
-      this.elevationText.text = text
-      this.elevationText.position.set(x + labelSize * 0.6, y + labelSize / 2);
-      this.elevationText.style.fontSize = labelSize / 2.5;
+      elevationText.text = text
+      elevationText.position.set(x + labelSize * 0.6, y + labelSize / 2);
+      elevationText.style.fontSize = labelSize / 2.5;
     }
 
     if (!this.hasArtwork && this.token.trackingId == null) {
-      this.elevationGraphics.zIndex = 10
-      this.elevationText.zIndex = 11
+      elevationGraphics.zIndex = 10
+      elevationText.zIndex = 11
     }
   }
 
@@ -654,7 +663,9 @@ export class TokenView extends View {
     }
 
     // add pointer move event
-    this.parent.parent.eventMode = 'static'
+    if (this.parent?.parent) {
+      this.parent.parent.eventMode = 'static'
+    }
     this.parent?.parent?.on('pointermove', this.onDragMove)
 
     this.dataService.send({ name: WSEventName.tokenMoved, data: { id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start } })
@@ -665,7 +676,9 @@ export class TokenView extends View {
 
     // remove pointer move event
     this.parent?.parent?.off('pointermove', this.onDragMove)
-    this.parent.parent.eventMode = 'passive'
+    if (this.parent?.parent) {
+      this.parent.parent.eventMode = 'passive'
+    }
 
     if (this.controlled) {
       return

@@ -92,9 +92,13 @@ describe('componentFilters', () => {
     it('folds tints into the matrix once an hsb filter is present', () => {
         const filters = componentFilters([tint("#808080"), hsb(0, 0, 20)])
         expect(filters.tint).toBe(0xffffff)
-        expect(filters.matrix).not.toBeNull()
+        const matrix = filters.matrix
+        if (matrix == null) {
+            fail("expected a colour matrix")
+            return
+        }
         // tint halves first, then brightness lifts: 0.8 × 0.5 + 0.2
-        expect(transform(filters.matrix, [1, 1, 1, 1])[0]).toBeCloseTo(0.8 * (0x80 / 0xff) + 0.2)
+        expect(transform(matrix, [1, 1, 1, 1])[0]).toBeCloseTo(0.8 * (0x80 / 0xff) + 0.2)
     })
 })
 

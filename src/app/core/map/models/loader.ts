@@ -76,8 +76,10 @@ export class Loader {
   }
 
   // TOOD: this is not working very well
-  async loadVideoTexture(src: string, loadingText: PIXI.Text = null, local: boolean = false): Promise<PIXI.Texture> {
-    loadingText.text = `Loading video map...`;
+  async loadVideoTexture(src: string, loadingText: PIXI.Text | null = null, local: boolean = false): Promise<PIXI.Texture> {
+    if (loadingText != null) {
+      loadingText.text = `Loading video map...`;
+    }
     if (local == false && !src.startsWith("blob:")) {
       src = this.remoteBaseURL + src;
     }
@@ -157,7 +159,9 @@ export class Loader {
           req.onprogress = (e) => {
             if (e.lengthComputable && Math.trunc(e.loaded / e.total * 100) > pos) {
               pos = Math.trunc(e.loaded / e.total * 100)
-              loadingText.text = `Loading video map: ${pos}%`;
+              if (loadingText != null) {
+                loadingText.text = `Loading video map: ${pos}%`;
+              }
             }
           };
           req.onload = () => resolve(req.response);
@@ -195,19 +199,17 @@ export class Loader {
 
       };
       video.onerror = (e) => {
-        console.log("Error " + video.error.code + " loading video: " + video.error.message)
+        console.log("Error " + video.error?.code + " loading video: " + video.error?.message)
         reject();
       }
       video.src = videosrcurl;
       console.log("Loading video");
       video.load();
     });
-
-    return null
   }
 
   // This is better texture loader, but m4v is not supported
-  async loadVideoTextureFrom(src: string, local: boolean = false): Promise<PIXI.Texture> {
+  async loadVideoTextureFrom(src: string, local: boolean = false): Promise<PIXI.Texture | null> {
 
     // if (local == false) {
     //     src = this.remoteBaseURL + src;

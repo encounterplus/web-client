@@ -37,7 +37,7 @@ export class MessageListComponent implements OnInit {
     let rollStr = ""
     const rollRE = /^(\/r(?:oll)? )?(([0-9]+)[dD]([0-9]+)|0)?(?:(kh|kl)1?)?((?:\+|\-)[0-9]+)? ?(.*)?/;
     const m = rollRE.exec(this.messageInput);
-    if (this.messageInput != "" && m == null) {
+    if (m == null) {
       return;
     }
     const [cmd, roll, num, sides, keep, mods, text] = m.slice(1);
@@ -141,7 +141,7 @@ export class MessageListComponent implements OnInit {
     console.log("sending message: " + text);
 
     let name = localStorage.getItem("userName") || "Unknown";
-    let color = localStorage.getItem("userColor");
+    let color = localStorage.getItem("userColor") ?? "";
 
     let message = new Message();
     message.source = name;

@@ -33,7 +33,7 @@ export class SplitAlphaVideo extends PIXI.Mesh<PIXI.Geometry, PIXI.Shader> {
      */
     readonly anchor: PIXI.ObservablePoint
 
-    private lease: VideoLease
+    private lease: VideoLease | null
 
     static async create(asset: Asset): Promise<SplitAlphaVideo> {
         const lease = await Loader.shared.acquireVideo(asset.resource, {
@@ -91,8 +91,8 @@ export class SplitAlphaVideo extends PIXI.Mesh<PIXI.Geometry, PIXI.Shader> {
         applyAnchor()
     }
 
-    get video(): HTMLVideoElement {
-        return this.lease.source.resource as HTMLVideoElement
+    get video(): HTMLVideoElement | null {
+        return this.lease?.source.resource as HTMLVideoElement ?? null
     }
 
     override destroy(options?: PIXI.DestroyOptions) {

@@ -11,7 +11,10 @@
     "noImplicitThis": true,
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
+    "strictNullChecks": true,
     "useUnknownInCatchVariables": true,
+    // Stage 4: the last flag to flip, then all of the above collapse to "strict": true.
+    "strictPropertyInitialization": false,
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,

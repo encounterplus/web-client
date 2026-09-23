@@ -6,19 +6,19 @@ import { DataService } from 'src/app/shared/services/data.service';
 
 export class BackgroundLayer extends Layer {
 
-    imageTexture: PIXI.Texture;
-    imageSprite: PIXI.Sprite;
+    imageTexture: PIXI.Texture | null;
+    imageSprite: PIXI.Sprite | null;
 
-    videoTexture: PIXI.Texture;
-    videoSprite: PIXI.Sprite;
+    videoTexture: PIXI.Texture | null;
+    videoSprite: PIXI.Sprite | null;
 
     loadingText = new PIXI.Text({ text: "Loading map resources...", style: {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'} });
     vidloadingText = new PIXI.Text({ text: "Loading video map...", style: {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'} });
 
-    image: string;
-    video: string;
-    loadedVideoSrc: string;
-    loadedVideoUrl: string;
+    image: string | null;
+    video: string | null;
+    loadedVideoSrc: string | null;
+    loadedVideoUrl: string | null;
 
     videoPaused: boolean = false;
     videoMuted: boolean = true;
@@ -146,17 +146,24 @@ export class BackgroundLayer extends Layer {
         }
 
         console.debug(`map size: ${this.w}x${this.h}`)
+
+        return this;
     }
 
     drawVideo() {
-        let sprite = new PIXI.Sprite(this.videoTexture);
-        sprite.width = this.videoTexture.width;
-        sprite.height = this.videoTexture.height;
+        const videoTexture = this.videoTexture
+        if (videoTexture == null) {
+            return
+        }
+
+        let sprite = new PIXI.Sprite(videoTexture);
+        sprite.width = videoTexture.width;
+        sprite.height = videoTexture.height;
         this.removeChildren();
         this.addChild(sprite);
         this.videoSprite = sprite;
 
-        const videoSource = this.videoTexture.source as PIXI.VideoSource;
+        const videoSource = videoTexture.source as PIXI.VideoSource;
         const video = videoSource.resource as HTMLVideoElement;
 
         this.loadedVideoSrc = this.video;

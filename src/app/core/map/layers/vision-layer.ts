@@ -39,10 +39,10 @@ export class VisionLayer extends Layer {
   fogLoaded = false
   lineOfSight = false
 
-  bg: PIXI.Sprite
+  bg: PIXI.Sprite | null
   meshes: Array<PIXI.Mesh<any, any>> = []
-  msk: PIXI.Graphics
-  app: PIXI.Application
+  msk: PIXI.Graphics | null
+  app: PIXI.Application | null = null
   blurFilter: PIXI.Filter
   blur: boolean = false
 
@@ -63,7 +63,7 @@ export class VisionLayer extends Layer {
     if (userTokenId && userTokenId != "null") {
       if (this.dataService.state.screen.sharedVision == SharedVision.never) {
         // search using userTokenId
-        for (let token of this.dataService.state.map.tokens) {
+        for (let token of this.dataService.state.map?.tokens ?? []) {
           if (token.id == userTokenId) {
             return token
           }
@@ -75,7 +75,7 @@ export class VisionLayer extends Layer {
           return null
         }
         // search using userTokenId
-        for (let token of this.dataService.state.map.tokens) {
+        for (let token of this.dataService.state.map?.tokens ?? []) {
           if (token.id == userTokenId) {
             return token
           }
@@ -90,7 +90,7 @@ export class VisionLayer extends Layer {
       }
 
       // search using creature tokenId
-      for (let token of this.dataService.state.map.tokens) {
+      for (let token of this.dataService.state.map?.tokens ?? []) {
         if (token.id == this.dataService.state.turned?.tokenId) {
 
           return token
@@ -112,18 +112,23 @@ export class VisionLayer extends Layer {
   }
 
   update() {
-    this.tokens = this.dataService.state.map.tokens
-    this.tiles = this.dataService.state.map.tiles
-    this.lights = this.dataService.state.map.lights
+    const map = this.dataService.state.map
+    if (!map) {
+      return
+    }
 
-    this.lineOfSight = this.dataService.state.map.lineOfSight
-    this.fogOfWar = this.dataService.state.map.fogOfWar
+    this.tokens = map.tokens
+    this.tiles = map.tiles
+    this.lights = map.lights
 
-    this.fog = this.dataService.state.map.fog
-    this.fogExplore = this.dataService.state.map.fogExploration
+    this.lineOfSight = map.lineOfSight
+    this.fogOfWar = map.fogOfWar
 
-    this.visionLimit = this.dataService.state.map.losVisionLimit || -1
-    this.intensity = this.dataService.state.map.losDaylight || 0.0
+    this.fog = map.fog
+    this.fogExplore = map.fogExploration
+
+    this.visionLimit = map.losVisionLimit || -1
+    this.intensity = map.losDaylight || 0.0
 
     this.visible = this.lineOfSight || this.fogOfWar
 
@@ -141,7 +146,7 @@ export class VisionLayer extends Layer {
     this.clear();
 
     if (!this.visible) {
-      return;
+      return this;
     }
 
     // prevent showing map while loading textures
@@ -294,7 +299,7 @@ export class VisionLayer extends Layer {
 
     // render to texture
     if (this.lineOfSight || (this.fogOfWar && this.fogExplore)) {
-      this.app.renderer.render({container: this.visionContainer, target: this.visionTexture, clear: true})
+      this.app?.renderer.render({container: this.visionContainer, target: this.visionTexture, clear: true})
     }
 
     // load texture if necessary
@@ -311,7 +316,7 @@ export class VisionLayer extends Layer {
     if (this.blur && !this.lineOfSight && this.fogOfWar && this.fogExplore) {
       let sprite = new PIXI.Sprite(this.fogTexture)
       sprite.filters = [this.blurFilter]
-      this.app.renderer.render({container: sprite, target: this.fogBlurTexture, clear: true})
+      this.app?.renderer.render({container: sprite, target: this.fogBlurTexture, clear: true})
       sprite.filters = null
       sprite.destroy()
     }
@@ -465,7 +470,7 @@ export class VisionLayer extends Layer {
       mesh.mask = this.msk;
     } else {
       // performance hog
-      this.msk.poly(sightPolygon).fill({color: 0xffffff})
+      this.msk?.poly(sightPolygon).fill({color: 0xffffff})
     }
   }
 
@@ -474,7 +479,7 @@ export class VisionLayer extends Layer {
     const light = tile.light
 
     // check light state
-    if (light.sight == null || light.sight.polygon == null || !light.enabled || light.sight.polygon.length == 0) {
+    if (light == null || light.sight == null || light.sight.polygon == null || !light.enabled || light.sight.polygon.length == 0) {
       return
     }
 
@@ -534,7 +539,7 @@ export class VisionLayer extends Layer {
       mesh.mask = this.msk;
     } else {
       // performance hog
-      this.msk.poly(sightPolygon).fill({color: 0xffffff})
+      this.msk?.poly(sightPolygon).fill({color: 0xffffff})
     }
   }
 
@@ -598,7 +603,7 @@ export class VisionLayer extends Layer {
       mesh.mask = this.msk;
     } else {
       // performance hog
-      this.msk.poly(sightPolygon).fill({color: 0xffffff})
+      this.msk?.poly(sightPolygon).fill({color: 0xffffff})
     }
   }
 
@@ -633,7 +638,7 @@ export class VisionLayer extends Layer {
     mesh.shader!.resources.texVision = this.visionTexture.source
     mesh.shader!.resources.fogUniforms.uniforms.exploration = this.fogExplore
 
-    this.app.renderer.render({container: mesh, target: this.tmpTexture, clear: false})
+    this.app?.renderer.render({container: mesh, target: this.tmpTexture, clear: false})
 
     // gpu texture copy function?
     // texture swap
@@ -671,7 +676,7 @@ export class VisionLayer extends Layer {
     sprite.filters = this.blur ? [this.blurFilter] : null
 
     // render offscreen
-    this.app.renderer.render({container: sprite, target: this.fogTexture })
+    this.app?.renderer.render({container: sprite, target: this.fogTexture })
 
     sprite.destroy()
     // remove cached textures
@@ -703,7 +708,7 @@ export class VisionLayer extends Layer {
     sprite.filters = this.blur ? [this.blurFilter] : null
 
     // render offscreen
-    this.app.renderer.render({container: sprite, target: this.fogTexture })
+    this.app?.renderer.render({container: sprite, target: this.fogTexture })
 
     sprite.destroy()
     // PIXI.BaseTexture.removeFromCache(fogTexture.baseTexture.textureCacheIds[1]);

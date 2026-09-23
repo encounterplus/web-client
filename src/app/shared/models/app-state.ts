@@ -45,11 +45,13 @@ export class AppState {
 
   viewMode: ViewMode = ViewMode.player
   runMode: RunMode = RunMode.normal
-  device: string = ""
+  // Null when no ?device= parameter was given; ToolbarComponent.showExit reads
+  // that distinction, so an empty-string default would not do.
+  device: string | null = ""
   allInteractions = false
   userTokenId?: string
 
-  get turned(): Combatant {
+  get turned(): Combatant | null {
     for (let combatant of this.game.combatants || []) {
       if (combatant.id == this.game.combatantId) {
         return combatant

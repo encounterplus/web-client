@@ -31,7 +31,7 @@ export class SettingsModalComponent implements OnInit {
 
   get tokens(): Array<Token> {
     if (this.state.map != null) {
-      return this.state.map.tokens.filter( token => { return token.role == Role.friendly } ).sort((a, b) => (a.name > b.name) ? 1 : -1)
+      return this.state.map.tokens.filter( token => { return token.role == Role.friendly } ).sort((a, b) => ((a.name ?? "") > (b.name ?? "")) ? 1 : -1)
     } else {
       return []
     }
@@ -48,7 +48,7 @@ export class SettingsModalComponent implements OnInit {
   save() {
     localStorage.setItem("userName", this.name)
     localStorage.setItem("userColor", this.color)
-    localStorage.setItem("userTokenId", this.tokenId)
+    localStorage.setItem("userTokenId", this.tokenId ?? "")
 
     localStorage.setItem("maxFPS", `${this.maxFPS}`)
     localStorage.setItem("allowVideo", `${this.allowVideo}`)
@@ -96,7 +96,7 @@ export class SettingsModalComponent implements OnInit {
     this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200")
     this.playVideoAssets = Loader.playsVideoAssets
     this.softEdges = (localStorage.getItem("softEdges") || "true") == "true"
-    this.tokenId = localStorage.getItem("userTokenId")
+    this.tokenId = localStorage.getItem("userTokenId") ?? undefined
     this.runMode = this.state.runMode
   }
 }

@@ -26,7 +26,7 @@ export class EffectsLayer extends Layer {
 
     views: { [id: string]: PointerView } = {};
 
-    weatherEffectView: WeatherEffectView
+    weatherEffectView: WeatherEffectView | null
 
     async draw() {
 
@@ -63,8 +63,8 @@ export class EffectsLayer extends Layer {
             this.weatherEffectView = null
         }
 
-        const weatherType = this.dataService.state.map.weatherType
-        const weatherIntensity = this.dataService.state.map.weatherIntensity
+        const weatherType = this.dataService.state.map?.weatherType
+        const weatherIntensity = this.dataService.state.map?.weatherIntensity
         let particleTexture: PIXI.Texture
     
         if (weatherType != null && weatherType != WeatherType.none) {
@@ -84,7 +84,7 @@ export class EffectsLayer extends Layer {
 
             console.debug(this.w, this.h, weatherType, weatherIntensity)
 
-            this.weatherEffectView = new WeatherEffectView(weatherType, weatherIntensity, this.grid, this, particleTexture);
+            this.weatherEffectView = new WeatherEffectView(weatherType, weatherIntensity ?? 0, this.grid, this, particleTexture);
             this.weatherEffectView.setSize(this.size);
             this.weatherEffectView.updatePosition(this.w / 2, this.h / 2);
             this.weatherEffectView.play();

@@ -146,9 +146,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges {
       ticker.autoStart = true;
       // Gamepad & KB Support
       ticker.add(() => {
-        let token = this.mapContainer.tokenViewById(localStorage.getItem("userTokenId"))
-        let x = token?.position.x
-        let y = token?.position.y
+        const userTokenId = localStorage.getItem("userTokenId")
+        let token = userTokenId ? this.mapContainer.tokenViewById(userTokenId) : null
+        let x = token?.position.x ?? 0
+        let y = token?.position.y ?? 0
         let pos = this.viewport.center
 
         // Keyboard Controls
@@ -332,7 +333,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges {
 
   notifyViewportUpdate() {
     if (this.state.runMode != RunMode.normal) {
-      this.dataService.send({ name: WSEventName.mapViewportUpdated, data: { id: this.state.map.id, x: Math.round((this.viewport.center.x - this.viewport.worldWidth / 2)), y: Math.round((this.viewport.center.y - this.viewport.worldHeight / 2)), zoom: this.viewport.scaled } })
+      this.dataService.send({ name: WSEventName.mapViewportUpdated, data: { id: this.state.map?.id, x: Math.round((this.viewport.center.x - this.viewport.worldWidth / 2)), y: Math.round((this.viewport.center.y - this.viewport.worldHeight / 2)), zoom: this.viewport.scaled } })
       this.dataService.send({ name: WSEventName.trackedObjectsUpdated, data: this.state.trackedObjects })
     }
   }

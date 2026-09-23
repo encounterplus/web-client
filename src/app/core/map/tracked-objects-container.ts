@@ -37,7 +37,7 @@ export class TrackedObjectsContainer extends Layer {
         this.removeChildren()
     }
 
-    trackedObjectViewById(id: number): TrackedObjectView {
+    trackedObjectViewById(id: number): TrackedObjectView | null {
         for (let view of this.views) {
             if (view.trackedObject.id == id) {
                 return view

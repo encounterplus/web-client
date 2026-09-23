@@ -41,7 +41,7 @@ export class TrackedObjectView extends View {
     }
 
     get center(): PIXI.Point {
-        return this.convert(this.trackedObject.x, this.trackedObject.y)
+        return this.convert(this.trackedObject.x ?? 0, this.trackedObject.y ?? 0)
     }
 
     async draw() {

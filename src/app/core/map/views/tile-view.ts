@@ -58,7 +58,7 @@ export class TileView extends View {
 
         this.position.set(this.tile.x, this.tile.y)
         this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
-        this.zIndex = this.tile.zIndex;
+        this.zIndex = this.tile.zIndex ?? 0;
 
         this.visible = !this.tile.hidden;
         this.mapLayer = this.tile.layer;

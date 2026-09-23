@@ -63,7 +63,7 @@ export class MapContainer extends Layer {
   overlaySprite: PIXI.Sprite
 
   // data
-  map: Map;
+  map: Map | undefined;
   state: AppState;
   grid: Grid = new SquareGrid()
 
@@ -150,7 +150,7 @@ export class MapContainer extends Layer {
       return
     }
 
-    this.backgroundLayer.update(this.state.map)
+    this.backgroundLayer.update(this.map)
 
 
     // if (this.map.video) {
@@ -158,13 +158,13 @@ export class MapContainer extends Layer {
     // }
 
     // create grid
-    if (this.state.map.gridType == GridType.square) {
+    if (this.map.gridType == GridType.square) {
       this.grid = new SquareGrid()
     } else {
       this.grid = new HexGrid()
     }
 
-    this.grid.update(this.state.map)
+    this.grid.update(this.map)
     this.gridLayer.update(this.grid)
 
     this.pathsLayer.grid = this.grid
@@ -198,17 +198,27 @@ export class MapContainer extends Layer {
   }
 
   updateTiles() {
-    this.bottomLayer.tiles = this.state.map.tiles.filter(tile => tile.layer == "map");
-    this.middleLayer.tiles = this.state.map.tiles.filter(tile => tile.layer == "object");
-    this.topLayer.tiles = this.state.map.tiles.filter(tile => tile.layer == "token");
+    const map = this.state.map
+    if (map == null) {
+      return
+    }
+
+    this.bottomLayer.tiles = map.tiles.filter(tile => tile.layer == "map");
+    this.middleLayer.tiles = map.tiles.filter(tile => tile.layer == "object");
+    this.topLayer.tiles = map.tiles.filter(tile => tile.layer == "token");
   }
 
   updateTokens() {
-    this.monstersLayer.tokens = this.state.map.tokens.filter(token => !(token.role == Role.friendly && token.vision && token.vision?.enabled))
-    this.playersLayer.tokens = this.state.map.tokens.filter(token => token.role == Role.friendly && token.vision && token.vision?.enabled)
+    const map = this.state.map
+    if (map == null) {
+      return
+    }
+
+    this.monstersLayer.tokens = map.tokens.filter(token => !(token.role == Role.friendly && token.vision && token.vision?.enabled))
+    this.playersLayer.tokens = map.tokens.filter(token => token.role == Role.friendly && token.vision && token.vision?.enabled)
   }
 
-  updateTurned(combatant: Combatant) {
+  updateTurned(combatant: Combatant | null) {
     if (this.turned != null) {
       this.turned.turned = false;
       this.turned.updateLabel();
@@ -241,13 +251,13 @@ export class MapContainer extends Layer {
 
   resetPaths() {
     for (let view of this.playersLayer.views) {
-      view.token.path = null
+      view.token.path = undefined
       view.pathView.clear()
       view.updateElevation()
     }
 
     for (let view of this.monstersLayer.views) {
-      view.token.path = null
+      view.token.path = undefined
       view.pathView.clear()
       view.updateElevation()
     }
@@ -357,7 +367,7 @@ export class MapContainer extends Layer {
     this.gridLayer.draw()
 
     // render to texture
-    this.app.renderer.render({ container: this.mapLayer, target: this.mapTexture, clear: true })
+    this.app?.renderer.render({ container: this.mapLayer, target: this.mapTexture, clear: true })
 
     // vision
     this.visionLayer.size = this.size
@@ -516,8 +526,8 @@ export class MapContainer extends Layer {
 
       this.activePointer = new Pointer();
       this.activePointer.id = uuidv4();
-      this.activePointer.color = localStorage.getItem("userColor");
-      this.activePointer.source = localStorage.getItem("userName");
+      this.activePointer.color = localStorage.getItem("userColor") ?? "";
+      this.activePointer.source = localStorage.getItem("userName") ?? "";
       this.activePointer.x = newPosition.x | 0;
       this.activePointer.y = newPosition.y | 0;
       this.activePointer.state = ControlState.start;
@@ -535,7 +545,7 @@ export class MapContainer extends Layer {
       const newPosition = event.data.getLocalPosition(this.parent);
 
       // out of bounds
-      if (newPosition.x < 0 || newPosition.x > this.w * this.map.scale || newPosition.y < 0 || newPosition.y > this.h * this.map.scale) {
+      if (newPosition.x < 0 || newPosition.x > this.w * (this.map?.scale ?? 1) || newPosition.y < 0 || newPosition.y > this.h * (this.map?.scale ?? 1)) {
         this.activePointer.state = ControlState.end;
         // send event
         this.dataService.send({ name: WSEventName.pointerUpdated, data: this.activePointer });

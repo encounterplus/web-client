@@ -11,7 +11,7 @@ export interface Tile {
     height: number;
     rotation: number;
     layer: MapLayer;
-    zIndex: null
+    zIndex: number | null
     opacity: number;
     scale: number;
     asset?: Asset;

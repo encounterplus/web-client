@@ -176,7 +176,7 @@ export class AssetArtwork extends PIXI.Container {
     private startAnimations(components: Array<Component>) {
         this.animations = components
             .map(component => ({ component, property: animationProperty(component) }))
-            .filter(animation => animation.property != null)
+            .filter((animation): animation is { component: Component, property: AnimationProperty } => animation.property != null)
         if (this.animations.length == 0) {
             return
         }

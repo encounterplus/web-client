@@ -1,7 +1,7 @@
 @for (toast of toastService.toasts(); track toast.id) {
   <ngb-toast
     [class]="toast.classname"
-    [autohide]="toast.autohide"
+    [autohide]="toast.autohide ?? false"
     [delay]="toast.delay || 5000"
     (hide)="toastService.remove(toast)"
     >

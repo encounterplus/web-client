@@ -32,9 +32,9 @@ export async function loadAssetSprite(asset: Asset): Promise<AssetSprite | null>
         return null
     }
 
-    const frameWidth = asset.parameters?.frameWidth
-    const frameHeight = asset.parameters?.frameHeight
-    if (asset.type != "spriteSheet" || !(frameWidth > 0) || !(frameHeight > 0)) {
+    const frameWidth = asset.parameters?.frameWidth ?? 0
+    const frameHeight = asset.parameters?.frameHeight ?? 0
+    if (asset.type != "spriteSheet" || frameWidth <= 0 || frameHeight <= 0) {
         // a still image: no frame list, nothing on the ticker — maps can hold many of these
         return new PIXI.Sprite(texture)
     }

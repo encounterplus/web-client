@@ -19,7 +19,7 @@ export class CombatantComponent implements OnInit {
   }
 
   get name(): string {
-    return this.combatant.entityType == "Character" ? this.combatant.name : this.combatant.label;
+    return (this.combatant.entityType == "Character" ? this.combatant.name : this.combatant.label) ?? "";
   }
 
   get overlayImage(): string {
