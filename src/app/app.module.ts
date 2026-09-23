@@ -1,7 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, provideZonelessChangeDetection } from '@angular/core';
+import { NgModule, provideCheckNoChangesConfig, provideZonelessChangeDetection } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+
+import { environment } from 'src/environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -56,5 +58,10 @@ import { LightboxComponent } from './core/lightbox/lightbox.component';
         FormsModule,
         ColorPickerDirective,
         SafePipe,
-        NgbModule], providers: [ToastService, DataService, provideZonelessChangeDetection(), provideHttpClient(withXhr(), withInterceptorsFromDi())] })
+        NgbModule], providers: [ToastService, DataService, provideZonelessChangeDetection(),
+        // dev only: the app is zoneless and Pixi runs outside change detection, so a
+        // callback that mutates state Angular renders can leave the UI stale. exhaustive
+        // also covers OnPush views, which the default post-CD check skips.
+        ...(environment.production ? [] : [provideCheckNoChangesConfig({ exhaustive: true, interval: 500 })]),
+        provideHttpClient(withXhr(), withInterceptorsFromDi())] })
 export class AppModule { }
