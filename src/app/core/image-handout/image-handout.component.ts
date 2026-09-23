@@ -28,7 +28,6 @@ export class ImageHandoutComponent implements OnInit {
   ) { }
 
   open(): void {
-    this.lightboxService.open(this.image);
     this.lightboxService.open(this.image, this.overlayImage);
   }
 
