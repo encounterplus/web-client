@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Screen, emptyScreen } from 'src/app/shared/models/screen';
+import { Screen, ScreenInteraction, SharedVision } from 'src/app/shared/models/screen';
 
 import { OverlayComponent } from './overlay.component';
 
@@ -22,9 +22,16 @@ describe('OverlayComponent', () => {
     fixture = TestBed.createComponent(OverlayComponent);
     component = fixture.componentInstance;
 
-    const screen = emptyScreen();
-    screen.overlayHandoutStyle = "parchment";
-    screen.overlayHandoutText = "You see a door.";
+    const screen: Screen = {
+      overlayHandoutStyle: "parchment",
+      overlayHandoutText: "You see a door.",
+      interaction: ScreenInteraction.none,
+      sharedVision: SharedVision.never,
+      tableTopMode: false,
+      scrollLock: false,
+      width: 0,
+      height: 0,
+    };
     component.screen = screen;
 
     fixture.detectChanges();

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, signal, computed, ChangeDetectionStrategy, WritableSignal } from '@angular/core';
 import { MapComponent } from './core/map/map.component';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
@@ -33,7 +33,7 @@ import { Meta } from '@angular/platform-browser';
 import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
 import { Message } from './shared/models/message';
 import { Game, emptyGame } from './shared/models/game';
-import { Screen, emptyScreen } from './shared/models/screen';
+import { Screen } from './shared/models/screen';
 import { ActiveCombatant, Role } from './shared/models/combatant';
 
 interface WebAppInterface {
@@ -103,8 +103,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   // to display game paused animation
   paused = signal(false)
 
-  // for overlay images
-  screen = signal(emptyScreen())
+  // for overlay images; seeded from the state, which holds the default screen
+  screen: WritableSignal<Screen>
 
   updateScreen(screen: Screen) {
     // this.screen.update(state => deepMerge(state, screen));
@@ -131,6 +131,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal, private cdr: ChangeDetectorRef) {
     this.state = new AppState();
+    this.screen = signal(this.state.screen)
 
     window['state'] = this.state
     window['componentRef'] = {

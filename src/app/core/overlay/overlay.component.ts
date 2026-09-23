@@ -15,7 +15,7 @@ export class OverlayComponent implements OnInit {
   public screen!: Screen;
 
   get text(): string {
-      return (this.screen.overlayHandoutText || this.screen.overlayHandountText)
+      return this.screen.overlayHandoutText ?? ""
   }
 
   get style(): string {

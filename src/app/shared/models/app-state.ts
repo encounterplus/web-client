@@ -1,4 +1,4 @@
-import { Screen, emptyScreen } from './screen'
+import { Screen, ScreenInteraction, SharedVision } from './screen'
 import { Grid } from 'src/app/core/map/models/grid'
 import { Game, emptyGame } from './game'
 import { Map } from './map'
@@ -33,7 +33,15 @@ export function parseRunMode(value: string | null): RunMode | undefined {
 export class AppState {
   map?: Map
   game: Game = emptyGame()
-  screen: Screen = emptyScreen()
+  screen: Screen = {
+    overlayHandoutStyle: "",
+    interaction: ScreenInteraction.none,
+    sharedVision: SharedVision.never,
+    tableTopMode: false,
+    scrollLock: false,
+    width: 0,
+    height: 0,
+  }
   messages: Array<Message> = []
   trackedObjects: Array<TrackedObject> = []
   grid: Grid = new SquareGrid()
