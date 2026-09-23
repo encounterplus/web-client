@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Screen } from 'src/app/shared/models/screen';
+import { Screen, emptyScreen } from 'src/app/shared/models/screen';
 
 import { OverlayComponent } from './overlay.component';
 
@@ -22,7 +22,7 @@ describe('OverlayComponent', () => {
     fixture = TestBed.createComponent(OverlayComponent);
     component = fixture.componentInstance;
 
-    const screen = new Screen();
+    const screen = emptyScreen();
     screen.overlayHandoutStyle = "parchment";
     screen.overlayHandoutText = "You see a door.";
     component.screen = screen;

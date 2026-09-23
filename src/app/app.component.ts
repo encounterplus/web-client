@@ -32,8 +32,8 @@ import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { Meta } from '@angular/platform-browser';
 import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
 import { Message } from './shared/models/message';
-import { Game } from './shared/models/game';
-import { Screen } from './shared/models/screen';
+import { Game, emptyGame } from './shared/models/game';
+import { Screen, emptyScreen } from './shared/models/screen';
 import { ActiveCombatant, Role } from './shared/models/combatant';
 
 interface WebAppInterface {
@@ -67,7 +67,7 @@ export class AppComponent implements OnInit, AfterViewInit {
      this._messages.update((value) => messages);
   }
 
-  private readonly _game = signal<Game>(new Game())
+  private readonly _game = signal<Game>(emptyGame())
   readonly game = this._game.asReadonly()
 
   activeCombatants = computed(() => {
@@ -104,7 +104,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   paused = signal(false)
 
   // for overlay images
-  screen = signal(new Screen())
+  screen = signal(emptyScreen())
 
   updateScreen(screen: Screen) {
     // this.screen.update(state => deepMerge(state, screen));

@@ -1,6 +1,6 @@
-import { Screen } from './screen'
+import { Screen, emptyScreen } from './screen'
 import { Grid } from 'src/app/core/map/models/grid'
-import { Game } from './game'
+import { Game, emptyGame } from './game'
 import { Map } from './map'
 import { Combatant } from './combatant'
 import { Message } from './message'
@@ -32,8 +32,8 @@ export function parseRunMode(value: string | null): RunMode | undefined {
 
 export class AppState {
   map?: Map
-  game: Game = new Game()
-  screen: Screen = new Screen()
+  game: Game = emptyGame()
+  screen: Screen = emptyScreen()
   messages: Array<Message> = []
   trackedObjects: Array<TrackedObject> = []
   grid: Grid = new SquareGrid()

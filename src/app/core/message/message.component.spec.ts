@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Message, MessageType } from 'src/app/shared/models/message';
+import { Message, MessageType, emptyMessage } from 'src/app/shared/models/message';
 
 import { MessageComponent } from './message.component';
 
@@ -16,7 +16,7 @@ describe('MessageComponent', () => {
     fixture = TestBed.createComponent(MessageComponent);
     component = fixture.componentInstance;
 
-    const message = new Message();
+    const message = emptyMessage();
     message.id = "1";
     message.type = MessageType.chat;
     message.source = "Dungeon Master";

@@ -20,7 +20,7 @@ import { DrawingsLayer } from './layers/drawings-layer';
 import { MarkersLayer } from './layers/markers-layer';
 import { MarkerView } from './views/marker-view';
 import { Tool } from '../toolbar/toolbar.component';
-import { Pointer } from 'src/app/shared/models/pointer';
+import { Pointer, emptyPointer } from 'src/app/shared/models/pointer';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { v4 as uuidv4 } from 'uuid';
 import { Role } from 'src/app/shared/models/token';
@@ -524,7 +524,7 @@ export class MapContainer extends Layer {
         this.dataService.send({ name: WSEventName.pointerUpdated, data: this.activePointer });
       }
 
-      this.activePointer = new Pointer();
+      this.activePointer = emptyPointer();
       this.activePointer.id = uuidv4();
       this.activePointer.color = Utils.userColor();
       this.activePointer.source = localStorage.getItem("userName") ?? "";
