@@ -11,7 +11,7 @@ import { AppState } from 'src/app/shared/models/app-state';
 export class ZoombarComponent implements OnInit {
 
   @Input() 
-  public state: AppState;
+  public state!: AppState;
 
   @Output()
   public action = new EventEmitter<string>();

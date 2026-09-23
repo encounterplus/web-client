@@ -6,11 +6,11 @@ export enum MessageType {
 }
 
 export class Message {
-    id: string;
-    type: MessageType;
-    source: string;
-    color: string;
-    creature: string;
+    id: string = "";
+    type: MessageType = MessageType.chat;
+    source: string = "";
+    color: string = "";
+    creature: string = "";
     content: any;
-    created: Date;
+    created: Date = new Date();
 }

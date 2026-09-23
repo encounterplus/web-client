@@ -2,7 +2,7 @@ import { Layer } from './layer';
 import { Grid } from '../models/grid';
 
 export class GridLayer extends Layer {
-    grid: Grid;
+    grid!: Grid;
 
 
     update(grid: Grid) {

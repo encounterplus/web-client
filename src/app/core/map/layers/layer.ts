@@ -2,8 +2,8 @@ import * as PIXI from 'pixi.js';
 
 export class Layer extends PIXI.Container {
 
-    w: number;
-    h: number;
+    w: number = 0;
+    h: number = 0;
 
     constructor() {
         super()

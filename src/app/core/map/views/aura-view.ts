@@ -13,7 +13,7 @@ export class AuraView extends View {
     /** The aura's asset, with its placement parameters and components; `null` without one. */
     artwork: AssetArtwork | null = null;
 
-    shapeGraphics: PIXI.Graphics;
+    shapeGraphics!: PIXI.Graphics;
 
     constructor(aura: Aura, grid: Grid) {
         super();

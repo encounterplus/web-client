@@ -14,13 +14,13 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
   element: HTMLDivElement;
 
   // PIXI app and stage references
-  app: PIXI.Application;
-  width: number;
-  height: number;
+  app!: PIXI.Application;
+  width: number = 0;
+  height: number = 0;
 
   readyPromise!: Promise<void>;
 
-  maxTextureSize: number;
+  maxTextureSize: number = 0;
 
   isReady = false;
 

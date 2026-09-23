@@ -1,20 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    // TS 6.0 changed the default for "strict" to true. Pinned false to keep the
-    // Angular 22 upgrade separate from the strict-mode migration. The sub-flags
-    // below are being turned on one stage at a time; when all of them are on,
-    // this collapses back to "strict": true.
-    "strict": false,
-    "alwaysStrict": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "useUnknownInCatchVariables": true,
-    // Stage 4: the last flag to flip, then all of the above collapse to "strict": true.
-    "strictPropertyInitialization": false,
+    "strict": true,
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,

@@ -23,8 +23,8 @@ export class AreaEffectView extends View {
     /** Set when the asset has nothing to draw, so the plain shape stands in; reset by `clear()`. */
     private artworkFailed = false;
 
-    shapeGraphics: PIXI.Graphics;
-    handlesGraphics: PIXI.Graphics;
+    shapeGraphics!: PIXI.Graphics;
+    handlesGraphics!: PIXI.Graphics;
 
     selected: boolean = false;
 

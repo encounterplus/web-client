@@ -12,7 +12,7 @@ import { DataService } from 'src/app/shared/services/data.service';
 export class CombatantComponent implements OnInit {
 
   @Input() 
-  public combatant: Combatant;
+  public combatant!: Combatant;
 
   get image(): string {
     return this.combatant.image ? `${this.dataService.protocol}//${this.dataService.remoteHost}${this.combatant.image}` : "assets/img/creature.png"

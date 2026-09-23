@@ -23,7 +23,7 @@ export enum Panel {
 export class ToolbarComponent implements OnInit {
 
   @Input() 
-  public state: AppState;
+  public state!: AppState;
 
   @Input() 
   public unreadMessages = 0;

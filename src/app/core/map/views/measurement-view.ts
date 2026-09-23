@@ -4,8 +4,8 @@ import { Grid } from '../models/grid';
 import { Measurement } from 'src/app/shared/models/measurement';
 
 export class MeasurementView extends View {
-    shape: PIXI.Graphics
-    handles: PIXI.Graphics
+    shape!: PIXI.Graphics
+    handles!: PIXI.Graphics
 
     constructor(public measurement: Measurement, private grid: Grid) {
         super()

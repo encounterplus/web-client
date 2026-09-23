@@ -13,7 +13,7 @@ import { environment } from 'src/environments/environment';
 export class EntityModalComponent implements OnInit {
 
   @Input() 
-  reference: string;
+  reference!: string;
 
   get url() {
     return `http://localhost:8080${this.reference}`

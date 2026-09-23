@@ -8,7 +8,7 @@ export class MeasurementsLayer extends Layer {
 
     measurements: Array<Measurement> = [];
     views: Array<MeasurementView> = [];
-    grid: Grid;
+    grid!: Grid;
 
     constructor(private dataService: DataService) {
         super();

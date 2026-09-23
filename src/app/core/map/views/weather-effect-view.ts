@@ -8,8 +8,8 @@ import { CenterMovementBehavior } from '../center-movement-behavior';
 
 export class WeatherEffectView extends View {
 
-  weatherEffect: String;
-  particleTexture: PIXI.Texture;
+  weatherEffect!: String;
+  particleTexture!: PIXI.Texture;
 
   particleContainer: PIXI.ParticleContainer;
   emitter: Emitter;

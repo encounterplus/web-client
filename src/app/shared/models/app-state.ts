@@ -39,9 +39,9 @@ export class AppState {
   grid: Grid = new SquareGrid()
   // isDirty: boolean = false
   paused: boolean = false
-  version: string
-  build: number
-  readCount: number
+  version: string = ""
+  build: number = 0
+  readCount: number = 0
 
   viewMode: ViewMode = ViewMode.player
   runMode: RunMode = RunMode.normal

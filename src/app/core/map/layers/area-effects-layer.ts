@@ -8,7 +8,7 @@ export class AreaEffectsLayer extends Layer {
 
     areaEffects: Array<AreaEffect> = [];
     views: Array<AreaEffectView> = [];
-    grid: Grid;
+    grid!: Grid;
 
     constructor(private dataService: DataService) {
         super();

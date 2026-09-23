@@ -21,7 +21,7 @@ interface RollDetail {
 export class MessageComponent implements OnInit {
 
   @Input() 
-  public message: Message;
+  public message!: Message;
 
   constructor() { }
 

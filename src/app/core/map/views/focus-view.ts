@@ -6,9 +6,9 @@ import { Layer } from '../layers/layer';
 
 export class FocusView extends View {
 
-  grid: Grid;
-  particleTexture: PIXI.Texture;
-  sourceText: PIXI.Text;
+  grid!: Grid;
+  particleTexture!: PIXI.Texture;
+  sourceText!: PIXI.Text;
 
   particleContainer: PIXI.ParticleContainer;
   emitter: Emitter;

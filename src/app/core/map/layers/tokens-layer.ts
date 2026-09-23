@@ -8,7 +8,7 @@ export class TokensLayer extends Layer {
 
     tokens: Array<Token> = [];
     views: Array<TokenView> = [];
-    grid: Grid;
+    grid!: Grid;
 
     constructor(private dataService: DataService) {
         super();

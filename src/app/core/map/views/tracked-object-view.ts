@@ -7,7 +7,7 @@ import { Layer } from '../layers/layer';
 export class TrackedObjectView extends View {
     trackedObject: TrackedObject
 
-    graphics: PIXI.Graphics
+    graphics!: PIXI.Graphics
 
     constructor(trackedObject: TrackedObject) {
         super()

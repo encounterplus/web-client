@@ -4,7 +4,7 @@ import { Grid } from '../models/grid';
 import { GridSize, TokenView } from '../views/token-view';
 
 export class PathsLayer extends Layer {
-    grid: Grid;
+    grid!: Grid;
 
     alphaFilter = new PIXI.AlphaFilter();
 

@@ -7,7 +7,7 @@ import { Marker } from 'src/app/shared/models/marker';
 export class MarkersLayer extends Layer {
     markers: Array<Marker> = [];
     views: Array<MarkerView> = [];
-    grid: Grid;
+    grid!: Grid;
 
     constructor(private dataService: DataService) {
         super();

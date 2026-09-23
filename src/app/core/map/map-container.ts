@@ -37,12 +37,12 @@ import { AssetVideo } from 'src/app/shared/models/asset';
 export class MapContainer extends Layer {
 
   mapLayer: Layer
-  mapTexture: PIXI.RenderTexture
+  mapTexture!: PIXI.RenderTexture
 
   backgroundLayer: BackgroundLayer
   gridLayer: GridLayer
   pathsLayer: PathsLayer
-  canvasLayer: Layer
+  canvasLayer!: Layer
   areaEffectsLayer: AreaEffectsLayer
   monstersLayer: TokensLayer
   playersLayer: TokensLayer
@@ -64,7 +64,7 @@ export class MapContainer extends Layer {
 
   // data
   map: Map | undefined;
-  state: AppState;
+  state!: AppState;
   grid: Grid = new SquareGrid()
 
   dragging: boolean = false

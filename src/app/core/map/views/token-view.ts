@@ -37,19 +37,19 @@ export class TokenView extends View {
   token: Token
   grid: Grid
 
-  overlayTexture: PIXI.Texture | null
-  overlaySprite: PIXI.Sprite | null
+  overlayTexture: PIXI.Texture | null = null
+  overlaySprite: PIXI.Sprite | null = null
 
   /** The token's asset or image, with the asset's placement parameters and components; `null` when drawn as a disc. */
   artwork: AssetArtwork | null = null
 
-  labelGraphics: PIXI.Graphics | null
-  labelText: PIXI.Text | null
+  labelGraphics: PIXI.Graphics | null = null
+  labelText: PIXI.Text | null = null
 
-  elevationGraphics: PIXI.Graphics | null
-  elevationText: PIXI.Text | null
+  elevationGraphics: PIXI.Graphics | null = null
+  elevationText: PIXI.Text | null = null
 
-  distanceText: PIXI.Text | null
+  distanceText: PIXI.Text | null = null
 
   dragging: boolean = false
   dragStart: number = Date.now()

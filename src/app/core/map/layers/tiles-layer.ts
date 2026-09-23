@@ -8,7 +8,7 @@ import { MapLayer } from 'src/app/shared/models/map';
 export class TilesLayer extends Layer {
     tiles: Array<Tile> = [];
     views: Array<TileView> = [];
-    grid: Grid;
+    grid!: Grid;
 
     /** Bumped by `clear()`, so a draw still loading tiles stops once it has been superseded. */
     private generation = 0;

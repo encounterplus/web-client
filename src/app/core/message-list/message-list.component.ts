@@ -17,9 +17,9 @@ export class MessageListComponent implements OnInit {
   private scrollContainer: any;
   isNearBottom: boolean = true;
 
-  @ViewChild('scrollframe', { static: true }) scrollFrame: ElementRef;
-  @ViewChild('messageinputarea', { static: true }) messageInputArea: ElementRef;
-  @ViewChildren('message') itemElements: QueryList<any>;
+  @ViewChild('scrollframe', { static: true }) scrollFrame!: ElementRef;
+  @ViewChild('messageinputarea', { static: true }) messageInputArea!: ElementRef;
+  @ViewChildren('message') itemElements!: QueryList<any>;
 
   @Input()
   messages: Array<Message> = []

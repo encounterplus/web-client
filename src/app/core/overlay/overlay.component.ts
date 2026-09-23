@@ -12,7 +12,7 @@ import { DataService } from 'src/app/shared/services/data.service';
 export class OverlayComponent implements OnInit {
 
   @Input() 
-  public screen: Screen;
+  public screen!: Screen;
 
   get text(): string {
       return (this.screen.overlayHandoutText || this.screen.overlayHandountText)

@@ -5,7 +5,7 @@ export enum TrackedObjectType {
 }
 
 export class TrackedObject {
-    id: number
+    id: number = 0
     typeId?: number
     categoryId?: number
     x?: number

@@ -6,11 +6,11 @@ import { GridSize } from './token-view';
 
 export class PathView extends View {
     shape?: PIXI.Graphics
-    handles: PIXI.Graphics
+    handles!: PIXI.Graphics
 
-    public path: Array<number>
-    public gridSize: GridSize
-    public color: number
+    public path: Array<number> = []
+    public gridSize!: GridSize
+    public color: number = 0
 
     constructor(private grid: Grid) {
         super()

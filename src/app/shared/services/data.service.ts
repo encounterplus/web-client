@@ -16,8 +16,8 @@ export class DataService {
   state: AppState = new AppState()
 
   private reconnectionDelay = 1000;
-  public remoteHost: string
-  public protocol: string
+  public remoteHost: string = ""
+  public protocol: string = ""
 
   private videoPaused$ = new BehaviorSubject(false);
   private videoMuted$ = new BehaviorSubject(true);
@@ -73,7 +73,7 @@ export class DataService {
   private status$: Subject<boolean> = new BehaviorSubject<boolean>(false);
   public attemptNr: number = 0;
   private ws: any;
-  private wsSubscription: Subscription;
+  private wsSubscription: Subscription | undefined;
   public events$: Subject<WSEvent> = new Subject<WSEvent>();
 
   public get connectionStatus$(): Observable<boolean> {

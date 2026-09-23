@@ -22,33 +22,33 @@ export class VisionLayer extends Layer {
   // gridSize: number = 50.0
   // gridScale: number = 5.0
 
-  grid: Grid
+  grid!: Grid
 
-  baseFogTexture: PIXI.Texture
+  baseFogTexture!: PIXI.Texture
   visionContainer: PIXI.Container
-  visionTexture: PIXI.RenderTexture
-  fogTexture: PIXI.RenderTexture
-  mapTexture: PIXI.RenderTexture
-  tmpTexture: PIXI.RenderTexture
-  fogBlurTexture: PIXI.RenderTexture
-  visionBlurTexture: PIXI.RenderTexture
+  visionTexture!: PIXI.RenderTexture
+  fogTexture!: PIXI.RenderTexture
+  mapTexture!: PIXI.RenderTexture
+  tmpTexture!: PIXI.RenderTexture
+  fogBlurTexture!: PIXI.RenderTexture
+  visionBlurTexture!: PIXI.RenderTexture
 
-  fog: string
+  fog: string = ""
   fogOfWar = false
   fogExplore = false
   fogLoaded = false
   lineOfSight = false
 
-  bg: PIXI.Sprite | null
+  bg: PIXI.Sprite | null = null
   meshes: Array<PIXI.Mesh<any, any>> = []
-  msk: PIXI.Graphics | null
+  msk: PIXI.Graphics | null = null
   app: PIXI.Application | null = null
   blurFilter: PIXI.Filter
   blur: boolean = false
 
   // shaders
-  mapShader: PIXI.Shader
-  visionShader: PIXI.Shader
+  mapShader!: PIXI.Shader
+  visionShader!: PIXI.Shader
 
   get activeToken(): Token | null {
     // no active token shared vision is always

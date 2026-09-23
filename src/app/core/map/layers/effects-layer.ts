@@ -12,21 +12,21 @@ import { WeatherType } from 'src/app/shared/models/map';
 import { FocusView } from '../views/focus-view';
 
 export class EffectsLayer extends Layer {
-    grid: Grid;
+    grid!: Grid;
 
     constructor(private dataService:DataService) {
         super()
     }
 
-    ringTexture: PIXI.Texture
-    snowTexture: PIXI.Texture
-    rainTexture: PIXI.Texture
-    fogTexture: PIXI.Texture
-    circleTexture: PIXI.Texture
+    ringTexture!: PIXI.Texture
+    snowTexture!: PIXI.Texture
+    rainTexture!: PIXI.Texture
+    fogTexture!: PIXI.Texture
+    circleTexture!: PIXI.Texture
 
     views: { [id: string]: PointerView } = {};
 
-    weatherEffectView: WeatherEffectView | null
+    weatherEffectView: WeatherEffectView | null = null
 
     async draw() {
 

@@ -23,7 +23,7 @@ import { ControlState } from './views/token-view';
 export class MapComponent implements OnInit, AfterViewInit, OnChanges {
 
   @ViewChild(CanvasContainerDirective, { static: true })
-  canvas: CanvasContainerDirective;
+  canvas!: CanvasContainerDirective;
 
   @Input()
   public state: AppState = new AppState();
@@ -34,15 +34,15 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges {
   isReady = false;
 
   // PixiJS
-  app: PIXI.Application;
-  container: PIXI.Container;
+  app!: PIXI.Application;
+  container!: PIXI.Container;
 
   // viewport 
-  viewport: Viewport;
+  viewport!: Viewport;
 
   // main map container
-  mapContainer: MapContainer
-  trackedObjectsContainer: TrackedObjectsContainer
+  mapContainer!: MapContainer
+  trackedObjectsContainer!: TrackedObjectsContainer
 
   // Keyboard tracked hotkeys
   kb = {

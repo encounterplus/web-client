@@ -6,19 +6,19 @@ import { DataService } from 'src/app/shared/services/data.service';
 
 export class BackgroundLayer extends Layer {
 
-    imageTexture: PIXI.Texture | null;
-    imageSprite: PIXI.Sprite | null;
+    imageTexture: PIXI.Texture | null = null;
+    imageSprite: PIXI.Sprite | null = null;
 
-    videoTexture: PIXI.Texture | null;
-    videoSprite: PIXI.Sprite | null;
+    videoTexture: PIXI.Texture | null = null;
+    videoSprite: PIXI.Sprite | null = null;
 
     loadingText = new PIXI.Text({ text: "Loading map resources...", style: {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'} });
     vidloadingText = new PIXI.Text({ text: "Loading video map...", style: {fontFamily : 'Arial', fontSize: 18, fill : 0xffffff, align : 'center'} });
 
-    image: string | null;
-    video: string | null;
-    loadedVideoSrc: string | null;
-    loadedVideoUrl: string | null;
+    image: string | null = null;
+    video: string | null = null;
+    loadedVideoSrc: string | null = null;
+    loadedVideoUrl: string | null = null;
 
     videoPaused: boolean = false;
     videoMuted: boolean = true;

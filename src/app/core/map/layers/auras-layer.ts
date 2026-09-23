@@ -8,7 +8,7 @@ export class AurasLayer extends Layer {
 
     tokens: Array<TokenView> = [];
     views: Array<PIXI.Container> = [];
-    grid: Grid;
+    grid!: Grid;
 
     constructor(private dataService: DataService) {
         super();

@@ -16,11 +16,11 @@ import { Loader } from '../map/models/loader';
 export class SettingsModalComponent implements OnInit {
 
   @Input()
-  public state: AppState
+  public state!: AppState
 
-  remoteHost: string
-  name: string;
-  color: string;
+  remoteHost: string = ""
+  name: string = "";
+  color: string = "";
 
   maxFPSOptions: Array<number> = [5, 15, 30, 60]
   maxFPS: number = 60

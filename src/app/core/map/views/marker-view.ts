@@ -8,8 +8,8 @@ export class MarkerView extends View {
     marker: Marker;
     grid: Grid;
 
-    markerGraphics: PIXI.Graphics;
-    nameText: PIXI.Text;
+    markerGraphics!: PIXI.Graphics;
+    nameText!: PIXI.Text;
 
     constructor(marker: Marker, grid: Grid) {
         super();

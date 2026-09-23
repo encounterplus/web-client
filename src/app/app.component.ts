@@ -112,22 +112,22 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   @ViewChild(MapComponent)
-  public mapComponent: MapComponent;
+  public mapComponent!: MapComponent;
 
   @ViewChild(InitiativeListComponent)
-  public initiativeListComponent: InitiativeListComponent;
+  public initiativeListComponent!: InitiativeListComponent;
 
   @ViewChild(MessageListComponent)
-  public messageListComponent: MessageListComponent;
+  public messageListComponent!: MessageListComponent;
 
   @ViewChild(ToolbarComponent)
-  public toolbarComponent: ToolbarComponent;
+  public toolbarComponent!: ToolbarComponent;
 
   @ViewChild(ZoombarComponent)
-  public zoombarComponent: ZoombarComponent;
+  public zoombarComponent!: ZoombarComponent;
 
   @ViewChild(ToastListComponent)
-  public toastListComponent: ToastListComponent;
+  public toastListComponent!: ToastListComponent;
 
   constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal, private cdr: ChangeDetectorRef) {
     this.state = new AppState();
