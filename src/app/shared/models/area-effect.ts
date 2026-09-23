@@ -21,11 +21,6 @@ export interface AreaEffect {
     radius: number;
     length: number;
     width: number;
-    asset: Asset;
-    hidden: boolean;
-}
-
-/** The fields an `areaEffectUpdated` event may leave out. */
-export function areaEffectDefaults(): Pick<AreaEffect, "hidden"> {
-    return { hidden: false }
+    asset?: Asset;
+    hidden?: boolean;
 }

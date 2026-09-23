@@ -7,13 +7,9 @@ export enum MeasurementType {
 
 export interface Measurement {
     id: string
-    type: MeasurementType
+    /** How the distance is measured; `precise` when the app leaves it out. */
+    type?: MeasurementType
     color: string
-    hidden: boolean
+    hidden?: boolean
     data: Array<number>;
-}
-
-/** The fields a `measurementUpdated` event may leave out. */
-export function measurementDefaults(): Pick<Measurement, "type" | "data"> {
-    return { type: MeasurementType.grid, data: [] }
 }

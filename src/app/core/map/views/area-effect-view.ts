@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
 import { AreaEffect, AreaEffectShape } from 'src/app/shared/models/area-effect';
+import { Asset } from 'src/app/shared/models/asset';
 import { ArtworkFrame, AssetArtwork } from './asset-artwork';
 
 export function toRadians(degrees: number) {
@@ -98,7 +99,7 @@ export class AreaEffectView extends View {
         await this.drawHandles();
 
         if (this.areaEffect.asset != null) {
-            await this.drawAsset();
+            await this.drawAsset(this.areaEffect.asset);
         }
 
         return this;
@@ -171,8 +172,8 @@ export class AreaEffectView extends View {
         return this;
     }
 
-    async drawAsset() {
-        const artwork = new AssetArtwork(this.areaEffect.asset);
+    async drawAsset(asset: Asset) {
+        const artwork = new AssetArtwork(asset);
         artwork.position.set(this.areaEffect.x, this.areaEffect.y);
         artwork.rotation = this.areaEffect.angle;
         artwork.layout(this.artworkFrame());

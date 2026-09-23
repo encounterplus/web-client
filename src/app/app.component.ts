@@ -8,8 +8,8 @@ import { environment } from 'src/environments/environment';
 import { AppState, parseRunMode, parseViewMode, RunMode, ViewMode } from './shared/models/app-state';
 import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState, TokenView } from './core/map/views/token-view';
-import { AreaEffect, areaEffectDefaults } from './shared/models/area-effect';
-import { Tile, tileDefaults } from './shared/models/tile';
+import { AreaEffect } from './shared/models/area-effect';
+import { Tile } from './shared/models/tile';
 import { ToolbarComponent, Tool, Panel } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/services/toast.service';
@@ -17,7 +17,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
 import { Loader } from './core/map/models/loader';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
-import { Marker, markerDefaults } from './shared/models/marker';
+import { Marker } from './shared/models/marker';
 import { MessageListComponent } from './core/message-list/message-list.component';
 import { Token } from './shared/models/token';
 import { Light } from './shared/models/light';
@@ -25,7 +25,7 @@ import { Sight } from './shared/models/sight';
 import { CacheManager, Utils } from './shared/utils';
 import { SharedVision } from './shared/models/screen';
 import { TrackedObject } from './shared/models/tracked-object';
-import { Measurement, measurementDefaults } from './shared/models/measurement';
+import { Measurement } from './shared/models/measurement';
 import { Point } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
@@ -591,7 +591,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.areaEffectUpdated: {
-        let model = { ...areaEffectDefaults(), ...event.data } as AreaEffect;
+        let model = event.data as AreaEffect;
         console.debug(model);
 
         // udpdate state
@@ -609,7 +609,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.measurementUpdated: {
-        let model = { ...measurementDefaults(), ...event.data } as Measurement;
+        let model = event.data as Measurement;
         console.debug(model);
 
         // udpdate state
@@ -627,7 +627,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.tileUpdated: {
-        let model = { ...tileDefaults(), ...event.data } as Tile;
+        let model = event.data as Tile;
         console.debug(model);
 
         // udpdate state
@@ -720,7 +720,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.markerUpdated: {
-        let model = { ...markerDefaults(), ...event.data } as Marker;
+        let model = event.data as Marker;
         console.debug(model);
 
         // udpdate state

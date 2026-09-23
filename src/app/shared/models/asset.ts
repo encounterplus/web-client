@@ -7,12 +7,15 @@ export type UnitRect = [number, number, number, number]
 
 export interface Asset {
     id: string
-    name: string
+    name?: string
     type: string
-    resource: string
+    resource?: string
     parameters?: AssetParameters
     components?: Array<Component>
 }
+
+/** An asset known to have a resource — see `AssetVideo.isVideo`. */
+export type VideoAsset = Asset & { resource: string }
 
 /**
  * Type-specific parameters of an asset, as sent by the app.
@@ -84,7 +87,7 @@ export class AssetVideo {
 
     static readonly speedRange: [number, number] = [0.1, 4.0]
 
-    static isVideo(asset: Asset | null | undefined): boolean {
+    static isVideo(asset: Asset | null | undefined): asset is VideoAsset {
         return asset?.type == "video" && asset.resource != null
     }
 

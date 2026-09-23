@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
 import { Aura } from 'src/app/shared/models/aura';
+import { Asset } from 'src/app/shared/models/asset';
 import { AssetArtwork } from './asset-artwork';
 
 
@@ -28,7 +29,7 @@ export class AuraView extends View {
         await this.drawShape();
 
         if (this.aura.asset != null) {
-            await this.drawAsset();
+            await this.drawAsset(this.aura.asset);
         }
 
         return this;
@@ -47,8 +48,8 @@ export class AuraView extends View {
         return this;
     }
 
-    async drawAsset() {
-        const artwork = new AssetArtwork(this.aura.asset);
+    async drawAsset(asset: Asset) {
+        const artwork = new AssetArtwork(asset);
         artwork.position.set(-this.w / 2, -this.h / 2);
         artwork.layout({ width: this.w, height: this.h });
         this.addChild(artwork);

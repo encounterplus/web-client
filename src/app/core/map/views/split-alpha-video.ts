@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import { Asset, AssetVideo } from 'src/app/shared/models/asset';
+import { Asset, AssetVideo, VideoAsset } from 'src/app/shared/models/asset';
 import { ProgramManager } from 'src/app/shared/utils';
 import { Loader, VideoLease } from '../models/loader';
 
@@ -35,7 +35,7 @@ export class SplitAlphaVideo extends PIXI.Mesh<PIXI.Geometry, PIXI.Shader> {
 
     private lease: VideoLease | null
 
-    static async create(asset: Asset): Promise<SplitAlphaVideo> {
+    static async create(asset: VideoAsset): Promise<SplitAlphaVideo> {
         const lease = await Loader.shared.acquireVideo(asset.resource, {
             loop: AssetVideo.loops(asset),
             muted: AssetVideo.muted(asset),

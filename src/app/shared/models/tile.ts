@@ -11,15 +11,10 @@ export interface Tile {
     height: number;
     rotation: number;
     layer: MapLayer;
-    zIndex: number | null
+    zIndex: number;
     opacity: number;
     scale: number;
     asset?: Asset;
     light?: Light;
-    hidden: boolean;
-}
-
-/** The fields a `tileUpdated` event may leave out. */
-export function tileDefaults(): Pick<Tile, "layer" | "hidden"> {
-    return { layer: MapLayer.object, hidden: false }
+    hidden?: boolean;
 }

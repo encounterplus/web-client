@@ -70,7 +70,7 @@ export class MarkerView extends View {
         this.h = this.grid.size;
 
         this.position.set(this.marker.x - (this.w / 2), this.marker.y - (this.w));
-        this.visible = !this.marker.hidden;
+        this.visible = !(this.marker.hidden ?? true);
     }
 
     clear() {

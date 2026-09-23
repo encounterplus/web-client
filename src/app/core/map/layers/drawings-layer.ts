@@ -52,10 +52,12 @@ export class DrawingsLayer extends Layer {
 
             graphics.cacheAsTexture(true);
 
-            if (drawing.opacity < 1.0) {
+            // no opacity means fully opaque
+            const opacity = drawing.opacity ?? 1.0
+            if (opacity < 1.0) {
                 let container = new PIXI.Container();
                 container.addChild(graphics);
-                container.alpha = drawing.opacity;
+                container.alpha = opacity;
 
                 this.addChild(container);
             } else {

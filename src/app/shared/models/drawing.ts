@@ -8,11 +8,11 @@ export enum DrawingShape {
 
 export interface Drawing {
     id: string;
-    shape: DrawingShape;
+    shape?: DrawingShape;
     data: Array<number>;
-    layer: MapLayer;
-    strokeWidth: number;
-    strokeColor: string;
-    fillColor: string;
-    opacity: number;
+    layer?: MapLayer;
+    strokeWidth?: number;
+    strokeColor?: string;
+    fillColor?: string;
+    opacity?: number;
 }

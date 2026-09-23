@@ -22,8 +22,8 @@ export enum DoorState {
 export interface Wall {
     id: string
     data: Array<number>
-    color: string
-    type: WallType
-    side: WallSide
-    door: DoorState
+    color?: string
+    type?: WallType
+    side?: WallSide
+    door?: DoorState
 }
