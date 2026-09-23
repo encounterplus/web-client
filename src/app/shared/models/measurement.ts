@@ -10,6 +10,6 @@ export interface Measurement {
     /** How the distance is measured; `precise` when the app leaves it out. */
     type?: MeasurementType
     color: string
-    hidden?: boolean
+    hidden: boolean
     data: Array<number>;
 }

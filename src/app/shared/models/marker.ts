@@ -7,6 +7,5 @@ export interface Marker {
     size: string;
     label?: string;
     shape: string;
-    /** Hidden unless the app says otherwise: a marker with no `hidden` field is not drawn. */
-    hidden?: boolean;
+    hidden: boolean;
 }

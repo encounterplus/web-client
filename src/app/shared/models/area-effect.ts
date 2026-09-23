@@ -22,5 +22,5 @@ export interface AreaEffect {
     length: number;
     width: number;
     asset?: Asset;
-    hidden?: boolean;
+    hidden: boolean;
 }

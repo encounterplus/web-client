@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { Combatant } from 'src/app/shared/models/combatant';
-import { GridType, Map } from 'src/app/shared/models/map';
+import { GridType, Map, MapLayer } from 'src/app/shared/models/map';
 import { Layer } from './layers/layer';
 import { GridLayer } from './layers/grid-layer';
 import { BackgroundLayer } from './layers/background-layer';
@@ -14,6 +14,7 @@ import { TilesLayer } from './layers/tiles-layer';
 import { AreaEffectsLayer } from './layers/area-effects-layer';
 import { AreaEffectView } from './views/area-effect-view';
 import { TileView } from './views/tile-view';
+import { tileLayer } from 'src/app/shared/models/tile';
 import { AurasLayer } from './layers/auras-layer';
 import { EffectsLayer } from './layers/effects-layer';
 import { DrawingsLayer } from './layers/drawings-layer';
@@ -203,9 +204,9 @@ export class MapContainer extends Layer {
       return
     }
 
-    this.bottomLayer.tiles = map.tiles.filter(tile => tile.layer == "map");
-    this.middleLayer.tiles = map.tiles.filter(tile => tile.layer == "object");
-    this.topLayer.tiles = map.tiles.filter(tile => tile.layer == "token");
+    this.bottomLayer.tiles = map.tiles.filter(tile => tileLayer(tile) == MapLayer.map);
+    this.middleLayer.tiles = map.tiles.filter(tile => tileLayer(tile) == MapLayer.object);
+    this.topLayer.tiles = map.tiles.filter(tile => tileLayer(tile) == MapLayer.token);
   }
 
   updateTokens() {

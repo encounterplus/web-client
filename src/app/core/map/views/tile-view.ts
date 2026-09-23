@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
 import { View } from './view';
 import { Grid } from '../models/grid';
-import { Tile } from 'src/app/shared/models/tile';
+import { Tile, tileLayer } from 'src/app/shared/models/tile';
 import { MapLayer } from 'src/app/shared/models/map';
 import { AssetArtwork } from './asset-artwork';
 
@@ -61,7 +61,7 @@ export class TileView extends View {
         this.zIndex = this.tile.zIndex ?? 0;
 
         this.visible = !this.tile.hidden;
-        this.mapLayer = this.tile.layer;
+        this.mapLayer = tileLayer(this.tile);
     }
 
     clear() {

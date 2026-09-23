@@ -10,11 +10,16 @@ export interface Tile {
     width: number;
     height: number;
     rotation: number;
-    layer: MapLayer;
+    layer?: MapLayer;
     zIndex: number;
     opacity: number;
     scale: number;
     asset?: Asset;
     light?: Light;
-    hidden?: boolean;
+    hidden: boolean;
+}
+
+/** The layer a tile sits on; the object layer when the app leaves it out. */
+export function tileLayer(tile: Tile): MapLayer {
+    return tile.layer ?? MapLayer.object
 }
