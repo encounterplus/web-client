@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Screen } from 'src/app/shared/models/screen';
 import { DataService } from 'src/app/shared/services/data.service';
 import { LightboxService } from '../lightbox/lightbox.service';
@@ -7,6 +7,7 @@ import { LightboxService } from '../lightbox/lightbox.service';
     selector: 'app-image-handout',
     templateUrl: './image-handout.component.html',
     styleUrls: ['./image-handout.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ImageHandoutComponent implements OnInit {

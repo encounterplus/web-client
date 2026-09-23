@@ -11,6 +11,7 @@ import { LightboxService } from '../lightbox/lightbox.service';
     selector: 'app-initiative-list',
     templateUrl: './initiative-list.component.html',
     styleUrls: ['./initiative-list.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {

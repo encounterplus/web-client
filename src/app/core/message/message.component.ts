@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Message, MessageType } from 'src/app/shared/models/message';
 import { DiceRoll, DiceRollType } from 'src/app/shared/models/dice-roll';
 
@@ -6,6 +6,7 @@ import { DiceRoll, DiceRollType } from 'src/app/shared/models/dice-roll';
     selector: 'app-message',
     templateUrl: './message.component.html',
     styleUrls: ['./message.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class MessageComponent implements OnInit {

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Combatant, Role } from 'src/app/shared/models/combatant';
 
@@ -13,7 +13,7 @@ describe('CombatantComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ CombatantComponent ],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting()
       ]
     })

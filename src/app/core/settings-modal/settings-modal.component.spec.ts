@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { ColorPickerModule } from 'ngx-color-picker';
+import { ColorPickerDirective } from 'ngx-color-picker';
 import { AppState } from 'src/app/shared/models/app-state';
 
 import { SettingsModalComponent } from './settings-modal.component';
@@ -15,10 +15,10 @@ describe('SettingsModalComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ SettingsModalComponent ],
-      imports: [ FormsModule, ColorPickerModule ],
+      imports: [ FormsModule, ColorPickerDirective ],
       providers: [
         NgbActiveModal,
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting()
       ]
     })

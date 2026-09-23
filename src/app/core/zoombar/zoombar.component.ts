@@ -1,10 +1,11 @@
-import { Component, OnInit, Input, ElementRef, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { AppState } from 'src/app/shared/models/app-state';
 
 @Component({
     selector: 'app-zoombar',
     templateUrl: './zoombar.component.html',
     styleUrls: ['./zoombar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ZoombarComponent implements OnInit {

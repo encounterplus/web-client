@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataService } from 'src/app/shared/services/data.service';
 import { WSEventName } from 'src/app/shared/models/wsevent';
@@ -10,6 +10,7 @@ import { Loader } from '../map/models/loader';
     selector: 'ngbd-modal-basic',
     templateUrl: './settings-modal.component.html',
     styleUrls: ['./settings-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SettingsModalComponent implements OnInit {

@@ -9,6 +9,7 @@ import { WSEventName } from 'src/app/shared/models/wsevent';
   selector: 'app-message-list',
   templateUrl: './message-list.component.html',
   styleUrls: ['./message-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class MessageListComponent implements OnInit {

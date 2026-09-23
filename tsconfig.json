@@ -1,7 +1,9 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
+    // TS 6.0 changed the default for "strict" to true. Pinned false to keep the
+    // Angular 22 upgrade separate from the strict-mode migration (~473 errors).
+    "strict": false,
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
@@ -9,9 +11,13 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
+    // Replaces the deprecated "baseUrl", which these resolved through until TS 6.0.
     "paths": {
+      "src/*": [
+        "./src/*"
+      ],
       "mini-signals": [
-        "node_modules/mini-signals/index.js"
+        "./node_modules/mini-signals/index.js"
       ]
     },
     "module": "es2020",

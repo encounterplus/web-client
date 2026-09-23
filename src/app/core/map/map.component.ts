@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, Input, HostListener, OnChanges } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, Input, HostListener, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CanvasContainerDirective } from './canvas-container.directive';
 import * as PIXI from 'pixi.js'
 import { Viewport } from 'pixi-viewport';
@@ -17,6 +17,7 @@ import { ControlState } from './views/token-view';
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class MapComponent implements OnInit, AfterViewInit, OnChanges {

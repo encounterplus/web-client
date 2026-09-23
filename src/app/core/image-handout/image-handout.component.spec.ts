@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { LightboxService } from '../lightbox/lightbox.service';
 
@@ -13,7 +13,7 @@ describe('ImageHandoutComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ ImageHandoutComponent ],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting()
       ]
     })

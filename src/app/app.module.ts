@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -17,7 +17,7 @@ import { ToastService } from './shared/services/toast.service';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
-import { ColorPickerModule } from 'ngx-color-picker';
+import { ColorPickerDirective } from 'ngx-color-picker';
 import { ImageHandoutComponent } from './core/image-handout/image-handout.component';
 // import { LightboxModule } from 'ngx-lightbox';
 import { MessageComponent } from './core/message/message.component';
@@ -54,7 +54,7 @@ import { LightboxComponent } from './core/lightbox/lightbox.component';
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
         FormsModule,
-        ColorPickerModule,
+        ColorPickerDirective,
         SafePipe,
-        NgbModule], providers: [ToastService, DataService, provideZonelessChangeDetection(), provideHttpClient(withInterceptorsFromDi())] })
+        NgbModule], providers: [ToastService, DataService, provideZonelessChangeDetection(), provideHttpClient(withXhr(), withInterceptorsFromDi())] })
 export class AppModule { }
