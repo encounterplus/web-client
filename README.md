@@ -18,6 +18,19 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
+## Releasing
+
+`package.json` owns the version; `src/manifest.json` follows it. Bump both and tag in one step, then push:
+
+```
+npm version 0.9.18
+git push --follow-tags
+```
+
+The tag triggers the Release workflow, which builds with the production configuration and publishes `web-client.zip` and `manifest.json` as a GitHub release titled `v0.9.18`. A pre-release suffix (`npm version 0.9.18-beta`) publishes a pre-release, which Encounter+ lists but never offers as an update. The workflow refuses to release when the tag, `package.json` and `src/manifest.json` disagree.
+
+To rebuild an existing release, run the Release workflow by hand with its tag; the assets are replaced.
+
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).

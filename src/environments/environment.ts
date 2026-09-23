@@ -1,4 +1,4 @@
-import metaInfo from '../meta.json'
+import manifest from '../manifest.json'
 
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
@@ -11,7 +11,7 @@ export const environment = {
       AUTO_RECONNECT: true
     }
   },
-  version: metaInfo.version
+  version: manifest.version
 };
 
 /*

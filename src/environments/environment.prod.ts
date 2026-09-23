@@ -1,4 +1,4 @@
-import metaInfo from '../meta.json'
+import manifest from '../manifest.json'
 
 export const environment = {
   production: true,
@@ -7,5 +7,5 @@ export const environment = {
       AUTO_RECONNECT: true
     }
   },
-  version: metaInfo.version
+  version: manifest.version
 };

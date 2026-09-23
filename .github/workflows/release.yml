@@ -1,0 +1,89 @@
+# Builds the production client and publishes it as a GitHub release.
+#
+# Triggered by pushing a version tag — `npm version <x> && git push --follow-tags`. Tags carry
+# no "v" prefix (see .npmrc); the release title does, because Encounter+ reads the version from
+# the release name. A tag with a pre-release suffix ("0.9.18-beta") is published as a
+# pre-release, which the app lists but never offers as an update.
+#
+# Run it by hand with an existing tag to rebuild that release; its assets are replaced.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing version tag to release, e.g. 0.9.17'
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      BUILD_DIR: dist/web-client/browser
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check versions
+        run: node scripts/sync-version.mjs --check "$TAG"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build:prod
+
+      - name: Check build output
+        run: |
+          for file in index.html manifest.json; do
+            if [ ! -f "$BUILD_DIR/$file" ]; then
+              echo "::error::$BUILD_DIR/$file is missing"
+              exit 1
+            fi
+          done
+
+      # older app builds read the installed version from meta.json
+      - name: Write legacy meta.json
+        run: node scripts/legacy-meta.mjs "$BUILD_DIR"
+
+      # the app unzips straight into its client folder, so index.html must sit at the root
+      - name: Pack
+        run: |
+          cd "$BUILD_DIR"
+          zip -r -X "$GITHUB_WORKSPACE/web-client.zip" .
+          cp manifest.json "$GITHUB_WORKSPACE/manifest.json"
+
+      - name: Publish release
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" web-client.zip manifest.json --clobber
+          else
+            flags=()
+            if [[ "$TAG" == *-* ]]; then
+              flags+=(--prerelease)
+            fi
+            gh release create "$TAG" web-client.zip manifest.json \
+              --title "v$TAG" \
+              --generate-notes \
+              --verify-tag \
+              "${flags[@]}"
+          fi

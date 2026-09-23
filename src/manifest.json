@@ -1,0 +1,15 @@
+{
+    "id": "web-client",
+    "name": "Web Client",
+    "version": "0.9.17",
+    "description": "Web client for Encounter+ VTT app",
+    "authors": [
+        {
+            "name": "Encounter+ Dev Team"
+        }
+    ],
+    "repository": "https://github.com/encounterplus/web-client",
+    "compatibility": {
+        "minimum": "5.0.0"
+    }
+}
