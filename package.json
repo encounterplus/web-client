@@ -8,6 +8,7 @@
     "build:prod": "ng build --configuration production",
     "package": "npm run build:prod && node scripts/package.mjs",
     "test": "ng test",
+    "test:ci": "ng test --watch=false",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "version": "node scripts/sync-version.mjs && git add src/manifest.json"
