@@ -10,6 +10,6 @@
     ],
     "repository": "https://github.com/encounterplus/web-client",
     "compatibility": {
-        "minimum": "5.0.0"
+        "minimum": "5.0.8"
     }
 }
