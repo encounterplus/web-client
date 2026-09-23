@@ -2,7 +2,7 @@ import { Asset } from 'src/app/shared/models/asset';
 import { resolveLayout } from './asset-artwork';
 
 function asset(parameters: { [key: string]: any } = {}): Asset {
-    return Object.assign(new Asset(), { id: "a", type: "image", resource: "a.png", parameters })
+    return { id: "a", type: "image", resource: "a.png", parameters } as Asset
 }
 
 describe('resolveLayout', () => {

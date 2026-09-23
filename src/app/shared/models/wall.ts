@@ -19,11 +19,11 @@ export enum DoorState {
     locked = "locked"
 }
 
-export class Wall {
+export interface Wall {
     id: string
-    data: Array<number> = []
+    data: Array<number>
     color: string
-    type: WallType = WallType.normal
-    side: WallSide = WallSide.both
+    type: WallType
+    side: WallSide
     door: DoorState
 }

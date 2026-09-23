@@ -1,6 +1,6 @@
 import { Asset } from './asset';
 
-export class Aura {
+export interface Aura {
     id: string;
     enabled: boolean;
     name: string;

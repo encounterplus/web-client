@@ -44,6 +44,7 @@
     "@angular/compiler-cli": "^22.1.7",
     "@angular/language-service": "^22.1.7",
     "@types/jasmine": "~5.1.0",
+    "@types/uuid": "^10.0.0",
     "istanbul-lib-instrument": "^6.0.3",
     "jasmine-core": "~5.1.0",
     "jasmine-spec-reporter": "^7.0.0",

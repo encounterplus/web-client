@@ -19,6 +19,17 @@ export enum RunMode {
   tv = "tv",
 }
 
+// The raw values come from the query string and localStorage, so they are
+// arbitrary strings: anything that is not a known mode reads back as undefined
+// and the caller picks the default.
+export function parseViewMode(value: string | null): ViewMode | undefined {
+  return Object.values(ViewMode).find(mode => mode === value)
+}
+
+export function parseRunMode(value: string | null): RunMode | undefined {
+  return Object.values(RunMode).find(mode => mode === value)
+}
+
 export class AppState {
   map?: Map
   game: Game = new Game()

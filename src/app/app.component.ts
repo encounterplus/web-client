@@ -5,11 +5,11 @@ import { InitiativeListComponent } from './core/initiative-list/initiative-list.
 import { ApiData } from './shared/models/api-data';
 import { DataService, deepMerge} from './shared/services/data.service';
 import { environment } from 'src/environments/environment';
-import { AppState, RunMode, ViewMode } from './shared/models/app-state';
+import { AppState, parseRunMode, parseViewMode, RunMode, ViewMode } from './shared/models/app-state';
 import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState, TokenView } from './core/map/views/token-view';
-import { AreaEffect } from './shared/models/area-effect';
-import { Tile } from './shared/models/tile';
+import { AreaEffect, areaEffectDefaults } from './shared/models/area-effect';
+import { Tile, tileDefaults } from './shared/models/tile';
 import { ToolbarComponent, Tool, Panel } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/services/toast.service';
@@ -17,7 +17,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
 import { Loader } from './core/map/models/loader';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
-import { Marker } from './shared/models/marker';
+import { Marker, markerDefaults } from './shared/models/marker';
 import { MessageListComponent } from './core/message-list/message-list.component';
 import { Token } from './shared/models/token';
 import { Light } from './shared/models/light';
@@ -25,7 +25,7 @@ import { Sight } from './shared/models/sight';
 import { CacheManager } from './shared/utils';
 import { SharedVision } from './shared/models/screen';
 import { TrackedObject } from './shared/models/tracked-object';
-import { Measurement } from './shared/models/measurement';
+import { Measurement, measurementDefaults } from './shared/models/measurement';
 import { Point } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
@@ -139,7 +139,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     };
   }
 
-  handleExternalEvent(data) {
+  handleExternalEvent(data: WSEvent) {
     // console.log(JSON.stringify(data))
 
     // send to server
@@ -548,7 +548,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.tokenUpdated: {
-        let model = Object.assign(new Token, event.data) as Token
+        let model = { ...event.data } as Token
 
         // udpdate state
         let index = this.state.map.tokens.findIndex((obj => obj.id == model.id))
@@ -581,7 +581,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.areaEffectUpdated: {
-        let model = Object.assign(new AreaEffect, event.data) as AreaEffect;
+        let model = { ...areaEffectDefaults(), ...event.data } as AreaEffect;
         console.debug(model);
 
         // udpdate state
@@ -597,7 +597,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.measurementUpdated: {
-        let model = Object.assign(new Measurement, event.data) as Measurement;
+        let model = { ...measurementDefaults(), ...event.data } as Measurement;
         console.debug(model);
 
         // udpdate state
@@ -613,7 +613,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.tileUpdated: {
-        let model = Object.assign(new Tile, event.data) as Tile;
+        let model = { ...tileDefaults(), ...event.data } as Tile;
         console.debug(model);
 
         // udpdate state
@@ -642,7 +642,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.lightUpdated: {
-        let model = Object.assign(new Light, event.data) as Light
+        let model = { ...event.data } as Light
         console.debug(model)
 
         // udpdate state
@@ -699,7 +699,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
 
       case WSEventName.markerUpdated: {
-        let model = Object.assign(new Marker, event.data) as Marker;
+        let model = { ...markerDefaults(), ...event.data } as Marker;
         console.debug(model);
 
         // udpdate state
@@ -1005,8 +1005,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   configureParams() {
     let urlParams = new URLSearchParams(window.location.search);
     this.state.device = urlParams.get('device')
-    this.state.viewMode = ViewMode[urlParams.get('viewMode') || "player"] || ViewMode.player
-    this.state.runMode = RunMode[urlParams.get('runMode') || localStorage.getItem("runMode") || ""] || (this.state.device ? RunMode.tv : RunMode.normal)
+    this.state.viewMode = parseViewMode(urlParams.get('viewMode')) || ViewMode.player
+    this.state.runMode = parseRunMode(urlParams.get('runMode') || localStorage.getItem("runMode")) || (this.state.device ? RunMode.tv : RunMode.normal)
     this.state.allInteractions = urlParams.get('interactions') == "all"
 
     // device scale hack for gameboard

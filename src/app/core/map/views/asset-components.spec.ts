@@ -2,7 +2,7 @@ import { Component } from 'src/app/shared/models/component';
 import { ColorMatrix, componentFilters, concatColorMatrices, enabledComponents, sampleAnimation, tintMatrix } from './asset-components';
 
 function animation(values: Partial<Component>): Component {
-    return Object.assign(new Component(), { type: "animation.opacity", enabled: true }, values)
+    return { type: "animation.opacity", enabled: true, ...values } as Component
 }
 
 /** Applies a colour matrix to an RGBA colour. */
@@ -74,9 +74,9 @@ describe('enabledComponents', () => {
 
 describe('componentFilters', () => {
 
-    const tint = (color: string): Component => Object.assign(new Component(), { type: "filter.tint", enabled: true, color })
+    const tint = (color: string): Component => ({ type: "filter.tint", enabled: true, color })
     const hsb = (hue: number, saturation: number, brightness: number): Component =>
-        Object.assign(new Component(), { type: "filter.hsb", enabled: true, hue, saturation, brightness })
+        ({ type: "filter.hsb", enabled: true, hue, saturation, brightness })
 
     it('keeps tints as a tint, with no filter pass', () => {
         const filters = componentFilters([tint("#00FF00"), tint("#FFFFFF")])
@@ -101,7 +101,7 @@ describe('componentFilters', () => {
 describe('concatColorMatrices', () => {
 
     it('applies the first matrix first', () => {
-        const half: ColorMatrix = tintMatrix(Object.assign(new Component(), { type: "filter.tint", enabled: true, color: "#808080" }))
+        const half: ColorMatrix = tintMatrix({ type: "filter.tint", enabled: true, color: "#808080" })
         const lift: ColorMatrix = [
             0.8, 0, 0, 0, 0.2,
             0, 0.8, 0, 0, 0.2,

@@ -2,9 +2,17 @@ import { Injectable, signal, TemplateRef, WritableSignal } from '@angular/core';
 import { Message } from '../models/message';
 import { Utils } from '../utils';
 
+export interface Toast {
+  id: string
+  textOrTpl: string | TemplateRef<any>
+  classname?: string
+  delay?: number
+  autohide?: boolean
+}
+
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  private readonly _toasts = signal<any[]>([])
+  private readonly _toasts = signal<Toast[]>([])
   readonly toasts = this._toasts.asReadonly()
 
   show(textOrTpl: string | TemplateRef<any>, options: any = {}) {
@@ -33,7 +41,7 @@ export class ToastService {
     this._toasts.update((value) => [])
   }
 
-  remove(toast) {
+  remove(toast: Toast) {
     // this.toasts = this.toasts.filter(t => t !== toast);
     this._toasts.update(toasts => toasts.filter(t => t != toast));
   }

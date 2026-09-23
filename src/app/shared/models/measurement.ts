@@ -5,10 +5,15 @@ export enum MeasurementType {
     precise = "precise"
 }
 
-export class Measurement {
+export interface Measurement {
     id: string
-    type: MeasurementType = MeasurementType.grid
+    type: MeasurementType
     color: string
     hidden: boolean
-    data: Array<number> = [];
+    data: Array<number>;
+}
+
+/** The fields a `measurementUpdated` event may leave out. */
+export function measurementDefaults(): Pick<Measurement, "type" | "data"> {
+    return { type: MeasurementType.grid, data: [] }
 }

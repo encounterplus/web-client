@@ -6,7 +6,7 @@ export enum VisionType {
     combined = "combined",
 }
 
-export class Vision {
+export interface Vision {
     id: string;
     enabled: boolean
     light: boolean

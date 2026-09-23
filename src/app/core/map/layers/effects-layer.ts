@@ -24,7 +24,7 @@ export class EffectsLayer extends Layer {
     fogTexture: PIXI.Texture
     circleTexture: PIXI.Texture
 
-    views = {};
+    views: { [id: string]: PointerView } = {};
 
     weatherEffectView: WeatherEffectView
 

@@ -1,4 +1,4 @@
-export class Marker {
+export interface Marker {
     id: string;
     x: number;
     y: number;
@@ -7,5 +7,10 @@ export class Marker {
     size: string;
     label: string;
     shape: string;
-    hidden: boolean = false;
+    hidden: boolean;
+}
+
+/** The fields a `markerUpdated` event may leave out. */
+export function markerDefaults(): Pick<Marker, "hidden"> {
+    return { hidden: false }
 }

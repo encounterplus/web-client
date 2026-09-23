@@ -1,6 +1,6 @@
 import { Sight } from "./sight"
 
-export class Light {
+export interface Light {
     id: string
     enabled: boolean
     radiusMin: number

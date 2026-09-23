@@ -5,7 +5,7 @@ export type AlphaLayout = "horizontal" | "vertical"
 /** A rectangle in unit coordinates of a video frame: x, y, width, height. */
 export type UnitRect = [number, number, number, number]
 
-export class Asset {
+export interface Asset {
     id: string
     name: string
     type: string

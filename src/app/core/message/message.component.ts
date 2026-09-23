@@ -2,6 +2,15 @@ import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core
 import { Message, MessageType } from 'src/app/shared/models/message';
 import { DiceRoll, DiceRollType } from 'src/app/shared/models/dice-roll';
 
+// A table roll's details nest arbitrarily deep: a detail either carries a value
+// or fans out into further rolls, so the flattened result mirrors that shape.
+type RollValue = string | RollValue[]
+
+interface RollDetail {
+  value: string
+  rolls?: Array<{ details: RollDetail[] }>
+}
+
 @Component({
     selector: 'app-message',
     templateUrl: './message.component.html',
@@ -50,8 +59,8 @@ export class MessageComponent implements OnInit {
 }
 
   get tableRollText(): string {
-      let getRollValue = (detail) => {
-          let val = []
+      let getRollValue = (detail: RollDetail): RollValue[] => {
+          let val: RollValue[] = []
           if (detail.rolls) {
               for (let roll of detail.rolls) {
                   const details = roll.details.map(getRollValue)

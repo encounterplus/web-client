@@ -12,7 +12,7 @@ export type ComponentType =
  * The app encodes only the keys a component has set, so every parameter is optional. Rendered by
  * `AssetArtwork`; `asset-components.ts` reads the parameters with the app's defaults.
  */
-export class Component {
+export interface Component {
     type: ComponentType | string;
     enabled: boolean;
 

@@ -50,11 +50,11 @@ export class ToolbarComponent implements OnInit {
   videoPaused: boolean = false;
   videoMuted: boolean = true;
 
-  activeToolChanged(newTool) {
+  activeToolChanged(newTool: Tool) {
     this.tool.emit(newTool);
   }
 
-  messagesChanged(newValue) {
+  messagesChanged(newValue: boolean) {
     let activePanel =  newValue ? Panel.messages : Panel.none;
     localStorage.setItem("activePanel", activePanel);
 

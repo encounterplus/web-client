@@ -9,7 +9,7 @@ export enum AreaEffectShape {
     sphere = "sphere"
 }
 
-export class AreaEffect {
+export interface AreaEffect {
     id: string;
     shape: AreaEffectShape;
     color: string;
@@ -22,5 +22,10 @@ export class AreaEffect {
     length: number;
     width: number;
     asset: Asset;
-    hidden: boolean = false;
+    hidden: boolean;
+}
+
+/** The fields an `areaEffectUpdated` event may leave out. */
+export function areaEffectDefaults(): Pick<AreaEffect, "hidden"> {
+    return { hidden: false }
 }

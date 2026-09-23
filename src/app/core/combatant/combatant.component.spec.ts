@@ -22,13 +22,13 @@ describe('CombatantComponent', () => {
     fixture = TestBed.createComponent(CombatantComponent);
     component = fixture.componentInstance;
 
-    const combatant = new Combatant();
-    combatant.id = "1";
-    combatant.name = "Goblin";
-    combatant.label = "Goblin 1";
-    combatant.role = Role.hostile;
-    combatant.entityType = "Monster";
-    component.combatant = combatant;
+    component.combatant = {
+      id: "1",
+      name: "Goblin",
+      label: "Goblin 1",
+      role: Role.hostile,
+      entityType: "Monster",
+    } as Combatant;
 
     fixture.detectChanges();
   });

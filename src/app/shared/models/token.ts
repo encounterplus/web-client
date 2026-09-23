@@ -54,7 +54,7 @@ export namespace Size {
   }
 }
 
-export class Token {
+export interface Token {
   id: string
   name?: string
   label?: string

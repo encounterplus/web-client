@@ -6,7 +6,7 @@ export enum Role {
   neutral = "neutral",
 }
 
-export class Combatant {
+export interface Combatant {
   id: string
   label?: string
   name?: string

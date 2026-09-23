@@ -6,7 +6,7 @@ export enum DiceRollType {
     save = "save"
 }
 
-export class DiceRoll {
+export interface DiceRoll {
     name: string;
     type: DiceRollType;
     formula: string;

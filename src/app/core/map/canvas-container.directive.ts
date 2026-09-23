@@ -65,7 +65,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
       await this.app.init(options);
       this.isReady = true;
     } catch (err) {
-      this.toastService.showError(err.message, false);
+      this.toastService.showError(err instanceof Error ? err.message : String(err), false);
       throw err;
     }
 
@@ -123,7 +123,7 @@ export class CanvasContainerDirective implements AfterViewInit, OnDestroy {
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize(event) {
+  onResize(event: UIEvent) {
 
     if (!this.isReady) {
       return;

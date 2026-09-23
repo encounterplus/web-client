@@ -33,7 +33,7 @@ export class MessageListComponent implements OnInit {
     this.sendMessage();
   }
 
-  quickRoll(r) {
+  quickRoll(r: string) {
     let rollStr = ""
     const rollRE = /^(\/r(?:oll)? )?(([0-9]+)[dD]([0-9]+)|0)?(?:(kh|kl)1?)?((?:\+|\-)[0-9]+)? ?(.*)?/;
     const m = rollRE.exec(this.messageInput);
@@ -57,7 +57,7 @@ export class MessageListComponent implements OnInit {
     if (roll) {
       if (r == sides) {
         rollStr += (Number(num) + 1).toString() + "d" + sides;
-      } else if (!isNaN(r)) {
+      } else if (!isNaN(Number(r))) {
         if (r == "adv" || r == "dis" || keep) {
           rollStr += "2d" + r;
         } else {
@@ -70,7 +70,7 @@ export class MessageListComponent implements OnInit {
           rollStr += roll;
         }
       }
-    } else if (!isNaN(r)) {
+    } else if (!isNaN(Number(r))) {
       rollStr += "1d" + r;
     } else if (mod != 0 || keep || r == "adv" || r == "dis") {
       rollStr += "0"
