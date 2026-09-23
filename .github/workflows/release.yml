@@ -52,36 +52,21 @@ jobs:
       - name: Build
         run: npm run build:prod
 
-      - name: Check build output
-        run: |
-          for file in index.html manifest.json; do
-            if [ ! -f "$BUILD_DIR/$file" ]; then
-              echo "::error::$BUILD_DIR/$file is missing"
-              exit 1
-            fi
-          done
-
-      # older app builds read the installed version from meta.json
-      - name: Write legacy meta.json
-        run: node scripts/legacy-meta.mjs "$BUILD_DIR"
-
-      # the app unzips straight into its client folder, so index.html must sit at the root
+      # checks the output, adds the legacy meta.json and writes dist/web-client.zip
       - name: Pack
-        run: |
-          cd "$BUILD_DIR"
-          zip -r -X "$GITHUB_WORKSPACE/web-client.zip" .
-          cp manifest.json "$GITHUB_WORKSPACE/manifest.json"
+        run: node scripts/package.mjs
 
       - name: Publish release
         run: |
+          cp "$BUILD_DIR/manifest.json" dist/manifest.json
           if gh release view "$TAG" > /dev/null 2>&1; then
-            gh release upload "$TAG" web-client.zip manifest.json --clobber
+            gh release upload "$TAG" dist/web-client.zip dist/manifest.json --clobber
           else
             flags=()
             if [[ "$TAG" == *-* ]]; then
               flags+=(--prerelease)
             fi
-            gh release create "$TAG" web-client.zip manifest.json \
+            gh release create "$TAG" dist/web-client.zip dist/manifest.json \
               --title "v$TAG" \
               --generate-notes \
               --verify-tag \

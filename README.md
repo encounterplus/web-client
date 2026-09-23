@@ -18,6 +18,8 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
+Run `npm run package` to make a production build and pack it into `dist/web-client.zip`, the archive Encounter+ imports. `node scripts/package.mjs` packs an existing production build without rebuilding.
+
 ## Releasing
 
 `package.json` owns the version; `src/manifest.json` follows it. Bump both and tag in one step, then push:
