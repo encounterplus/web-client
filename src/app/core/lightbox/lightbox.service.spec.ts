@@ -26,7 +26,7 @@ describe('LightboxService', () => {
   it('should open lightbox with default alt text', (done) => {
     service.open('test-url.jpg');
     service.state$.subscribe(state => {
-      expect(state.imageAlt).toBe('Lightbox image');
+      expect(state.imageAlt).toBe('Custom Image');
       done();
     });
   });

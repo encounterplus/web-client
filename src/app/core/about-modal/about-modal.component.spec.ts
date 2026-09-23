@@ -1,4 +1,7 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AboutModalComponent } from './about-modal.component';
 
@@ -6,14 +9,17 @@ describe('AboutModalComponent', () => {
   let component: AboutModalComponent;
   let fixture: ComponentFixture<AboutModalComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ AboutModalComponent ]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ AboutModalComponent ],
+      providers: [
+        NgbActiveModal,
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(AboutModalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

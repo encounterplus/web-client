@@ -1,4 +1,7 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { CombatantComponent } from '../combatant/combatant.component';
 
 import { InitiativeListComponent } from './initiative-list.component';
 
@@ -6,14 +9,16 @@ describe('InitiativeListComponent', () => {
   let component: InitiativeListComponent;
   let fixture: ComponentFixture<InitiativeListComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ InitiativeListComponent ]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ InitiativeListComponent, CombatantComponent ],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(InitiativeListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -21,5 +26,9 @@ describe('InitiativeListComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should render no combatants by default', () => {
+    expect(fixture.nativeElement.querySelectorAll('app-combatant').length).toBe(0);
   });
 });
