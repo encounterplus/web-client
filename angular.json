@@ -127,12 +127,6 @@
               "devServerTarget": "web-client:serve:production"
             }
           }
-        },
-        "deploy": {
-          "builder": "angular-cli-ghpages:deploy",
-          "options": {
-            "cname": "client.encounter.plus"
-          }
         }
       }
     }
