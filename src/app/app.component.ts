@@ -9,7 +9,7 @@ import { AppState, parseRunMode, parseViewMode, RunMode, ViewMode } from './shar
 import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState, TokenView } from './core/map/views/token-view';
 import { AreaEffect } from './shared/models/area-effect';
-import { Tile } from './shared/models/tile';
+import { Tile, tileLayer } from './shared/models/tile';
 import { ToolbarComponent, Tool, Panel } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/services/toast.service';
@@ -638,7 +638,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         Utils.upsertById(map.tiles, model)
 
         let view = this.mapComponent.mapContainer.tileViewById(model.id)
-        if (view != null && view.mapLayer == model.layer) {
+        // the view resolves an absent layer to the default, so read the event the same way
+        if (view != null && view.mapLayer == tileLayer(model)) {
           // update tile only
           view.tile = model;
           view.draw();
