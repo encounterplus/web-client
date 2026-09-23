@@ -17,7 +17,7 @@ import { AreaEffect, AreaEffectShape } from '../area-effect'
 import { ApiData } from '../api-data'
 import { Asset } from '../asset'
 import { Aura } from '../aura'
-import { Combatant, Role } from '../combatant'
+import { ActiveCombatant, Combatant, Role } from '../combatant'
 import { Component } from '../component'
 import { Drawing, DrawingShape } from '../drawing'
 import { Game, emptyGame } from '../game'
@@ -303,6 +303,16 @@ export function fullCombatant(values: Partial<Combatant> = {}): Combatant {
         player: false,
         ...values,
     })
+}
+
+export function minimalActiveCombatant(values: Partial<ActiveCombatant> = {}): ActiveCombatant {
+    return {
+        id: "combatant-1",
+        turned: false,
+        initiative: minimalInitiative(),
+        combatant: minimalCombatant(),
+        ...values,
+    }
 }
 
 export function minimalGame(values: Partial<Game> = {}): Game {
