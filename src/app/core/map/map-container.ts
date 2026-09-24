@@ -282,6 +282,15 @@ export class MapContainer extends Layer {
     // paths
     this.pathsLayer.tokens = [...this.playersLayer.views, ...this.monstersLayer.views]
     this.pathsLayer.draw()
+
+    // auras: the views are new ones, so the layer holds the aura containers of views now gone
+    this.drawAuras()
+  }
+
+  drawAuras() {
+    this.aurasLayer.size = this.size
+    this.aurasLayer.tokens = [...this.playersLayer.views, ...this.monstersLayer.views]
+    this.aurasLayer.draw()
   }
 
   /**
@@ -390,9 +399,7 @@ export class MapContainer extends Layer {
     await this.drawTokens()
 
     // auras
-    this.aurasLayer.size = this.size
-    this.aurasLayer.tokens = [...this.playersLayer.views, ...this.monstersLayer.views]
-    this.aurasLayer.draw()
+    this.drawAuras()
 
     this.areaEffectsLayer.size = this.size
     this.areaEffectsLayer.draw()

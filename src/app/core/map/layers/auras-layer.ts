@@ -14,13 +14,18 @@ export class AurasLayer extends Layer {
         super();
     }
 
+    /**
+     * Shows the aura containers of the token views it was given.
+     *
+     * The views fill their own containers as part of their draw — this layer only places them, so
+     * that it never starts a second, concurrent draw of a token.
+     */
     async draw() {
         this.clear();
 
         // tokens
         for (let view of this.tokens) {
             this.addChild(view.auraContainer);
-            view.draw();
 
             this.views.push(view.auraContainer);
         }
