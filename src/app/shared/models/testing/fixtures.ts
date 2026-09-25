@@ -29,6 +29,7 @@ import { Measurement, MeasurementType } from '../measurement'
 import { Message, MessageType } from '../message'
 import { Screen, ScreenInteraction, SharedVision } from '../screen'
 import { Sight } from '../sight'
+import { StatusEffect } from '../status-effect'
 import { Tile } from '../tile'
 import { Size, Token, TokenStyle } from '../token'
 import { TrackedObject, TrackedObjectType } from '../tracked-object'
@@ -280,6 +281,13 @@ export function minimalCombatant(values: Partial<Combatant> = {}): Combatant {
     return {
         id: "combatant-1",
         rank: 0,
+        ...values,
+    }
+}
+
+export function minimalStatusEffect(values: Partial<StatusEffect> = {}): StatusEffect {
+    return {
+        id: "effect-1",
         ...values,
     }
 }

@@ -35,6 +35,7 @@ export function tokenViewStub(token: Token = minimalToken()) {
         updateTint: jasmine.createSpy('updateTint'),
         drawPath: jasmine.createSpy('drawPath'),
         updateElevation: jasmine.createSpy('updateElevation'),
+        updateEffects: jasmine.createSpy('updateEffects'),
     }
 }
 

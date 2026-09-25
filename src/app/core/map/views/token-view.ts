@@ -14,6 +14,7 @@ import { RunMode } from 'src/app/shared/models/app-state';
 import { PathView } from './path-view';
 import { Asset, AssetLayout } from 'src/app/shared/models/asset';
 import { AssetArtwork } from './asset-artwork';
+import { StatusEffectsView } from './status-effects-view';
 
 function clamp(num: number, min: number, max: number) {
   return num <= min ? min : num >= max ? max : num
@@ -50,6 +51,9 @@ export class TokenView extends View {
   elevationText: PIXI.Text | null = null
 
   distanceText: PIXI.Text | null = null
+
+  /** The combatant's status effects, over the token's top-left; kept across redraws so unchanged icons are not rebuilt. */
+  effectsView: StatusEffectsView = new StatusEffectsView()
 
   dragging: boolean = false
   dragStart: number = Date.now()
@@ -334,6 +338,11 @@ export class TokenView extends View {
 
     this.updateOverlay()
 
+    // status effects, above the artwork and overlay, below the elevation and label
+    this.effectsView.zIndex = 2
+    this.addChild(this.effectsView)
+    this.updateEffects()
+
     // elevation graphics
     this.elevationGraphics = new PIXI.Graphics();
     this.elevationGraphics.zIndex = 3
@@ -414,6 +423,12 @@ export class TokenView extends View {
       overlaySprite.height = Math.min(size, this.h)
       overlaySprite.position.set(this.w / 2, this.h / 2)
     }
+  }
+
+  /** Redraws the status effects, which skips the work when they have not changed. */
+  updateEffects() {
+    this.effectsView.visible = !this.defeated
+    this.effectsView.draw(this.token.combatant?.effects, this.w, this.h)
   }
 
   updateLabel() {
@@ -630,6 +645,7 @@ export class TokenView extends View {
   dispose() {
     this.disposeAuras()
     this.clear()
+    this.effectsView.destroy({ children: true })
   }
 
   onTap(event: any) {

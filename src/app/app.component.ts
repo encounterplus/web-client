@@ -488,6 +488,14 @@ export class AppComponent implements OnInit, AfterViewInit {
           Object.assign(combatant, event.data)
         }
 
+        // the token keeps its own copy of the combatant, which its status effects are drawn from
+        const tokenId = event.data.tokenId ?? combatant?.tokenId
+        const tokenView = tokenId ? this.mapComponent?.mapContainer.tokenViewById(tokenId) : null
+        if (tokenView != null) {
+          tokenView.token.combatant = Object.assign(tokenView.token.combatant ?? {}, event.data)
+          tokenView.updateEffects()
+        }
+
         // update state
         this.updateGame(this.state.game)
 

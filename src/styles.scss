@@ -3,6 +3,13 @@
 $default-margin: 8px;
 $gameboard-margin: 75px;
 
+// the game icon font status effects draw with; see src/app/shared/icons/README.md
+@font-face {
+    font-family: 'Game-Icons';
+    src: url('./fonts/Game-Icons.ttf') format('truetype');
+    font-display: block;
+}
+
 body {
     padding: 0;
     margin: 0;
