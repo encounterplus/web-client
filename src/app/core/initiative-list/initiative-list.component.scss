@@ -1,12 +1,161 @@
-:host {
-    background-color: rgba($color: #ffffff, $alpha: 0.2);
-    overflow-x: hidden;
-    overflow-y: scroll;
+$gameboard-margin: 75px;
+$message-width: 300px;
+$mobile-message-width: 260px;
+$dock-gap: 8px;
+$combatant-size: 130px;
+$mobile-combatant-size: 80px;
 
-    @media (max-width: 420px) {
-        width: 80px;
+:host {
+    position: absolute;
+    z-index: 1030;
+    display: block;
+    color: var(--ui-text);
+    pointer-events: none;
+}
+
+.initiative-dock-shell {
+    position: fixed;
+    pointer-events: auto;
+}
+
+.initiative-entries {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid var(--ui-border);
+    border-radius: 0.45rem;
+    background-color: var(--ui-surface);
+    box-shadow: 0 0.35rem 1rem var(--ui-shadow);
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
     }
 }
-:host(::-webkit-scrollbar) {
-    width: 0 !important
+
+.dock-right {
+    top: $dock-gap;
+    right: $dock-gap;
+    bottom: $dock-gap;
+    width: $combatant-size;
+
+    &.messages-open {
+        right: calc(#{$dock-gap} + #{$message-width});
+    }
+}
+
+.dock-bottom {
+    right: $dock-gap;
+    bottom: $dock-gap;
+    left: $dock-gap;
+    height: $combatant-size;
+
+    &.messages-open {
+        right: calc(#{$dock-gap} + #{$message-width});
+    }
+
+    .initiative-entries {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+}
+
+.initiative-dock-toggle {
+    position: absolute;
+    z-index: 2;
+    display: inline-flex;
+    width: 2.25rem;
+    height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--ui-text-muted);
+    border: 1px solid var(--ui-border);
+    border-radius: 0.4rem;
+    background: var(--ui-surface-solid);
+    box-shadow: 0 0.25rem 0.65rem var(--ui-shadow);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        color: var(--ui-text);
+        background: var(--ui-control-hover);
+        outline: none;
+    }
+}
+
+.dock-right .initiative-dock-toggle {
+    top: 1.25rem;
+    right: 100%;
+    border-radius: 0.45rem 0 0 0.45rem;
+}
+
+.dock-bottom .initiative-dock-toggle {
+    bottom: 100%;
+    right: 1.25rem;
+    border-radius: 0.45rem 0.45rem 0 0;
+}
+
+.initiative-dock-toggle-shape {
+    position: relative;
+    top: 0.28rem;
+    width: 1.15rem;
+    height: 0.36rem;
+    border: 2px solid currentColor;
+    border-radius: 0.12rem;
+}
+
+.dock-bottom .initiative-dock-toggle-shape {
+    top: 0;
+    left: 0.28rem;
+    width: 0.36rem;
+    height: 1.15rem;
+}
+
+:host-context(.gameboard) {
+    .dock-right {
+        right: $gameboard-margin;
+
+        &.messages-open {
+            right: calc(#{$gameboard-margin} + #{$message-width});
+        }
+    }
+
+    .dock-right {
+        top: $gameboard-margin;
+        bottom: $gameboard-margin;
+    }
+
+    .dock-bottom {
+        right: $gameboard-margin;
+        bottom: $gameboard-margin;
+        left: $gameboard-margin;
+
+        &.messages-open {
+            right: calc(#{$gameboard-margin} + #{$message-width});
+        }
+    }
+}
+
+@media (max-width: 420px) {
+    .dock-right {
+        top: 56px;
+        width: $mobile-combatant-size;
+    }
+
+    .dock-bottom {
+        height: $mobile-combatant-size;
+    }
+
+    .dock-right.messages-open {
+        right: calc(#{$dock-gap} + #{$mobile-message-width});
+    }
+
+    .dock-bottom.messages-open {
+        right: calc(#{$dock-gap} + #{$mobile-message-width});
+    }
 }

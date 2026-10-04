@@ -56,9 +56,9 @@ describe('MessageComponent', () => {
       render(minimalMessage());
     });
 
-    it('falls back to the Dungeon Master and renders no body', () => {
+    it('falls back to the neutral Host label and renders no body', () => {
       const source = fixture.nativeElement.querySelector('.message-source').textContent;
-      expect(source).toContain("Dungeon Master");
+      expect(source).toContain("Host");
       expect(fixture.nativeElement.querySelector('.message-chat').textContent).toBe("");
     });
 

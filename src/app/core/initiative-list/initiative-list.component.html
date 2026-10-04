@@ -1,3 +1,20 @@
-@for (activeCombatant of activeCombatants; track activeCombatant.id; let i = $index) {
-  <app-combatant [combatant]="activeCombatant.combatant" [attr.data-id]="activeCombatant.initiative.id" [class.combatant-turned]="activeCombatant.turned" class="combatant role-{{activeCombatant.combatant.role}} d-flex align-items-stretch" (click)="open(i)"></app-combatant>
-}
+<div
+  class="initiative-dock-shell dock-{{dockPosition}}"
+  [class.messages-open]="messagesOpen"
+>
+  <button
+    type="button"
+    class="initiative-dock-toggle"
+    [attr.aria-label]="dockPosition === 'right' ? 'Move initiative order to bottom' : 'Move initiative order to right'"
+    [title]="dockPosition === 'right' ? 'Move initiative order to bottom' : 'Move initiative order to right'"
+    (click)="toggleDockPosition($event)"
+  >
+    <span class="initiative-dock-toggle-shape" aria-hidden="true"></span>
+  </button>
+
+  <div class="initiative-entries">
+    @for (activeCombatant of activeCombatants; track activeCombatant.id; let i = $index) {
+      <app-combatant [combatant]="activeCombatant.combatant" [attr.data-id]="activeCombatant.initiative.id" [class.combatant-turned]="activeCombatant.turned" class="combatant role-{{activeCombatant.combatant.role}} d-flex align-items-stretch" (click)="open(i)"></app-combatant>
+    }
+  </div>
+</div>

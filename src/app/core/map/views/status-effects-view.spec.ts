@@ -1,4 +1,11 @@
-import { minimalStatusEffect } from 'src/app/shared/models/testing/fixtures'
+import * as PIXI from 'pixi.js'
+import { AppState } from 'src/app/shared/models/app-state'
+import { Role } from 'src/app/shared/models/token'
+import { minimalCombatant, minimalStatusEffect, minimalToken } from 'src/app/shared/models/testing/fixtures'
+import { DataService } from 'src/app/shared/services/data.service'
+import { Loader } from '../models/loader'
+import { SquareGrid } from '../models/square-grid'
+import { TokenView } from './token-view'
 import { MAX_STATUS_EFFECTS, StatusEffectsView, statusEffectFrames, statusEffectTint, visibleStatusEffects } from './status-effects-view'
 
 describe('statusEffectFrames', () => {
@@ -106,5 +113,55 @@ describe('StatusEffectsView', () => {
         await view.draw([], 100, 100)
         expect(view.children.length).toBe(0)
         view.destroy({ children: true })
+    })
+})
+
+describe('token status-effect layering', () => {
+    function tokenView(role: Role, image?: string) {
+        const token = minimalToken({
+            role,
+            label: 'E1',
+            width: 1,
+            height: 1,
+            image,
+            combatant: minimalCombatant({ effects: [minimalStatusEffect({ icon: 'unused' })] }),
+        })
+        return new TokenView(token, new SquareGrid(), { state: new AppState() } as DataService)
+    }
+
+    for (const role of [Role.friendly, Role.hostile]) {
+        it(`draws effects above the ${role} token's colored disc`, async () => {
+            const view = tokenView(role)
+            try {
+                await view.drawToken()
+                view.sortChildren()
+                expect(view.labelGraphics!.visible).toBeTrue()
+                expect(view.children.indexOf(view.effectsView)).toBeGreaterThan(view.children.indexOf(view.labelGraphics!))
+                expect(view.children.indexOf(view.labelText!)).toBeGreaterThan(view.children.indexOf(view.effectsView))
+            } finally {
+                view.destroy({ children: true })
+            }
+        })
+    }
+
+    it('keeps artwork labels above effects and lowers the disc after artwork is removed', async () => {
+        spyOn(Loader.shared, 'loadTexture').and.resolveTo(PIXI.Texture.WHITE)
+        const view = tokenView(Role.friendly, '/token.png')
+        try {
+            await view.drawToken()
+            view.sortChildren()
+            expect(view.hasArtwork).toBeTrue()
+            expect(view.children.indexOf(view.effectsView)).toBeGreaterThan(view.children.indexOf(view.artwork!))
+            expect(view.children.indexOf(view.labelGraphics!)).toBeGreaterThan(view.children.indexOf(view.effectsView))
+
+            view.token.image = undefined
+            view.clear()
+            await view.drawToken()
+            view.sortChildren()
+            expect(view.hasArtwork).toBeFalse()
+            expect(view.children.indexOf(view.effectsView)).toBeGreaterThan(view.children.indexOf(view.labelGraphics!))
+        } finally {
+            view.destroy({ children: true })
+        }
     })
 })

@@ -31,6 +31,7 @@ import { EntityModalComponent } from './core/entity-modal/entity-modal.component
 import { DraggableDirective } from './draggable.directive';
 import { SafePipe } from 'safe-pipe';
 import { LightboxComponent } from './core/lightbox/lightbox.component';
+import { PlayerPanelComponent } from './core/player-panel/player-panel.component';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -51,6 +52,7 @@ import { LightboxComponent } from './core/lightbox/lightbox.component';
         ZoombarComponent,
         OverlayComponent,
         EntityModalComponent,
+        PlayerPanelComponent,
         DraggableDirective
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,

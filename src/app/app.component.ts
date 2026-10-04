@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, signal, computed, ChangeDetectionStrategy, WritableSignal } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, signal, computed, ChangeDetectionStrategy, WritableSignal } from '@angular/core';
 import { MapComponent } from './core/map/map.component';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
@@ -10,7 +10,7 @@ import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState, TokenView } from './core/map/views/token-view';
 import { AreaEffect } from './shared/models/area-effect';
 import { Tile, tileLayer } from './shared/models/tile';
-import { ToolbarComponent, Tool, Panel } from './core/toolbar/toolbar.component';
+import { ToolbarComponent, Tool, Panel, PanelChange, savedPanelState, savePanelState, MeasurementToolOptions, AreaTemplateToolOptions } from './core/toolbar/toolbar.component';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/services/toast.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -30,11 +30,25 @@ import { Point } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { Meta } from '@angular/platform-browser';
-import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
 import { Message } from './shared/models/message';
 import { Game, emptyGame } from './shared/models/game';
 import { Screen } from './shared/models/screen';
-import { ActiveCombatant, Role } from './shared/models/combatant';
+import { ActiveCombatant, Combatant, Role } from './shared/models/combatant';
+import { PlayerEffect, assignedPlayerCombatant } from './shared/player-tools';
+import { EntityReferenceAction } from './shared/entity-frame-interactions';
+import { InitiativeDockPosition, storedInitiativeDockPosition } from './core/initiative-list/initiative-dock';
+
+interface EntityWindowState {
+  title: string;
+  reference?: string;
+  description?: string;
+}
+
+interface TurnNoticeState {
+  combatantId: string;
+  name: string;
+  round?: number;
+}
 
 interface WebAppInterface {
   showText(text: string): any;
@@ -57,6 +71,18 @@ export class AppComponent implements OnInit, AfterViewInit {
   env = environment;
 
   state: AppState;
+
+  characterWindow?: EntityWindowState;
+  referenceWindow?: EntityWindowState;
+  characterWindowZ = 1060;
+  referenceWindowZ = 1061;
+
+  readonly turnNotice = signal<TurnNoticeState | undefined>(undefined);
+  readonly playerStateRevision = signal(0);
+  playerColor = Utils.userColor();
+  initiativeDockPosition: InitiativeDockPosition = storedInitiativeDockPosition();
+  private turnNoticeKey?: string;
+  private turnNoticeTimer?: ReturnType<typeof setTimeout>;
 
   destroy$: Subject<boolean> = new Subject<boolean>();
 
@@ -111,6 +137,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.screen.set(screen)
   }
 
+  private refreshPlayerState(): void {
+    // The panel receives one long-lived AppState object. A primitive revision input tells Angular
+    // that its mutable contents changed, so zoneless rendering does not wait for user interaction.
+    this.playerStateRevision.update(revision => revision + 1)
+  }
+
   @ViewChild(MapComponent)
   public mapComponent!: MapComponent;
 
@@ -129,7 +161,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild(ToastListComponent)
   public toastListComponent!: ToastListComponent;
 
-  constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal, private cdr: ChangeDetectorRef) {
+  constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal) {
     this.state = new AppState();
     this.screen = signal(this.state.screen)
 
@@ -155,7 +187,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  showMessages: Boolean = false;
+  showMessages: boolean = false;
+  showPlayerPanel: boolean = false;
   movingTokenView: TokenView | null = null
 
   toolbarAction(type: string) {
@@ -167,7 +200,11 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.mapComponent.viewport.pause = true
         }
 
-        let modal = this.modalService.open(SettingsModalComponent, {centered: true})
+        let modal = this.modalService.open(SettingsModalComponent, {
+          centered: true,
+          windowClass: 'settings-modal-layer',
+          backdropClass: 'settings-modal-backdrop',
+        })
         modal.componentInstance.state = this.state
         const playedVideoAssets = Loader.playsVideoAssets
         modal.result.then(result => {
@@ -193,6 +230,13 @@ export class AppComponent implements OnInit, AfterViewInit {
           if (typeof appInterface !== "undefined") {
             appInterface.showText("Settings changed")
           }
+
+          this.playerColor = Utils.userColor();
+          // Settings mutates the long-lived AppState object when the assigned token changes.
+          // Bump the panel input so an already-open My Character panel renders the new token
+          // immediately instead of waiting for the next click or websocket event.
+          this.refreshPlayerState();
+          this.updateTurnNotice();
 
         }, reason => {
           console.debug(`Setting component dismissed ${reason}`)
@@ -246,13 +290,43 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   activeToolAction(tool: Tool) {
     if (this.mapComponent) {
+      if (this.toolbarComponent) {
+        this.mapComponent.mapContainer.setMeasurementOptions(
+          this.toolbarComponent.measurementType,
+          this.toolbarComponent.saveMeasurements
+        )
+        this.mapComponent.mapContainer.setAreaTemplateOptions(
+          this.toolbarComponent.areaTemplateShape
+        )
+      }
       this.mapComponent.mapContainer.setActiveTool(tool)
     }
   }
 
-  activePanelAction(panel: Panel) {
-    this.showMessages = panel == Panel.messages;
-    if (panel) {
+  measurementToolOptionsChanged(options: MeasurementToolOptions) {
+    if (this.mapComponent?.mapContainer) {
+      this.mapComponent.mapContainer.setMeasurementOptions(options.type, options.save)
+    }
+  }
+
+  areaTemplateToolOptionsChanged(options: AreaTemplateToolOptions) {
+    if (this.mapComponent?.mapContainer) {
+      this.mapComponent.mapContainer.setAreaTemplateOptions(options.shape)
+    }
+  }
+
+  clearAreaTemplatePreview() {
+    this.mapComponent?.mapContainer?.clearLocalAreaTemplate()
+  }
+
+  activePanelAction(change: PanelChange) {
+    if (change.panel == Panel.messages) {
+      this.showMessages = change.open;
+    } else if (change.panel == Panel.player) {
+      this.showPlayerPanel = change.open;
+    }
+
+    if (change.panel == Panel.messages && change.open) {
       let lastHost = localStorage.getItem("lastSuccessfullHost");
       localStorage.setItem("readMessages", JSON.stringify({ "lastHost": lastHost, seenCount: this.state.messages.length }));
       this.state.readCount = this.state.messages.length;
@@ -260,18 +334,93 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  showEntityAction(reference: string) {
-    console.debug(`showing entity modal: ${reference}`)
+  closePlayerPanel() {
+    this.showPlayerPanel = false;
+    savePanelState(Panel.player, false);
+    if (this.toolbarComponent) this.toolbarComponent.player = false;
+  }
 
-    let modal = this.modalService.open(EntityModalComponent, {centered: true, modalDialogClass: 'dark-modal', scrollable: false})
-    modal.componentInstance.state = this.state
-    modal.componentInstance.reference = reference
-    
-    modal.result.then(result => {
-      console.debug(`Entity component closed with: ${result}`);
-    }, reason => {
-      console.debug(`Entity component dismissed ${reason}`)
+  showCharacterSheet(reference: string) {
+    this.characterWindow = { title: 'Character', reference };
+    this.focusFloatingWindow('character');
+  }
+
+  showEntityAction(reference: string, title = 'Reference') {
+    this.referenceWindow = { title, reference };
+    this.focusFloatingWindow('reference');
+  }
+
+  showReferenceAction(action: EntityReferenceAction) {
+    this.showEntityAction(action.reference, action.title);
+  }
+
+  showEffectAction(effect: PlayerEffect) {
+    if (effect.reference) {
+      this.showEntityAction(effect.reference, effect.name);
+      return;
+    }
+    if (!effect.description) return;
+
+    this.referenceWindow = { title: effect.name, description: effect.description };
+    this.focusFloatingWindow('reference');
+  }
+
+  closeFloatingWindow(window: 'character' | 'reference') {
+    if (window === 'character') this.characterWindow = undefined;
+    else this.referenceWindow = undefined;
+  }
+
+  focusFloatingWindow(window: 'character' | 'reference') {
+    if (window === 'character') {
+      this.characterWindowZ = 1061;
+      this.referenceWindowZ = 1060;
+    } else {
+      this.characterWindowZ = 1060;
+      this.referenceWindowZ = 1061;
+    }
+  }
+
+  dismissTurnNotice() {
+    this.turnNotice.set(undefined);
+    if (this.turnNoticeTimer) {
+      clearTimeout(this.turnNoticeTimer);
+      this.turnNoticeTimer = undefined;
+    }
+  }
+
+  initiativeDockPositionChanged(position: InitiativeDockPosition) {
+    this.initiativeDockPosition = position;
+  }
+
+  private updateTurnNotice() {
+    const combatant = assignedPlayerCombatant(this.state);
+    const isPlayersTurn = Boolean(
+      this.state.game.started &&
+      combatant &&
+      this.state.game.combatantId === combatant.id
+    );
+
+    if (!isPlayersTurn || !combatant) {
+      this.turnNoticeKey = undefined;
+      this.dismissTurnNotice();
+      return;
+    }
+
+    const key = `${combatant.id}:${this.state.game.round}:${this.state.game.turn}`;
+    if (key === this.turnNoticeKey) return;
+
+    this.turnNoticeKey = key;
+    this.turnNotice.set({
+      combatantId: combatant.id,
+      name: combatant.name || combatant.label || 'Your character',
+      round: this.state.game.round || undefined,
     });
+
+    if (this.turnNoticeTimer) clearTimeout(this.turnNoticeTimer);
+    this.turnNoticeTimer = setTimeout(() => {
+      this.turnNotice.set(undefined);
+      this.turnNoticeTimer = undefined;
+    }, 7000);
   }
 
   // main websocket event handler
@@ -319,6 +468,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         
         // update state
         this.updateGame(this.state.game)
+        this.updateTurnNotice()
 
         if (this.initiativeListComponent) {
           this.initiativeListComponent.scrollToTurned(this.state.game.initiativeId)
@@ -339,6 +489,8 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.mapComponent.mapContainer.visionLayer.draw()
           this.mapComponent.mapContainer.lightsLayer.draw()
         }
+
+        this.refreshPlayerState()
 
         break;
       }
@@ -488,8 +640,14 @@ export class AppComponent implements OnInit, AfterViewInit {
           Object.assign(combatant, event.data)
         }
 
-        // the token keeps its own copy of the combatant, which its status effects are drawn from
+        // Keep model state current even when no token view is mounted.
         const tokenId = event.data.tokenId ?? combatant?.tokenId
+        const token = tokenId ? this.state.map?.tokens.find(token => token.id === tokenId) : undefined
+        if (token) {
+          token.combatant = Object.assign(token.combatant ?? {}, event.data) as Combatant
+        }
+
+        // The rendered token may hold its own combatant copy.
         const tokenView = tokenId ? this.mapComponent?.mapContainer.tokenViewById(tokenId) : null
         if (tokenView != null) {
           tokenView.token.combatant = Object.assign(tokenView.token.combatant ?? {}, event.data)
@@ -498,6 +656,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         // update state
         this.updateGame(this.state.game)
+        this.refreshPlayerState()
 
         // changes
         // console.debug(creature)
@@ -593,6 +752,9 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.mapComponent.mapContainer.visionLayer.draw()
           this.mapComponent.mapContainer.lightsLayer.draw()
         }
+
+        // The assigned character can fall back to the combatant embedded in its token.
+        this.refreshPlayerState()
 
         // changes
         // console.debug(model)
@@ -823,6 +985,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.mapComponent.mapContainer.visionLayer.update()
         this.mapComponent.mapContainer.visionLayer.draw()
         this.mapComponent.mapContainer.lightsLayer.draw()
+        this.refreshPlayerState()
         break;
       }
 
@@ -1032,11 +1195,13 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
       
       this.updateGame(this.state.game)
+      this.updateTurnNotice()
       this.updateScreen(this.state.screen)
       this.updateMessages([...this.state.messages])
 
       this.unreadMessages.set(this.state.messages.length - this.state.readCount)
       this.paused.set(this.state.paused)
+      this.refreshPlayerState()
 
     }, err => this.toastService.showError("API error: " + err));
   }
@@ -1087,7 +1252,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngOnInit() {
 
     // update messages based on local storage settings
-    this.showMessages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
+    this.showMessages = savedPanelState(Panel.messages);
+    this.showPlayerPanel = savedPanelState(Panel.player);
 
     // update settings
     this.state.userTokenId = localStorage.getItem("userTokenId") ?? undefined
@@ -1144,6 +1310,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngOnDestroy() {
+    this.dismissTurnNotice();
     this.destroy$.next(true);
     // Unsubscribe from the subject
     this.destroy$.unsubscribe();

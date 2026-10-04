@@ -8,12 +8,8 @@ module.exports = function (config) {
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter'),
       require('karma-coverage')
     ],
-    client: {
-      clearContext: false // leave Jasmine Spec Runner output visible in browser
-    },
     coverageReporter: {
       dir: require('path').join(__dirname, './coverage/web-client'),
       subdir: '.',
@@ -23,10 +19,14 @@ module.exports = function (config) {
         { type: 'text-summary' }
       ]
     },
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['dots'],
+    browserConsoleLogOptions: {
+      level: 'error',
+      terminal: true
+    },
     port: 9876,
-    colors: true,
-    logLevel: config.LOG_INFO,
+    colors: false,
+    logLevel: config.LOG_WARN,
     autoWatch: true,
     browsers: ['ChromeHeadless'],
     singleRun: false,

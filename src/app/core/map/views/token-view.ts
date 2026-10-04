@@ -452,6 +452,7 @@ export class TokenView extends View {
     const text = this.token.label || this.trackingLabel || (this.token.name || "Unknown").toUpperCase().charAt(0)
 
     if (this.hasArtwork || (this.token.trackingId != null && this.dataService.state.runMode != RunMode.normal)) {
+      labelGraphics.zIndex = 5
       let size = Math.min(this.w, this.h) * clamp(this.scaleFactor, 0.1, 1.0)
       let labelSize = this.grid.adjustedSize.width * 0.4
 
@@ -486,6 +487,8 @@ export class TokenView extends View {
       labelText.style.fontSize = labelSize / 2.5;
 
     } else {
+      // Without artwork this graphic is the token body, beneath its overlays and effects.
+      labelGraphics.zIndex = 0
       let size = Math.min(this.w, this.h) * this.scaleFactor
       labelGraphics.clear();
       labelGraphics.circle(this.w / 2, this.h / 2, size / 2)

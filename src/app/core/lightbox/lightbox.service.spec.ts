@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { take } from 'rxjs/operators';
 import { LightboxService } from './lightbox.service';
 
 describe('LightboxService', () => {
@@ -15,7 +16,7 @@ describe('LightboxService', () => {
 
   it('should open lightbox with image URL and alt text', (done) => {
     service.open('test-url.jpg', 'Test Alt');
-    service.state$.subscribe(state => {
+    service.state$.pipe(take(1)).subscribe(state => {
       expect(state.isOpen).toBe(true);
       expect(state.imageUrl).toBe('test-url.jpg');
       expect(state.imageAlt).toBe('Test Alt');
@@ -25,7 +26,7 @@ describe('LightboxService', () => {
 
   it('should open lightbox with default alt text', (done) => {
     service.open('test-url.jpg');
-    service.state$.subscribe(state => {
+    service.state$.pipe(take(1)).subscribe(state => {
       expect(state.imageAlt).toBe('Custom Image');
       done();
     });
@@ -34,7 +35,7 @@ describe('LightboxService', () => {
   it('should close lightbox', (done) => {
     service.open('test-url.jpg');
     service.close();
-    service.state$.subscribe(state => {
+    service.state$.pipe(take(1)).subscribe(state => {
       expect(state.isOpen).toBe(false);
       done();
     });

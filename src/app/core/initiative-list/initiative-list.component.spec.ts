@@ -23,6 +23,7 @@ describe('InitiativeListComponent', () => {
   }
 
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       declarations: [ InitiativeListComponent, CombatantComponent ],
       providers: [
@@ -43,6 +44,34 @@ describe('InitiativeListComponent', () => {
 
   it('should render no combatants by default', () => {
     expect(fixture.nativeElement.querySelectorAll('app-combatant').length).toBe(0);
+  });
+
+  it('starts in the persisted dock position', () => {
+    fixture.destroy();
+    localStorage.setItem('initiativeDockPosition', 'bottom');
+
+    fixture = TestBed.createComponent(InitiativeListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component.dockPosition).toBe('bottom');
+    expect(fixture.nativeElement.querySelector('.initiative-dock-shell').classList).toContain('dock-bottom');
+  });
+
+  it('toggles directly between the right and bottom positions', () => {
+    const event = jasmine.createSpyObj<Event>('event', ['preventDefault', 'stopPropagation']);
+    const changed = jasmine.createSpy('changed');
+    component.dockPositionChange.subscribe(changed);
+
+    component.toggleDockPosition(event);
+    expect(component.dockPosition).toBe('bottom');
+    expect(localStorage.getItem('initiativeDockPosition')).toBe('bottom');
+    expect(changed).toHaveBeenCalledWith('bottom');
+
+    component.toggleDockPosition(event);
+    expect(component.dockPosition).toBe('right');
+    expect(localStorage.getItem('initiativeDockPosition')).toBe('right');
+    expect(changed).toHaveBeenCalledWith('right');
   });
 
   describe('with combatants that carry only their required fields', () => {

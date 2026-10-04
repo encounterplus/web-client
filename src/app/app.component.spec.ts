@@ -5,6 +5,8 @@ import { AppComponent } from './app.component';
 import { AppState } from './shared/models/app-state';
 import { DataService } from './shared/services/data.service';
 import { WSEvent } from './shared/models/wsevent';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
 
 // the real service opens a websocket on init, so the spec runs against a stub
 function dataServiceStub() {
@@ -64,5 +66,57 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     expect(dataService.connect).toHaveBeenCalled();
+  });
+
+  it('opens settings in the dedicated topmost modal layer', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    const modalService = TestBed.inject(NgbModal);
+    const open = spyOn(modalService, 'open').and.returnValue({
+      componentInstance: {},
+      result: new Promise(() => {}),
+    } as any);
+
+    app.toolbarAction('showSettings');
+
+    expect(open).toHaveBeenCalledWith(SettingsModalComponent, jasmine.objectContaining({
+      centered: true,
+      windowClass: 'settings-modal-layer',
+      backdropClass: 'settings-modal-backdrop',
+    }));
+  });
+
+  it('keeps repeated floating-window focus within its reserved layer', () => {
+    const app = TestBed.createComponent(AppComponent).componentInstance;
+    for (let index = 0; index < 100; index++) {
+      app.focusFloatingWindow('character');
+      app.focusFloatingWindow('reference');
+    }
+    expect(app.referenceWindowZ).toBe(1061);
+    expect(app.characterWindowZ).toBe(1060);
+    app.focusFloatingWindow('character');
+    expect(app.characterWindowZ).toBe(1061);
+    expect(app.referenceWindowZ).toBe(1060);
+  });
+
+  it('refreshes an open player panel after settings changes its assigned token', async () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    const modalService = TestBed.inject(NgbModal);
+    let closeSettings!: (result: string) => void;
+    const result = new Promise<string>(resolve => closeSettings = resolve);
+    spyOn(modalService, 'open').and.returnValue({
+      componentInstance: {},
+      result,
+    } as any);
+    const initialRevision = app.playerStateRevision();
+
+    app.toolbarAction('showSettings');
+    app.state.userTokenId = 'new-token';
+    closeSettings('save');
+    await result;
+    await Promise.resolve();
+
+    expect(app.playerStateRevision()).toBe(initialRevision + 1);
   });
 });

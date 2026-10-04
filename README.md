@@ -6,6 +6,16 @@
 
 A browser client for the [Encounter+](https://encounter.plus) virtual tabletop app. Encounter+ serves this client to players' browsers, TVs and table displays. The client shows the current map, tokens, lighting and fog of war, the initiative order and the chat. Everything updates live over a WebSocket. Depending on how the host has set up the screen, players can also move their tokens, ping the map and send messages.
 
+## Player tools
+
+- **My character** shows the selected friendly token's sheet and enabled status effects. HP controls appear when the host supplies an HP range, and players can enter an initiative result before combat starts.
+- **Ruler** provides precise distances and grid movement. Saved rulers stay in the current browser session and are cleared when the map changes.
+- **Area preview** draws local sphere, cylinder, cone, cube and line templates. Overlapping squares are highlighted on square grids; the preview does not create or modify host area effects.
+- Character sheets and rule references open in separate draggable windows. Roll and reference links are handled when the hosted sheet is accessible from the client's origin.
+- Appearance can follow the device or use light/dark mode. Initiative can dock at the right or bottom, and the selected character receives a turn notification.
+
+HP and initiative updates use the host's existing `updateCombatant` WebSocket event; rolls use `createMessage`. Host measurements and area effects continue to arrive through their existing model/event paths. Local map tools do not call area-effect or measurement write endpoints, leaving their shared-state integration for a later change.
+
 ## Environment
 
 | | Version |
@@ -50,7 +60,7 @@ http://localhost:4200/?remoteHost=192.168.1.10:8080
 | `device` | e.g. `gameboard` | Marks a dedicated display device. `gameboard` also applies a 1.5× viewport scale. |
 | `interactions` | `all` | Enables every interaction, whatever the screen settings say. |
 
-User preferences (max FPS, video playback, name, selected token, open panel) are kept in `localStorage`.
+User preferences (max FPS, video playback, name, selected token, open panels, appearance and initiative dock position) are kept in `localStorage`.
 
 ## Architecture
 
@@ -122,8 +132,9 @@ To rebuild an existing release, run the Release workflow manually with its tag. 
 ## Tests
 
 ```
+npm run verify         # all unit tests followed by the production build
 npm test               # Karma in watch mode
-npm run test:ci        # single run
+npm run test:ci        # unit tests only, single run
 ```
 
 Specs sit next to the code they cover (`*.spec.ts`). `core/map/testing/` and `shared/models/testing/` hold stubs and fixtures.

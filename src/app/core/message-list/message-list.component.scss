@@ -5,7 +5,8 @@
     // top: 0;
     // right: 0;
     // bottom: 0;
-    background-color: rgba($color: #1d2124, $alpha: 0.92);
+    color: var(--ui-text);
+    background-color: var(--ui-surface);
     flex: 1;
 
     @media (max-width: 420px) {
@@ -24,8 +25,8 @@
 
     .message-input {
         // display: flex;
-        border-top: 1px solid #666;
-        background-color: #1d2124;
+        border-top: 1px solid var(--ui-border);
+        background-color: var(--ui-surface-solid);
         position: absolute;
         flex: 1;
         width: 300px;

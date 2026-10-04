@@ -1,7 +1,7 @@
 <div class="btn-toolbar" role="toolbar">
   <div class="btn-group mr-2" role="group" aria-label="Button group with nested dropdown">
     <div class="btn-group" ngbDropdown role="group">
-      <button id="dropdownBasic1" type="button" class="btn btn-dark" ngbDropdownToggle>
+      <button id="dropdownBasic1" type="button" class="btn btn-client" ngbDropdownToggle>
         Menu
       </button>
       <div aria-labelledby="dropdownBasic1" ngbDropdownMenu>
@@ -17,33 +17,116 @@
         }
       </div>
     </div>
-    <div class="btn-group" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" name="radioTest" role="group" aria-label="Messages">
+    <div class="btn-group client-divider-start" name="radioTest" role="group" aria-label="Messages">
       <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off" [(ngModel)]="messages" (ngModelChange)="messagesChanged($event)">
-      <label class="btn btn-dark" for="btncheck1"> 
+      <label class="btn btn-client" for="btncheck1">
         <i class="fa fa-comments-o">&nbsp;
         @if (unreadMessages > 0) { <span class="badge text-bg-light">{{unreadMessages}}</span> }
         </i>
     </label>
     </div>
+    <div class="btn-group client-divider-start" role="group" aria-label="My character">
+      <input type="checkbox" class="btn-check" id="playerPanelToggle" autocomplete="off" [(ngModel)]="player" (ngModelChange)="playerChanged($event)">
+      <label class="btn btn-client" for="playerPanelToggle" title="My character">
+        <i class="fa fa-user-circle-o"></i>
+      </label>
+    </div>
   </div>
 
   <div class="btn-group ms-2" role="group" name="activeTool" aria-label="Active Tool">
     <input type="radio" value="move" class="btn-check" id="btnradio1" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
-    <label class="btn btn-dark" for="btnradio1"> <i class="fa fa-arrows"></i></label>
+    <label class="btn btn-client" for="btnradio1"> <i class="fa fa-arrows"></i></label>
 
     <input type="radio" value="pointer" class="btn-check" id="btnradio2" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
-    <label class="btn btn-dark" for="btnradio2"> <i class="fa fa-magic"></i></label>
+    <label class="btn btn-client" for="btnradio2" title="Pointer"> <i class="fa fa-magic"></i></label>
+
+    <div class="btn-group configurable-tool measurement-tool" ngbDropdown role="group">
+      <input type="radio" value="measure" class="btn-check" id="btnradio3" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
+      <label class="btn btn-client configurable-tool-main" for="btnradio3" title="Measure distance" aria-label="Measure distance"> <i class="fa fa-arrows-h"></i></label>
+      <button type="button" class="configurable-tool-toggle" ngbDropdownToggle aria-label="Measurement options" title="Measurement options">
+        <i class="fa fa-caret-down" aria-hidden="true"></i>
+      </button>
+
+      <div class="tool-options-menu measurement-menu" ngbDropdownMenu>
+        <div class="measurement-menu-title">Measurement</div>
+        <button type="button" ngbDropdownItem class="measurement-mode" (click)="measurementTypeChanged(MeasurementType.precise)">
+          <span class="measurement-mode-icon" [class.selected]="measurementType == MeasurementType.precise">√x</span>
+          <span class="measurement-mode-copy">
+            <strong>Precise</strong>
+            <small>Geometric distance</small>
+          </span>
+          @if (measurementType == MeasurementType.precise) { <i class="fa fa-check measurement-check"></i> }
+        </button>
+        <button type="button" ngbDropdownItem class="measurement-mode" (click)="measurementTypeChanged(MeasurementType.grid)">
+          <span class="measurement-mode-icon" [class.selected]="measurementType == MeasurementType.grid">#</span>
+          <span class="measurement-mode-copy">
+            <strong>Grid movement</strong>
+            <small>Alternating diagonal cost</small>
+          </span>
+          @if (measurementType == MeasurementType.grid) { <i class="fa fa-check measurement-check"></i> }
+        </button>
+
+        <div class="dropdown-divider"></div>
+        <div class="measurement-save" (click)="$event.stopPropagation()">
+          <label for="saveMeasurements">
+            <strong>Save</strong>
+            <small>Keep multiple rulers on this map</small>
+          </label>
+          <div class="form-check form-switch m-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="saveMeasurements" [(ngModel)]="saveMeasurements" (ngModelChange)="saveMeasurementsChanged($event)">
+          </div>
+        </div>
+        @if (saveMeasurements) {
+          <div class="measurement-delete-help">Select the ruler tool, then tap × to delete a saved ruler.</div>
+        }
+      </div>
+    </div>
+
+    <div class="btn-group configurable-tool area-template-tool" ngbDropdown role="group">
+      <input type="radio" value="template" class="btn-check" id="areaTemplateTool" autocomplete="off" [(ngModel)]="activeTool" (ngModelChange)="activeToolChanged($event)">
+      <label class="btn btn-client configurable-tool-main" for="areaTemplateTool" title="Preview an area" aria-label="Preview an area"> <i class="fa fa-bullseye"></i></label>
+      <button type="button" class="configurable-tool-toggle" ngbDropdownToggle aria-label="Area template options" title="Area template options">
+        <i class="fa fa-caret-down" aria-hidden="true"></i>
+      </button>
+
+      <div class="tool-options-menu area-template-menu" ngbDropdownMenu>
+        <div class="measurement-menu-title">Area preview</div>
+        <div class="area-template-shapes" role="group" aria-label="Area shape">
+          <button type="button" class="area-template-shape" [class.selected]="areaTemplateShape == AreaEffectShape.sphere" (click)="areaTemplateShapeChanged(AreaEffectShape.sphere)" title="Radius" aria-label="Radius">
+            <i class="fa fa-circle-thin"></i>
+          </button>
+          <button type="button" class="area-template-shape" [class.selected]="areaTemplateShape == AreaEffectShape.cone" (click)="areaTemplateShapeChanged(AreaEffectShape.cone)" title="Cone" aria-label="Cone">
+            <span class="area-template-cone">◁</span>
+          </button>
+          <button type="button" class="area-template-shape" [class.selected]="areaTemplateShape == AreaEffectShape.cube" (click)="areaTemplateShapeChanged(AreaEffectShape.cube)" title="Cube" aria-label="Cube">
+            <i class="fa fa-cube"></i>
+          </button>
+          <button type="button" class="area-template-shape" [class.selected]="areaTemplateShape == AreaEffectShape.cylinder" (click)="areaTemplateShapeChanged(AreaEffectShape.cylinder)" title="Cylinder" aria-label="Cylinder">
+            <i class="fa fa-database"></i>
+          </button>
+          <button type="button" class="area-template-shape" [class.selected]="areaTemplateShape == AreaEffectShape.line" (click)="areaTemplateShapeChanged(AreaEffectShape.line)" title="Line" aria-label="Line">
+            <i class="fa fa-long-arrow-right"></i>
+          </button>
+        </div>
+
+        <div class="dropdown-divider"></div>
+        <button type="button" ngbDropdownItem class="area-template-clear" (click)="clearAreaTemplatePreview()">
+          <i class="fa fa-times-circle-o"></i>
+          Clear preview
+        </button>
+        <div class="area-template-help">Drag from the template’s origin to set its size and direction.</div>
+      </div>
+    </div>
   </div>
 
   @if (state.map?.video) {
     <div class="btn-group ms-2" role="group" aria-label="Video Controls">
-      <button ngbButton class="btn btn-dark" (click)="videoPauseToggle()">
+      <button ngbButton class="btn btn-client" (click)="videoPauseToggle()">
         <i class="fa fa-fw" [ngClass]="videoPaused ? 'fa-play' : 'fa-pause'"></i>
       </button>
-      <button ngbButton class="btn btn-dark" style="border-left: 1px solid rgba(255, 255, 255, 0.1);" (click)="videoMuteToggle()">
+      <button ngbButton class="btn btn-client client-divider-start" (click)="videoMuteToggle()">
         <i class="fa fa-fw" [ngClass]="videoMuted ? 'fa-volume-off' : 'fa-volume-up'"></i>
       </button>
     </div>
   }
 </div>
-

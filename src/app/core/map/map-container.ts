@@ -31,8 +31,12 @@ import { ProgramManager, Utils } from 'src/app/shared/utils';
 import { VisionLayer } from './layers/vision-layer';
 import { MeasurementsLayer } from './layers/measurements-layer';
 import { MeasurementView } from './views/measurement-view';
+import { Measurement, MeasurementType } from 'src/app/shared/models/measurement';
 import { PathsLayer } from './layers/paths-layer';
 import { View } from './views/view';
+import { AreaEffect, AreaEffectShape } from 'src/app/shared/models/area-effect';
+import { areaTemplateDimensions } from 'src/app/shared/area-template-tools';
+import { LocalAreaTemplateView } from './views/local-area-template-view';
 import { AssetVideo } from 'src/app/shared/models/asset';
 
 export class MapContainer extends Layer {
@@ -73,6 +77,18 @@ export class MapContainer extends Layer {
   dragTarget?: View
 
   activePointer: Pointer | null = null
+  activeMeasurement: Measurement | null = null
+  localMeasurementView: MeasurementView | null = null
+  savedMeasurementViews: Array<MeasurementView> = []
+  measurementType: MeasurementType = MeasurementType.precise
+  saveMeasurements: boolean = false
+  localMeasurementMapId: string | null = null
+  measuring: boolean = false
+  areaTemplateShape: AreaEffectShape = AreaEffectShape.sphere
+  activeAreaTemplate: AreaEffect | null = null
+  localAreaTemplateView: LocalAreaTemplateView | null = null
+  localAreaTemplateMapId: string | null = null
+  creatingAreaTemplate: boolean = false
   activeTool: Tool | null = null
 
   turned: TokenView | null = null
@@ -129,6 +145,7 @@ export class MapContainer extends Layer {
 
     this
       .on('pointerup', this.onPointerUp)
+      .on('pointerupoutside', this.onPointerUp)
       .on('pointerdown', this.onPointerDown)
       // .on('pointermove', this.onPointerMove)
   }
@@ -137,12 +154,54 @@ export class MapContainer extends Layer {
     console.debug(`changing active tool ${tool}`)
 
     this.activeTool = tool
-    this.eventMode = this.activeTool == Tool.pointer ? "static" : "passive"
-    this.interactiveChildren = this.activeTool == Tool.move
+    const usesMapCanvas = this.activeTool == Tool.pointer || this.activeTool == Tool.measure || this.activeTool == Tool.template
+    const blocksTokens = this.activeTool == Tool.measure || this.activeTool == Tool.template
+    this.eventMode = usesMapCanvas ? "static" : "passive"
+    this.interactiveChildren = this.activeTool == Tool.move || blocksTokens
+    this.cursor = blocksTokens ? 'crosshair' : 'default'
+    this.playersLayer.eventMode = blocksTokens ? 'none' : 'passive'
+    this.monstersLayer.eventMode = blocksTokens ? 'none' : 'passive'
+
+    for (const view of this.savedMeasurementViews) {
+      view.setDeleteControlVisible(this.activeTool == Tool.measure)
+    }
+
+    if (this.activeTool != Tool.measure) {
+      this.clearTransientMeasurement()
+    }
+    if (this.activeTool != Tool.template) {
+      this.clearLocalAreaTemplate()
+    }
+  }
+
+  setMeasurementOptions(type: MeasurementType, save: boolean) {
+    this.measurementType = type
+    this.saveMeasurements = save
+
+    if (this.activeMeasurement && this.localMeasurementView) {
+      this.activeMeasurement.type = type
+      this.localMeasurementView.draw()
+    }
+  }
+
+  setAreaTemplateOptions(shape: AreaEffectShape) {
+    const shapeChanged = this.areaTemplateShape != shape
+    this.areaTemplateShape = shape
+
+    if (shapeChanged && this.localAreaTemplateView) {
+      this.clearLocalAreaTemplate()
+    }
   }
 
   update(state: AppState) {
     this.state = state
+
+    if (this.localMeasurementMapId != null && this.localMeasurementMapId != this.state.map?.id) {
+      this.clearAllLocalMeasurements()
+    }
+    if (this.localAreaTemplateMapId != null && this.localAreaTemplateMapId != this.state.map?.id) {
+      this.clearLocalAreaTemplate()
+    }
 
     console.debug("updating map")
     this.map = this.state.map
@@ -167,6 +226,21 @@ export class MapContainer extends Layer {
 
     this.grid.update(this.map)
     this.gridLayer.update(this.grid)
+
+    for (const view of [...this.savedMeasurementViews, this.localMeasurementView]) {
+      if (view) {
+        view.grid = this.grid
+        view.draw()
+      }
+    }
+
+    if (this.localAreaTemplateView) {
+      this.localAreaTemplateView.grid = this.grid
+      this.localAreaTemplateView.maximumWidth = this.w
+      this.localAreaTemplateView.maximumHeight = this.h
+      if (this.activeAreaTemplate) this.activeAreaTemplate.width = this.grid.size
+      this.localAreaTemplateView.draw()
+    }
 
     this.pathsLayer.grid = this.grid
 
@@ -413,6 +487,21 @@ export class MapContainer extends Layer {
     this.effectsLayer.size = this.size
     this.effectsLayer.draw()
 
+    // Local rulers must stay above the refreshed map layers and mask so their
+    // delete controls remain visible and interactive.
+    for (const view of this.savedMeasurementViews) {
+      this.addChild(view)
+    }
+    if (this.localMeasurementView) {
+      this.addChild(this.localMeasurementView)
+    }
+    if (this.localAreaTemplateView) {
+      this.localAreaTemplateView.maximumWidth = this.w
+      this.localAreaTemplateView.maximumHeight = this.h
+      this.localAreaTemplateView.draw()
+      this.addChild(this.localAreaTemplateView)
+    }
+
     this.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h)
     return this;
   }
@@ -497,6 +586,24 @@ export class MapContainer extends Layer {
   }
 
   onPointerUp(event: any) {
+    if (this.creatingAreaTemplate && this.activeAreaTemplate) {
+      event.stopPropagation()
+      this.updateLocalAreaTemplate(event)
+      this.creatingAreaTemplate = false
+      this.off('pointermove', this.onPointerMove)
+      this.localAreaTemplateView?.setEditing(false)
+      return
+    }
+
+    if (this.measuring && this.activeMeasurement) {
+      event.stopPropagation();
+      this.updateLocalMeasurement(event)
+      this.measuring = false
+      this.off('pointermove', this.onPointerMove)
+      this.finishLocalMeasurement()
+      return
+    }
+
     this.dragging = false;
     this.off('pointermove', this.onPointerMove)
 
@@ -517,6 +624,18 @@ export class MapContainer extends Layer {
   }
 
   onPointerDown(event: any) {
+    if (this.activeTool == Tool.template) {
+      event.stopPropagation()
+      this.startLocalAreaTemplate(event)
+      return
+    }
+
+    if (this.activeTool == Tool.measure) {
+      event.stopPropagation()
+      this.startLocalMeasurement(event)
+      return
+    }
+
     // notice: shift key no longer works, as the container event mode is passive by default
     if (event.data.originalEvent.shiftKey || this.activeTool == Tool.pointer) {
       event.stopPropagation();
@@ -548,6 +667,18 @@ export class MapContainer extends Layer {
   }
 
   onPointerMove(event: any) {
+    if (this.creatingAreaTemplate && this.activeAreaTemplate) {
+      event.stopPropagation()
+      this.updateLocalAreaTemplate(event)
+      return
+    }
+
+    if (this.measuring && this.activeMeasurement) {
+      event.stopPropagation()
+      this.updateLocalMeasurement(event)
+      return
+    }
+
     if (this.dragging && this.activePointer) {
       event.stopPropagation();
 
@@ -569,6 +700,166 @@ export class MapContainer extends Layer {
       // send event
       this.dataService.send({ name: WSEventName.pointerUpdated, data: this.activePointer });
     }
+  }
+
+  private localPosition(event: any): PIXI.Point {
+    const point = typeof event.getLocalPosition === 'function'
+      ? event.getLocalPosition(this)
+      : event.data.getLocalPosition(this)
+
+    return new PIXI.Point(
+      Math.max(0, Math.min(this.w, point.x)),
+      Math.max(0, Math.min(this.h, point.y))
+    )
+  }
+
+  private startLocalMeasurement(event: any) {
+    this.clearTransientMeasurement()
+
+    const position = this.localPosition(event)
+    const measurement: Measurement = {
+      id: uuidv4(),
+      type: this.measurementType,
+      color: localStorage.getItem('userColor') || '#2f8cff',
+      hidden: false,
+      data: [position.x, position.y, position.x, position.y],
+    }
+
+    this.activeMeasurement = measurement
+    this.localMeasurementView = new MeasurementView(measurement, this.grid)
+    this.addChild(this.localMeasurementView)
+    this.localMeasurementView.draw()
+    this.localMeasurementMapId = this.map?.id || null
+
+    this.measuring = true
+    this.off('pointermove', this.onPointerMove)
+    this.on('pointermove', this.onPointerMove)
+  }
+
+  private startLocalAreaTemplate(event: any) {
+    this.clearLocalAreaTemplate()
+
+    const position = this.localPosition(event)
+    const areaTemplate: AreaEffect = {
+      id: uuidv4(),
+      shape: this.areaTemplateShape,
+      color: localStorage.getItem('userColor') || '#2f8cff',
+      x: position.x,
+      y: position.y,
+      zIndex: 1000,
+      opacity: 1,
+      angle: 0,
+      radius: 0,
+      length: 0,
+      width: this.grid.size,
+      hidden: false,
+    }
+
+    this.activeAreaTemplate = areaTemplate
+    this.localAreaTemplateView = new LocalAreaTemplateView(areaTemplate, this.grid)
+    this.localAreaTemplateView.maximumWidth = this.w
+    this.localAreaTemplateView.maximumHeight = this.h
+    this.addChild(this.localAreaTemplateView)
+    this.localAreaTemplateView.draw()
+    this.localAreaTemplateMapId = this.map?.id || null
+
+    this.creatingAreaTemplate = true
+    this.off('pointermove', this.onPointerMove)
+    this.on('pointermove', this.onPointerMove)
+  }
+
+  private updateLocalAreaTemplate(event: any) {
+    if (!this.activeAreaTemplate || !this.localAreaTemplateView) return
+
+    const end = this.localPosition(event)
+    const dimensions = areaTemplateDimensions(
+      this.activeAreaTemplate.shape,
+      { x: this.activeAreaTemplate.x, y: this.activeAreaTemplate.y },
+      end,
+      this.grid.size
+    )
+    this.activeAreaTemplate.angle = dimensions.angle
+    this.activeAreaTemplate.length = dimensions.length
+    this.activeAreaTemplate.radius = dimensions.radius
+    this.activeAreaTemplate.width = dimensions.width
+    this.localAreaTemplateView.draw()
+  }
+
+  clearLocalAreaTemplate() {
+    const wasCreating = this.creatingAreaTemplate
+    this.creatingAreaTemplate = false
+    this.activeAreaTemplate = null
+    if (wasCreating) {
+      this.off('pointermove', this.onPointerMove)
+    }
+
+    if (this.localAreaTemplateView) {
+      this.removeChild(this.localAreaTemplateView)
+      this.localAreaTemplateView.destroy({ children: true })
+      this.localAreaTemplateView = null
+    }
+    this.localAreaTemplateMapId = null
+  }
+
+  private updateLocalMeasurement(event: any) {
+    if (!this.activeMeasurement || !this.localMeasurementView) return
+
+    const position = this.localPosition(event)
+    this.activeMeasurement.data[2] = position.x
+    this.activeMeasurement.data[3] = position.y
+    this.localMeasurementView.draw()
+  }
+
+  private finishLocalMeasurement() {
+    this.activeMeasurement = null
+
+    if (!this.saveMeasurements || !this.localMeasurementView) return
+
+    const savedView = this.localMeasurementView
+    savedView.setDeleteHandler(() => this.deleteSavedMeasurement(savedView))
+    savedView.setDeleteControlVisible(this.activeTool == Tool.measure)
+    this.savedMeasurementViews.push(savedView)
+    this.localMeasurementView = null
+  }
+
+  private deleteSavedMeasurement(view: MeasurementView) {
+    const index = this.savedMeasurementViews.indexOf(view)
+    if (index < 0) return
+
+    this.savedMeasurementViews.splice(index, 1)
+    this.removeChild(view)
+    view.destroy({ children: true })
+
+    if (this.savedMeasurementViews.length == 0 && this.localMeasurementView == null) {
+      this.localMeasurementMapId = null
+    }
+  }
+
+  private clearTransientMeasurement() {
+    const wasMeasuring = this.measuring
+    this.measuring = false
+    this.activeMeasurement = null
+    if (wasMeasuring) {
+      this.off('pointermove', this.onPointerMove)
+    }
+
+    if (this.localMeasurementView) {
+      this.removeChild(this.localMeasurementView)
+      this.localMeasurementView.destroy({ children: true })
+      this.localMeasurementView = null
+    }
+  }
+
+  private clearAllLocalMeasurements() {
+    this.clearTransientMeasurement()
+
+    for (const view of this.savedMeasurementViews) {
+      this.removeChild(view)
+      view.destroy({ children: true })
+    }
+
+    this.savedMeasurementViews = []
+    this.localMeasurementMapId = null
   }
 
   // onTokenMove(event: any) {

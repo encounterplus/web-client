@@ -20,7 +20,7 @@ export interface Combatant {
 
   rank: number
   initiative?: Array<Initiative>
-  effects?: Array<StatusEffect>
+  effects?: Array<StatusEffect> | null
 
   bloodied?: boolean
   defeated?: boolean

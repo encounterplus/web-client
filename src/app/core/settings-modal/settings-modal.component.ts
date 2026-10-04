@@ -5,6 +5,7 @@ import { Utils } from 'src/app/shared/utils';
 import { WSEventName } from 'src/app/shared/models/wsevent';
 import { Role, Token } from 'src/app/shared/models/token';
 import { AppState, RunMode } from 'src/app/shared/models/app-state';
+import { Appearance, saveAppearance, storedAppearance } from 'src/app/shared/appearance';
 import { Loader } from '../map/models/loader';
 
 @Component({
@@ -28,7 +29,13 @@ export class SettingsModalComponent implements OnInit {
   
   runModeOptions: Array<RunMode> = [RunMode.normal, RunMode.tv]
   runMode: RunMode = RunMode.normal
-  tokenId?: string
+  appearanceOptions = [
+    { value: Appearance.automatic, label: "Automatic" },
+    { value: Appearance.light, label: "Light" },
+    { value: Appearance.dark, label: "Dark" },
+  ]
+  appearance: Appearance = Appearance.automatic
+  tokenId?: string | null
 
   get tokens(): Array<Token> {
     if (this.state.map != null) {
@@ -49,7 +56,13 @@ export class SettingsModalComponent implements OnInit {
   save() {
     localStorage.setItem("userName", this.name)
     localStorage.setItem("userColor", this.color)
-    localStorage.setItem("userTokenId", this.tokenId ?? "")
+    if (this.tokenId) {
+      localStorage.setItem("userTokenId", this.tokenId)
+      this.state.userTokenId = this.tokenId
+    } else {
+      localStorage.removeItem("userTokenId")
+      this.state.userTokenId = undefined
+    }
 
     localStorage.setItem("maxFPS", `${this.maxFPS}`)
     localStorage.setItem("allowVideo", `${this.allowVideo}`)
@@ -60,6 +73,7 @@ export class SettingsModalComponent implements OnInit {
     localStorage.setItem("playVideoAssets", `${this.playVideoAssets}`)
     localStorage.setItem("softEdges", `${this.softEdges}`)
     localStorage.setItem("runMode", `${this.runMode}`)
+    saveAppearance(this.appearance)
 
     // update server
     this.dataService.send({name: WSEventName.clientUpdated, data: {name: this.name, color: this.color}})
@@ -97,7 +111,9 @@ export class SettingsModalComponent implements OnInit {
     this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200")
     this.playVideoAssets = Loader.playsVideoAssets
     this.softEdges = (localStorage.getItem("softEdges") || "true") == "true"
-    this.tokenId = localStorage.getItem("userTokenId") ?? undefined
+    const storedToken = localStorage.getItem("userTokenId")
+    this.tokenId = storedToken && storedToken !== "null" && storedToken !== "undefined" ? storedToken : null
     this.runMode = this.state.runMode
+    this.appearance = storedAppearance()
   }
 }

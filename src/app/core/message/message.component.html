@@ -1,7 +1,7 @@
 <div class="message-source">
   <span [style.color]="message.color || 'purple'">◉</span> @if (message.creature) {
-  <span [style.color]="'#ccc'"> {{message.creature}} | </span>
-  } {{message.source || "Dungeon Master"}} <time>{{message.created | date:'short'}}</time>
+  <span class="message-creature"> {{message.creature}} | </span>
+  } {{message.source || "Host"}} <time>{{message.created | date:'short'}}</time>
 </div>
 
 @if (isDiceRoll) {

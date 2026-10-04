@@ -2,15 +2,51 @@ import { Component, OnInit, Input, ElementRef, Output, EventEmitter, ChangeDetec
 import { AppState } from 'src/app/shared/models/app-state';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataService } from 'src/app/shared/services/data.service';
+import { MeasurementType } from 'src/app/shared/models/measurement';
+import { AreaEffectShape } from 'src/app/shared/models/area-effect';
 
 export enum Tool {
   move = "move",
   pointer = "pointer",
+  measure = "measure",
+  template = "template",
 }
 
 export enum Panel {
   none = "none",
   messages = "messages",
+  player = "player",
+}
+
+export interface PanelChange {
+  panel: Panel;
+  open: boolean;
+}
+
+export interface MeasurementToolOptions {
+  type: MeasurementType;
+  save: boolean;
+}
+
+export interface AreaTemplateToolOptions {
+  shape: AreaEffectShape;
+}
+
+const panelStorageKeys: Record<Panel.messages | Panel.player, string> = {
+  [Panel.messages]: "messagesPanelOpen",
+  [Panel.player]: "playerPanelOpen",
+};
+
+export function savedPanelState(panel: Panel.messages | Panel.player): boolean {
+  const value = localStorage.getItem(panelStorageKeys[panel]);
+  if (value !== null) return value === "true";
+
+  // Migrate the older single-panel preference without breaking existing users.
+  return localStorage.getItem("activePanel") === panel;
+}
+
+export function savePanelState(panel: Panel.messages | Panel.player, open: boolean): void {
+  localStorage.setItem(panelStorageKeys[panel], String(open));
 }
 
 @Component({
@@ -35,7 +71,16 @@ export class ToolbarComponent implements OnInit {
   public tool = new EventEmitter<Tool>();
 
   @Output()
-  public panel = new EventEmitter<Panel>();
+  public panel = new EventEmitter<PanelChange>();
+
+  @Output()
+  public measurementOptions = new EventEmitter<MeasurementToolOptions>();
+
+  @Output()
+  public areaTemplateOptions = new EventEmitter<AreaTemplateToolOptions>();
+
+  @Output()
+  public clearAreaTemplate = new EventEmitter<void>();
 
   get showExit(): boolean {
     return this.state.device != null
@@ -44,8 +89,14 @@ export class ToolbarComponent implements OnInit {
   constructor(private element: ElementRef, private modalService: NgbModal, private dataService: DataService) { }
 
   activeTool: Tool = Tool.move;
+  measurementType: MeasurementType = MeasurementType.precise;
+  saveMeasurements: boolean = false;
+  readonly MeasurementType = MeasurementType;
+  areaTemplateShape: AreaEffectShape = AreaEffectShape.sphere;
+  readonly AreaEffectShape = AreaEffectShape;
 
   messages: Boolean = false;
+  player: Boolean = false;
   videoControlsVisible: Boolean = false;
   videoPaused: boolean = false;
   videoMuted: boolean = true;
@@ -54,11 +105,48 @@ export class ToolbarComponent implements OnInit {
     this.tool.emit(newTool);
   }
 
-  messagesChanged(newValue: boolean) {
-    let activePanel =  newValue ? Panel.messages : Panel.none;
-    localStorage.setItem("activePanel", activePanel);
+  measurementTypeChanged(type: MeasurementType) {
+    this.measurementType = type;
+    localStorage.setItem('measurementType', type);
+    this.emitMeasurementOptions();
+  }
 
-    this.panel.emit(activePanel);
+  saveMeasurementsChanged(save: boolean) {
+    this.saveMeasurements = save;
+    localStorage.setItem('saveMeasurements', String(save));
+    this.emitMeasurementOptions();
+  }
+
+  private emitMeasurementOptions() {
+    this.measurementOptions.emit({ type: this.measurementType, save: this.saveMeasurements });
+  }
+
+  areaTemplateShapeChanged(shape: AreaEffectShape) {
+    this.areaTemplateShape = shape;
+    localStorage.setItem('areaTemplateShape', shape);
+    this.activateAreaTemplateTool();
+  }
+
+  clearAreaTemplatePreview() {
+    this.clearAreaTemplate.emit();
+  }
+
+  private activateAreaTemplateTool() {
+    this.areaTemplateOptions.emit({ shape: this.areaTemplateShape });
+    if (this.activeTool != Tool.template) {
+      this.activeTool = Tool.template;
+      this.tool.emit(Tool.template);
+    }
+  }
+
+  messagesChanged(newValue: boolean) {
+    savePanelState(Panel.messages, newValue);
+    this.panel.emit({ panel: Panel.messages, open: newValue });
+  }
+
+  playerChanged(newValue: boolean) {
+    savePanelState(Panel.player, newValue);
+    this.panel.emit({ panel: Panel.player, open: newValue });
   }
 
   showSettings() {
@@ -88,8 +176,16 @@ export class ToolbarComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.messages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
-
+    this.messages = savedPanelState(Panel.messages);
+    this.player = savedPanelState(Panel.player);
+    this.measurementType = localStorage.getItem('measurementType') == MeasurementType.grid
+      ? MeasurementType.grid
+      : MeasurementType.precise;
+    this.saveMeasurements = localStorage.getItem('saveMeasurements') === 'true';
+    const storedAreaTemplateShape = localStorage.getItem('areaTemplateShape') as AreaEffectShape;
+    if (Object.values(AreaEffectShape).includes(storedAreaTemplateShape)) {
+      this.areaTemplateShape = storedAreaTemplateShape;
+    }
     this.dataService.videoMuted.subscribe(value => this.videoMuted);
     this.dataService.videoPaused.subscribe(value => this.videoPaused);
   }

@@ -1,10 +1,14 @@
 :host {
-    color: darkgray;
+    color: var(--ui-text-muted);
     padding: 8px;
     display: block;
     font-size: 0.9rem;
 
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--ui-border);
+
+    .message-creature {
+        color: var(--ui-text-muted);
+    }
 
     .frame {
         overflow-x: hidden;
@@ -12,10 +16,10 @@
 
     .message-source {
         font-size: 0.8rem;
-        color: white;
+        color: var(--ui-text);
         
         time {
-            color: darkgray;
+            color: var(--ui-text-muted);
             font-size: 0.6rem;
         }
     }
@@ -39,7 +43,7 @@
             }
     
             .roll-formula {
-                color: white;
+                color: var(--ui-text);
                 font-size: 1.1rem;
             }
     
@@ -53,7 +57,7 @@
             display: block;
             float: right;
             font-size: 2.2rem;
-            color: white;
+            color: var(--ui-text);
             min-width: 60px;
             max-width: 120px;
             text-align: center;

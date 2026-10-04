@@ -9,16 +9,19 @@
 
 import { EventEmitter, NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { EMPTY, Subject } from 'rxjs';
+import { EMPTY, of, Subject } from 'rxjs';
 import { AppComponent } from './app.component';
 import { AppState, RunMode } from './shared/models/app-state';
 import { DataService } from './shared/services/data.service';
 import { WSEvent, WSEventName } from './shared/models/wsevent';
 import { MapLayer } from './shared/models/map';
 import { ControlState } from './core/map/views/token-view';
+import { Role } from './shared/models/token';
+import { playerEffects } from './shared/player-tools';
 import { mapComponentStub, modelViewStub, tileViewStub, tokenViewStub } from './core/map/testing/map-component-stub';
 import {
   minimalAreaEffect,
+  minimalApiData,
   minimalCombatant,
   minimalStatusEffect,
   minimalDrawing,
@@ -75,6 +78,29 @@ describe('AppComponent websocket events', () => {
     app.handleEvent({ name, data });
   }
 
+  it('rerenders an already-open player panel when the initial API data arrives', async () => {
+    const initialRevision = app.playerStateRevision();
+    app.state.userTokenId = 'token-1';
+
+    const service = TestBed.inject(DataService) as any;
+    service.getData.and.returnValue(of(minimalApiData({
+      map: minimalMap({
+        tokens: [minimalToken({ id: 'token-1', name: 'Mira', role: Role.friendly })],
+      }),
+      game: {
+        turn: 0,
+        round: 0,
+        started: false,
+        combatants: [minimalCombatant({ id: 'hero-1', tokenId: 'token-1', name: 'Mira' })],
+      },
+    })));
+
+    app.getData();
+
+    expect(app.state.map?.tokens[0].name).toBe('Mira');
+    expect(app.playerStateRevision()).toBe(initialRevision + 1);
+  });
+
   describe('systemPaused', () => {
 
     it('mirrors the flag into the state and the signal', () => {
@@ -122,6 +148,46 @@ describe('AppComponent websocket events', () => {
     it('survives a game with no combatants at all', () => {
       expect(() => send(WSEventName.gameUpdated, {})).not.toThrow();
     });
+
+    it('announces the assigned character when their turn begins', () => {
+      app.state.userTokenId = 'token-1';
+      app.state.map = minimalMap({
+        tokens: [minimalToken({ id: 'token-1', role: Role.friendly })],
+      });
+      app.state.game.combatants = [minimalCombatant({
+        id: 'hero-1',
+        tokenId: 'token-1',
+        name: 'Mira',
+        label: 'G',
+      })];
+
+      send(WSEventName.gameUpdated, {
+        started: true,
+        turn: 1,
+        round: 2,
+        combatantId: 'hero-1',
+      });
+
+      expect(app.turnNotice()).toEqual({
+        combatantId: 'hero-1',
+        name: 'Mira',
+        round: 2,
+      });
+    });
+
+    it('clears the turn notice when play moves to another combatant', () => {
+      app.state.userTokenId = 'token-1';
+      app.state.map = minimalMap({
+        tokens: [minimalToken({ id: 'token-1', role: Role.friendly })],
+      });
+      app.state.game.combatants = [minimalCombatant({ id: 'hero-1', tokenId: 'token-1' })];
+
+      send(WSEventName.gameUpdated, { started: true, turn: 1, round: 1, combatantId: 'hero-1' });
+      expect(app.turnNotice()).toBeDefined();
+
+      send(WSEventName.gameUpdated, { turn: 2, combatantId: 'enemy-1' });
+      expect(app.turnNotice()).toBeUndefined();
+    });
   });
 
   describe('combatantUpdated', () => {
@@ -147,6 +213,60 @@ describe('AppComponent websocket events', () => {
     it('ignores an unknown combatant', () => {
       expect(() => send(WSEventName.combatantUpdated, { id: "z", bloodied: true })).not.toThrow();
       expect(app.state.game.combatants).toEqual([]);
+    });
+
+    it('refreshes an open player panel when effects change or the final effect is explicitly removed', () => {
+      const initialRevision = app.playerStateRevision();
+      app.state.game.combatants = [minimalCombatant({
+        id: 'hero-1',
+        effects: [{ id: 'frightened', name: 'Frightened' }],
+      })];
+
+      send(WSEventName.combatantUpdated, {
+        id: 'hero-1',
+        effects: [],
+      });
+
+      expect(app.state.game.combatants[0].effects).toEqual([]);
+      expect(app.playerStateRevision()).toBe(initialRevision + 1);
+    });
+
+    it("clears the final effect from both the game and token combatant copies", () => {
+      const initialRevision = app.playerStateRevision();
+      app.state.userTokenId = 'token-1';
+      app.state.map = minimalMap({
+        tokens: [minimalToken({
+          id: 'token-1',
+          role: Role.friendly,
+          combatant: minimalCombatant({
+            id: 'hero-1',
+            tokenId: 'token-1',
+            effects: [{ id: 'frightened', name: 'Frightened' }],
+          }),
+        })],
+      });
+      app.state.game.combatants = [minimalCombatant({
+        id: 'hero-1',
+        tokenId: 'token-1',
+        effects: [{ id: 'frightened', name: 'Frightened' }],
+      })];
+
+      send(WSEventName.combatantUpdated, { id: 'hero-1', effects: [] });
+
+      expect(playerEffects(app.state.game.combatants[0])).toEqual([]);
+      expect(playerEffects(app.state.map.tokens[0].combatant)).toEqual([]);
+      expect(app.playerStateRevision()).toBe(initialRevision + 1);
+    });
+
+    it('preserves effects when a genuinely partial update omits that field', () => {
+      app.state.game.combatants = [minimalCombatant({
+        id: 'hero-1',
+        effects: [{ id: 'frightened', name: 'Frightened' }],
+      })];
+
+      send(WSEventName.combatantUpdated, { id: 'hero-1', bloodied: true });
+
+      expect(playerEffects(app.state.game.combatants[0]).map(effect => effect.name)).toEqual(['Frightened']);
     });
   });
 
@@ -224,6 +344,14 @@ describe('AppComponent websocket events', () => {
       send(WSEventName.tokenUpdated, minimalToken({ vision: minimalVision() }));
       expect(container.visionLayer.draw).toHaveBeenCalled();
       expect(container.lightsLayer.draw).toHaveBeenCalled();
+    });
+
+    it('refreshes an open player panel when its assigned token changes', async () => {
+      const initialRevision = app.playerStateRevision();
+
+      send(WSEventName.tokenUpdated, minimalToken({ id: 'token-1' }));
+
+      expect(app.playerStateRevision()).toBe(initialRevision + 1);
     });
 
     it('does nothing when there is no map', () => {

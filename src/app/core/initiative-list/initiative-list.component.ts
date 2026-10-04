@@ -1,11 +1,14 @@
-import { Component, OnInit, Input, ElementRef, AfterViewChecked, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { AppState } from 'src/app/shared/models/app-state';
-import { ActiveCombatant, Combatant, Role } from 'src/app/shared/models/combatant';
-import { Game } from 'src/app/shared/models/game';
-import { Initiative } from 'src/app/shared/models/initiative';
+import { Component, Input, Output, EventEmitter, ElementRef, AfterViewChecked, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { ActiveCombatant } from 'src/app/shared/models/combatant';
 // import { Lightbox, IAlbum } from 'ngx-lightbox';
 import { DataService } from 'src/app/shared/services/data.service';
 import { LightboxService } from '../lightbox/lightbox.service';
+import {
+  InitiativeDockPosition,
+  nextInitiativeDockPosition,
+  saveInitiativeDock,
+  storedInitiativeDockPosition,
+} from './initiative-dock';
 
 @Component({
     selector: 'app-initiative-list',
@@ -14,7 +17,7 @@ import { LightboxService } from '../lightbox/lightbox.service';
     changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
-export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
+export class InitiativeListComponent implements OnDestroy, AfterViewChecked, AfterViewInit {
   static el: HTMLElement | undefined;
 
   // @Input()
@@ -26,10 +29,15 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
   @Input()
   activeCombatants: Array<ActiveCombatant> = []
 
-  constructor(private element: ElementRef, private lightboxService: LightboxService, private dataService: DataService) {
-  }
+  @Input()
+  messagesOpen = false;
 
-  ngOnInit(): void {
+  @Output()
+  dockPositionChange = new EventEmitter<InitiativeDockPosition>();
+
+  dockPosition: InitiativeDockPosition = storedInitiativeDockPosition();
+
+  constructor(private element: ElementRef, private lightboxService: LightboxService, private dataService: DataService) {
   }
 
   ngAfterViewChecked(): void {
@@ -58,17 +66,28 @@ export class InitiativeListComponent implements OnInit, OnDestroy, AfterViewChec
     console.debug(initiativeId);
     const selector = `[data-id="${initiativeId}"]`;
     const el = host.querySelector(selector);
-    if (el) {
+    const viewport = host.querySelector('.initiative-entries');
+    if (el && viewport) {
       const box = el.getBoundingClientRect();
+      const hostBox = viewport.getBoundingClientRect();
 
-      if (box.top < 0 || box.bottom > window.innerHeight) {
+      if (box.top < hostBox.top || box.bottom > hostBox.bottom || box.left < hostBox.left || box.right > hostBox.right) {
         el.scrollIntoView({
           behavior: 'smooth',
-          block: box.top < 0 ? 'start' : 'end',
+          block: 'nearest',
           inline: 'nearest',
         });
       }
     }
+  }
+
+  toggleDockPosition(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dockPosition = nextInitiativeDockPosition(this.dockPosition);
+    saveInitiativeDock(this.dockPosition);
+    this.dockPositionChange.emit(this.dockPosition);
+    window.dispatchEvent(new Event('resize'));
   }
 
   private getImage(index: number): string {
