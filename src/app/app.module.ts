@@ -28,6 +28,7 @@ import { PausedComponent } from './core/paused/paused.component';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { OverlayComponent } from './core/overlay/overlay.component';
 import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
+import { ResourcesBarComponent } from './core/resources-bar/resources-bar.component';
 import { DraggableDirective } from './draggable.directive';
 import { SafePipe } from 'safe-pipe';
 import { LightboxComponent } from './core/lightbox/lightbox.component';
@@ -51,6 +52,7 @@ import { LightboxComponent } from './core/lightbox/lightbox.component';
         ZoombarComponent,
         OverlayComponent,
         EntityModalComponent,
+        ResourcesBarComponent,
         DraggableDirective
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,

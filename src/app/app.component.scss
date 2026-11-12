@@ -11,6 +11,19 @@ $gameboard-margin: 75px;
     pointer-events: none;
 }
 
+// top centre: the toolbar holds the top-left corner and the side bar the top-right
+#resources-bar {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1100;
+
+    @media (max-width: 420px) {
+        top: 56px;
+    }
+}
+
 #side-bar {
     position: absolute;
     // width: 400px;
@@ -32,6 +45,10 @@ $gameboard-margin: 75px;
 }
 
 .gameboard {
+    #resources-bar {
+        top: $gameboard-margin;
+    }
+
     #side-bar {
         top: $gameboard-margin;
         right: $gameboard-margin;

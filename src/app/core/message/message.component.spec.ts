@@ -85,6 +85,21 @@ describe('MessageComponent', () => {
       expect(fixture.nativeElement.querySelector('.roll-name').textContent).toContain("roll");
     });
 
+    it('shows the outcome the system read from the dice, in its colour', () => {
+      render(minimalMessage({ type: MessageType.roll, content: {
+        formula: "1d12[Hope] + 1d12[Fear]", detail: "Hope (9) + Fear (4)",
+        outcome: { id: "hope", label: "With Hope", color: "#e8b931" }
+      } }));
+      const outcome = fixture.nativeElement.querySelector('.roll-outcome');
+      expect(outcome.textContent).toContain("With Hope");
+      expect(outcome.style.color).toBe("rgb(232, 185, 49)");
+    });
+
+    it('shows no outcome for a roll without one', () => {
+      render(minimalMessage({ type: MessageType.roll, content: { formula: "1d20" } }));
+      expect(fixture.nativeElement.querySelector('.roll-outcome')).toBeNull();
+    });
+
     it('colours the roll by its type, and yellow when it has none', () => {
       component.message = minimalMessage({ type: MessageType.roll, content: { formula: "1d20" } });
       expect(component.rollColor).toBe("yellow");

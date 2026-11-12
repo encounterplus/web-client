@@ -84,6 +84,37 @@ describe('AppComponent websocket events', () => {
     });
   });
 
+  describe('resourcesUpdated', () => {
+
+    it('replaces the resources and updates the signal', () => {
+      app.state.game.resources = [{ id: "old", type: "counter", label: "Old", min: 0, value: 1 }];
+      send(WSEventName.resourcesUpdated, [{ id: "fear", type: "counter", label: "Fear", min: 0, max: 12, value: 4 }]);
+      expect(app.state.game.resources?.map(resource => resource.id)).toEqual(["fear"]);
+      expect(app.resources().map(resource => resource.value)).toEqual([4]);
+    });
+
+    it('keeps a countdown', () => {
+      send(WSEventName.resourcesUpdated, [{ id: "ritual", type: "countdown", label: "Ritual", min: 0, value: 3 }]);
+      expect(app.resources().map(resource => resource.id)).toEqual(["ritual"]);
+    });
+
+    it('skips a resource type the client does not know', () => {
+      send(WSEventName.resourcesUpdated, [{ id: "doom", type: "clock", label: "Doom", min: 0, value: 2 }]);
+      expect(app.resources()).toEqual([]);
+    });
+
+    it('survives an event without data', () => {
+      expect(() => send(WSEventName.resourcesUpdated, undefined)).not.toThrow();
+      expect(app.resources()).toEqual([]);
+    });
+
+    it('keeps the resources when a game update leaves them out', () => {
+      send(WSEventName.resourcesUpdated, [{ id: "fear", type: "counter", label: "Fear", min: 0, value: 4 }]);
+      send(WSEventName.gameUpdated, { turn: 2 });
+      expect(app.resources().map(resource => resource.id)).toEqual(["fear"]);
+    });
+  });
+
   describe('gameUpdated', () => {
 
     it('applies the fields the event carries', () => {

@@ -36,6 +36,9 @@ import { Game, emptyGame } from './shared/models/game';
 import { Screen } from './shared/models/screen';
 import { ActiveCombatant, Role } from './shared/models/combatant';
 
+/** The game resource types this client draws; anything else is skipped. */
+const KNOWN_RESOURCE_TYPES = ["counter", "countdown"]
+
 interface WebAppInterface {
   showText(text: string): any;
   wsConnected(remoteHost: string): any;
@@ -86,6 +89,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
     
     return array.sort((a, b) => ((a.initiative.order ?? 0) > (b.initiative.order ?? 0)) ? 1 : -1);
+  });
+
+  // player-visible game resources, of the types this client knows; the app already leaves out
+  // a countdown at 0
+  resources = computed(() => {
+    return (this._game().resources ?? []).filter(resource => KNOWN_RESOURCE_TYPES.includes(resource.type))
   });
 
   // // initiativeId = signal<string | null>(null);
@@ -263,7 +272,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   showEntityAction(reference: string) {
     console.debug(`showing entity modal: ${reference}`)
 
-    let modal = this.modalService.open(EntityModalComponent, {centered: true, modalDialogClass: 'dark-modal', scrollable: false})
+    let modal = this.modalService.open(EntityModalComponent, {centered: true, modalDialogClass: 'dark-modal entity-modal', scrollable: false})
     modal.componentInstance.state = this.state
     modal.componentInstance.reference = reference
     
@@ -287,6 +296,13 @@ export class AppComponent implements OnInit, AfterViewInit {
         break
       }
       
+      case WSEventName.resourcesUpdated: {
+        // the whole list, replacing what the client has
+        this.state.game.resources = event.data ?? []
+        this.updateGame(this.state.game)
+        break
+      }
+
       case WSEventName.gameUpdated: {
         // detect changes, very primitive
         const turnChanged = this.state.game.turn != event.data.turn

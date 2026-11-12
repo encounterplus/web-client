@@ -15,8 +15,9 @@ export class EntityModalComponent implements OnInit {
   @Input() 
   reference!: string;
 
+  /** The entry's address on the app's server: its rendered view, or its sheet when its type opens as one. */
   get url() {
-    return `http://localhost:8080${this.reference}`
+    return `${this.dataService.baseURL}${this.reference}`
   }
 
   constructor(public modalInstance: NgbActiveModal, private dataService: DataService) { 

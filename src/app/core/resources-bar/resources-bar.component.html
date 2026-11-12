@@ -1,0 +1,17 @@
+@for (item of items; track item.resource.id) {
+  <div class="resource" role="status" [attr.aria-label]="item.resource.label + ': ' + item.resource.value">
+    <div class="value-row" aria-hidden="true">
+      @if (item.glyph) {
+        <span class="glyph">{{ item.glyph }}</span>
+      }
+      @if (item.image) {
+        <img class="image" [src]="item.image" alt="">
+      }
+      <span class="value">{{ item.resource.value }}</span>
+      @if (item.resource.max != null) {
+        <span class="max">/ {{ item.resource.max }}</span>
+      }
+    </div>
+    <div class="label" aria-hidden="true">{{ item.resource.label }}</div>
+  </div>
+}

@@ -40,7 +40,8 @@ export enum WSEventName {
     trackedObjectDeleted = "trackedObjectDeleted",
     trackedObjectsUpdated = "trackedObjectsUpdated",
     updateModel = "updateModel",
-    systemPaused = "systemPaused"
+    systemPaused = "systemPaused",
+    resourcesUpdated = "resourcesUpdated"
 }
 
 export interface WSEvent {

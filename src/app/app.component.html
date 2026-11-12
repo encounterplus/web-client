@@ -6,6 +6,10 @@
     <app-zoombar id="zoombar" class="d-flex align-items-baseline" (action)="zoombarAction($event)" [state]="state"></app-zoombar>
   }
 
+  @if (resources().length > 0) {
+    <app-resources-bar id="resources-bar" [resources]="resources()"></app-resources-bar>
+  }
+
   <div id="side-bar">
     @if (this.game().started) {
       <app-initiative-list [initiativeId]="this.initiativeId()" [activeCombatants]="this.activeCombatants()" id="initiative-list"></app-initiative-list>
