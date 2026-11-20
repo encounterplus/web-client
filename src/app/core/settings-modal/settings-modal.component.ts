@@ -6,6 +6,7 @@ import { WSEventName } from 'src/app/shared/models/wsevent';
 import { Role, Token } from 'src/app/shared/models/token';
 import { AppState, RunMode } from 'src/app/shared/models/app-state';
 import { Loader } from '../map/models/loader';
+import { SessionService } from 'src/app/shared/services/session.service';
 
 @Component({
     selector: 'ngbd-modal-basic',
@@ -43,12 +44,35 @@ export class SettingsModalComponent implements OnInit {
   playVideoAssets: boolean = true
   softEdges: boolean = true
 
-  constructor(public modalInstance: NgbActiveModal, private dataService: DataService) { 
+  constructor(public modalInstance: NgbActiveModal, private dataService: DataService, public session: SessionService) { 
+  }
+
+  /** How the signed-in role reads to people. */
+  get roleTitle(): string {
+    switch (this.session.session()?.role) {
+      case 'gm': return 'GM'
+      case 'player': return 'Player'
+      case 'integration': return 'API key'
+      default: return 'Guest'
+    }
+  }
+
+  /** Closes, for the app to open the sign-in dialog. */
+  signIn() {
+    this.modalInstance.close("signIn")
+  }
+
+  async signOut() {
+    await this.session.signOut()
+    this.modalInstance.close("signedOut")
   }
 
   save() {
-    localStorage.setItem("userName", this.name)
-    localStorage.setItem("userColor", this.color)
+    // a signed-in client is named by its account in the app
+    if (!this.session.isSignedIn()) {
+      localStorage.setItem("userName", this.name)
+      localStorage.setItem("userColor", this.color)
+    }
     localStorage.setItem("userTokenId", this.tokenId ?? "")
 
     localStorage.setItem("maxFPS", `${this.maxFPS}`)
@@ -90,8 +114,9 @@ export class SettingsModalComponent implements OnInit {
 
   ngOnInit() {
     this.remoteHost = this.dataService.remoteHost
-    this.name = localStorage.getItem("userName") || "Unknown"
-    this.color = Utils.userColor()
+    const session = this.session.session()
+    this.name = session?.name ?? (localStorage.getItem("userName") || "Unknown")
+    this.color = session?.player?.color ?? Utils.userColor()
     this.maxFPS = parseInt(localStorage.getItem("maxFPS") || "60") || 60
     this.allowVideo = (localStorage.getItem("allowVideo") || "true") == "true"
     this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200")

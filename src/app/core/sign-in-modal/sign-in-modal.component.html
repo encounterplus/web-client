@@ -1,0 +1,23 @@
+<div class="modal-header">
+  <h5 class="modal-title" id="modal-basic-title">Sign In</h5>
+  @if (session.allowsGuests()) {
+    <button type="button" class="btn-close" aria-label="Close" (click)="continueAsGuest()"></button>
+  }
+</div>
+
+<form class="modal-body" (ngSubmit)="signIn()">
+  <label for="code" class="form-label">Code</label>
+  <input [(ngModel)]="code" name="code" id="code" type="text" class="form-control code"
+         placeholder="ABC-DEF" autocomplete="off" autocapitalize="characters" spellcheck="false" ngbAutofocus />
+  <div class="form-text">Ask the GM for your code. You sign in once on each device.</div>
+  @if (error()) {
+    <div class="text-danger mt-2">{{ error() }}</div>
+  }
+</form>
+
+<div class="modal-footer">
+  @if (session.allowsGuests()) {
+    <button type="button" class="btn btn-link me-auto" (click)="continueAsGuest()">Continue as Guest</button>
+  }
+  <button type="button" class="btn btn-success" [disabled]="busy() || !code.trim()" (click)="signIn()">Sign In</button>
+</div>

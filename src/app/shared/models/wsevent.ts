@@ -41,11 +41,18 @@ export enum WSEventName {
     trackedObjectsUpdated = "trackedObjectsUpdated",
     updateModel = "updateModel",
     systemPaused = "systemPaused",
-    resourcesUpdated = "resourcesUpdated"
+    resourcesUpdated = "resourcesUpdated",
+    // signing in on the socket: authenticate { accessToken? } → authenticated { role, … }
+    authenticate = "authenticate",
+    authenticated = "authenticated",
+    requestFailed = "requestFailed"
 }
 
 export interface WSEvent {
     name: WSEventName;
     model?: string;
     data: any;
+    /** Sent with a request; the answer carries it back as `responseId`. */
+    requestId?: string;
+    responseId?: string;
 }

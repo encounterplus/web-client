@@ -5,6 +5,7 @@ import { DataService } from 'src/app/shared/services/data.service';
 import { Utils } from 'src/app/shared/utils';
 import { Message, MessageType } from 'src/app/shared/models/message';
 import { WSEventName } from 'src/app/shared/models/wsevent';
+import { SessionService } from 'src/app/shared/services/session.service';
 
 @Component({
   selector: 'app-message-list',
@@ -27,7 +28,7 @@ export class MessageListComponent implements OnInit {
 
   messageInput: string = "";
 
-  constructor(private element: ElementRef/*, private lightbox: Lightbox*/, private dataService: DataService) {
+  constructor(private element: ElementRef/*, private lightbox: Lightbox*/, private dataService: DataService, private sessionService: SessionService) {
   }
 
   onEnter() {
@@ -144,8 +145,10 @@ export class MessageListComponent implements OnInit {
 
     console.log("sending message: " + text);
 
-    let name = localStorage.getItem("userName") || "Unknown";
-    let color = Utils.userColor();
+    // a signed-in client speaks as its account; the app names it so either way
+    const session = this.sessionService.session();
+    let name = session?.name || localStorage.getItem("userName") || "Unknown";
+    let color = session?.player?.color || Utils.userColor();
 
     let message: Message = {
       id: "",

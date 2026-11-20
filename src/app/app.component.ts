@@ -15,6 +15,8 @@ import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { ToastService } from './shared/services/toast.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
+import { SignInModalComponent } from './core/sign-in-modal/sign-in-modal.component';
+import { SessionService } from './shared/services/session.service';
 import { Loader } from './core/map/models/loader';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { Marker } from './shared/models/marker';
@@ -138,7 +140,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild(ToastListComponent)
   public toastListComponent!: ToastListComponent;
 
-  constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal, private cdr: ChangeDetectorRef) {
+  constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal, private cdr: ChangeDetectorRef, private session: SessionService) {
     this.state = new AppState();
     this.screen = signal(this.state.screen)
 
@@ -181,6 +183,13 @@ export class AppComponent implements OnInit, AfterViewInit {
         const playedVideoAssets = Loader.playsVideoAssets
         modal.result.then(result => {
           console.debug(`Settings component closed with: ${result}`);
+
+          // the account section's buttons
+          if (result == "signIn") {
+            this.openSignIn(false)
+          } else if (result == "signedOut") {
+            this.sessionChanged()
+          }
 
           if (this.mapComponent) {
             // update maxFPS
@@ -1084,7 +1093,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.state.device = urlParams.get('device')
     this.state.viewMode = parseViewMode(urlParams.get('viewMode')) || ViewMode.player
     this.state.runMode = parseRunMode(urlParams.get('runMode') || localStorage.getItem("runMode")) || (this.state.device ? RunMode.tv : RunMode.normal)
-    this.state.allInteractions = urlParams.get('interactions') == "all"
+    this.interactionsParam = urlParams.get('interactions') == "all"
+    this.state.allInteractions = this.interactionsParam
 
     // device scale hack for gameboard
     if (this.state.device == "gameboard") {
@@ -1113,7 +1123,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.wsConnect()
     this.showBanner()
 
-    this.dataService.connectionStatus$.subscribe(status => {
+    this.dataService.connectionStatus$.subscribe(async status => {
       if (status) {
         console.log("Websocket connected");
 
@@ -1124,7 +1134,16 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         this.toastService.clear();
         this.toastService.showSuccess("Websocket connected");
+
+        // signed in before anything else, so nothing is asked as a guest by mistake
+        if (!this.serverChecked) {
+          await this.session.loadServer();
+          this.serverChecked = true;
+        }
+        const { refused } = await this.session.authenticateSocket();
+        this.state.allInteractions = this.interactionsParam || this.session.isGM();
         this.getData();
+        this.promptSignIn(refused);
 
         // update color
         let name = localStorage.getItem("userName") || "Unknown";
@@ -1163,6 +1182,71 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.destroy$.next(true);
     // Unsubscribe from the subject
     this.destroy$.unsubscribe();
+  }
+
+  /** The `interactions=all` parameter; a GM's device gets every interaction too. */
+  private interactionsParam = false
+  /** Whether the app was asked if it supports signing in, once per page. */
+  private serverChecked = false
+  /** Whether the sign-in dialog opened by itself on this page, so a reconnection doesn't reopen it. */
+  private promptedSignIn = false
+  private signInOpen = false
+
+  /**
+   * Opens the sign-in dialog by itself when it helps: the first time an app with sign-in is met,
+   * and after a kept sign-in was refused — never on a display (TV, `device`), which stays a guest,
+   * unless the app lets no guest in.
+   */
+  promptSignIn(refused: boolean) {
+    if (!this.session.supportsSignIn() || this.session.isSignedIn() || this.signInOpen) {
+      return
+    }
+    const required = !this.session.allowsGuests()
+    if (!required) {
+      const display = this.state.device != null || this.state.runMode != RunMode.normal
+      if (display || ((this.session.skippedSignIn || this.promptedSignIn) && !refused)) {
+        return
+      }
+    }
+    this.promptedSignIn = true
+    if (refused) {
+      this.toastService.showError("Your sign-in is no longer valid. Sign in again.")
+    }
+    this.openSignIn(required)
+  }
+
+  /** Opens the sign-in dialog; one the user can't leave when the app lets no guest in. */
+  openSignIn(required: boolean) {
+    if (this.signInOpen) {
+      return
+    }
+    this.signInOpen = true
+    if (this.mapComponent) {
+      this.mapComponent.viewport.pause = true
+    }
+    const modal = this.modalService.open(SignInModalComponent, { centered: true, backdrop: required ? 'static' : true, keyboard: !required })
+    const closed = () => {
+      this.signInOpen = false
+      if (this.mapComponent) {
+        this.mapComponent.viewport.pause = false
+      }
+    }
+    modal.result.then(result => {
+      closed()
+      if (result == "signedIn") {
+        this.sessionChanged()
+      }
+    }, () => closed())
+  }
+
+  /** After signing in or out: the socket signs in again, and the state is loaded as the new session sees it. */
+  async sessionChanged() {
+    await this.session.authenticateSocket()
+    this.state.allInteractions = this.interactionsParam || this.session.isGM()
+    this.getData()
+    if (this.mapComponent) {
+      this.mapComponent.mapContainer.updateInteraction()
+    }
   }
 
   showBanner() {

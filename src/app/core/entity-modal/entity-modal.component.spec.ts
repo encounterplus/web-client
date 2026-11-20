@@ -41,4 +41,16 @@ describe('EntityModalComponent', () => {
   it('should build the entity url from the connected server and the reference', () => {
     expect(component.url).toBe("http://192.168.1.42:8080/monster/goblin");
   });
+
+  it('passes the access token in the fragment to a page on another origin', () => {
+    TestBed.inject(DataService).accessToken = "ept_alice";
+    expect(component.url).toBe("http://192.168.1.42:8080/monster/goblin#accessToken=ept_alice");
+  });
+
+  it('leaves the token out for a page on its own origin, which finds it stored', () => {
+    const dataService = TestBed.inject(DataService);
+    dataService.accessToken = "ept_alice";
+    dataService.remoteHost = window.location.host;
+    expect(component.url).toBe(`http://${window.location.host}/monster/goblin`);
+  });
 });

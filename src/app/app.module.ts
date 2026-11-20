@@ -18,6 +18,7 @@ import { DisableRightClickDirective } from './core/disable-right-click.directive
 import { ToastService } from './shared/services/toast.service';
 import { ToastListComponent } from './core/toast-list/toast-list.component';
 import { SettingsModalComponent } from './core/settings-modal/settings-modal.component';
+import { SignInModalComponent } from './core/sign-in-modal/sign-in-modal.component';
 import { AboutModalComponent } from './core/about-modal/about-modal.component';
 import { ColorPickerDirective } from 'ngx-color-picker';
 import { ImageHandoutComponent } from './core/image-handout/image-handout.component';
@@ -40,6 +41,7 @@ import { LightboxComponent } from './core/lightbox/lightbox.component';
         InitiativeListComponent,
         ToastListComponent,
         SettingsModalComponent,
+        SignInModalComponent,
         CanvasContainerDirective,
         DisableRightClickDirective,
         CombatantComponent,

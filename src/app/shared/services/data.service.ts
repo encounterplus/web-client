@@ -3,7 +3,7 @@ import { ApiData } from '../models/api-data';
 import { Observable, Subject, BehaviorSubject, timer, throwError, Subscription } from 'rxjs';
 import { catchError, skip, filter, tap, distinctUntilChanged, switchMap, retryWhen, repeat, retry } from 'rxjs/operators';
 import { WSEvent } from '../models/wsevent';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { webSocket } from 'rxjs/webSocket';
 import { AppState } from '../models/app-state';
 
@@ -18,6 +18,14 @@ export class DataService {
   private reconnectionDelay = 1000;
   public remoteHost: string = ""
   public protocol: string = ""
+
+  /** The access token REST requests send, set by `SessionService`; `null` for a guest. */
+  public accessToken: string | null = null
+
+  /** The `Authorization` header for REST requests, empty for a guest. */
+  get authHeaders(): HttpHeaders {
+    return this.accessToken ? new HttpHeaders({ Authorization: `Bearer ${this.accessToken}` }) : new HttpHeaders()
+  }
 
   private videoPaused$ = new BehaviorSubject(false);
   private videoMuted$ = new BehaviorSubject(true);
@@ -67,7 +75,7 @@ export class DataService {
   }
 
   public getData(): Observable<ApiData> {
-    return this.httpClient.get<ApiData>(this.apiBaseURL).pipe(retry(1), catchError(this.handleError));
+    return this.httpClient.get<ApiData>(this.apiBaseURL, { headers: this.authHeaders }).pipe(retry(1), catchError(this.handleError));
   }
 
   private status$: Subject<boolean> = new BehaviorSubject<boolean>(false);

@@ -4,6 +4,21 @@
 </div>
 
 <div class="modal-body">
+  @if (session.supportsSignIn()) {
+    <div class="mb-3">
+      <label class="form-label">Account</label>
+      <div class="d-flex align-items-center gap-2">
+        @if (session.isSignedIn()) {
+          <span class="me-auto">Signed in as <strong>{{ session.session()?.name || roleTitle }}</strong> ({{ roleTitle }})</span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="signOut()">Sign Out</button>
+        } @else {
+          <span class="me-auto">Not signed in</span>
+          <button type="button" class="btn btn-outline-primary btn-sm" (click)="signIn()">Sign In</button>
+        }
+      </div>
+    </div>
+  }
+
   <div class="mb-2">
     <label for="remoteHost" class="form-label">Remote Host</label>
     <input [(ngModel)]="remoteHost" id="remoteHost" type="text" class="form-control" placeholder="Enter remote hostname" />
@@ -12,9 +27,12 @@
   <div class="mb-2">
     <label for="name" class="form-label">Name</label>
     <div class="input-group">
-      <input [(ngModel)]="name" id="name" type="text" class="form-control" placeholder="Enter your name" />
-      <input class="form-control" [(colorPicker)]="color" [style.background]="color" [value]="color" [cpPosition]="'bottom'" />
+      <input [(ngModel)]="name" id="name" type="text" class="form-control" placeholder="Enter your name" [disabled]="session.isSignedIn()" />
+      <input class="form-control" [(colorPicker)]="color" [style.background]="color" [value]="color" [cpPosition]="'bottom'" [cpDisabled]="session.isSignedIn()" [disabled]="session.isSignedIn()" />
     </div>
+    @if (session.isSignedIn()) {
+      <div class="form-text">Your name and colour come from your account in the app.</div>
+    }
   </div>
 
   <div class="mb-2">

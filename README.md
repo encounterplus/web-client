@@ -52,6 +52,16 @@ http://localhost:4200/?remoteHost=192.168.1.10:8080
 
 User preferences (max FPS, video playback, name, selected token, open panel) are kept in `localStorage`.
 
+### Signing in
+
+Encounter+ can ask players to sign in. The GM gives each player a code in the app (Settings → Server → Players & Sign-in), and the client exchanges it for an access token once per device.
+
+- `SessionService` asks `GET /api/server` whether the app supports sign-in. An older app answers nothing useful there, and the client works as before.
+- Tokens are kept per server id (`encounterplus.accessTokens` in `localStorage`), not per address, so a server whose address changes keeps its sign-in. A client the app served also writes `encounterplus.accessToken`, which sheets on the same origin read through the sheet SDK; a client served from elsewhere passes the token to entity pages as `#accessToken=…`.
+- On every connection the socket signs in first (`authenticate { accessToken }`), before anything else is sent, and `GET /api` carries `Authorization: Bearer`. A token the app refuses — a new code, a revoked sign-in — is forgotten, and the client asks to sign in again.
+- The sign-in dialog opens by itself the first time an app with sign-in is met, unless the user continued as a guest before; it never opens on a display (`runMode=tv`, `device`), which stays a guest — unless the app lets no guest in, and then it can't be dismissed. Settings has an Account section to sign in and out. A signed-in player's name and colour come from the app.
+- A GM device (signed in with the GM code) gets every interaction, like `interactions=all`. What the map lets anyone else do follows the `interaction` the app sends, which is `none` for a guest who may only watch.
+
 ## Architecture
 
 ```
