@@ -77,4 +77,11 @@ export interface Token {
   path?: Array<number>
   player?: boolean
   combatant?: Combatant
+  /** The entity the token stands for, when it has one: what a player's characters are matched against. */
+  entityId?: string
+  /**
+   * Who moves the token when remote interaction is set to own tokens, as the GM set it in the
+   * app: a player id, `all` for every player, or absent for whoever plays its character.
+   */
+  controlledBy?: string
 }

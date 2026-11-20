@@ -1,11 +1,11 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, signal, computed, ChangeDetectionStrategy, WritableSignal } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, signal, computed, effect, untracked, ChangeDetectionStrategy, WritableSignal } from '@angular/core';
 import { MapComponent } from './core/map/map.component';
 import { Subject } from 'rxjs';
 import { InitiativeListComponent } from './core/initiative-list/initiative-list.component';
 import { ApiData } from './shared/models/api-data';
 import { DataService, deepMerge} from './shared/services/data.service';
 import { environment } from 'src/environments/environment';
-import { AppState, parseRunMode, parseViewMode, RunMode, ViewMode } from './shared/models/app-state';
+import { AppState, parseRunMode, parseViewMode, RunMode, tokenControl, ViewMode } from './shared/models/app-state';
 import { WSEventName, WSEvent } from './shared/models/wsevent';
 import { ControlState, TokenView } from './core/map/views/token-view';
 import { AreaEffect } from './shared/models/area-effect';
@@ -144,6 +144,13 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.state = new AppState();
     this.screen = signal(this.state.screen)
 
+    // a signed-in player's tokens follow their session: signing in or out, and `sessionUpdated`
+    effect(() => {
+      this.state.tokenControl = tokenControl(this.session.session())
+      // the map reads no signals of its own for this effect to follow
+      untracked(() => this.tokenControlChanged())
+    })
+
     window['state'] = this.state
     window['componentRef'] = {
       componentFn: (value) => this.handleExternalEvent(value),
@@ -253,8 +260,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         break;
 
       case "focusToken":
-        const userTokenId = localStorage.getItem("userTokenId")
-        let view = userTokenId ? this.mapComponent.mapContainer.tokenViewById(userTokenId) : null
+        const primaryTokenId = this.state.primaryToken?.id
+        let view = primaryTokenId ? this.mapComponent.mapContainer.tokenViewById(primaryTokenId) : null
         if (view) {
           this.mapComponent.viewport.animate({ position: view.position, scale: 1.0, time: 2000, ease: "easeInOutSine", removeOnInterrupt: true })
         }
@@ -723,6 +730,11 @@ export class AppComponent implements OnInit, AfterViewInit {
         break;
       }
 
+      case WSEventName.sessionUpdated: {
+        this.session.updated(event.data);
+        break;
+      }
+
       case WSEventName.interactionUpdated: {
         this.state.screen.interaction = event.data;
         this.mapComponent.mapContainer.updateInteraction();
@@ -1115,8 +1127,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     // update messages based on local storage settings
     this.showMessages = (localStorage.getItem("activePanel") || Panel.none) == Panel.messages;
 
-    // update settings
-    this.state.userTokenId = localStorage.getItem("userTokenId") ?? undefined
+    // tokens come from the app now: forget the one older clients picked in Settings
+    try {
+      localStorage.removeItem("userTokenId")
+    } catch {
+      // nothing stored
+    }
 
     this.configureRemoteHost()
     this.configureParams()
@@ -1237,6 +1253,17 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.sessionChanged()
       }
     }, () => closed())
+  }
+
+  /** Which tokens are ours changed: what can be dragged, and whose vision is shown. */
+  private tokenControlChanged() {
+    const container = this.mapComponent?.mapContainer
+    if (!container || !this.state.map) {
+      return
+    }
+    container.updateInteraction()
+    container.visionLayer.update()
+    container.visionLayer.draw()
   }
 
   /** After signing in or out: the socket signs in again, and the state is loaded as the new session sees it. */

@@ -146,6 +146,16 @@ describe('SessionService', () => {
     expect(data.sent.length).toBe(0);
   });
 
+  it('takes the session the app sends a signed-in player, but not after signing out', () => {
+    service.updated({ role: 'player', permissions: ['read', 'write'], player: { id: 'p1', name: 'Alice' }, characters: [] });
+    expect(service.session()).toBeNull();
+
+    service.session.set({ role: 'player', permissions: ['read', 'write'], player: { id: 'p1', name: 'Alice' }, characters: [] });
+    const hero = { id: 'hero', name: 'Hero', kind: 'Character' };
+    service.updated({ role: 'player', permissions: ['read', 'write'], player: { id: 'p1', name: 'Alice' }, characters: [hero] });
+    expect(service.session()?.characters).toEqual([hero]);
+  });
+
   it('signing out asks the app to forget the token, and forgets it too', async () => {
     await loadServer();
     await signIn();

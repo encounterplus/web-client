@@ -45,6 +45,8 @@ export enum WSEventName {
     // signing in on the socket: authenticate { accessToken? } → authenticated { role, … }
     authenticate = "authenticate",
     authenticated = "authenticated",
+    // who a signed-in player is now, unasked — as `authenticated` — after their characters changed
+    sessionUpdated = "sessionUpdated",
     requestFailed = "requestFailed"
 }
 

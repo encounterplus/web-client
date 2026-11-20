@@ -19,7 +19,7 @@ export class ZoombarComponent implements OnInit {
   constructor() { }
 
   get tokenFocusVisible(): boolean {
-    return this.state.userTokenId != null && this.state.userTokenId != "null"
+    return this.state.primaryToken != null
   }
 
   ngOnInit(): void {

@@ -6,6 +6,7 @@ import { Combatant } from './combatant'
 import { Message } from './message'
 import { SquareGrid } from 'src/app/core/map/models/square-grid'
 import { TrackedObject } from './tracked-object'
+import { Token } from './token'
 import { signal } from '@angular/core'
 
 export enum ViewMode {
@@ -28,6 +29,24 @@ export function parseViewMode(value: string | null): ViewMode | undefined {
 
 export function parseRunMode(value: string | null): RunMode | undefined {
   return Object.values(RunMode).find(mode => mode === value)
+}
+
+/**
+ * Which tokens a signed-in player controls, from their session: the app decides, so the client
+ * matches what it accepts.
+ */
+export interface TokenControl {
+  playerId: string
+  /** The entities the player plays in the campaign being played. */
+  characterIds: string[]
+}
+
+/** The token control a session gives: only a signed-in player's. */
+export function tokenControl(session: { role: string, player?: { id: string }, characters?: { id: string }[] } | null): TokenControl | undefined {
+  if (session?.role !== 'player' || !session.player) {
+    return undefined
+  }
+  return { playerId: session.player.id, characterIds: (session.characters ?? []).map(character => character.id) }
 }
 
 export class AppState {
@@ -57,7 +76,43 @@ export class AppState {
   // that distinction, so an empty-string default would not do.
   device: string | null = ""
   allInteractions = false
-  userTokenId?: string
+
+  /**
+   * A signed-in player's tokens, decided by the app (their characters', and tokens the GM gave
+   * them); undefined for guests, the GM and apps without sign-in, who control no token.
+   */
+  tokenControl?: TokenControl
+
+  /**
+   * Whether this client controls a token: moves it with remote interaction set to own tokens,
+   * sees through it, follows it. Only a signed-in player controls any.
+   */
+  controls(token: Token): boolean {
+    const control = this.tokenControl
+    if (!control) {
+      return false
+    }
+    if (token.controlledBy == "all") {
+      return true
+    }
+    if (token.controlledBy) {
+      // the GM's choice replaces the character's player
+      return token.controlledBy == control.playerId
+    }
+    return token.entityId != null && control.characterIds.includes(token.entityId)
+  }
+
+  /** The tokens on the map this client controls. */
+  get ownTokens(): Token[] {
+    return (this.map?.tokens ?? []).filter(token => this.controls(token))
+  }
+
+  /** The token to see through and follow: the one whose turn it is when it is ours, else the first. */
+  get primaryToken(): Token | undefined {
+    const own = this.ownTokens
+    const turned = this.turned?.tokenId
+    return own.find(token => token.id == turned) ?? own[0]
+  }
 
   get turned(): Combatant | null {
     for (let combatant of this.game.combatants || []) {

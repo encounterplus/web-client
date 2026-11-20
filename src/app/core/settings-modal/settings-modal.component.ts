@@ -3,10 +3,23 @@ import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataService } from 'src/app/shared/services/data.service';
 import { Utils } from 'src/app/shared/utils';
 import { WSEventName } from 'src/app/shared/models/wsevent';
-import { Role, Token } from 'src/app/shared/models/token';
 import { AppState, RunMode } from 'src/app/shared/models/app-state';
 import { Loader } from '../map/models/loader';
 import { SessionService } from 'src/app/shared/services/session.service';
+import { resolveEffectIcon } from 'src/app/shared/icons/game-icons';
+
+/** A signed-in player's character as the settings list draws it. */
+export interface CharacterRow {
+  id: string
+  name: string
+  detail?: string
+  /** The portrait, on the server. */
+  image?: string
+  /** The game icon font glyph, for a `gi-` icon and no portrait. */
+  glyph?: string
+  /** What draws without either: the name's first letter. */
+  initial: string
+}
 
 @Component({
     selector: 'ngbd-modal-basic',
@@ -29,14 +42,20 @@ export class SettingsModalComponent implements OnInit {
   
   runModeOptions: Array<RunMode> = [RunMode.normal, RunMode.tv]
   runMode: RunMode = RunMode.normal
-  tokenId?: string
 
-  get tokens(): Array<Token> {
-    if (this.state.map != null) {
-      return this.state.map.tokens.filter( token => { return token.role == Role.friendly } ).sort((a, b) => ((a.name ?? "") > (b.name ?? "")) ? 1 : -1)
-    } else {
-      return []
-    }
+  /** A signed-in player's characters, whose tokens are theirs: a portrait, else the icon, else an initial. */
+  get characters(): CharacterRow[] {
+    return (this.session.session()?.characters ?? []).map(character => {
+      const icon = !character.image && character.icon ? resolveEffectIcon(character.icon) : null
+      return {
+        id: character.id,
+        name: character.name,
+        detail: character.detail,
+        image: character.image ? this.dataService.baseURL + character.image : icon?.kind == 'image' ? this.dataService.baseURL + icon.src : undefined,
+        glyph: icon?.kind == 'glyph' ? icon.char : undefined,
+        initial: (character.name.trim()[0] ?? '?').toUpperCase(),
+      }
+    })
   }
 
   allowVideo: boolean = true
@@ -73,7 +92,6 @@ export class SettingsModalComponent implements OnInit {
       localStorage.setItem("userName", this.name)
       localStorage.setItem("userColor", this.color)
     }
-    localStorage.setItem("userTokenId", this.tokenId ?? "")
 
     localStorage.setItem("maxFPS", `${this.maxFPS}`)
     localStorage.setItem("allowVideo", `${this.allowVideo}`)
@@ -122,7 +140,6 @@ export class SettingsModalComponent implements OnInit {
     this.maxVideoSize = parseInt(localStorage.getItem("maxVideoSize") || "200")
     this.playVideoAssets = Loader.playsVideoAssets
     this.softEdges = (localStorage.getItem("softEdges") || "true") == "true"
-    this.tokenId = localStorage.getItem("userTokenId") ?? undefined
     this.runMode = this.state.runMode
   }
 }

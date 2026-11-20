@@ -1,0 +1,69 @@
+
+// a signed-in player's characters: a list, not a field
+.characters {
+  .character {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .avatar {
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.375rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-secondary-bg, rgba(127, 127, 127, 0.15));
+    color: var(--bs-secondary-color, inherit);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+    }
+
+    .glyph {
+      font-family: 'Game-Icons';
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .initial {
+      font-weight: 600;
+    }
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .name,
+  .detail {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .name {
+    font-weight: 500;
+  }
+
+  .detail {
+    font-size: 0.875em;
+    color: var(--bs-secondary-color, #6c757d);
+  }
+}
+
+.characters-empty {
+  padding: 0.5rem 0.75rem;
+  border: 1px dashed var(--bs-border-color, #dee2e6);
+  border-radius: var(--bs-border-radius, 0.375rem);
+  color: var(--bs-secondary-color, #6c757d);
+}

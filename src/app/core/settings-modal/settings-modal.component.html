@@ -35,15 +35,37 @@
     }
   </div>
 
-  <div class="mb-2">
-    <label for="token" class="form-label">Token</label>
-    <select [(ngModel)]="tokenId" class="form-control" id="token" >
-      @for (token of tokens; track token) {
-        <option [ngValue]="token.id">{{token.name || 'Unknown'}}</option>
+  @if (state.tokenControl) {
+    <div class="mb-2">
+      <label class="form-label" id="characters-label">Characters</label>
+      @if (characters.length) {
+        <ul class="list-group characters" aria-labelledby="characters-label">
+          @for (character of characters; track character.id) {
+            <li class="list-group-item character">
+              <span class="avatar" aria-hidden="true">
+                @if (character.image) {
+                  <img [src]="character.image" alt="">
+                } @else if (character.glyph) {
+                  <span class="glyph">{{ character.glyph }}</span>
+                } @else {
+                  <span class="initial">{{ character.initial }}</span>
+                }
+              </span>
+              <span class="text">
+                <span class="name">{{ character.name }}</span>
+                @if (character.detail) {
+                  <span class="detail">{{ character.detail }}</span>
+                }
+              </span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="characters-empty">The GM hasn't given you a character in the campaign being played.</div>
       }
-      <option value=null>None</option>
-    </select>
-  </div>
+      <div class="form-text">Your tokens are your characters' and any the GM gives you in the app.</div>
+    </div>
+  }
 
   <div class="mb-2">
     <label for="runMode" class="form-label">Run Mode</label>

@@ -1,5 +1,5 @@
-import { AppState, parseRunMode, parseViewMode, RunMode, ViewMode } from './app-state'
-import { minimalCombatant, minimalGame } from './testing/fixtures'
+import { AppState, parseRunMode, parseViewMode, RunMode, tokenControl, ViewMode } from './app-state'
+import { minimalCombatant, minimalGame, minimalMap, minimalToken } from './testing/fixtures'
 
 describe('parseViewMode', () => {
 
@@ -72,5 +72,56 @@ describe('AppState', () => {
             state.game.combatants = undefined as unknown as typeof state.game.combatants
             expect(state.turned).toBeNull()
         })
+    })
+})
+
+describe('token control', () => {
+
+    const hero = minimalToken({ id: "hero-token", entityId: "hero" })
+    const rogue = minimalToken({ id: "rogue-token", entityId: "rogue" })
+    const wolf = minimalToken({ id: "wolf-token", entityId: "wolf", controlledBy: "p1" })
+    const cart = minimalToken({ id: "cart-token", controlledBy: "all" })
+    const borrowed = minimalToken({ id: "borrowed-token", entityId: "hero", controlledBy: "p2" })
+
+    function playerState(): AppState {
+        const state = new AppState()
+        state.map = minimalMap({ tokens: [hero, rogue, wolf, cart, borrowed] })
+        state.tokenControl = { playerId: "p1", characterIds: ["hero"] }
+        return state
+    }
+
+    it('comes only from a signed-in player\'s session', () => {
+        expect(tokenControl({ role: 'player', player: { id: "p1" }, characters: [{ id: "hero" }] })).toEqual({ playerId: "p1", characterIds: ["hero"] })
+        expect(tokenControl({ role: 'player', player: { id: "p1" } })).toEqual({ playerId: "p1", characterIds: [] })
+        expect(tokenControl({ role: 'gm' })).toBeUndefined()
+        expect(tokenControl({ role: 'guest' })).toBeUndefined()
+        expect(tokenControl(null)).toBeUndefined()
+    })
+
+    it('gives a player their characters\' tokens and those the GM gave them or everyone', () => {
+        const state = playerState()
+        expect(state.controls(hero)).toBeTrue()
+        expect(state.controls(rogue)).toBeFalse()
+        expect(state.controls(wolf)).toBeTrue()
+        expect(state.controls(cart)).toBeTrue()
+        // the GM's choice replaces the character's player
+        expect(state.controls(borrowed)).toBeFalse()
+        expect(state.ownTokens.map(token => token.id)).toEqual(["hero-token", "wolf-token", "cart-token"])
+    })
+
+    it('gives nobody else any token', () => {
+        const state = new AppState()
+        state.map = minimalMap({ tokens: [hero, rogue, cart] })
+        expect(state.ownTokens).toEqual([])
+        expect(state.primaryToken).toBeUndefined()
+    })
+
+    it('follows the token whose turn it is, else the first', () => {
+        const state = playerState()
+        expect(state.primaryToken?.id).toBe("hero-token")
+        state.game = minimalGame({ combatantId: "c", combatants: [minimalCombatant({ id: "c", tokenId: "wolf-token" })] })
+        expect(state.primaryToken?.id).toBe("wolf-token")
+        state.game = minimalGame({ combatantId: "c", combatants: [minimalCombatant({ id: "c", tokenId: "rogue-token" })] })
+        expect(state.primaryToken?.id).toBe("hero-token")
     })
 })

@@ -621,9 +621,18 @@ export class TokenView extends View {
         this.eventMode = this.token.role == Role.friendly ? 'static' : 'none'
         break;
 
-      case ScreenInteraction.token:
-        this.eventMode = ((this.token.role == Role.friendly && !this.isPlayer) || (this.token.id == localStorage.getItem("userTokenId"))) ? 'static' : 'none'
+      case ScreenInteraction.token: {
+        const state = this.dataService.state
+        if (state.tokenControl) {
+          // a signed-in player: exactly the tokens the app lets them move
+          this.eventMode = state.controls(this.token) ? 'static' : 'none'
+        } else {
+          // a guest with full access, or an app without sign-in: the app doesn't say whose tokens
+          // are whose, so any friendly token
+          this.eventMode = this.token.role == Role.friendly ? 'static' : 'none'
+        }
         break;
+      }
 
       case ScreenInteraction.none:
         this.eventMode = 'none'

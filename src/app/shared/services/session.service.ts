@@ -20,6 +20,20 @@ export interface Session {
   permissions: string[];
   name?: string;
   player?: { id: string; name: string; color?: string };
+  /** A player's characters in the campaign being played; absent for everyone else. */
+  characters?: SessionCharacter[];
+}
+
+/** A character a player plays: their tokens on the map are this entity's. */
+export interface SessionCharacter {
+  id: string;
+  name: string;
+  kind: string;
+  detail?: string;
+  image?: string;
+  icon?: string;
+  /** Where a browser opens it: the sheet, else its HTML view. */
+  url?: string;
 }
 
 /** Access tokens by server id, so a client that knows several servers keeps a sign-in for each. */
@@ -100,6 +114,16 @@ export class SessionService {
       // no answer: an app that can't sign in over the socket, or a connection gone meanwhile
       this.session.set(null);
       return { refused: false };
+    }
+  }
+
+  /**
+   * Takes `sessionUpdated`, which the app sends a signed-in player when their characters changed.
+   * Ignored when signed out meanwhile.
+   */
+  updated(session: Session) {
+    if (this.session() !== null && session?.role) {
+      this.session.set(session);
     }
   }
 

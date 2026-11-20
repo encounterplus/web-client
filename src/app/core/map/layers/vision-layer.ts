@@ -51,36 +51,22 @@ export class VisionLayer extends Layer {
   visionShader!: PIXI.Shader
 
   get activeToken(): Token | null {
+    const state = this.dataService.state
+
     // no active token shared vision is always
-    if (this.dataService.state.screen.sharedVision == SharedVision.always) {
+    if (state.screen.sharedVision == SharedVision.always) {
       return null
     }
 
-    // get userTokenId from storage
-    let userTokenId = localStorage['userTokenId']
-
-    // check for empty user token or `null` string
-    if (userTokenId && userTokenId != "null") {
-      if (this.dataService.state.screen.sharedVision == SharedVision.never) {
-        // search using userTokenId
-        for (let token of this.dataService.state.map?.tokens ?? []) {
-          if (token.id == userTokenId) {
-            return token
-          }
-        }
-        return null
-      } else if (this.dataService.state.screen.sharedVision == SharedVision.partial) {
-        // outside of turn
-        if (!this.dataService.state.game.started || this.dataService.state.turned?.tokenId != userTokenId) {
-          return null
-        }
-        // search using userTokenId
-        for (let token of this.dataService.state.map?.tokens ?? []) {
-          if (token.id == userTokenId) {
-            return token
-          }
-        }
-        return null
+    // a signed-in player's tokens on this map; without any, the same vision as a spectator
+    const own = state.ownTokens
+    if (own.length > 0) {
+      const onTurn = own.find(token => token.id == state.turned?.tokenId)
+      if (state.screen.sharedVision == SharedVision.never) {
+        return onTurn ?? own[0]
+      } else if (state.screen.sharedVision == SharedVision.partial) {
+        // shared outside of our turn
+        return state.game.started ? onTurn ?? null : null
       }
 
     } else {

@@ -146,8 +146,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges {
       ticker.autoStart = true;
       // Gamepad & KB Support
       ticker.add(() => {
-        const userTokenId = localStorage.getItem("userTokenId")
-        let token = userTokenId ? this.mapContainer.tokenViewById(userTokenId) : null
+        const primaryTokenId = this.dataService.state.primaryToken?.id
+        let token = primaryTokenId ? this.mapContainer.tokenViewById(primaryTokenId) : null
         let x = token?.position.x ?? 0
         let y = token?.position.y ?? 0
         let pos = this.viewport.center
