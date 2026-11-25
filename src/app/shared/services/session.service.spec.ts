@@ -2,11 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Subject } from 'rxjs';
-import { SessionService, ServerInfo } from './session.service';
+import { SessionService, ServerInfo, splitLinkCode } from './session.service';
 import { DataService } from './data.service';
 import { WSEvent, WSEventName } from '../models/wsevent';
 
-const server: ServerInfo = { id: 'server-1', version: '5.0', auth: { guest: 'view' } };
+const server: ServerInfo = { id: 'server-1', version: '5.0', auth: { guest: 'open' } };
 
 /** A data service whose socket the test answers: `sent` collects what goes out. */
 function dataStub() {
@@ -79,8 +79,8 @@ describe('SessionService', () => {
     expect(service.supportsSignIn()).toBeFalse();
   });
 
-  it('an app that lets no guest in asks everyone to sign in', async () => {
-    await loadServer({ ...server, auth: { guest: 'none' } });
+  it('an app whose guests need the guest code asks everyone to sign in', async () => {
+    await loadServer({ ...server, auth: { guest: 'code' } });
     expect(service.allowsGuests()).toBeFalse();
   });
 
@@ -197,5 +197,69 @@ describe('SessionService', () => {
     await loadServer();
     await signIn();
     expect(localStorage.getItem('encounterplus.accessToken')).toBeNull();
+  });
+
+  it('a join link signs in with its code, once', async () => {
+    await loadServer();
+    service.linkCode = 'ABC-DEF';
+    const signingIn = service.signInWithLink();
+    const request = http.expectOne('http://localhost:8080/api/session');
+    expect(request.request.body).toEqual({ code: 'ABC-DEF' });
+    request.flush({ accessToken: 'ept_alice', role: 'player', permissions: ['read', 'write'], name: 'Alice' }, { status: 201, statusText: 'Created' });
+    expect(await signingIn).toEqual({ signedIn: true });
+    expect(service.accessToken).toBe('ept_alice');
+
+    expect(await service.signInWithLink()).toEqual({ signedIn: false });
+  });
+
+  it('a join link wins over a kept sign-in, and signs the old token out', async () => {
+    await loadServer();
+    await signIn('ABC-DEF', 'ept_alice');
+    service.linkCode = 'BOB-BOB';
+
+    const signingIn = service.signInWithLink();
+    http.expectOne((request) => request.method === 'POST').flush({ accessToken: 'ept_bob', role: 'player', permissions: ['read', 'write'], name: 'Bob' }, { status: 201, statusText: 'Created' });
+    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve));
+    const signOut = http.expectOne((request) => request.method === 'DELETE');
+    expect(signOut.request.headers.get('Authorization')).toBe('Bearer ept_alice');
+    signOut.flush(null, { status: 204, statusText: 'No Content' });
+
+    expect(await signingIn).toEqual({ signedIn: true });
+    expect(service.accessToken).toBe('ept_bob');
+    expect(service.session()?.name).toBe('Bob');
+  });
+
+  it('a refused join link says so, and keeps a sign-in from before', async () => {
+    await loadServer();
+    await signIn('ABC-DEF', 'ept_alice');
+    service.linkCode = 'OLD-OLD';
+
+    const signingIn = service.signInWithLink();
+    http.expectOne('http://localhost:8080/api/session').flush('no', { status: 401, statusText: 'Unauthorized' });
+    expect(await signingIn).toEqual({ signedIn: false, error: 'This link is no longer valid. Ask the GM for a new one.' });
+    expect(service.accessToken).toBe('ept_alice');
+  });
+
+  it('an app without sign-in drops a join link\'s code', async () => {
+    await loadServer(null);
+    service.linkCode = 'ABC-DEF';
+    expect(await service.signInWithLink()).toEqual({ signedIn: false });
+    expect(service.linkCode).toBeNull();
+  });
+});
+
+describe('splitLinkCode', () => {
+  it('takes the code out of the fragment and keeps the rest of the address', () => {
+    expect(splitLinkCode('http://192.168.1.2:8080/client/?runMode=tv#code=ABC-DEF'))
+      .toEqual({ code: 'ABC-DEF', href: 'http://192.168.1.2:8080/client/?runMode=tv' });
+    expect(splitLinkCode('http://localhost:8080/#code=ABCDEF&other=1'))
+      .toEqual({ code: 'ABCDEF', href: 'http://localhost:8080/#other=1' });
+  });
+
+  it('leaves an address without a code alone', () => {
+    expect(splitLinkCode('http://localhost:8080/client/')).toBeNull();
+    expect(splitLinkCode('http://localhost:8080/client/#section')).toBeNull();
+    expect(splitLinkCode('http://localhost:8080/client/?code=ABC-DEF')).toBeNull();
   });
 });

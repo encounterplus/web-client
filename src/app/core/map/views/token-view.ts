@@ -627,8 +627,7 @@ export class TokenView extends View {
           // a signed-in player: exactly the tokens the app lets them move
           this.eventMode = state.controls(this.token) ? 'static' : 'none'
         } else {
-          // a guest with full access, or an app without sign-in: the app doesn't say whose tokens
-          // are whose, so any friendly token
+          // an app without sign-in: it doesn't say whose tokens are whose, so any friendly token
           this.eventMode = this.token.role == Role.friendly ? 'static' : 'none'
         }
         break;

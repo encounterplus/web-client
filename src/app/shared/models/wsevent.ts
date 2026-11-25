@@ -23,7 +23,6 @@ export enum WSEventName {
     markerMoved = "markerMoved",
     fogUpdated = "fogUpdated",
     pointerUpdated = "pointerUpdated",
-    pointerMoved = "pointerMoved",
     interactionUpdated = "interactionUpdated",
     lineOfSightUpdated = "lineOfSightUpdated",
     screenUpdated = "screenUpdated",
@@ -31,7 +30,6 @@ export enum WSEventName {
     clientUpdated = "clientUpdated",
     reload = "reload",
     messageCreated = "messageCreated",
-    messageDeleted = "messageDeleted",
     createMessage = "createMessage",
     measurementUpdated = "measurementUpdated",
     measurementsUpdated = "measurementsUpdated",
@@ -39,7 +37,8 @@ export enum WSEventName {
     trackedObjectUpdated = "trackedObjectUpdated",
     trackedObjectDeleted = "trackedObjectDeleted",
     trackedObjectsUpdated = "trackedObjectsUpdated",
-    updateModel = "updateModel",
+    // a player may send only rotation and path; anything else is refused
+    updateToken = "updateToken",
     systemPaused = "systemPaused",
     resourcesUpdated = "resourcesUpdated",
     // signing in on the socket: authenticate { accessToken? } → authenticated { role, … }
@@ -52,7 +51,6 @@ export enum WSEventName {
 
 export interface WSEvent {
     name: WSEventName;
-    model?: string;
     data: any;
     /** Sent with a request; the answer carries it back as `responseId`. */
     requestId?: string;

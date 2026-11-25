@@ -1151,15 +1151,20 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.toastService.clear();
         this.toastService.showSuccess("Websocket connected");
 
-        // signed in before anything else, so nothing is asked as a guest by mistake
-        if (!this.serverChecked) {
-          await this.session.loadServer();
-          this.serverChecked = true;
-        }
+        // signed in before anything else, so nothing is asked as a guest by mistake; asked on every
+        // connection, since the GM may have turned the guest code on — the app then closes guests'
+        // connections, and this one asks for the code
+        await this.session.loadServer();
+        // a join link signs in before the socket does, on displays too
+        const link = await this.session.signInWithLink();
         const { refused } = await this.session.authenticateSocket();
         this.state.allInteractions = this.interactionsParam || this.session.isGM();
         this.getData();
-        this.promptSignIn(refused);
+        if (link.error) {
+          this.linkSignInFailed(link.error);
+        } else {
+          this.promptSignIn(refused);
+        }
 
         // update color
         let name = localStorage.getItem("userName") || "Unknown";
@@ -1202,8 +1207,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   /** The `interactions=all` parameter; a GM's device gets every interaction too. */
   private interactionsParam = false
-  /** Whether the app was asked if it supports signing in, once per page. */
-  private serverChecked = false
   /** Whether the sign-in dialog opened by itself on this page, so a reconnection doesn't reopen it. */
   private promptedSignIn = false
   private signInOpen = false
@@ -1211,7 +1214,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   /**
    * Opens the sign-in dialog by itself when it helps: the first time an app with sign-in is met,
    * and after a kept sign-in was refused — never on a display (TV, `device`), which stays a guest,
-   * unless the app lets no guest in.
+   * unless guests need the guest code.
    */
   promptSignIn(refused: boolean) {
     if (!this.session.supportsSignIn() || this.session.isSignedIn() || this.signInOpen) {
@@ -1231,8 +1234,21 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.openSignIn(required)
   }
 
-  /** Opens the sign-in dialog; one the user can't leave when the app lets no guest in. */
-  openSignIn(required: boolean) {
+  /**
+   * A join link's code was refused: the dialog says why — unless a sign-in kept from before still
+   * works, which then stays, and a toast says it.
+   */
+  private linkSignInFailed(message: string) {
+    if (this.session.isSignedIn()) {
+      this.toastService.showError(message)
+      return
+    }
+    this.promptedSignIn = true
+    this.openSignIn(!this.session.allowsGuests(), message)
+  }
+
+  /** Opens the sign-in dialog; one the user can't leave when guests need the guest code. */
+  openSignIn(required: boolean, message?: string) {
     if (this.signInOpen) {
       return
     }
@@ -1241,6 +1257,9 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.mapComponent.viewport.pause = true
     }
     const modal = this.modalService.open(SignInModalComponent, { centered: true, backdrop: required ? 'static' : true, keyboard: !required })
+    if (message) {
+      (modal.componentInstance as SignInModalComponent).error.set(message)
+    }
     const closed = () => {
       this.signInOpen = false
       if (this.mapComponent) {

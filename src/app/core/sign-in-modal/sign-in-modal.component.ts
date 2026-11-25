@@ -3,8 +3,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SessionService } from 'src/app/shared/services/session.service';
 
 /**
- * Signing in with the code the GM gives each player. Closes with `signedIn`, or `guest` when the
- * user continues without signing in — offered only when the app lets guests in.
+ * Signing in with the code the GM gives each player — or the guest code. Closes with `signedIn`,
+ * or `guest` when the user continues without signing in — offered only when guests need no code.
  */
 @Component({
     selector: 'ngbd-modal-basic',

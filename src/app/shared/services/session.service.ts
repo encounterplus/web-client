@@ -4,15 +4,19 @@ import { firstValueFrom, filter, first, timeout } from 'rxjs';
 import { DataService } from './data.service';
 import { WSEventName } from '../models/wsevent';
 
-/** `GET /api/server`: who the app is, and what a client may do without signing in. */
+/** `GET /api/server`: who the app is, and how guests get in. */
 export interface ServerInfo {
   /** Stable across launches and address changes: sign-ins are kept per server id. */
   id: string;
   version: string;
-  auth: { guest: GuestAccess };
+  auth: { guest: GuestEntry };
 }
 
-export type GuestAccess = 'none' | 'view' | 'full';
+/**
+ * How guests get in: `open`, watching without signing in, or `code`, signing in with the guest
+ * code. Guests read what players may see and never change anything either way.
+ */
+export type GuestEntry = 'open' | 'code';
 
 /** Who the client is signed in as: the answer to signing in and to `authenticate`. */
 export interface Session {
@@ -43,6 +47,50 @@ const SHEET_TOKEN_KEY = 'encounterplus.accessToken';
 /** Servers whose sign-in the user skipped, so the dialog doesn't open on every visit. */
 const SKIPPED_KEY = 'encounterplus.signInSkipped';
 
+/** The code a join link carried, taken from the address before the app started. */
+let linkCode: string | null = null;
+
+/**
+ * Splits a join link's code off an address: `#code=ABC-DEF` in the fragment, which browsers never
+ * send to the server or put in `Referer`. Other fragment parameters stay.
+ *
+ * @returns The code and the address without it, or `null` when the address carries none.
+ */
+export function splitLinkCode(href: string): { code: string; href: string } | null {
+  let url: URL;
+  try {
+    url = new URL(href);
+  } catch {
+    return null;
+  }
+  const params = new URLSearchParams(url.hash.slice(1));
+  const code = params.get('code')?.trim();
+  if (code === undefined) {
+    return null;
+  }
+  params.delete('code');
+  url.hash = params.toString();
+  return { code, href: url.href };
+}
+
+/**
+ * Takes a join link's code out of the address bar, so it ends up in neither bookmarks nor history,
+ * and keeps it for `SessionService` to sign in with. Called before the app starts, so the router
+ * never sees it.
+ */
+export function takeLinkCode() {
+  const link = splitLinkCode(window.location.href);
+  if (!link) {
+    return;
+  }
+  try {
+    window.history.replaceState(window.history.state, '', link.href);
+  } catch {
+    // the address keeps it; signing in works the same
+  }
+  linkCode = link.code || null;
+}
+
 /**
  * Signing in to the app: whether it supports it, who the client is, and the access token it keeps.
  *
@@ -62,12 +110,17 @@ export class SessionService {
   readonly supportsSignIn = computed(() => this.server() !== null);
   readonly isSignedIn = computed(() => this.session() !== null);
   readonly isGM = computed(() => this.session()?.role === 'gm');
-  /** Whether a client may stay a guest, so the sign-in dialog offers to continue as one. */
-  readonly allowsGuests = computed(() => (this.server()?.auth.guest ?? 'full') !== 'none');
+  /** Whether a client may stay a guest without a code, so the sign-in dialog offers to continue as one. */
+  readonly allowsGuests = computed(() => this.server()?.auth.guest !== 'code');
 
   private requestCounter = 0;
 
-  constructor(private http: HttpClient, private data: DataService) {}
+  /** A join link's code, signed in with on the first connection (`signInWithLink`). */
+  linkCode: string | null = linkCode;
+
+  constructor(private http: HttpClient, private data: DataService) {
+    linkCode = null;
+  }
 
   /** Asks the app who it is. Never fails: anything but a proper answer means no sign-in. */
   async loadServer(): Promise<ServerInfo | null> {
@@ -127,15 +180,44 @@ export class SessionService {
     }
   }
 
+  /**
+   * Signs in with a join link's code, once: the link wins over a sign-in kept for this server,
+   * whose token is signed out after the new one is kept — so a link opened on another player's
+   * tablet switches it. An app without sign-in drops the code.
+   *
+   * @returns Whether it signed in, or why not, for people; nothing to do is neither.
+   */
+  async signInWithLink(): Promise<{ signedIn: boolean; error?: string }> {
+    const code = this.linkCode;
+    this.linkCode = null;
+    if (!code || !this.supportsSignIn()) {
+      return { signedIn: false };
+    }
+    const previous = this.accessToken;
+    try {
+      await this.signIn(code, 'This link is no longer valid. Ask the GM for a new one.');
+    } catch (error) {
+      return { signedIn: false, error: (error as Error).message };
+    }
+    if (previous && previous !== this.accessToken) {
+      try {
+        await firstValueFrom(this.http.delete(`${this.data.apiBaseURL}/session`, { headers: { Authorization: `Bearer ${previous}` } }));
+      } catch {
+        // the old device entry stays in the app until the GM removes it
+      }
+    }
+    return { signedIn: true };
+  }
+
   /** Exchanges a code for an access token, and keeps it. Throws a message for people. */
-  async signIn(code: string): Promise<Session> {
+  async signIn(code: string, invalidMessage = "That code isn't valid."): Promise<Session> {
     let answer: Session & { accessToken?: string };
     try {
       answer = await firstValueFrom(this.http.post<Session & { accessToken?: string }>(`${this.data.apiBaseURL}/session`, { code }));
     } catch (error) {
       const status = (error as HttpErrorResponse).status;
       if (status === 401) {
-        throw new Error("That code isn't valid.");
+        throw new Error(invalidMessage);
       } else if (status === 429) {
         throw new Error('Too many attempts. Try again in a minute.');
       }

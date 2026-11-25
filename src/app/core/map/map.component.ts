@@ -180,14 +180,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges {
             if (tokenRotation > 360) tokenRotation -= 360
           }
           if (tokenRotation != token.token.rotation) {
-            this.dataService.send({ name: WSEventName.updateModel, model: "token", data: { id: token.token.id, rotation: tokenRotation } })
+            this.dataService.send({ name: WSEventName.updateToken, data: { id: token.token.id, rotation: tokenRotation } })
           }
           // Center on token
           if (this.kb.keyT)
             this.viewport.animate({ position: token.position, time: 1000, ease: "easeInOutSine", removeOnInterrupt: true })
           // Reset path
           if (this.kb.keyEsc)
-            this.dataService.send({ name: WSEventName.updateModel, model: "token", data: { id: token.token.id, path: [] } })
+            this.dataService.send({ name: WSEventName.updateToken, data: { id: token.token.id, path: [] } })
         }
         // Gamepad Controls
         let gamePads = (window.isSecureContext) ? navigator.getGamepads() : null;
@@ -235,7 +235,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges {
               if (tokenRotation > 360) tokenRotation -= 360
             }
             if (tokenRotation != token.token.rotation) {
-              this.dataService.send({ name: WSEventName.updateModel, model: "token", data: { id: token.token.id, rotation: tokenRotation } })
+              this.dataService.send({ name: WSEventName.updateToken, data: { id: token.token.id, rotation: tokenRotation } })
             }
             if (gp.timestamp != this.gpTS) {
               // Center token
@@ -244,7 +244,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges {
               }
               // Reset path
               if (gp.buttons[3].pressed && !this.gpButtons?.[3]?.pressed) {
-                this.dataService.send({ name: WSEventName.updateModel, model: "token", data: { id: token.token.id, path: [] } })
+                this.dataService.send({ name: WSEventName.updateToken, data: { id: token.token.id, path: [] } })
               }
             }
           }
