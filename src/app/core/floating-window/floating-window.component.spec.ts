@@ -1,11 +1,18 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FloatingWindowComponent, resized } from './floating-window.component';
 import { FloatingWindowService, MIN_HEIGHT, MIN_WIDTH } from './floating-window.service';
+import { FloatingWindowRef } from './floating-window-ref';
 
 @Component({ selector: 'app-content-stub', template: '<p class="stub">{{ text }}</p>', standalone: false })
 class ContentStub {
   @Input() text = ''
+}
+
+/** Content that went elsewhere and can go back, as a page in a frame does. */
+@Component({ selector: 'app-navigating-stub', template: '', standalone: false })
+class NavigatingStub {
+  readonly ref = inject(FloatingWindowRef)
 }
 
 describe('FloatingWindowComponent', () => {
@@ -16,7 +23,7 @@ describe('FloatingWindowComponent', () => {
   beforeEach(async () => {
     localStorage.removeItem('encounterplus.windows');
     await TestBed.configureTestingModule({
-      declarations: [FloatingWindowComponent, ContentStub],
+      declarations: [FloatingWindowComponent, ContentStub, NavigatingStub],
     }).compileComponents();
 
     windows = TestBed.inject(FloatingWindowService);
@@ -116,6 +123,38 @@ describe('FloatingWindowComponent', () => {
     render();
     expect(windows.front()).toBe('a');
     expect(element.classList).toContain('front');
+  });
+
+  it('offers going back only once its content went elsewhere', () => {
+    expect(element.querySelector('.nav-back')).toBeNull();
+
+    windows.close('a');
+    windows.open({ key: 'a', title: 'Aria', component: NavigatingStub });
+    render();
+    const content: NavigatingStub = fixture.debugElement.query(debug => debug.componentInstance instanceof NavigatingStub).componentInstance;
+    const back = jasmine.createSpy('back');
+    content.ref.back.set(back);
+    fixture.detectChanges();
+
+    const button = element.querySelector<HTMLButtonElement>('.nav-back')!;
+    expect(button).not.toBeNull();
+    button.click();
+    expect(back).toHaveBeenCalled();
+
+    content.ref.back.set(null);
+    fixture.detectChanges();
+    expect(element.querySelector('.nav-back')).toBeNull();
+  });
+
+  it('does not move from the back button', () => {
+    windows.close('a');
+    windows.open({ key: 'a', title: 'Aria', component: NavigatingStub });
+    windows.move('a', { x: 100, y: 100, width: 400, height: 300 });
+    render();
+    fixture.debugElement.query(debug => debug.componentInstance instanceof NavigatingStub).componentInstance.ref.back.set(() => {});
+    fixture.detectChanges();
+    drag(element.querySelector('.nav-back')!, 50, 30);
+    expect(rect().x).toBe(100);
   });
 
   it('closes from its close button', () => {

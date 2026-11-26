@@ -64,6 +64,7 @@ $handle: 8px;
 }
 
 .open-external,
+.nav-back,
 .btn-close {
     // a whole title bar's height, so a finger lands on it
     flex: none;
@@ -71,7 +72,16 @@ $handle: 8px;
     height: $title-height;
 }
 
-.open-external {
+.nav-back {
+    // the glyph sits high in its line; this centres it on the title bar
+    padding: 3px 0 0;
+    border: 0;
+    background: none;
+    font-size: 1rem;
+}
+
+.open-external,
+.nav-back {
     display: flex;
     align-items: center;
     justify-content: center;

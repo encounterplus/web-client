@@ -3,6 +3,10 @@
   @if (win().externalUrl) {
     <a class="open-external" [href]="win().externalUrl" target="_blank" rel="noopener" title="Open in a new tab" aria-label="Open in a new tab">&#8599;</a>
   }
+  <!-- only once the content went elsewhere, such as a link followed in a sheet -->
+  @if (ref.back(); as back) {
+    <button type="button" class="nav-back" title="Back to where it started" aria-label="Back to where it started" (click)="back()">&#8617;</button>
+  }
   <span class="title">{{ win().title }}</span>
   <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="close()"></button>
 </div>

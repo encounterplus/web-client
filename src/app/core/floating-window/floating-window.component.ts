@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { FloatingWindowRef } from './floating-window-ref';
 import { FloatingWindowService, MIN_HEIGHT, MIN_WIDTH, WindowRect, WindowState } from './floating-window.service';
 
 /** How far, in pixels, a press on the title bar can wander and still be a tap rather than a drag. */
@@ -38,6 +39,8 @@ interface Gesture {
   styleUrls: ['./floating-window.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
+  // the content finds its window through this, such as to offer going back
+  providers: [FloatingWindowRef],
   host: {
     'role': 'dialog',
     '[attr.aria-label]': 'win().title',
@@ -80,7 +83,7 @@ export class FloatingWindowComponent {
   private gesture: Gesture | null = null
   private lastTap: { time: number, x: number, y: number } | null = null
 
-  constructor(private windows: FloatingWindowService) {}
+  constructor(private windows: FloatingWindowService, public ref: FloatingWindowRef) {}
 
   bringToFront() {
     this.windows.focus(this.win().key)
