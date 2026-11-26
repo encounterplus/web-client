@@ -17,7 +17,8 @@ $gameboard-margin: 75px;
     top: 8px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1100;
+    // above the map and side bars, below the floating windows (1045) so a sheet dragged over it covers it
+    z-index: 1040;
 
     @media (max-width: 420px) {
         top: 56px;
