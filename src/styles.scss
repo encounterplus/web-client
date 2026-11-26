@@ -10,6 +10,12 @@ $gameboard-margin: 75px;
     font-display: block;
 }
 
+// no accidental double-tap zoom: iOS Safari ignores user-scalable=no in the viewport tag.
+// Pinch zoom is left to the browser, so a zoomed page can always be zoomed back out.
+html, body {
+    touch-action: manipulation;
+}
+
 body {
     padding: 0;
     margin: 0;
