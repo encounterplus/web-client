@@ -46,23 +46,3 @@ code {
     width: 400px;
 }
 
-// the entity modal: wide and tall enough for a character sheet, within the screen on a phone
-.entity-modal {
-    width: min(96vw, 720px);
-    max-width: none;
-
-    .modal-body {
-        height: min(80vh, 900px);
-    }
-
-    .entity-modal-open {
-        color: inherit;
-        text-decoration: none;
-        opacity: 0.6;
-
-        &:hover {
-            opacity: 1;
-        }
-    }
-}
-

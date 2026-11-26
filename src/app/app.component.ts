@@ -32,7 +32,9 @@ import { Point } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { Meta } from '@angular/platform-browser';
-import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
+import { FloatingWindowService } from './core/floating-window/floating-window.service';
+import { entityWindow, windowCharacterId, windowEntityReference, windowUrl } from './core/floating-window/windows';
+import { characterRow } from './shared/models/character';
 import { Message } from './shared/models/message';
 import { Game, emptyGame } from './shared/models/game';
 import { Screen } from './shared/models/screen';
@@ -140,7 +142,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild(ToastListComponent)
   public toastListComponent!: ToastListComponent;
 
-  constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal, private cdr: ChangeDetectorRef, private session: SessionService) {
+  constructor(private metaService: Meta, private dataService: DataService, private toastService: ToastService, private modalService: NgbModal, private cdr: ChangeDetectorRef, private session: SessionService, private windows: FloatingWindowService) {
     this.state = new AppState();
     this.screen = signal(this.state.screen)
 
@@ -148,7 +150,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     effect(() => {
       this.state.tokenControl = tokenControl(this.session.session())
       // the map reads no signals of its own for this effect to follow
-      untracked(() => this.tokenControlChanged())
+      untracked(() => {
+        this.tokenControlChanged()
+        this.closeWindowsNoLongerAllowed()
+      })
     })
 
     window['state'] = this.state
@@ -285,18 +290,40 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  showEntityAction(reference: string) {
-    console.debug(`showing entity modal: ${reference}`)
+  /** Opens a token's entity page, such as its stat block, in a floating window, when this client may see it. */
+  showEntityAction(token: Token) {
+    const reference = token.reference
+    if (!reference || !this.state.mayShowEntity(token, this.session.isGM())) {
+      console.debug(`not showing entity of token ${token.id}: not allowed`)
+      return
+    }
+    this.windows.open(entityWindow(reference, token.name || token.label || 'Stat block', this.dataService.pageUrl(reference)))
+  }
 
-    let modal = this.modalService.open(EntityModalComponent, {centered: true, modalDialogClass: 'dark-modal entity-modal', scrollable: false})
-    modal.componentInstance.state = this.state
-    modal.componentInstance.reference = reference
-    
-    modal.result.then(result => {
-      console.debug(`Entity component closed with: ${result}`);
-    }, reason => {
-      console.debug(`Entity component dismissed ${reason}`)
-    });
+  /**
+   * Closes the windows a new session no longer allows: a character sheet whose character isn't the
+   * player's any more, or whose address changed with the sign-in, and a stat block of a token the
+   * player doesn't control.
+   */
+  private closeWindowsNoLongerAllowed() {
+    const session = this.session.session()
+    const characters = new Map((session?.role == 'player' ? session.characters ?? [] : [])
+      .map(character => [character.id, characterRow(character, this.dataService).url]))
+    const isGM = this.session.isGM()
+    const references = new Set(this.state.ownTokens.map(token => token.reference))
+
+    this.windows.closeWhere(window => {
+      const characterId = windowCharacterId(window)
+      if (characterId != null) {
+        const url = characters.get(characterId)
+        return !url || url != windowUrl(window)
+      }
+      const reference = windowEntityReference(window)
+      if (reference != null) {
+        return !isGM && !references.has(reference)
+      }
+      return false
+    })
   }
 
   // main websocket event handler
@@ -1118,6 +1145,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     
   }
 
+  /** A signed-in player's characters down the left side; the bar shows nothing for anyone else. */
+  get characterBar(): boolean {
+    return this.state.runMode == RunMode.normal
+  }
+
   get zoomControls(): boolean {
     return this.state.map != null && this.state.runMode == RunMode.normal
   }
@@ -1187,8 +1219,8 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
     });
 
-    this.dataService.showEntityEmitter.subscribe(reference => {
-      this.showEntityAction(reference)
+    this.dataService.showEntityEmitter.subscribe(token => {
+      this.showEntityAction(token)
     });
   }
 

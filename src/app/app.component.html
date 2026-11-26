@@ -2,6 +2,10 @@
   <app-map [state]="state" class="h-100"></app-map>
   <app-toolbar id="toolbar" [state]="state" [unreadMessages]="this.unreadMessages()" (action)="toolbarAction($event)" (panel)="activePanelAction($event)" (tool)="activeToolAction($event)"></app-toolbar>
 
+  @if (characterBar) {
+    <app-character-bar id="character-bar"></app-character-bar>
+  }
+
   @if (zoomControls) {
     <app-zoombar id="zoombar" class="d-flex align-items-baseline" (action)="zoombarAction($event)" [state]="state"></app-zoombar>
   }
@@ -31,6 +35,8 @@
   @if (this.screen().overlayHandoutText) {
     <app-overlay [screen]="this.screen()"></app-overlay>
   }
+
+  <app-floating-window-host></app-floating-window-host>
 
   <app-lightbox></app-lightbox>
 

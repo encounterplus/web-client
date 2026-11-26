@@ -102,6 +102,14 @@ export class AppState {
     return token.entityId != null && control.characterIds.includes(token.entityId)
   }
 
+  /**
+   * Whether this client may open a token's entity page, such as its stat block: the GM any token's,
+   * a signed-in player only a token they control.
+   */
+  mayShowEntity(token: Token, isGM: boolean): boolean {
+    return token.reference != null && (isGM || this.controls(token))
+  }
+
   /** The tokens on the map this client controls. */
   get ownTokens(): Token[] {
     return (this.map?.tokens ?? []).filter(token => this.controls(token))

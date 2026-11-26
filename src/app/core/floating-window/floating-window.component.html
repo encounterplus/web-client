@@ -1,0 +1,20 @@
+<div class="title-bar" (pointerdown)="startMove($event)">
+  <span class="title">{{ win().title }}</span>
+  @if (win().externalUrl) {
+    <a class="open-external" [href]="win().externalUrl" target="_blank" rel="noopener" title="Open in a new tab" aria-label="Open in a new tab">&#8599;</a>
+  }
+  <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="close()"></button>
+</div>
+
+<div class="content">
+  <ng-container *ngComponentOutlet="win().component; inputs: win().inputs ?? {}"></ng-container>
+  <!-- takes the pointer instead of the content: in a window behind, so a click brings it forward,
+       and in every window while one is dragged, so no iframe takes the pointer's events -->
+  <div class="shield"></div>
+</div>
+
+@if (!compact()) {
+  @for (edge of edges; track edge) {
+    <div class="resize resize-{{ edge }}" (pointerdown)="startResize($event, edge)"></div>
+  }
+}

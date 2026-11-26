@@ -125,3 +125,29 @@ describe('token control', () => {
         expect(state.primaryToken?.id).toBe("hero-token")
     })
 })
+
+describe('mayShowEntity', () => {
+    const goblin = minimalToken({ id: 'goblin', reference: '/monster/goblin' })
+    const aria = minimalToken({ id: 'aria', reference: '/character/aria', entityId: 'aria' })
+
+    it('lets the GM open any token\'s entity', () => {
+        const state = new AppState()
+        expect(state.mayShowEntity(goblin, true)).toBeTrue()
+    })
+
+    it('lets a player open only the entity of a token they control', () => {
+        const state = new AppState()
+        state.tokenControl = { playerId: 'p1', characterIds: ['aria'] }
+        expect(state.mayShowEntity(aria, false)).toBeTrue()
+        expect(state.mayShowEntity(goblin, false)).toBeFalse()
+        expect(state.mayShowEntity({ ...goblin, controlledBy: 'p1' }, false)).toBeTrue()
+    })
+
+    it('lets a guest open none', () => {
+        expect(new AppState().mayShowEntity(aria, false)).toBeFalse()
+    })
+
+    it('opens nothing for a token without an entity', () => {
+        expect(new AppState().mayShowEntity(minimalToken(), true)).toBeFalse()
+    })
+})

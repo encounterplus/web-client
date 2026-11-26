@@ -1,0 +1,9 @@
+:host {
+    position: fixed;
+    inset: 0;
+    // above the side bar, toolbar and zoombar; below ng-bootstrap's modals (1050) and their backdrop
+    z-index: 1045;
+    pointer-events: none;
+    // each window's z-index orders it among the others only
+    isolation: isolate;
+}

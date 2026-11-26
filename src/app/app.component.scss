@@ -24,6 +24,14 @@ $gameboard-margin: 75px;
     }
 }
 
+// down the left side, below the toolbar and clear of the zoombar in the bottom-left corner
+#character-bar {
+    position: absolute;
+    top: 52px;
+    left: 5px;
+    max-height: calc(100% - 52px - 130px);
+}
+
 #side-bar {
     position: absolute;
     // width: 400px;
@@ -45,6 +53,13 @@ $gameboard-margin: 75px;
 }
 
 .gameboard {
+    // the toolbar's own gameboard margin is 100px
+    #character-bar {
+        top: 148px;
+        left: 97px;
+        max-height: calc(100% - 148px - 130px - #{$gameboard-margin});
+    }
+
     #resources-bar {
         top: $gameboard-margin;
     }

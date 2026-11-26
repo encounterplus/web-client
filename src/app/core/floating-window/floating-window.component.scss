@@ -1,0 +1,119 @@
+$title-height: 32px;
+$handle: 8px;
+
+:host {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    background-color: #1d2124;
+    color: #f8f9fa;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.5);
+    overflow: visible;
+}
+
+:host(.front) {
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+:host(.interacting) {
+    user-select: none;
+}
+
+// a phone: no room to move a window around, so it fills the page
+:host(.compact) {
+    inset: 0;
+    border-radius: 0;
+    border: none;
+}
+
+.title-bar {
+    flex: none;
+    height: $title-height;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem 0 0.75rem;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.375rem 0.375rem 0 0;
+    cursor: move;
+    // a touch drags the window rather than scrolling or zooming the page
+    touch-action: none;
+    user-select: none;
+
+    :host(.compact) & {
+        cursor: default;
+        border-radius: 0;
+    }
+}
+
+.title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.open-external {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.6;
+    line-height: 1;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.btn-close {
+    flex: none;
+    font-size: 0.7rem;
+}
+
+.content {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 0 0 0.375rem 0.375rem;
+
+    :host(.compact) & {
+        border-radius: 0;
+    }
+}
+
+.shield {
+    position: absolute;
+    inset: 0;
+    display: none;
+
+    :host(:not(.front)) &,
+    :host(.interacting) & {
+        display: block;
+    }
+}
+
+.resize {
+    position: absolute;
+    touch-action: none;
+    z-index: 1;
+}
+
+.resize-n, .resize-s { left: $handle; right: $handle; height: $handle; cursor: ns-resize; }
+.resize-e, .resize-w { top: $handle; bottom: $handle; width: $handle; cursor: ew-resize; }
+.resize-n { top: -$handle * 0.5; }
+.resize-s { bottom: -$handle * 0.5; }
+.resize-e { right: -$handle * 0.5; }
+.resize-w { left: -$handle * 0.5; }
+
+.resize-ne, .resize-nw, .resize-se, .resize-sw { width: $handle * 2; height: $handle * 2; }
+.resize-ne { top: -$handle * 0.5; right: -$handle * 0.5; cursor: nesw-resize; }
+.resize-sw { bottom: -$handle * 0.5; left: -$handle * 0.5; cursor: nesw-resize; }
+.resize-nw { top: -$handle * 0.5; left: -$handle * 0.5; cursor: nwse-resize; }
+.resize-se { bottom: -$handle * 0.5; right: -$handle * 0.5; cursor: nwse-resize; }

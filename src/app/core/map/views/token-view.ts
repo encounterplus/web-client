@@ -666,7 +666,7 @@ export class TokenView extends View {
     event.stopPropagation()
 
     if (this.token.reference != null) {
-      this.dataService.showEntity(this.token.reference)
+      this.dataService.showEntity(this.token)
     }
   }
 

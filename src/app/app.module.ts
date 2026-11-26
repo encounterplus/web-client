@@ -28,11 +28,13 @@ import { MessageListComponent } from './core/message-list/message-list.component
 import { PausedComponent } from './core/paused/paused.component';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { OverlayComponent } from './core/overlay/overlay.component';
-import { EntityModalComponent } from './core/entity-modal/entity-modal.component';
 import { ResourcesBarComponent } from './core/resources-bar/resources-bar.component';
-import { DraggableDirective } from './draggable.directive';
 import { SafePipe } from 'safe-pipe';
 import { LightboxComponent } from './core/lightbox/lightbox.component';
+import { FloatingWindowComponent } from './core/floating-window/floating-window.component';
+import { FloatingWindowHostComponent } from './core/floating-window/floating-window-host.component';
+import { IframeContentComponent } from './core/floating-window/iframe-content.component';
+import { CharacterBarComponent } from './core/character-bar/character-bar.component';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -53,9 +55,11 @@ import { LightboxComponent } from './core/lightbox/lightbox.component';
         PausedComponent,
         ZoombarComponent,
         OverlayComponent,
-        EntityModalComponent,
         ResourcesBarComponent,
-        DraggableDirective
+        FloatingWindowComponent,
+        FloatingWindowHostComponent,
+        IframeContentComponent,
+        CharacterBarComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,

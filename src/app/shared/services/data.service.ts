@@ -6,6 +6,7 @@ import { WSEvent } from '../models/wsevent';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { webSocket } from 'rxjs/webSocket';
 import { AppState } from '../models/app-state';
+import type { Token } from '../models/token';
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +34,8 @@ export class DataService {
   videoPaused = this.videoPaused$.asObservable();
   videoMuted = this.videoMuted$.asObservable();
 
-  public showEntityEmitter = new EventEmitter<string>();
+  /** A token whose entity page, such as its stat block, was asked for; the app decides whether it opens. */
+  public showEntityEmitter = new EventEmitter<Token>();
 
   updateVideoPaused(value: boolean) {
     this.videoPaused$.next(value);
@@ -48,6 +50,25 @@ export class DataService {
 
   get baseURL(): string {
     return `${this.protocol}//${this.remoteHost}`
+  }
+
+  /**
+   * A page on the app's server, such as an entity's view or a character's sheet, for a browser to
+   * open. A client served from elsewhere passes its access token in the fragment, which never
+   * reaches a server: the page is on the app's origin, where the client's storage isn't, and the
+   * sheet SDK keeps the token and takes it out of the address. A client the app served shares the
+   * origin, and the page finds the token stored. An absolute address is taken as it is.
+   */
+  pageUrl(path: string): string {
+    if (/^https?:\/\//i.test(path)) {
+      return path
+    }
+    const address = `${this.baseURL}${path.startsWith('/') ? '' : '/'}${path}`
+    const token = this.accessToken
+    if (!token || this.remoteHost === window.location.host) {
+      return address
+    }
+    return `${address}${address.includes('#') ? '&' : '#'}accessToken=${encodeURIComponent(token)}`
   }
 
   get apiBaseURL(): string {
@@ -139,8 +160,8 @@ export class DataService {
     this.ws.next(event);
   }
 
-  public showEntity(reference: string) {
-    this.showEntityEmitter.emit(reference)
+  public showEntity(token: Token) {
+    this.showEntityEmitter.emit(token)
   }
 }
 

@@ -6,20 +6,7 @@ import { WSEventName } from 'src/app/shared/models/wsevent';
 import { AppState, RunMode } from 'src/app/shared/models/app-state';
 import { Loader } from '../map/models/loader';
 import { SessionService } from 'src/app/shared/services/session.service';
-import { resolveEffectIcon } from 'src/app/shared/icons/game-icons';
-
-/** A signed-in player's character as the settings list draws it. */
-export interface CharacterRow {
-  id: string
-  name: string
-  detail?: string
-  /** The portrait, on the server. */
-  image?: string
-  /** The game icon font glyph, for a `gi-` icon and no portrait. */
-  glyph?: string
-  /** What draws without either: the name's first letter. */
-  initial: string
-}
+import { CharacterRow, characterRow } from 'src/app/shared/models/character';
 
 @Component({
     selector: 'ngbd-modal-basic',
@@ -45,17 +32,7 @@ export class SettingsModalComponent implements OnInit {
 
   /** A signed-in player's characters, whose tokens are theirs: a portrait, else the icon, else an initial. */
   get characters(): CharacterRow[] {
-    return (this.session.session()?.characters ?? []).map(character => {
-      const icon = !character.image && character.icon ? resolveEffectIcon(character.icon) : null
-      return {
-        id: character.id,
-        name: character.name,
-        detail: character.detail,
-        image: character.image ? this.dataService.baseURL + character.image : icon?.kind == 'image' ? this.dataService.baseURL + icon.src : undefined,
-        glyph: icon?.kind == 'glyph' ? icon.char : undefined,
-        initial: (character.name.trim()[0] ?? '?').toUpperCase(),
-      }
-    })
+    return (this.session.session()?.characters ?? []).map(character => characterRow(character, this.dataService))
   }
 
   allowVideo: boolean = true

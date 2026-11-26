@@ -1,0 +1,18 @@
+@for (character of characters; track character.id) {
+  <button type="button" class="portrait"
+    [class.open]="isOpen(character)"
+    [style.--ring-color]="color"
+    [disabled]="!character.url"
+    [attr.aria-pressed]="character.url ? isOpen(character) : null"
+    [title]="character.url ? character.name : character.name + ' (no character sheet)'"
+    [attr.aria-label]="character.url ? 'Character sheet: ' + character.name : character.name + ', no character sheet'"
+    (click)="toggle(character)">
+    @if (character.image) {
+      <img [src]="character.image" alt="">
+    } @else if (character.glyph) {
+      <span class="glyph" aria-hidden="true">{{ character.glyph }}</span>
+    } @else {
+      <span class="initial" aria-hidden="true">{{ character.initial }}</span>
+    }
+  </button>
+}

@@ -13,6 +13,7 @@ import { EMPTY, Subject } from 'rxjs';
 import { AppComponent } from './app.component';
 import { AppState, RunMode } from './shared/models/app-state';
 import { DataService } from './shared/services/data.service';
+import { Token } from './shared/models/token';
 import { WSEvent, WSEventName } from './shared/models/wsevent';
 import { MapLayer } from './shared/models/map';
 import { ControlState } from './core/map/views/token-view';
@@ -42,9 +43,10 @@ function dataServiceStub() {
     protocol: "http:",
     attemptNr: 0,
     baseURL: "http://localhost",
+    pageUrl: (path: string) => "http://localhost" + path,
     events$: new Subject<WSEvent>(),
     connectionStatus$: new Subject<boolean>(),
-    showEntityEmitter: new EventEmitter<string>(),
+    showEntityEmitter: new EventEmitter<Token>(),
     connect: jasmine.createSpy('connect'),
     send: jasmine.createSpy('send'),
     getData: jasmine.createSpy('getData').and.returnValue(EMPTY)

@@ -15,6 +15,36 @@ describe('DataService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  describe('pageUrl', () => {
+    beforeEach(() => {
+      // the server the client is connected to, never a fixed address
+      service.protocol = "http:";
+      service.remoteHost = "192.168.1.42:8080";
+    });
+
+    it('builds the address from the connected server and the path', () => {
+      expect(service.pageUrl("/monster/goblin")).toBe("http://192.168.1.42:8080/monster/goblin");
+      expect(service.pageUrl("monster/goblin")).toBe("http://192.168.1.42:8080/monster/goblin");
+    });
+
+    it('passes the access token in the fragment to a page on another origin', () => {
+      service.accessToken = "ept_alice";
+      expect(service.pageUrl("/monster/goblin")).toBe("http://192.168.1.42:8080/monster/goblin#accessToken=ept_alice");
+      expect(service.pageUrl("/sheet#tab=2")).toBe("http://192.168.1.42:8080/sheet#tab=2&accessToken=ept_alice");
+    });
+
+    it('leaves the token out for a page on its own origin, which finds it stored', () => {
+      service.accessToken = "ept_alice";
+      service.remoteHost = window.location.host;
+      expect(service.pageUrl("/monster/goblin")).toBe(`http://${window.location.host}/monster/goblin`);
+    });
+
+    it('takes an absolute address as it is', () => {
+      service.accessToken = "ept_alice";
+      expect(service.pageUrl("https://example.com/sheet")).toBe("https://example.com/sheet");
+    });
+  });
 });
 
 describe('deepMerge', () => {
