@@ -123,6 +123,64 @@ describe('FloatingWindowComponent', () => {
     expect(windows.isOpen('a')).toBeFalse();
   });
 
+  describe('double tap', () => {
+    let now: number;
+
+    beforeEach(() => {
+      now = 1_000_000;
+      spyOn(Date, 'now').and.callFake(() => now);
+    });
+
+    function tapTitle(x = 200, y = 110) {
+      const bar = element.querySelector('.title-bar')!;
+      pointer(bar, 'pointerdown', x, y);
+      pointer(bar, 'pointerup', x + 2, y + 1);
+      render();
+    }
+
+    it('fills the page, and again brings the window back to its default size', () => {
+      tapTitle();
+      now += 200;
+      tapTitle();
+      expect(windows.windows()[0].maximized).toBeTrue();
+      expect(element.classList).toContain('maximized');
+      expect(element.style.left).toBe('');
+      expect(element.querySelector('.resize-se')).toBeNull();
+
+      now += 1000;
+      tapTitle();
+      now += 200;
+      tapTitle();
+      expect(windows.windows()[0].maximized).toBeFalse();
+      expect(rect().width).toBe(720);
+      expect(element.style.width).toBe('720px');
+    });
+
+    it('takes taps too far apart in time or place as two taps', () => {
+      tapTitle();
+      now += 1000;
+      tapTitle();
+      now += 200;
+      tapTitle(400, 110);
+      expect(windows.windows()[0].maximized).toBeFalsy();
+    });
+
+    it('neither moves nor remembers a window for a tap', () => {
+      localStorage.removeItem('encounterplus.windows');
+      tapTitle();
+      expect(rect()).toEqual({ x: 100, y: 100, width: 400, height: 300 });
+      expect(localStorage.getItem('encounterplus.windows')).toBeNull();
+    });
+
+    it('keeps a window that fills the page in place when its title bar is dragged', () => {
+      windows.toggleMaximized('a');
+      render();
+      drag(element.querySelector('.title-bar')!, 80, 80);
+      expect(windows.windows()[0].maximized).toBeTrue();
+      expect(rect()).toEqual({ x: 100, y: 100, width: 400, height: 300 });
+    });
+  });
+
   it('fills a phone\'s page and neither moves nor resizes there', () => {
     windows.viewportChanged(390, 844);
     render();

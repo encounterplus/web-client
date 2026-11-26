@@ -1,8 +1,9 @@
-<div class="title-bar" (pointerdown)="startMove($event)">
-  <span class="title">{{ win().title }}</span>
+<div class="title-bar" (pointerdown)="startMove($event)" [title]="compact() ? '' : win().maximized ? 'Double-tap to restore' : 'Double-tap to fill the screen'">
+  <!-- at the far end from close, so a touch meant for one never opens the other -->
   @if (win().externalUrl) {
     <a class="open-external" [href]="win().externalUrl" target="_blank" rel="noopener" title="Open in a new tab" aria-label="Open in a new tab">&#8599;</a>
   }
+  <span class="title">{{ win().title }}</span>
   <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="close()"></button>
 </div>
 
@@ -13,7 +14,7 @@
   <div class="shield"></div>
 </div>
 
-@if (!compact()) {
+@if (!filled()) {
   @for (edge of edges; track edge) {
     <div class="resize resize-{{ edge }}" (pointerdown)="startResize($event, edge)"></div>
   }

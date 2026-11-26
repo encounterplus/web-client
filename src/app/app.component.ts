@@ -32,8 +32,8 @@ import { Point } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { Meta } from '@angular/platform-browser';
-import { FloatingWindowService } from './core/floating-window/floating-window.service';
-import { entityWindow, windowCharacterId, windowEntityReference, windowUrl } from './core/floating-window/windows';
+import { FloatingWindowService, SHEET_SIZE } from './core/floating-window/floating-window.service';
+import { STAT_BLOCK_SIZE, entityWindow, windowCharacterId, windowEntityReference, windowUrl } from './core/floating-window/windows';
 import { characterRow } from './shared/models/character';
 import { Message } from './shared/models/message';
 import { Game, emptyGame } from './shared/models/game';
@@ -149,6 +149,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     // a signed-in player's tokens follow their session: signing in or out, and `sessionUpdated`
     effect(() => {
       this.state.tokenControl = tokenControl(this.session.session())
+      this.state.isGM = this.session.isGM()
       // the map reads no signals of its own for this effect to follow
       untracked(() => {
         this.tokenControlChanged()
@@ -290,14 +291,18 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  /** Opens a token's entity page, such as its stat block, in a floating window, when this client may see it. */
+  /**
+   * Opens a token's entity page in a floating window, when this client may see it: a player
+   * character's as wide as a sheet, anything else as narrow as a stat block.
+   */
   showEntityAction(token: Token) {
     const reference = token.reference
-    if (!reference || !this.state.mayShowEntity(token, this.session.isGM())) {
+    if (!reference || !this.state.mayShowEntity(token)) {
       console.debug(`not showing entity of token ${token.id}: not allowed`)
       return
     }
-    this.windows.open(entityWindow(reference, token.name || token.label || 'Stat block', this.dataService.pageUrl(reference)))
+    const size = token.player ? SHEET_SIZE : STAT_BLOCK_SIZE
+    this.windows.open(entityWindow(reference, token.name || token.label || 'Stat block', this.dataService.pageUrl(reference), size))
   }
 
   /**
@@ -309,7 +314,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     const session = this.session.session()
     const characters = new Map((session?.role == 'player' ? session.characters ?? [] : [])
       .map(character => [character.id, characterRow(character, this.dataService).url]))
-    const isGM = this.session.isGM()
+    const isGM = this.state.isGM
     const references = new Set(this.state.ownTokens.map(token => token.reference))
 
     this.windows.closeWhere(window => {

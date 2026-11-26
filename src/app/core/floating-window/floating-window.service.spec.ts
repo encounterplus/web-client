@@ -33,6 +33,23 @@ describe('FloatingWindowService', () => {
     expect(service.front()).toBe('a');
   });
 
+  it('opens at the size it asks for the first time, within the page', () => {
+    service.open({ key: 'narrow', title: 'Goblin', component: ContentStub, size: { width: 420, height: 600 } });
+    expect(service.windows()[0]).toEqual(jasmine.objectContaining({ x: 390, y: 100, width: 420, height: 600 }));
+
+    service.viewportChanged(390, 844);
+    service.open({ key: 'phone', title: 'Goblin', component: ContentStub, size: { width: 420, height: 600 } });
+    expect(service.windows()[1].width).toBe(374); // 96% of a phone's page, in whole pixels
+  });
+
+  it('opens where it was left rather than at the size it asks for', () => {
+    service.open({ key: 'narrow', title: 'Goblin', component: ContentStub, size: { width: 420, height: 600 } });
+    service.move('narrow', { x: 10, y: 20, width: 500, height: 300 });
+    service.close('narrow');
+    service.open({ key: 'narrow', title: 'Goblin', component: ContentStub, size: { width: 420, height: 600 } });
+    expect(service.windows()[0]).toEqual(jasmine.objectContaining({ x: 10, y: 20, width: 500, height: 300 }));
+  });
+
   it('cascades each next window a little down and right', () => {
     open('a');
     open('b');
@@ -113,6 +130,26 @@ describe('FloatingWindowService', () => {
     expect(win.height).toBe(500);
     expect(win.x).toBeLessThanOrEqual(600 - 96);
     expect(win.y).toBeLessThanOrEqual(500 - TITLE_HEIGHT);
+  });
+
+  it('fills the page with a window, and brings it back to its default size, forgetting where it was left', () => {
+    service.open({ key: 'goblin', title: 'Goblin', component: ContentStub, size: { width: 420, height: 600 } });
+    service.move('goblin', { x: 10, y: 20, width: 500, height: 300 });
+
+    service.toggleMaximized('goblin');
+    expect(service.windows()[0].maximized).toBeTrue();
+
+    service.toggleMaximized('goblin');
+    expect(service.windows()[0]).toEqual(jasmine.objectContaining({ x: 390, y: 100, width: 420, height: 600, maximized: false }));
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!)['goblin']).toBeUndefined();
+  });
+
+  it('keeps a window filling the page when it comes to the front', () => {
+    open('a');
+    open('b');
+    service.toggleMaximized('a');
+    service.focus('a');
+    expect(service.windows()[0].maximized).toBeTrue();
   });
 
   it('fills a phone\'s page with windows', () => {

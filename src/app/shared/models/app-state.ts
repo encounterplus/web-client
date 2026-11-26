@@ -83,6 +83,9 @@ export class AppState {
    */
   tokenControl?: TokenControl
 
+  /** Whether the client is signed in as the GM, from its session. */
+  isGM = false
+
   /**
    * Whether this client controls a token: moves it with remote interaction set to own tokens,
    * sees through it, follows it. Only a signed-in player controls any.
@@ -106,8 +109,8 @@ export class AppState {
    * Whether this client may open a token's entity page, such as its stat block: the GM any token's,
    * a signed-in player only a token they control.
    */
-  mayShowEntity(token: Token, isGM: boolean): boolean {
-    return token.reference != null && (isGM || this.controls(token))
+  mayShowEntity(token: Token): boolean {
+    return token.reference != null && (this.isGM || this.controls(token))
   }
 
   /** The tokens on the map this client controls. */

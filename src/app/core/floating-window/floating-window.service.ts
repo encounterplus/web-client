@@ -12,7 +12,20 @@ export interface WindowSpec {
   inputs?: Record<string, unknown>
   /** Where the content opens in a browser tab of its own, offered in the title bar. */
   externalUrl?: string
+  /**
+   * The size it opens at the first time, within the page; a sheet's when absent. Once moved or
+   * resized, it opens where it was left instead.
+   */
+  size?: WindowSize
 }
+
+export interface WindowSize {
+  width: number
+  height: number
+}
+
+/** A character sheet's: wide enough for its columns. */
+export const SHEET_SIZE: WindowSize = { width: 720, height: 900 }
 
 /** A window's place and size on the page, in CSS pixels. */
 export interface WindowRect {
@@ -25,6 +38,8 @@ export interface WindowRect {
 export interface WindowState extends WindowSpec, WindowRect {
   /** Its stacking order: the highest is in front. */
   z: number
+  /** Whether it fills the page, its place and size kept for when it no longer does. */
+  maximized?: boolean
 }
 
 export const MIN_WIDTH = 280
@@ -96,7 +111,7 @@ export class FloatingWindowService {
       return
     }
     const saved = this.saved()[spec.key]
-    const rect = this.clamp(isRect(saved) ? saved : this.defaultRect())
+    const rect = this.clamp(isRect(saved) ? saved : this.defaultRect(spec.size ?? SHEET_SIZE))
     this.list.update(list => [...list, { ...spec, ...rect, z: ++this.topZ }])
   }
 
@@ -128,6 +143,24 @@ export class FloatingWindowService {
     this.save(key, clamped)
   }
 
+  /**
+   * Fills the page with a window, or, when it fills it, brings it back to its default size, centred,
+   * forgetting where it was left: double-tapping its title bar.
+   */
+  toggleMaximized(key: string) {
+    const window = this.list().find(window => window.key == key)
+    if (!window) {
+      return
+    }
+    if (!window.maximized) {
+      this.list.update(list => list.map(window => window.key == key ? { ...window, maximized: true } : window))
+      return
+    }
+    const rect = this.clamp(this.defaultRect(window.size ?? SHEET_SIZE, false))
+    this.list.update(list => list.map(window => window.key == key ? { ...window, ...rect, maximized: false } : window))
+    this.forget(key)
+  }
+
   /** Takes the page's new size and brings any window it left off the page back on. */
   viewportChanged(width: number, height: number) {
     this.viewport.set({ width, height })
@@ -139,12 +172,12 @@ export class FloatingWindowService {
     return clampRect(rect, width, height)
   }
 
-  /** Centred and sized for a character sheet, each next one a little down and right. */
-  private defaultRect(): WindowRect {
+  /** Centred at the given size within the page, each next one a little down and right when cascading. */
+  private defaultRect(size: WindowSize, cascade = true): WindowRect {
     const { width: pageWidth, height: pageHeight } = this.viewport()
-    const width = Math.min(pageWidth * 0.96, 720)
-    const height = Math.min(pageHeight * 0.8, 900)
-    const offset = (this.list().length % 8) * CASCADE
+    const width = Math.min(pageWidth * 0.96, size.width)
+    const height = Math.min(pageHeight * 0.8, size.height)
+    const offset = cascade ? (this.list().length % 8) * CASCADE : 0
     return {
       x: (pageWidth - width) / 2 + offset,
       y: (pageHeight - height) / 2 + offset,
@@ -159,6 +192,19 @@ export class FloatingWindowService {
       return value && typeof value == 'object' && !Array.isArray(value) ? value : {}
     } catch {
       return {}
+    }
+  }
+
+  private forget(key: string) {
+    const saved = this.saved()
+    if (!(key in saved)) {
+      return
+    }
+    delete saved[key]
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved))
+    } catch {
+      // it opens where it was left next time
     }
   }
 

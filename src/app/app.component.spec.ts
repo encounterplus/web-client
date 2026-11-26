@@ -109,6 +109,13 @@ describe('AppComponent', () => {
       expect(win.key).toBe('entity:/monster/goblin');
       expect(win.title).toBe('Goblin');
       expect(win.externalUrl).toBe('http://localhost/monster/goblin');
+      expect(win.width).toBe(420);
+    });
+
+    it('opens a player character\'s entity as wide as a sheet', () => {
+      signIn({ role: 'gm', permissions: [] });
+      app.showEntityAction({ ...aria, player: true });
+      expect(windows.windows()[0].size?.width).toBe(720);
     });
 
     it('opens a player only the stat block of a token they control', () => {

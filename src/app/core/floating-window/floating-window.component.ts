@@ -1,6 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { FloatingWindowService, MIN_HEIGHT, MIN_WIDTH, WindowRect, WindowState } from './floating-window.service';
 
+/** How far, in pixels, a press on the title bar can wander and still be a tap rather than a drag. */
+export const TAP_SLOP = 6
+/** How soon a second tap on the title bar must follow the first to be a double tap, in milliseconds. */
+export const DOUBLE_TAP_TIME = 350
+/** How close a second tap must land to the first to be a double tap, in pixels. */
+export const DOUBLE_TAP_SLOP = 24
+
 /** Which edges a resize handle moves: `n`, `s`, `e`, `w`, or a corner such as `se`. */
 export type ResizeEdges = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
 
@@ -11,11 +18,14 @@ interface Gesture {
   start: WindowRect
   /** `move`, or the edges a resize moves. */
   mode: 'move' | ResizeEdges
+  /** Whether the pointer went past `TAP_SLOP`: a tap until it does, and a window doesn't move for a tap. */
+  moved: boolean
 }
 
 /**
  * One floating window: a title bar to drag it by, with a link to open its content in a tab of its
  * own and a close button, its content, and handles on its edges and corners to resize it.
+ * Double-tapping the title bar fills the page with it, and again brings it back to its default size.
  *
  * While a pointer drags or resizes it, the window follows locally and tells the service where it
  * ended up only when the pointer lets go. Only the window in front takes pointers in its content:
@@ -34,11 +44,12 @@ interface Gesture {
     '[attr.data-window-key]': 'win().key',
     '[class.front]': 'front()',
     '[class.compact]': 'compact()',
+    '[class.maximized]': 'win().maximized',
     '[class.interacting]': 'live() !== null',
-    '[style.left.px]': 'compact() ? null : rect().x',
-    '[style.top.px]': 'compact() ? null : rect().y',
-    '[style.width.px]': 'compact() ? null : rect().width',
-    '[style.height.px]': 'compact() ? null : rect().height',
+    '[style.left.px]': 'filled() ? null : rect().x',
+    '[style.top.px]': 'filled() ? null : rect().y',
+    '[style.width.px]': 'filled() ? null : rect().width',
+    '[style.height.px]': 'filled() ? null : rect().height',
     '[style.z-index]': 'win().z',
     '(pointerdown)': 'bringToFront()',
     '(pointermove)': 'onPointerMove($event)',
@@ -63,8 +74,11 @@ export class FloatingWindowComponent {
 
   readonly front = computed(() => this.windows.front() == this.win().key)
   readonly compact = this.windows.compact
+  /** Whether it fills the page, on a phone or maximized, where it neither moves nor resizes. */
+  readonly filled = computed(() => this.compact() || !!this.win().maximized)
 
   private gesture: Gesture | null = null
+  private lastTap: { time: number, x: number, y: number } | null = null
 
   constructor(private windows: FloatingWindowService) {}
 
@@ -95,6 +109,14 @@ export class FloatingWindowComponent {
     }
     const dx = event.clientX - gesture.startX
     const dy = event.clientY - gesture.startY
+    if (!gesture.moved && Math.hypot(dx, dy) <= TAP_SLOP) {
+      return
+    }
+    gesture.moved = true
+    if (this.filled()) {
+      // only taps: a window that fills the page stays put
+      return
+    }
     const next = gesture.mode == 'move'
       ? { ...gesture.start, x: gesture.start.x + dx, y: gesture.start.y + dy }
       : resized(gesture.start, gesture.mode, dx, dy)
@@ -109,13 +131,30 @@ export class FloatingWindowComponent {
     this.gesture = null
     const rect = this.live()
     this.live.set(null)
-    if (rect) {
-      this.windows.move(this.win().key, rect)
+    if (gesture.moved) {
+      if (rect && !this.filled()) {
+        this.windows.move(this.win().key, rect)
+      }
+    } else if (gesture.mode == 'move' && event.type == 'pointerup') {
+      this.titleTapped(event)
+    }
+  }
+
+  /** A tap on the title bar: the second of two in quick succession fills the page, or stops filling it. */
+  private titleTapped(event: PointerEvent) {
+    const now = Date.now()
+    const last = this.lastTap
+    if (last && now - last.time <= DOUBLE_TAP_TIME && Math.hypot(event.clientX - last.x, event.clientY - last.y) <= DOUBLE_TAP_SLOP) {
+      this.lastTap = null
+      this.windows.toggleMaximized(this.win().key)
+    } else {
+      this.lastTap = { time: now, x: event.clientX, y: event.clientY }
     }
   }
 
   private begin(event: PointerEvent, mode: Gesture['mode']) {
-    if (event.button != 0 || this.compact() || this.gesture) {
+    // on a phone a window always fills the page; a maximized one only takes taps on its title bar
+    if (event.button != 0 || this.compact() || this.gesture || (this.win().maximized && mode != 'move')) {
       return
     }
     // the element keeps getting the pointer's events wherever it goes, iframes included, and they
@@ -125,7 +164,7 @@ export class FloatingWindowComponent {
     } catch {
       // a pointer that is already gone: the gesture ends with its pointerup or pointercancel
     }
-    this.gesture = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, start: this.rect(), mode }
+    this.gesture = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, start: this.rect(), mode, moved: false }
     this.live.set(this.rect())
     event.preventDefault()
   }

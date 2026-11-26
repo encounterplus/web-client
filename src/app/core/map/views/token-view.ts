@@ -16,6 +16,19 @@ import { Asset, AssetLayout } from 'src/app/shared/models/asset';
 import { AssetArtwork } from './asset-artwork';
 import { StatusEffectsView } from './status-effects-view';
 
+/** How far, in screen pixels, a press can wander and still be a tap rather than a drag. */
+export const TAP_SLOP = 6
+/** How long, in milliseconds, a press can last and still be a tap. */
+export const TAP_TIME = 500
+
+/** A pointer pressed on a token: a tap until it moves past `TAP_SLOP`, when a movable token starts dragging. */
+interface Press {
+  pointerId: number
+  x: number
+  y: number
+  time: number
+}
+
 function clamp(num: number, min: number, max: number) {
   return num <= min ? min : num >= max ? max : num
 }
@@ -57,6 +70,11 @@ export class TokenView extends View {
 
   dragging: boolean = false
   dragStart: number = Date.now()
+  /** Whether a pointer may drag the token, from the screen's interaction setting; see `updateInteraction`. */
+  movable: boolean = false
+  /** Whether a tap opens the token's entity page, such as its stat block. */
+  inspectable: boolean = false
+  private press: Press | null = null
   kbMovement: boolean = false
 
   selected: boolean = false
@@ -166,7 +184,7 @@ export class TokenView extends View {
     this.pathView = new PathView(grid)
 
     this
-      // .on('pointertap', this.onTap)
+      // a press is a tap until it moves, when a movable token starts dragging: see onDragStart
       .on('pointerdown', this.onDragStart)
       .on('pointerup', this.onDragEnd)
       .on('pointerupoutside', this.onDragEnd)
@@ -601,43 +619,44 @@ export class TokenView extends View {
     }
   }
 
+  /**
+   * Makes the token take pointers when this client may move it or open its entity page. A token it
+   * may only inspect leaves a press to the map, so the map still pans from it.
+   */
   updateInteraction() {
+    this.movable = this.mayMove()
+    this.inspectable = this.dataService.state.mayShowEntity(this.token)
+    this.eventMode = this.movable || this.inspectable ? 'static' : 'none'
+  }
 
-    // disable interactions when game is paused
-    if (this.dataService.state.paused) {
-      this.eventMode = 'none'
-      return
+  /** Whether a pointer may drag the token, from the screen's interaction setting. */
+  private mayMove(): boolean {
+    const state = this.dataService.state
+
+    // nothing moves while the game is paused
+    if (state.paused) {
+      return false
     }
 
     // interactions override
-    if (this.dataService.state.allInteractions) {
-      this.eventMode = 'static'
-      return
+    if (state.allInteractions) {
+      return true
     }
 
-    // enable interactions based on screen settings
-    switch (this.dataService.state.screen.interaction) {
+    switch (state.screen.interaction) {
       case ScreenInteraction.all:
-        this.eventMode = this.token.role == Role.friendly ? 'static' : 'none'
-        break;
+        return this.token.role == Role.friendly
 
-      case ScreenInteraction.token: {
-        const state = this.dataService.state
+      case ScreenInteraction.token:
         if (state.tokenControl) {
           // a signed-in player: exactly the tokens the app lets them move
-          this.eventMode = state.controls(this.token) ? 'static' : 'none'
-        } else {
-          // an app without sign-in: it doesn't say whose tokens are whose, so any friendly token
-          this.eventMode = this.token.role == Role.friendly ? 'static' : 'none'
+          return state.controls(this.token)
         }
-        break;
-      }
+        // an app without sign-in: it doesn't say whose tokens are whose, so any friendly token
+        return this.token.role == Role.friendly
 
-      case ScreenInteraction.none:
-        this.eventMode = 'none'
-        break;
       default:
-        this.eventMode = 'none'
+        return false
     }
   }
 
@@ -656,47 +675,46 @@ export class TokenView extends View {
     this.effectsView.destroy({ children: true })
   }
 
-  onTap(event: any) {
-    // console.debug(`tap, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
-
-    if (this.controlled) {
+  /** Opens the token's entity page, such as its stat block, when this client may see it. */
+  onTap(event: PIXI.FederatedPointerEvent) {
+    if (this.controlled || !this.inspectable) {
       return
     }
-    // stop propagation
     event.stopPropagation()
-
-    if (this.token.reference != null) {
-      this.dataService.showEntity(this.token)
-    }
+    this.dataService.showEntity(this.token)
   }
 
-  onDragStart(event: any) {
-    // console.debug(`drag start, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
-
-    if (this.controlled) {
+  /**
+   * A press: a tap until it moves past `TAP_SLOP`, when a movable token starts dragging. A token
+   * that only opens its entity page lets the press through, so the map pans from it.
+   */
+  onDragStart(event: PIXI.FederatedPointerEvent) {
+    if (this.controlled || this.dragging) {
       return
     }
-    // stop propagation
-    event.stopPropagation()
-    this.dragging = true
-    this.dragStart = Date.now()
+    // replaces a press whose pointer never came up here, such as one the token stopped taking
+    // pointers during
+    this.press = { pointerId: event.pointerId, x: event.global.x, y: event.global.y, time: Date.now() }
 
-    // update pointerId
-    if (event.data.pointerId != null) {
-      this.pointerId = event.data.pointerId
+    if (!this.movable) {
+      return
     }
+    event.stopPropagation()
 
-    // add pointer move event
+    // follow the pointer across the map, to start dragging once it moves
     if (this.parent?.parent) {
       this.parent.parent.eventMode = 'static'
     }
+    this.parent?.parent?.off('pointermove', this.onDragMove)
     this.parent?.parent?.on('pointermove', this.onDragMove)
-
-    this.dataService.send({ name: WSEventName.tokenMoved, data: { id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start } })
   }
 
-  onDragEnd(event: any) {
-    // console.debug(`drag end, controlling: ${this.controlled}, dragging: ${this.dragging}, pointerId: ${this.pointerId}`)
+  onDragEnd(event: PIXI.FederatedPointerEvent) {
+    const press = this.press
+    if (!press || event.pointerId != press.pointerId) {
+      return
+    }
+    this.press = null
 
     // remove pointer move event
     this.parent?.parent?.off('pointermove', this.onDragMove)
@@ -708,19 +726,28 @@ export class TokenView extends View {
       return
     }
 
-    // stop propagation
-    event.stopPropagation()
-    this.dragging = false
-    this.pointerId = null
+    if (this.dragging) {
+      event.stopPropagation()
+      this.dragging = false
+      this.pointerId = null
+      this.dataService.send({ name: WSEventName.tokenMoved, data: { id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end } })
+      return
+    }
 
-    this.dataService.send({ name: WSEventName.tokenMoved, data: { id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.end } })
+    // never dragged: a tap, unless the pointer was cancelled, held, moved (the map panned under it),
+    // or shift-pressed to point
+    const moved = Math.hypot(event.global.x - press.x, event.global.y - press.y)
+    if (event.type == 'pointerup' && Date.now() - press.time <= TAP_TIME && moved <= TAP_SLOP && !event.shiftKey) {
+      this.onTap(event)
+    }
+  }
 
-    // click/tap event if time difference between start/end is less than 200ms
-    let time = Date.now() - this.dragStart
-
-    // if (time <= 200) {
-    //    this.onTap(event)
-    // }
+  /** Starts dragging once a press moves past `TAP_SLOP`, so a tap never sends a move. */
+  private startDrag(event: PIXI.FederatedPointerEvent) {
+    this.dragging = true
+    this.dragStart = Date.now()
+    this.pointerId = event.pointerId
+    this.dataService.send({ name: WSEventName.tokenMoved, data: { id: this.token.id, x: (this.position.x + (this.w / 2.0)) | 0, y: (this.position.y + (this.h / 2.0)) | 0, state: ControlState.start } })
   }
 
   onDragMove = (event: any) => {
@@ -728,6 +755,11 @@ export class TokenView extends View {
 
     if (this.controlled) {
       return
+    }
+
+    const press = this.press
+    if (!this.dragging && this.movable && press && event.pointerId == press.pointerId && Math.hypot(event.global.x - press.x, event.global.y - press.y) > TAP_SLOP) {
+      this.startDrag(event)
     }
 
     if (this.dragging) {
