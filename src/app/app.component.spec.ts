@@ -123,7 +123,27 @@ describe('AppComponent', () => {
       app.showEntityAction(goblin);
       expect(windows.windows().length).toBe(0);
       app.showEntityAction(aria);
-      expect(windows.isOpen('entity:/character/aria')).toBeTrue();
+      expect(windows.isOpen('character:aria')).toBeTrue();
+    });
+
+    it('opens a player\'s own character\'s sheet rather than its stat block, the window the character bar opens', () => {
+      signIn(player);
+      app.showEntityAction(aria);
+      expect(windows.windows().map(win => win.key)).toEqual(['character:aria']);
+      expect(windows.windows()[0].externalUrl).toBe('http://localhost/sheet/aria');
+      expect(windows.windows()[0].size?.width).toBe(720);
+    });
+
+    it('opens the stat block of a player\'s character without a sheet', () => {
+      signIn({ ...player, characters: [{ id: 'aria', name: 'Aria', kind: 'Character' }] });
+      app.showEntityAction(aria);
+      expect(windows.windows().map(win => win.key)).toEqual(['entity:/character/aria']);
+    });
+
+    it('opens the GM a character\'s stat block: the GM has no sheets', () => {
+      signIn({ role: 'gm', permissions: [] });
+      app.showEntityAction(aria);
+      expect(windows.windows().map(win => win.key)).toEqual(['entity:/character/aria']);
     });
 
     it('opens a guest no stat block', () => {

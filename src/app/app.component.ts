@@ -33,7 +33,7 @@ import { Viewport } from 'pixi-viewport';
 import { ZoombarComponent } from './core/zoombar/zoombar.component';
 import { Meta } from '@angular/platform-browser';
 import { FloatingWindowService, SHEET_SIZE } from './core/floating-window/floating-window.service';
-import { STAT_BLOCK_SIZE, entityWindow, windowCharacterId, windowEntityReference, windowUrl } from './core/floating-window/windows';
+import { STAT_BLOCK_SIZE, characterWindow, entityWindow, windowCharacterId, windowEntityReference, windowUrl } from './core/floating-window/windows';
 import { characterRow } from './shared/models/character';
 import { Message } from './shared/models/message';
 import { Game, emptyGame } from './shared/models/game';
@@ -292,8 +292,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * Opens a token's entity page in a floating window, when this client may see it: a player
-   * character's as wide as a sheet, anything else as narrow as a stat block.
+   * Opens what a tapped token shows in a floating window, when this client may see it: the
+   * player's own character's sheet, the same window the character bar opens, when it has one; else
+   * its entity page, a player character's as wide as a sheet and anything else as narrow as a stat
+   * block.
    */
   showEntityAction(token: Token) {
     const reference = token.reference
@@ -301,8 +303,23 @@ export class AppComponent implements OnInit, AfterViewInit {
       console.debug(`not showing entity of token ${token.id}: not allowed`)
       return
     }
+    const sheet = this.characterSheet(token)
+    if (sheet) {
+      this.windows.open(characterWindow(sheet))
+      return
+    }
     const size = token.player ? SHEET_SIZE : STAT_BLOCK_SIZE
     this.windows.open(entityWindow(reference, token.name || token.label || 'Stat block', this.dataService.pageUrl(reference), size))
+  }
+
+  /** The sheet of the signed-in player's character a token stands for, when it has one. */
+  private characterSheet(token: Token) {
+    const session = this.session.session()
+    const character = session?.role == 'player' && token.entityId
+      ? session.characters?.find(character => character.id == token.entityId)
+      : undefined
+    const row = character ? characterRow(character, this.dataService) : undefined
+    return row?.url ? { ...row, url: row.url } : undefined
   }
 
   /**
